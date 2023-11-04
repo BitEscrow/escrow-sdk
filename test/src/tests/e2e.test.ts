@@ -6,7 +6,7 @@ import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
 import { prevout_to_txspend } from '@scrow/core/tx'
 import { get_users }          from '../core.js'
-import { get_funds }          from '../escrow.js'
+import { get_funds }          from '../fund.js'
 import { create_settlment }   from '../spend.js'
 
 import {

@@ -1,5 +1,5 @@
 import { EscrowClient }   from '@scrow/core'
-import { get_funds }      from '../escrow.js'
+import { get_funds }      from '../fund.js'
 
 import {
   get_daemon,

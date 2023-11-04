@@ -1,6 +1,7 @@
 import { create_covenant }  from '@scrow/core/session'
 import { create_return_tx } from '@scrow/core/return'
 import { create_timelock }  from '@scrow/core/tx'
+import { get_utxo }         from './core.js'
 import { MemberData }       from './types.js'
 
 import { ContractData } from '@scrow/core'
@@ -9,7 +10,6 @@ import {
   get_deposit_address,
   get_deposit_ctx
 } from '@scrow/core/deposit'
-import { get_utxo } from './core.js'
 
 const SEQUENCE = create_timelock(60 * 60 * 2)
 
