@@ -1,0 +1,113 @@
+{
+  "name": "@scrow/core",
+  "version": "0.3.2",
+  "description": "Core library for BitEscrow API.",
+  "author": "Christopher Scott",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitescrow/escrow-core.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist",
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./assert": {
+      "import": "./dist/assert.js",
+      "types": "./dist/assert.d.ts"
+    },
+    "./contract": {
+      "import": "./dist/lib/contract.js",
+      "types": "./dist/lib/contract.d.ts"
+    },
+    "./deposit": {
+      "import": "./dist/lib/deposit.js",
+      "types": "./dist/lib/deposit.d.ts"
+    },
+    "./oracle": {
+      "import": "./dist/lib/oracle.js",
+      "types": "./dist/lib/oracle.d.ts"
+    },
+    "./parse": {
+      "import": "./dist/lib/parse.js",
+      "types": "./dist/lib/parse.d.ts"
+    },
+    "./proof": {
+      "import": "./dist/lib/proof.js",
+      "types": "./dist/lib/proof.d.ts"
+    },
+    "./proposal": {
+      "import": "./dist/lib/proposal.js",
+      "types": "./dist/lib/proposal.d.ts"
+    },
+    "./return": {
+      "import": "./dist/lib/return.js",
+      "types": "./dist/lib/return.d.ts"
+    },
+    "./session": {
+      "import": "./dist/lib/session.js",
+      "types": "./dist/lib/session.d.ts"
+    },
+    "./tx": {
+      "import": "./dist/lib/tx.js",
+      "types": "./dist/lib/tx.d.ts"
+    },
+    "./util": {
+      "import": "./dist/lib/util.js",
+      "types": "./dist/lib/util.d.ts"
+    },
+    "./validate": {
+      "import": "./dist/validators/index.js",
+      "types": "./dist/validators/index.d.ts"
+    },
+    "./witness": {
+      "import": "./dist/lib/witness.js",
+      "types": "./dist/lib/witness.d.ts"
+    },
+    "./vm": {
+      "import": "./dist/vm/index.js",
+      "types": "./dist/vm/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "./build.sh",
+    "release": "yarn build",
+    "scratch": "tsx --tsconfig test/tsconfig.json test/scratch.ts",
+    "start": "tsx --tsconfig test/tsconfig.json",
+    "test": "tsx --tsconfig test/tsconfig.json test/tape.ts"
+  },
+  "devDependencies": {
+    "@cmdcode/core-cmd": "1.3.8",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.8.7",
+    "@types/tape": "^5.6.3",
+    "rollup": "^4.1.4",
+    "tape": "^5.7.1",
+    "tslib": "^2.6.2",
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@cmdcode/buff": "2.2.2",
+    "@cmdcode/crypto-tools": "2.6.1",
+    "@cmdcode/musig2": "2.4.1",
+    "@scrow/tapscript": "2.1.2",
+    "zod": "^3.22.4"
+  }
+}
