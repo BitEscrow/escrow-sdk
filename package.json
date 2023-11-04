@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -73,10 +73,6 @@
       "import": "./dist/validators/index.js",
       "types": "./dist/validators/index.d.ts"
     },
-    "./witness": {
-      "import": "./dist/lib/witness.js",
-      "types": "./dist/lib/witness.d.ts"
-    },
     "./vm": {
       "import": "./dist/vm/index.js",
       "types": "./dist/vm/index.d.ts"
@@ -84,7 +80,7 @@
   },
   "scripts": {
     "build": "./build.sh",
-    "release": "yarn build",
+    "release": "yarn test && yarn build",
     "scratch": "tsx --tsconfig test/tsconfig.json test/scratch.ts",
     "start": "tsx --tsconfig test/tsconfig.json",
     "test": "tsx --tsconfig test/tsconfig.json test/tape.ts"
