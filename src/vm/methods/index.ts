@@ -1,7 +1,7 @@
 import sign from './sign.js'
 
-import { ProgramMethod } from '../../types/index.js'
+import { ProgramList } from '@/types/index.js'
 
-const methods : ProgramMethod = { sign }
+const methods : ProgramList = { sign }
 
 export default methods

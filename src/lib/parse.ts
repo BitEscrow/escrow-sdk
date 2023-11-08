@@ -5,9 +5,8 @@ import {
   Payment,
   DepositData,
   ProposalData,
-  ProgramTerms,
+  WitnessData,
   ProgramData,
-  WitnessData
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -31,12 +30,14 @@ export function parse_deposit (
 }
 
 export function parse_program (
-  terms : ProgramTerms
+  terms : unknown[]
 ) : ProgramData {
   const [ actions, paths, method, ...params ] = terms
-  const img = [ method, ...params ]
-  const id  = Buff.json(img).digest.hex
-  return { id, actions, paths, method, params }
+  const parser  = schema.program.terms
+  const parsed  = parser.parse({ method, actions, paths, params })
+  const img     = [ method, ...params ]
+  const prog_id = Buff.json(img).digest.hex
+  return { prog_id, ...parsed }
 }
 
 export function parse_proposal (
@@ -46,7 +47,9 @@ export function parse_proposal (
 }
 
 export function parse_witness (
-  witness : unknown
+  witness : unknown[]
 ) : WitnessData {
-  return schema.vm.witness.parse(witness)
+  const [ prog_id, method, action, path, ...args ] = witness
+  const parser  = schema.program.witness
+  return parser.parse({ prog_id, method, action, path, args })
 }

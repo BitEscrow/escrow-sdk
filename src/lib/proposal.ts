@@ -1,14 +1,11 @@
 import { parse_addr }   from '@scrow/tapscript/address'
 import { create_vout }  from '@scrow/tapscript/tx'
 import { TxOutput }     from '@scrow/tapscript'
-import { PATH_METHODS } from '@/config.js'
 
 import {
   Payment,
   PayPath,
-  ProgramTerms
 } from '../types/index.js'
-import { parse_program } from './parse.js'
 
 type PathTotal = [ path: string, total : number ]
 
@@ -21,14 +18,6 @@ export function filter_path (
 
 export function get_path_names (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[0])) ]
-}
-
-export function get_path_methods (
-  programs : ProgramTerms[]
-) {
-  return programs
-    .filter(e => PATH_METHODS.includes(e[0]))
-    .map(e => parse_program(e))
 }
 
 export function get_pay_total (

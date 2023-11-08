@@ -2,7 +2,6 @@ import { run_action }     from './action.js'
 import { get_path_names } from '../lib/proposal.js'
 import { regex }          from '../lib/util.js'
 import { debug }          from './util.js'
-import { PATH_METHODS }   from '@/config.js'
 
 import {
   PathState,
@@ -70,9 +69,8 @@ function init_path_state (
   programs : ProgramTerms[]
 ) : PathState {
   const terms = { ...INIT_TERMS }
-  const progs = programs.filter(e => PATH_METHODS.includes(e[0]))
     let state : PathState = PathState.open
-  for (const prog of progs) {
+  for (const prog of programs) {
     const [ _, actexp, pathexp ] = prog.map(e => String(e))
     if (regex(pathname, pathexp)) {
       if (regex('dispute', actexp)) terms.can_dispute = true

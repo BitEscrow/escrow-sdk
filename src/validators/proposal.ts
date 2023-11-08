@@ -1,4 +1,4 @@
-import { parse_proposal } from '../lib/parse.js'
+import { parse_program, parse_proposal } from '../lib/parse.js'
 import { now }            from '../lib/util.js'
 
 import {
@@ -7,15 +7,20 @@ import {
   MAX_EXPIRY,
   MIN_WINDOW,
   MAX_EFFECT,
-  ACTIONS_LIST,
+  METHOD_LIST,
+  ACTION_LIST,
 } from '../config.js'
 
 import {
   get_pay_total,
   get_path_total,
-  get_path_names,
-  get_path_methods
+  get_path_names
 } from '../lib/proposal.js'
+
+import {
+  check_expires,
+  check_regex
+} from './util.js'
 
 import {
   Literal,
@@ -38,7 +43,7 @@ export function verify_proposal (
   // Check if timestamps are valid.
   check_stamps(proposal)
   // Check if path-based program terms are valid.
-  check_path_programs(proposal)
+  check_programs(proposal)
   // Check if schedule tasks are valid.
   check_schedule(proposal)
 }
@@ -64,23 +69,12 @@ function check_payments (proposal : ProposalData) {
   }
 }
 
-function check_path_programs (proposal : ProposalData) {
-  const { paths, programs } = proposal
-  const names   = get_path_names(paths)
-  const methods = get_path_methods(programs)
-  methods.forEach(({ actions, paths, method, params }) => {
-    check_regex(ACTIONS_LIST, String(actions))
-    check_regex(names, String(paths))
-    check_method(method, params)
-  })
-}
-
 function check_schedule (proposal : ProposalData) {
   const { expires, paths, schedule } = proposal
   const names = get_path_names(paths)
   schedule.forEach(task => {
     const [ timer, action, regex ] = task
-    check_timer(timer, expires)
+    check_expires(timer, expires)
     check_action(action)
     check_regex(names, regex)
   })
@@ -125,15 +119,31 @@ function check_stamps (proposal : ProposalData) {
 function check_action (
   action : string
 ) {
-  if (!ACTIONS_LIST.includes(action)) {
+  if (!ACTION_LIST.includes(action)) {
     throw new Error('Invalid action: ' + action)
   }
 }
 
-function check_method (
+function check_programs (
+  proposal : ProposalData
+) {
+  const { paths, programs } = proposal
+  const names = get_path_names(paths)
+  for (const terms of programs) {
+    const prog = parse_program(terms)
+    check_regex(ACTION_LIST, prog.actions)
+    check_regex(names, prog.paths)
+    check_program(prog.method, prog.params)
+  }
+}
+
+function check_program (
   method : string,
   params : Literal[]
 ) {
+  if (!METHOD_LIST.includes(method)) {
+    throw new Error('invalid method: ' + method)
+  }
   switch (method) {
     case 'sign':
       check_sign_terms(params)
@@ -146,36 +156,8 @@ function check_method (
 function check_sign_terms (params : Literal[]) {
   const [ thold, ...pubkeys ] = params
   if (typeof thold !== 'number' || thold > pubkeys.length) {
-    throw new Error('Invalid threshold specified for program: ' + String(thold))
+    throw new Error('invalid threshold: ' + String(thold))
   }
   pubkeys.forEach(e => assert.valid_pubkey(e))
 }
 
-function check_regex (
-  labels : string[],
-  regex  : string
-) {
-  if (regex === '*') return
-  const arr = (regex.includes('|'))
-    ? regex.split('|') 
-    : [ regex ]
-  arr.forEach(label => check_label_exists(label, labels))
-}
-
-function check_label_exists (
-  label  : string,
-  labels : string[]
-) {
-  if (!labels.includes(label)) {
-    throw new Error('Referenced label does not exist: ' + label)
-  }
-}
-
-function check_timer (
-  timer  : number,
-  expiry : number
-) {
-  if (timer >= expiry) {
-    throw new Error('Scheduled timer equals or exceeds expiry value: ' + String(timer))
-  }
-}

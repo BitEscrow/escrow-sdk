@@ -1,9 +1,9 @@
 import { Buff }          from '@cmdcode/buff'
 import { parse_program } from '../lib/parse.js'
 import { now, regex }    from '../lib/util.js'
-import methods           from './methods/index.js'
 import { update_path }   from './state.js'
 import { debug }         from './util.js'
+import methods           from './methods/index.js'
 
 import {
   ProgramTerms,
@@ -11,7 +11,7 @@ import {
   StateData,
   StoreEntry,
   WitnessData,
-  ProgramMethod
+  ProgramList
 } from '../types/index.js'
 
 export function init_programs (
@@ -81,7 +81,7 @@ function load_program (
     throw 'program does not have access to this path: ' + path
   }
 
-  const exec = methods[method as keyof ProgramMethod]
+  const exec = methods[method as keyof ProgramList]
 
   return exec(params, store)
 }

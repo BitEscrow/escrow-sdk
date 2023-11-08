@@ -1,11 +1,11 @@
-import { EscrowClient }   from '@scrow/core'
-import { get_funds }      from '../fund.js'
+import { EscrowClient }       from '@scrow/core'
+import { create_witness_sig } from '@scrow/core/witness'
+import { get_funds }          from '../fund.js'
 
 import {
   get_daemon,
   get_users
 } from '../core.js'
-import { create_witness_sig } from '@/vm/witness/sign.js'
 
 const config = {
   network     : 'regtest',
@@ -40,7 +40,7 @@ const proposal = {
   ],
   programs : [
     [ 'close', 'heads', 'sign', 1, alice.signer.pubkey ],
-    [ 'close', 'tails', 'sign', 1, bob.signer.pubkey ]
+    [ 'close', 'tails', 'sign', 1, bob.signer.pubkey   ]
   ],
   schedule: [
     [ 7200, 'close', 'heads|tails' ]

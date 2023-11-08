@@ -1,5 +1,4 @@
-import { parse_witness } from '../lib/parse.js'
-import { regex }         from '../lib/util.js'
+import { regex } from '../lib/util.js'
 
 import {
   ProgramEntry,
@@ -7,12 +6,6 @@ import {
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
-
-export function validate_witness (
-  witness : unknown
-) : asserts witness is WitnessData {
-  parse_witness(witness as WitnessData)
-}
 
 export function verify_witness (
   programs : ProgramEntry[],

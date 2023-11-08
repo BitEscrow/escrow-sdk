@@ -1,4 +1,4 @@
-import { Json, Literal } from './base.js'
+import { Literal } from './base.js'
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
 export type WitProgram = (...args : string[]) => boolean
@@ -15,7 +15,7 @@ export type ProgramEntry = [
   actions : string,
   paths   : string,
   method  : string,
-  params  : string[]
+  params  : Literal[]
 ]
 
 export type StateEntry = [
@@ -23,9 +23,9 @@ export type StateEntry = [
   state : PathState
 ]
 
-export type StoreEntry<T = Json> = [
+export type StoreEntry = [
   label : string,
-  store : T
+  store : unknown
 ]
 
 export type TaskEntry = [
@@ -41,18 +41,6 @@ export enum PathState {
   closed
 }
 
-export interface ProgramData {
-  id      : string
-  actions : string
-  paths   : string
-  method  : string
-  params  : Literal[]
-}
-
-export interface ProgramMethod {
-  sign : Function
-}
-
 export interface StateData {
   commits  : CommitEntry[]
   error    : string | null
@@ -66,12 +54,4 @@ export interface StateData {
   store    : StoreEntry[]
   tasks    : TaskEntry[]
   updated  : number
-}
-
-export interface WitnessData {
-  prog_id : string,
-  action  : string,
-  args    : string[],
-  method  : string,
-  path    : string,
 }

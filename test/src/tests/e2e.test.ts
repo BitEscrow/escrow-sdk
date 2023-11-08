@@ -1,10 +1,12 @@
 import { Test }               from 'tape'
 import { Buff }               from '@cmdcode/buff'
 import { CoreClient }         from '@cmdcode/core-cmd'
+import { StateData }          from '@scrow/core'
 import { get_return_ctx }     from '@scrow/core/return'
 import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
 import { prevout_to_txspend } from '@scrow/core/tx'
+import { create_witness_sig } from '@scrow/core/witness'
 import { get_users }          from '../core.js'
 import { get_funds }          from '../fund.js'
 import { create_settlment }   from '../spend.js'
@@ -32,15 +34,12 @@ import {
   validate_covenant,
   verify_covenant,
   validate_registration,
-  validate_witness,
   verify_witness
 } from '@scrow/core/validate'
 
 import * as assert from '@scrow/core/assert'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
-import { StateData } from '@/index.js'
-import { create_witness_sig } from '@/vm/witness/sign.js'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -125,7 +124,6 @@ export default async function (client : CoreClient, t : Test) {
     const signer   = members[0].signer
     const witness  = create_witness_sig('dispute', 'payout', programs, signer)
 
-    validate_witness(witness)
     verify_witness(vm_state.programs, witness)
 
     if (VERBOSE) {

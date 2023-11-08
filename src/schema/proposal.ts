@@ -2,10 +2,11 @@ import { z } from 'zod'
 import base  from './base.js'
 import wit   from './vm.js'
 
-const { num, payment, literal, network, paypath, stamp, str } = base
+const { hash, num, payment, literal, network, paypath, stamp, str } = base
 const { method, regex, task } = wit
 
-const program  = z.tuple([ regex, regex, method ]).rest(literal)
+const member  = z.tuple([ hash, hash ])
+const program = z.tuple([ regex, regex, method ]).rest(literal)
 
 const data = z.object({
   confirmations : num.optional(),
@@ -16,6 +17,7 @@ const data = z.object({
   expires       : num,
   fallback      : str.optional(),
   feerate       : num.optional(),
+  members       : member.array().optional(),
   network       : network.default('main'),
   paths         : paypath.array().default([]),
   payments      : payment.array(),

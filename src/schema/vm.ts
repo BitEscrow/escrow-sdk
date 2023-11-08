@@ -9,7 +9,7 @@ const entry     = z.tuple([ hash ]).rest(literal)
 const method    = z.enum([ 'sign' ])
 const path      = z.tuple([ str, num ])
 const regex     = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
-const program   = z.tuple([ hash, regex, regex, label, str.array() ])
+const progdata  = z.tuple([ hash, regex, regex, label, literal.array() ])
 const store     = z.tuple([ label, z.any() ])
 const task      = z.tuple([ num, action, regex ])
 const status    = z.enum([ 'init', 'open', 'disputed', 'closed' ])
@@ -19,7 +19,7 @@ const data = z.object({
   error    : label.nullable(),
   head     : hash,
   paths    : path.array(),
-  programs : program.array(),
+  programs : progdata.array(),
   result   : label.nullable(),
   start    : stamp,
   steps    : num.max(255),
@@ -29,14 +29,6 @@ const data = z.object({
   updated  : stamp
 })
 
-const witness = z.object({
-  action,
-  method,
-  args    : str.array(),
-  path    : label,
-  prog_id : hash
-})
-
 export default { 
   action,
   commit,
@@ -44,10 +36,9 @@ export default {
   entry,
   method,
   path, 
-  program,
+  progdata,
   regex,
   store,
   task,
-  status,
-  witness
+  status
 }

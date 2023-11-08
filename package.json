@@ -76,6 +76,10 @@
     "./vm": {
       "import": "./dist/vm/index.js",
       "types": "./dist/vm/index.d.ts"
+    },
+    "./witness": {
+      "import": "./dist/lib/witness.js",
+      "types": "./dist/lib/witness.d.ts"
     }
   },
   "scripts": {

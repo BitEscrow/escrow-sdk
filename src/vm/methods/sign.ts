@@ -7,15 +7,16 @@ import {
 } from '@/lib/proof.js'
 
 import {
+  Literal,
   StoreEntry,
   WitnessData,
-} from '../../types/index.js'
+} from '@/types/index.js'
 
 type Entry = [ key : string, val : string[] ]
 
 export default function (
-  params : string[],
-  store  : StoreEntry<Entry[]>
+  params : Literal[],
+  store  : StoreEntry
 ) {
   // Unpack params.
   const [ threshold, ...members ] = params
@@ -27,9 +28,10 @@ export default function (
     // For each proof in the stack:
     for (const proof of args) {
       // Check validity of proof.
-      const pub = verify_witness(members, proof, witness)
+      const mem = members.map(e => String(e))
+      const pub = verify_witness(mem, proof, witness)
       // Increment the proof counter
-      const count = record_witness(store[1], `${path}/${action}`, pub)
+      const count = record_witness(store[1] as Entry[], `${path}/${action}`, pub)
       // If we meet the threshold, return true.
       if (count >= thold) {
         return true
