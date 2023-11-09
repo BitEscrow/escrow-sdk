@@ -3,8 +3,8 @@ import { StoreEntry } from './vm.js'
 
 export type ProgramMethod = 'sign'
 
-export type ProgramData = (SignProgramData) & { prog_id : string }
-export type WitnessData = SignWitnessData
+export type ProgramData = (LockProgramData | SignProgramData) & { prog_id : string }
+export type WitnessData = (LockWitnessData | SignWitnessData)
 export type ProgramList = Record<string, ProgramEval>
 
 export type ProgramEval = (
@@ -23,6 +23,21 @@ export type WitnessEntry = [
   path    : string,
   args    : Literal[]
 ]
+
+export interface LockProgramData {
+  actions : string
+  method  : 'lock'
+  paths   : string
+  params  : [ number, ...string[] ]
+}
+
+export interface LockWitnessData {
+  prog_id : string
+  action  : string
+  args    : string[]
+  method  : 'lock'
+  path    : string
+}
 
 export interface SignProgramData {
   actions : string
