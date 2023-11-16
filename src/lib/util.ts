@@ -107,7 +107,9 @@ export function sort_record <T extends Record<string, any>> (
 export function stringify (content : any) : string {
   switch (typeof content) {
     case 'object':
-      return JSON.stringify(content)
+      return (content ==! null)
+        ? JSON.stringify(content)
+        : 'null'
     case 'string':
       return content
     case 'bigint':
@@ -116,6 +118,8 @@ export function stringify (content : any) : string {
       return content.toString()
     case 'boolean':
       return String(content)
+    case 'undefined':
+      return 'undefined'
     default:
       throw new TypeError('Content type not supported: ' + typeof content)
   }
