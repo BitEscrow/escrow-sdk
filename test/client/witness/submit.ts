@@ -1,5 +1,10 @@
-import { create_witness }       from '@/lib/witness.js'
-import { EscrowClient, Signer } from '@scrow/core'
+import { create_witness_sig }   from '@/lib/witness.js'
+
+import {
+  EscrowClient,
+  Signer,
+  ProgramTerms
+} from '@scrow/core'
 
 import ctx from '../ctx.js'
 
@@ -7,15 +12,15 @@ const alice    = { signer : Signer.seed('alice') }
 const carol    = { signer : Signer.seed('carol') }
 const hostname = ctx.escrow
 const oracle   = ctx.oracle
-const client   = new EscrowClient(carol.signer, { hostname, oracle })
+const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const programs = [
-  [ 'close', 'heads', 'proof', 1, alice.signer.pubkey ],
-  [ 'close', 'tails', 'proof', 1, carol.signer.pubkey ]
+const programs : ProgramTerms[] = [
+  [ 'close', 'heads', 'sign', 1, alice.signer.pubkey ],
+  [ 'close', 'tails', 'sign', 1, carol.signer.pubkey ]
 ]
 
 const cid   = ctx.cid
-const entry = create_witness('close', 'tails', client.signer, { programs })
+const entry = create_witness_sig('close', 'tails', programs, client.signer)
 
 console.log('Witness entry:', entry)
 

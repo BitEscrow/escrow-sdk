@@ -18,7 +18,7 @@ const cli      = await core.startup()
 const alias    = [ 'alice', 'bob', 'carol' ]
 const members  = await get_users(cli, alias)
 
-const [ alice, bob ] = members
+const [ alice, bob, carol ] = members
 
 const hostname = 'http://localhost:3000'
 const oracle   = 'http://172.21.0.3:3000'
@@ -32,18 +32,19 @@ const proposal = {
   network   : 'regtest',
   moderator : alice.signer.pubkey,
   paths: [
-    [ 'heads', 10000, await bob.wallet.new_address   ],
-    [ 'tails', 10000, await alice.wallet.new_address ]
+    [ 'heads', 10000, await alice.wallet.new_address ],
+    [ 'tails', 10000, await bob.wallet.new_address   ],
+    [ 'draw',  5000,  await alice.wallet.new_address ],
+    [ 'draw',  5000,  await bob.wallet.new_address   ]
   ],
   payments : [
-    [ 5000,  await bob.wallet.new_address ]
+    [ 5000,  await carol.wallet.new_address ]
   ],
   programs : [
-    [ 'close', 'heads', 'sign', 1, alice.signer.pubkey ],
-    [ 'close', 'tails', 'sign', 1, bob.signer.pubkey   ]
+    [ 'close', 'heads|tails', 'sign', 2, alice.signer.pubkey, bob.signer.pubkey ]
   ],
   schedule: [
-    [ 7200, 'close', 'heads|tails' ]
+    [ 7200, 'close', 'draw' ]
   ],
   value   : 15000,
   version : 1

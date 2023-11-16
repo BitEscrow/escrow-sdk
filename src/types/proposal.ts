@@ -1,5 +1,10 @@
 import { Literal, Network } from './base.js'
 
+export type Member = [
+  id     : string,
+  pubkey : string
+]
+
 export type Payment = [
   value   : number,
   address : string
@@ -32,6 +37,7 @@ export interface ProposalData {
   expires        : number
   fallback      ?: string
   feerate       ?: number
+  members       ?: Member[]
   network        : Network
   paths          : PayPath[]
   payments       : Payment[]

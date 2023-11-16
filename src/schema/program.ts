@@ -2,7 +2,7 @@ import { z } from 'zod'
 import base  from './base.js'
 import vm    from './vm.js'
 
-const { hash, hex, label, num } = base
+const { hash, hex, label, num, str } = base
 const { action, regex } = vm
 
 const lock_params = z.tuple([ num ]).rest(hash)
@@ -36,7 +36,7 @@ const sign_witness = z.object({
   method  : z.literal('sign'),
   action,
   path    : label,
-  args    : hex.array()
+  args    : str.array()
 })
 
 const terms   = z.discriminatedUnion('method', [ lock_terms, sign_terms ])
