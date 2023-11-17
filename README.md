@@ -53,7 +53,7 @@ Keys are radioactive. - bad practices can expose private keys (which give us can
 
 ## Overview
 
-The protocol is split into three phases: `proposal`, `contract`, and `settlement`. Each phase represents a round of communication in the protocol.
+The protocol is split into three phases: `proposal`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
 **Proposal**:  
 
@@ -61,7 +61,7 @@ A proposal is the pre-cursor to a contract, and contains all of the negotiable t
 
 There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they (mostly) support JSON. Feel free to use your favorite one!
 
-**Contract**:  
+**Funding**:  
 
 Once the terms of a proposal have been established, the next step is to setup an escrow contract. The contract requires a collaborative agreement between three acting parties:
 
@@ -85,10 +85,10 @@ The final round of the escrow process is the `settlement`. This is the most fun 
 
 At this phase:
 
-  * The agent is bound by the covenant, and can only settle the contract on a pre-authorized spending path.
-  * However, the agent has control over that selection process, and can implement any protocol.
+  * The agent is bound by the covenant, and can only settle the contract using a pre-authorized spending path.
+  * The agent does have control over that selection process, and can implement any protocol.
 
-To maximize the power of the first point, and minimize risk from the second point, both the `members` and `agent` interact with the contract through the use of a virtual state machine. The consensus of this machine is governed by the terms of the proposal, which define:
+To maximize the power of the first point, and minimize risk from the second point, both the `members` and `agent` interact with the contract through the use of a virtual machine. The consensus of this machine is governed by the terms of the proposal, which define:
 
   - The `paths` available to spend in the contract.
   - The `actions` that can be taken on a given path.
@@ -103,7 +103,7 @@ To execute a program, a `member` submits their arguments to the `agent`, who the
 
 > Note: Each commit proof links to the previous, forming a git-style hash chain of attribution.
 
-Once the state machine has computed a result for the contract, the agent then proceeds to complete each covenant and spend the selected output in an on-chain transaction.
+Once the machine has computed a result for the contract, the agent then proceeds to complete each covenant and broadcast the selected path via an on-chain transaction.
 
 **Agents**  
 
@@ -378,13 +378,13 @@ type WitnessEntry = [
 ]
 ```
 
-Currently, the CVM only supports one method, and that is the `vote` method. This method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reached. The threshold for this quorm is defined in the proposal terms.
+Currently, the CVM only supports one method, and that is the `sign` method. This method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reached. The threshold for this quorm is defined in the proposal terms.
 
-The `vote` method uses compact signature proofs that are designed to be easy to work with. They are inspired by `NIP-26` delegation proofs, and can support an optional query string to provide additional parameters.
+The `sign` method uses compact signature proofs that are designed to be easy to work with. They are inspired by `NIP-26` delegation proofs, and can support an optional query string to provide additional parameters.
 
 ```ts
-// Includes a reference id, pubkey, proof id, and signature.
-'a61ba8a7780a8bb02c31a67c613855c608b3d064b366e122420caae0cf23d2379997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803bedcb3e636893b1b39ee8199da6948b2ad3fdfa47b901342a67e979992a256f3ea23af335d9d3ac52949e759e91cf59931054f0460325a31f885293e64bf296bedc603b73b29aa11fb2c0a7b1470945f5f3b8b56cdf7bf2ade422dfa29ecbd4a2c'
+// Includes a reference id, pubkey, proof id, signature and timestamp.
+'b92e904d8819b670761e903f3d788da3ccea2db1ed9253d9fdbab427fe87022a9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be553ae992fa3b9a7fd6b6792936c2a6e6dcfbb3f091e2994df0c5cdb901e92e4abccb7ef9408028283a08c32e199036755c2401ddec831f6fad244c7aa7af8e7d4dff691c97add18871d32ec3c6c487f2433f51bf4ef3d9b2d58459aeff3b8016?stamp=1700172943'
 ```
 
 Also, proofs use the same signing method as nostr notes, so technically any proof can be converted into a valid nostr note, and vice-versa. Valid proofs can also be constructed usings nostr-based signing devices (such as `NIP-07` based extensions).
@@ -632,7 +632,7 @@ VERBOSE=true npm run test
 
 This should spin up an isolated `regtest` version of Bitcoin core (which comes packaged with the repo), and run a flurry of methods which exercise the entire protocol. The full end-to-end test is located in `test/src/tests/e2e.test.ts`.
 
-Over the next two weeks, we'll be adding more concrete examples using the `EscrowClient`, plus opening our escrow server to public beta on `testnet` and `mutinynet`.
+Over the next month, we'll be adding more concrete examples using the `EscrowClient`, plus opening our escrow server to public beta on `testnet` and `mutinynet`.
 
 Please stay tuned!
 
