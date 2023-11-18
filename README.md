@@ -95,7 +95,7 @@ To maximize the power of the first point, and minimize risk from the second poin
   - The `method` used to trigger those actions.
   - The `params` used to configure each method.
 
-> Note: Each method involves the creation / validation of a crypto-graphic proof.
+> Note: Each method involves the creation / validation of a cryptography proof.
 
 The sum of these definitions constitutes a `program` that can be executed.
 
@@ -175,9 +175,9 @@ A proposal is the precursor to creating a contract. It defines the terms of the 
   ],
   payments : [[ 10000, 'bcrt1qxemag7t72rlrhl2ezsnsprmunmnzc35nmaph6v' ]],
   programs : [
-    [ 'dispute', 'payout', 'sign', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
-    [ 'resolve',      '*', 'sign', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
-    [ 'close|resolve','*', 'sign', 2, 
+    [ 'sign', 'dispute', 'payout', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
+    [ 'sign', 'resolve',      '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
+    [ 'sign', 'close|resolve','*', 2, 
       '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
       '4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10'
     ]
@@ -258,9 +258,9 @@ Actions can be taken within the CVM by executing a program.
 
 Programs are loaded into the CVM using the `programs` section of the proposal. Each program specifies the following configuration:
 
+  - The `method` used to activate the program.
   - The `action` policy, which defines the actions this program can take. 
   - The `path` policy, which restricts which paths this program can access. 
-  - The `method` used to activate the program.
   - Additional `params` that configure the method.
 
 > The regex format for actions and paths is intentionally limited: It accepts '|' for specifying multiple options, or a single '*' for specifying all options. No other patterns are allowed.
@@ -268,16 +268,16 @@ Programs are loaded into the CVM using the `programs` section of the proposal. E
 The following entry is an example definition of a program:
 
 ```ts
-[ 'close|resolve', '*', 'sign', 2, buyer_pubkey, seller_pubkey ]
+[ 'sign', 'close|resolve', '*', 2, buyer_pubkey, seller_pubkey ]
 ```
 
-Let's assume that for our `sign` program, the list of pubkeys includes the buyer and seller. The buyer and seller can use the above program to `close` or `resolve` the contract on any (*) spending path. They can do this by using the `sign` method, which requires submitting a signed statement to the program. The program requires a minimum of two signatures to agree on a resolution, and must use a pubkey that is included in the list.
+Let's assume that for our `sign` program, the list of pubkeys includes the buyer and seller. The buyer and seller can use the above program to `close` or `resolve` the contract on any ('*') spending path. They can do this by using the `sign` method, which requires submitting a signed statement to the program. The program requires a minimum of two unique signatures to activate, and they must be from one of the pubkeys included in the list.
 
-The `sign` method is a basic implementation of a threshold multi-signature agreement. Additional methods and actions will be added to the CVM in the future.
+The `sign` method is a basic implementation of a threshold-based multi-signature agreement. Additional methods and actions will be added to the CVM in the future.
 
-**Rules of Action**  
+**Rules of Actions**  
 
-The logic rules for the CVM are designed to be simple and easy to follow:
+The logical rules for the CVM are designed to be simple and easy to follow:
 
 ```
   - An open path can be locked, disputed, or closed.
@@ -300,7 +300,7 @@ In the proposal, each task entry must contain three items: the *timer*, *action*
 
 The timer is defined in seconds, and will be relative to the `activated` date that is defined in the contract. Once the specified number of seconds have passed, the action will be executed inside the CVM.
 
-You may specify multiple paths. The task will execute the provided action on each path in sequential order. If the result of the action leads to a settlement, then the contract will close. If an action fails to execute on a given path (due to a rule violation), then the task will continue to the next path.
+You may specify multiple paths. The task will execute the provided action on each path in sequential order. If the result of the action leads to a settlement, then the contract will close. If a task fails to execute on a given path (due to a rule violation), then the task will continue onto the next path.
 
 ## The Contract
 
@@ -451,7 +451,7 @@ type DepositStatus =
 'stale'    | // Deposit is stuck in mempool, must wait for confirmation.
 'open'     | // Deposit is confirmed and ready for signing
 'locked'   | // Deposit is currently locked to a covenant.
-'spent'    | // Deposit has been spent and is in the mempool.
+'spent'    | // Deposit has been spent and is awaiting confirmation.
 'settled'  | // Deposit spending tx has been confirmed.
 'expired'  | // Deposit time-lock is expired, no longer secured.
 'error'      // Something went wrong, may need manual intervention.
