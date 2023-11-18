@@ -1,7 +1,11 @@
 import { run_schedule } from './schedule.js'
 import { init_paths }   from './state.js'
-import { debug, err_handler }        from './util.js'
 import { now }          from '../lib/util.js'
+
+import {
+  debug,
+  err_handler
+} from './util.js'
 
 import {
   init_programs,
@@ -27,42 +31,46 @@ const INIT_STATE = {
   store   : []
 }
 
+/**
+ * Evaluates the witness data against the current virtual machine state.
+ */
 export function eval_witness (
   state   : StateData,
   witness : WitnessData,
   marker  = now()
-) {
-  /**
-   * Evaluate witness data using the vm state.
-   */
+) : { error ?: string, state : StateData } {
   // Return early if there is already a result.
-  if (state.result !== null) return state
+  if (state.result !== null) {
+    return { state }
+  }
+  // Define our error varaible.
+  let error : string | undefined
   // Try to run the scheduler and program.
   try {
     debug('[vm] eval witness data:', witness)
     // Evaluate the schedule for due events.
     run_schedule(state, marker)
     // If there is a result, return early.
-    if (state.result !== null) return state
+    if (state.result !== null) return { state }
     // Fetch the program by id, then run the program.
     run_program(state, witness)
   } catch (err) {
     // Handle raised errors.
-    state.error = err_handler(err)
+    error = err_handler(err)
   }
   // Update the state timestamp.
   state.updated = marker
   // Return the current state.
-  return state
+  return { error, state }
 }
 
+/**
+ * Evaluates the schedule of the virtual machine to process due events.
+ */
 export function eval_schedule (
   state  : StateData,
   marker : number = now()
-) {
-  /**
-   * Run scheduler using the vm state.
-   */
+) : StateData {
   // Return early if there is already a result.
   if (state.result !== null) return state
   // Evaluate the schedule for due events.
@@ -71,6 +79,9 @@ export function eval_schedule (
   return state
 }
 
+/**
+ * Initializes the virtual machine with the given parameters.
+ */
 export function init_vm (
   contract_id : string,
   paypaths    : PayPath[],
@@ -78,10 +89,6 @@ export function init_vm (
   published   : number,
   schedule    : ScheduleTerms[]
 ) : StateData {
-  /**
-   * Initialize the state of 
-   * the contract virtal machine.
-   */
   const head     = contract_id
   const paths    = init_paths(paypaths, progterms)
   const programs = init_programs(progterms)
