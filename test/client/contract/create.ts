@@ -28,18 +28,20 @@ const proposal = {
   network   : 'regtest',
   moderator : alice.signer.pubkey,
   paths: [
-    [ 'heads', 10000, await bob.wallet.new_address   ],
-    [ 'tails', 10000, await alice.wallet.new_address ]
+    [ 'heads', 10000, await alice.wallet.new_address ],
+    [ 'tails', 10000, await bob.wallet.new_address   ],
+    [ 'draw',  5000,  await alice.wallet.new_address ],
+    [ 'draw',  5000,  await bob.wallet.new_address   ]
   ],
   payments : [
-    [ 5000,  await bob.wallet.new_address ]
+    [ 5000,  await carol.wallet.new_address ]
   ],
   programs : [
-    [ 'close', 'heads', 'proof', 1, alice.signer.pubkey ],
-    [ 'close', 'tails', 'proof', 1, carol.signer.pubkey ]
+    [ 'sign', 'close|dispute', '*', 2, alice.signer.pubkey, bob.signer.pubkey ],
+    [ 'sign', 'resolve',       '*', 1, carol.signer.pubkey ]
   ],
   schedule: [
-    [ 7200, 'close', 'heads|tails' ]
+    [ 7200, 'close', 'draw' ]
   ],
   value   : 15000,
   version : 1
