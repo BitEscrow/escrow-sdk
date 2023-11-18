@@ -1,9 +1,9 @@
 import { Buff }          from '@cmdcode/buff'
 import { parse_program } from '../lib/parse.js'
 import { now, regex }    from '../lib/util.js'
+import { MANIFEST }      from '../lib/program/index.js'
 import { update_path }   from './state.js'
 import { debug }         from './util.js'
-import methods           from './methods/index.js'
 
 import {
   ProgramTerms,
@@ -11,7 +11,7 @@ import {
   StateData,
   StoreEntry,
   WitnessData,
-  ProgramList
+  MethodManifest
 } from '../types/index.js'
 
 export function init_programs (
@@ -24,11 +24,9 @@ export function init_programs (
   const entries : ProgramEntry[] = []
   for (const term of terms) {
     const program = parse_program(term)
-    const { method, actions, paths, params } = program
-    const img = [ method, ...params ]
-    const id  = Buff.json(img).digest.hex
+    const { method, actions, paths, params, prog_id } = program
     const arr = params.map(e => String(e))
-    entries.push([ id, actions, paths, method, arr ])
+    entries.push([ prog_id, actions, paths, method, arr ])
   }
   return entries
 }
@@ -81,7 +79,7 @@ function load_program (
     throw 'program does not have access to this path: ' + path
   }
 
-  const exec = methods[method as keyof ProgramList]
+  const exec = MANIFEST[method as keyof MethodManifest]
 
   return exec(params, store)
 }

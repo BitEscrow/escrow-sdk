@@ -1,15 +1,14 @@
 import { Literal }    from './base.js'
 import { StoreEntry } from './vm.js'
 
-export type ProgramMethod = 'sign'
+export type ProgramMethod  = 'oracle' | 'reveal' | 'sign'
+export type ProgramData    = (LockProgramData | SignProgramData) & { prog_id : string }
+export type WitnessData    = (LockWitnessData | SignWitnessData)
+export type MethodManifest = Record<ProgramMethod, ProgramExec>
 
-export type ProgramData = (LockProgramData | SignProgramData) & { prog_id : string }
-export type WitnessData = (LockWitnessData | SignWitnessData)
-export type ProgramList = Record<string, ProgramEval>
-
-export type ProgramEval = (
-  params: Literal[],
-  store: StoreEntry
+export type ProgramExec = (
+  params : Literal[],
+  store  : StoreEntry
 ) => ProgramReturn
 
 export type ProgramReturn = (
@@ -24,9 +23,17 @@ export type WitnessEntry = [
   args    : Literal[]
 ]
 
+export interface ProgramQuery {
+  action   ?: string
+  includes ?: Literal[]
+  method   ?: string
+  params   ?: Literal[]
+  path     ?: string
+}
+
 export interface LockProgramData {
   actions : string
-  method  : 'lock'
+  method  : 'reveal'
   paths   : string
   params  : [ number, ...string[] ]
 }
@@ -35,7 +42,7 @@ export interface LockWitnessData {
   prog_id : string
   action  : string
   args    : string[]
-  method  : 'lock'
+  method  : 'reveal'
   path    : string
 }
 

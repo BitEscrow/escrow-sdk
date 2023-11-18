@@ -117,4 +117,3 @@ export function check_stamp (
     throw `Timestamp occurs before latest update: ${stamp} <= ${updated}`
   }
 }
-

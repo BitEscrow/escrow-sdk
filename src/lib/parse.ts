@@ -32,7 +32,7 @@ export function parse_deposit (
 export function parse_program (
   terms : unknown[]
 ) : ProgramData {
-  const [ actions, paths, method, ...params ] = terms
+  const [ method, actions, paths, ...params ] = terms
   const parser  = schema.program.terms
   const parsed  = parser.parse({ method, actions, paths, params })
   const img     = [ method, ...params ]

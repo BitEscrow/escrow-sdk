@@ -45,6 +45,10 @@
       "import": "./dist/lib/parse.js",
       "types": "./dist/lib/parse.d.ts"
     },
+    "./program": {
+      "import": "./dist/lib/program/index.js",
+      "types": "./dist/lib/program/index.d.ts"
+    },
     "./proof": {
       "import": "./dist/lib/proof.js",
       "types": "./dist/lib/proof.d.ts"
@@ -76,10 +80,6 @@
     "./vm": {
       "import": "./dist/vm/index.js",
       "types": "./dist/vm/index.d.ts"
-    },
-    "./witness": {
-      "import": "./dist/lib/witness.js",
-      "types": "./dist/lib/witness.d.ts"
     }
   },
   "scripts": {

@@ -1,12 +1,12 @@
 import { z } from 'zod'
 import base  from './base.js'
-import wit   from './vm.js'
+import vm    from './vm.js'
 
 const { hash, num, payment, literal, network, paypath, stamp, str } = base
-const { method, regex, task } = wit
+const { method, regex, task } = vm
 
 const member  = z.tuple([ hash, hash ])
-const program = z.tuple([ regex, regex, method ]).rest(literal)
+const program = z.tuple([ method, regex, regex ]).rest(literal)
 
 const data = z.object({
   confirmations : num.optional(),

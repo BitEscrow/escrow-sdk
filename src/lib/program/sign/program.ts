@@ -1,10 +1,4 @@
-import { Buff } from '@cmdcode/buff'
-import { now }  from '@/lib/util.js'
-
-import {
-  parse_proof,
-  verify_proof
-} from '@/lib/proof.js'
+import { verify_witness } from './witness.js'
 
 import {
   Literal,
@@ -14,7 +8,7 @@ import {
 
 type Entry = [ key : string, val : string[] ]
 
-export default function (
+export function exec (
   params : Literal[],
   store  : StoreEntry
 ) {
@@ -39,34 +33,6 @@ export default function (
     }
     return false
   }
-}
-
-function verify_witness (
-  members : string[],
-  proof   : string,
-  witness : WitnessData
-) {
-  /**
-   * Verify the provided witness signatures.
-   */
-  const { pub, ref } = parse_proof(proof)
-
-  if (!members.includes(pub)) {
-    throw '[vm/sign_v1] Invalid member: ' + pub
-  } 
-  
-  const { prog_id, action, path, method } = witness
-  
-  const preimg = [ prog_id, action, path, method ]
-  const digest = Buff.json(preimg).digest.hex
-
-  if (ref !== digest) {
-    throw '[vm/sign_v1] invalid ref: ' + ref
-  } else if (!verify_proof(proof, preimg, { until : now() })) {
-    throw '[vm/sign_v1] invalid proof: ' + proof
-  }
-
-  return pub
 }
 
 function record_witness (

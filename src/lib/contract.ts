@@ -25,9 +25,6 @@ export function create_contract (
   session   : AgentSession,
   options   : Partial<ContractConfig> = {}
 ) : ContractData {
-  /**
-   * Create a contract.
-   */
   const { fees = [], moderator = null, published = now() } = options
 
   return sort_record({

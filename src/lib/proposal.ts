@@ -1,10 +1,14 @@
-import { parse_addr }   from '@scrow/tapscript/address'
-import { create_vout }  from '@scrow/tapscript/tx'
-import { TxOutput }     from '@scrow/tapscript'
+import { parse_addr }    from '@scrow/tapscript/address'
+import { create_vout }   from '@scrow/tapscript/tx'
+import { TxOutput }      from '@scrow/tapscript'
+import { parse_program } from './parse.js'
+import { regex }         from './util.js'
 
 import {
   Payment,
   PayPath,
+  ProgramQuery,
+  ProgramTerms
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -60,4 +64,35 @@ export function get_path_total (
     path_totals.push([ label, amt ])
   }
   return path_totals
+}
+
+export function find_program (
+  query : ProgramQuery,
+  terms : ProgramTerms[]
+) {
+  const { action, includes, method, path, params } = query
+
+  let progs = terms.map(e => parse_program(e))
+
+  if (method !== undefined) {
+    progs = progs.filter(e => e.method === method)
+  }
+
+  if (action !== undefined) {
+    progs = progs.filter(e => regex(action, e.actions))
+  }
+
+  if (path !== undefined) {
+    progs = progs.filter(e => regex(path, e.paths))
+  }
+
+  if (Array.isArray(params)) {
+    progs = progs.filter(e => params.every((x, i) => e.params[i] === x))
+  }
+
+  if (Array.isArray(includes)) {
+    progs = progs.filter(e => includes.every(x => e.params.includes(x as any)))
+  }
+
+  return progs[0]
 }

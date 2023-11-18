@@ -8,7 +8,7 @@ const { action, regex } = vm
 const lock_params = z.tuple([ num ]).rest(hash)
 
 const lock_terms = z.object({
-  method  : z.literal('lock'),
+  method  : z.literal('reveal'),
   actions : action,
   paths   : label,
   params  : lock_params
@@ -16,7 +16,7 @@ const lock_terms = z.object({
 
 const lock_witness = z.object({
   prog_id : hash,
-  method  : z.literal('lock'),
+  method  : z.literal('reveal'),
   action,
   path    : label,
   args    : hex.array()

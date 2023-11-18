@@ -2,11 +2,11 @@ import { Test }               from 'tape'
 import { Buff }               from '@cmdcode/buff'
 import { CoreClient }         from '@cmdcode/core-cmd'
 import { StateData }          from '@scrow/core'
+import { sign }               from '@scrow/core/program'
 import { get_return_ctx }     from '@scrow/core/return'
 import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
 import { prevout_to_txspend } from '@scrow/core/tx'
-import { create_witness_sig } from '@scrow/core/witness'
 import { get_users }          from '../core.js'
 import { get_funds }          from '../fund.js'
 import { create_settlment }   from '../spend.js'
@@ -122,7 +122,7 @@ export default async function (client : CoreClient, t : Test) {
 
     const programs = terms.programs
     const signer   = members[0].signer
-    const witness  = create_witness_sig('dispute', 'payout', programs, signer)
+    const witness  = sign.create_witness('dispute', 'payout', programs, signer)
 
     verify_witness(vm_state.programs, witness)
 
