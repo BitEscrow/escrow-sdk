@@ -1,6 +1,6 @@
-import { EscrowClient }       from '@scrow/core'
-import { create_witness_sig } from '@scrow/core/witness'
-import { get_funds }          from '../fund.js'
+import { EscrowClient } from '@scrow/core'
+import { sign }         from '@scrow/core/program'
+import { get_funds }    from '../fund.js'
 
 import {
   get_daemon,
@@ -41,7 +41,7 @@ const proposal = {
     [ 5000,  await carol.wallet.new_address ]
   ],
   programs : [
-    [ 'close', 'heads|tails', 'sign', 2, alice.signer.pubkey, bob.signer.pubkey ]
+    [ 'sign', 'close', 'heads|tails', 2, alice.signer.pubkey, bob.signer.pubkey ]
   ],
   schedule: [
     [ 7200, 'close', 'draw' ]
@@ -70,7 +70,7 @@ console.log('status:', status)
 
 const programs = contract.terms.programs
 
-const wit = create_witness_sig('close', 'heads', programs, alice.signer)
+const wit = sign.create_witness('close', 'heads', programs, alice.signer)
 const res = await client.witness.submit(contract.cid, wit)
 
 console.log('res:', res)

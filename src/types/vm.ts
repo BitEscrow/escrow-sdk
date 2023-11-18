@@ -43,7 +43,6 @@ export enum PathState {
 
 export interface StateData {
   commits  : CommitEntry[]
-  error    : string | null
   head     : string
   paths    : StateEntry[]
   programs : ProgramEntry[]

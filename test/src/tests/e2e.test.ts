@@ -133,7 +133,14 @@ export default async function (client : CoreClient, t : Test) {
 
     let state : StateData
  
-    state = eval_witness(vm_state, witness, now())
+    const vm_result = eval_witness(vm_state, witness, now())
+
+    if (vm_result.error !== undefined) {
+      throw new Error(vm_result.error)
+    } else {
+      state = vm_result.state
+    }
+
     state = eval_schedule(state, now() + 8000)
 
     if (VERBOSE) {

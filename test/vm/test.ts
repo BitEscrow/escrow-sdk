@@ -68,9 +68,11 @@ export default function test () {
 
   try {
     for (const wit of witness) {
-      vm_state = eval_witness(vm_state, wit)
-      if (vm_state.error !== null) {
-        console.log('err:', vm_state.error)
+      const vm_result = eval_witness(vm_state, wit)
+      if (vm_result.error !== null) {
+        console.log('err:', vm_result.error)
+      } else {
+        vm_state = vm_result.state
       }
     }
 

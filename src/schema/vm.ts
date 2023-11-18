@@ -16,7 +16,6 @@ const status    = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
 const data = z.object({
   commits  : commit.array(),
-  error    : str.nullable(),
   head     : hash,
   paths    : path.array(),
   programs : progdata.array(),
