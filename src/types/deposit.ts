@@ -1,4 +1,4 @@
-import { KeyContext }   from '@cmdcode/musig2'
+import { KeyContext } from '@cmdcode/musig2'
 
 import {
   AgentSession,
