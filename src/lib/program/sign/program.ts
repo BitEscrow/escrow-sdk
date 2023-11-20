@@ -3,10 +3,9 @@ import { verify_witness } from './witness.js'
 import {
   Literal,
   StoreEntry,
+  StoreItem,
   WitnessData,
 } from '@/types/index.js'
-
-type Entry = [ key : string, val : string[] ]
 
 export function exec (
   params : Literal[],
@@ -25,7 +24,7 @@ export function exec (
       const mem = members.map(e => String(e))
       const pub = verify_witness(mem, proof, witness)
       // Increment the proof counter
-      const count = record_witness(store[1] as Entry[], `${path}/${action}`, pub)
+      const count = record_witness(store[1], `${path}/${action}`, pub)
       // If we meet the threshold, return true.
       if (count >= thold) {
         return true
@@ -36,7 +35,7 @@ export function exec (
 }
 
 function record_witness (
-  store : Entry[],
+  store : StoreItem[],
   label : string,
   key   : string
 ) : number {
@@ -46,23 +45,47 @@ function record_witness (
    */
 
   const idx = store.findIndex(e => e[0] === label)
-    let arr : Entry[1]
+    let arr : string[]
+
   if (idx === -1) {
     arr = new Array(key)
   } else {
-    arr = store[idx][1]
-    if (!Array.isArray(arr)) {
-      throw new Error('program state is corrupt')
-    } else if (arr.includes(key)) {
+    arr = revive_data(store[idx][1])
+    if (arr.includes(key)) {
       throw `signature already exists: ${label} => ${key}`
     } else {
       arr.push(key)
     }
   }
 
+  const data = serialize_data(arr)
+
   if (idx === -1) {
-    store.push([ label, arr ])
+    store.push([ label, data ])
+  } else {
+    store[idx][1] = data
   }
 
   return arr.length
+}
+
+function revive_data (data : string) {
+  let arr : string[]
+  try {
+    arr = JSON.parse(data)
+  } catch {
+    throw new Error('program data is corrupt')
+  }
+  if (!Array.isArray(arr)) {
+    throw new Error('program data is corrupt')
+  }
+  return arr
+}
+
+function serialize_data (data : string[]) {
+  try {
+    return JSON.stringify(data)
+  } catch {
+    throw new Error('program failed to save data')
+  }
 }

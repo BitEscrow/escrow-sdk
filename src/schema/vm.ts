@@ -10,7 +10,9 @@ const method    = z.enum([ 'oracle', 'reveal', 'sign' ])
 const path      = z.tuple([ str, num ])
 const regex     = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
 const progdata  = z.tuple([ hash, regex, regex, label, literal.array() ])
-const store     = z.tuple([ label, z.any() ])
+const item      = z.tuple([ label, str ])
+const store     = z.tuple([ label, item.array() ])
+
 const task      = z.tuple([ num, action, regex ])
 const status    = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 

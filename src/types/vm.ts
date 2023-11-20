@@ -25,7 +25,12 @@ export type StateEntry = [
 
 export type StoreEntry = [
   label : string,
-  store : unknown
+  store : StoreItem[]
+]
+
+export type StoreItem = [
+  key : string,
+  val : string
 ]
 
 export type TaskEntry = [
