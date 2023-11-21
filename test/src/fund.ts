@@ -1,10 +1,9 @@
-import { create_covenant }  from '@scrow/core/session'
-import { create_return_tx } from '@scrow/core/return'
-import { create_timelock }  from '@scrow/core/tx'
-import { get_utxo }         from './core.js'
-import { MemberData }       from './types.js'
-
-import { ContractData } from '@scrow/core'
+import { ContractData }       from '@scrow/core'
+import { create_spend_psigs } from '@scrow/core/session'
+import { create_return_tx }   from '@scrow/core/return'
+import { create_timelock }    from '@scrow/core/tx'
+import { get_utxo }           from './core.js'
+import { MemberData }         from './types.js'
 
 import {
   get_deposit_address,
@@ -29,7 +28,7 @@ export function get_funds (
     const txid = await mbr.wallet.send_funds(value, addr)
     const txo  = await get_utxo(cli, addr, txid)
     const rtx  = create_return_tx(ctx, mbr.signer, txo, { txfee })
-    const cov  = create_covenant(ctx, contract, mbr.signer, txo)
+    const cov  = create_spend_psigs(ctx, contract, mbr.signer, txo)
     return { agent_id, covenant : cov, return_tx : rtx }
   })
 

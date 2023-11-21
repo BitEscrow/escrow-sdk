@@ -1,6 +1,5 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
 import { parse_addr }   from '@scrow/tapscript/address'
-import { parse_script } from '@scrow/tapscript/script'
 import { parse_proof }  from '@scrow/tapscript/tapkey'
 import { Signer }       from '../signer.js'
 import { base }         from '../schema/index.js'
@@ -13,17 +12,13 @@ import {
 import {
   ScriptWord,
   SigHashOptions,
-  TxBytes,
-  TxData
+  TxBytes
 } from '@scrow/tapscript'
 
 import {
-  create_prevout,
   create_tx,
   encode_tx,
-  parse_tx,
-  parse_txid,
-  parse_witness
+  parse_tx
 } from '@scrow/tapscript/tx'
 
 import {
@@ -37,6 +32,10 @@ import * as assert from '../assert.js'
 
 const MIN_RECOVER_FEE = 10000
 
+/**
+ * Computes and returns a context 
+ * object from a given transaction.
+ */
 export function get_return_ctx (
   txhex : TxBytes
 ) : ReturnContext {
@@ -56,6 +55,10 @@ export function get_return_ctx (
   return { pubkey : pub, sequence, signature, tapkey, tx }
 }
 
+/**
+ * Returns an asm-formatted locking script
+ * using the provided input arguments.
+ */
 export function get_return_script (
   return_key : Bytes,
   sequence   : number
@@ -69,6 +72,10 @@ export function get_return_script (
   ]
 }
 
+/**
+ * Create and sign a return transaction
+ * for a given unspent transaction output.
+ */
 export function create_return_tx (
   context  : DepositContext,
   signer   : Signer,
@@ -96,6 +103,10 @@ export function create_return_tx (
   return encode_tx(return_tx).hex
 }
 
+/**
+ * Create a transaction output locking script
+ * based on the provided config options.
+ */
 export function create_script_key (
   signer  : Signer,
   options : Partial<DepositConfig>
@@ -112,6 +123,10 @@ export function create_script_key (
   return script_key
 }
 
+/**
+ * Parse and return the public key that is
+ * contained in a transaction locking script.
+ */
 export function parse_return_key (words : ScriptWord[]) {
   const pubkey = words.at(3)
   if (pubkey === undefined) return null
@@ -122,31 +137,31 @@ export function parse_return_key (words : ScriptWord[]) {
   }
 }
 
-export function scan_return_tx (
-  signer : Signer,
-  txdata : TxBytes | TxData
-) {
-  const { vin, vout } = parse_tx(txdata)
-  for (let idx = 0; idx < vin.length; idx++) {
-    const txout   = vout[idx]
-    const txin    = vin[idx]
-    const scrkey  = parse_script(txout.scriptPubKey).key
-    if (scrkey === undefined) { continue }
-    const witdata = parse_witness(txin.witness)
-    if (witdata.script === null) { continue }
-    const redeem  = parse_script(witdata.script)
-    const pubkey  = parse_return_key(redeem.asm)
-    if (pubkey === null) { continue }
-    const retkey  = create_script_key(signer, { pubkey })
-    if (retkey[1] === scrkey.hex) {
-      const [ sig ] = witdata.params
-      const txid    = parse_txid(txdata)
-      const txinput = create_prevout({ txid, vout : idx, prevout : txout })
-      return { pubkey, sig, txinput }
-    }
-  }
-  return null
-}
+// export function scan_return_tx (
+//   signer : Signer,
+//   txdata : TxBytes | TxData
+// ) {
+//   const { vin, vout } = parse_tx(txdata)
+//   for (let idx = 0; idx < vin.length; idx++) {
+//     const txout   = vout[idx]
+//     const txin    = vin[idx]
+//     const scrkey  = parse_script(txout.scriptPubKey).key
+//     if (scrkey === undefined) { continue }
+//     const witdata = parse_witness(txin.witness)
+//     if (witdata.script === null) { continue }
+//     const redeem  = parse_script(witdata.script)
+//     const pubkey  = parse_return_key(redeem.asm)
+//     if (pubkey === null) { continue }
+//     const retkey  = create_script_key(signer, { pubkey })
+//     if (retkey[1] === scrkey.hex) {
+//       const [ sig ] = witdata.params
+//       const txid    = parse_txid(txdata)
+//       const txinput = create_prevout({ txid, vout : idx, prevout : txout })
+//       return { pubkey, sig, txinput }
+//     }
+//   }
+//   return null
+// }
 
 // export function sweep_recovery_tx (
 //   address : string,

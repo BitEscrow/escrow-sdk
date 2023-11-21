@@ -19,6 +19,9 @@ import {
   SpendTemplate
 } from '../types/index.js'
 
+/**
+ * Returns a new ContractData object using the provided params.
+ */
 export function create_contract (
   cid       : string,
   proposal  : ProposalData,
@@ -53,6 +56,10 @@ export function create_contract (
   })
 }
 
+/**
+ * Initializes the vm state and 
+ * returns the updated contract.
+ */
 export function activate_contract (
   contract  : ContractData,
   activated : number = now()
@@ -71,13 +78,14 @@ export function activate_contract (
   }
 }
 
+/**
+ * Returns the effective deadline
+ * based on the proposal data.
+ */
 function get_deadline (
   proposal : ProposalData,
   created  : number
 ) {
-  /**
-   * Calculate the true deadline for a proposal.
-   */
   const { deadline, effective } = proposal
   if (effective !== undefined) {
     return effective - created
@@ -86,14 +94,14 @@ function get_deadline (
   }
 }
 
+/**
+ * Compute the spending output transactions
+ * for each path in the proposal.
+ */
 export function get_spend_outputs (
   prop : ProposalData,
   fees : Payment[]
 ) : SpendTemplate[] {
-  /**
-   * Compute the spending output transactions
-   * for each path in the proposal.
-   */
   const { payments, paths } = prop
   const total_fees = [ ...payments, ...fees ]
   const path_names = get_path_names(paths)

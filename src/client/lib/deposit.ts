@@ -13,8 +13,8 @@ import {
 } from '../../lib/deposit.js'
 
 import {
-  create_covenant,
-  create_return
+  create_spend_psigs,
+  create_return_psig
 } from '../../lib/session.js'
 
 import { validate_registration } from '../../validators/index.js'
@@ -48,7 +48,7 @@ function create_template_api (client : EscrowClient) {
     const tmpl : DepositTemplate = { agent_id, return_tx : rtx }
     if (cid !== undefined) {
       const ct  = await client.contract.read(cid)
-      const cov = create_covenant(ctx, ct.data, client.signer, utxo)
+      const cov = create_spend_psigs(ctx, ct.data, client.signer, utxo)
       tmpl.covenant = cov
     }
     return tmpl
@@ -124,7 +124,7 @@ function close_deposit_api (client : EscrowClient) {
       txfee = Math.ceil(rate * REFUND_TX_WEIGHT)
     }
     const dpid = deposit.deposit_id
-    const req  = create_return(address, deposit, client.signer, txfee)
+    const req  = create_return_psig(address, deposit, client.signer, txfee)
     const url  = `${client._host}/api/deposit/${dpid}/close`
     const body = JSON.stringify(req)
     const tkn  = create_proof(client.signer, url + body, { stamp : now() })

@@ -1,12 +1,13 @@
-import { verify_psig } from '@cmdcode/musig2'
-import { Signer }      from '../signer.js'
-import { get_entry }   from '../lib/util.js'
+import { verify_psig }    from '@cmdcode/musig2'
+import { parse_txout }    from '@/lib/tx.js'
+import { parse_covenant } from '@/lib/parse.js'
+import { Signer }         from '../signer.js'
+import { get_entry }      from '../lib/util.js'
 
 import {
-  get_mutex_entries,
+  get_path_mutexes,
   get_return_mutex,
   get_session_pnonce,
-  parse_covenant,
   verify_mutex_psig
 } from '../lib/session.js'
 
@@ -20,7 +21,6 @@ import {
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
-import { parse_txout } from '@/lib/tx.js'
 
 export function validate_covenant (
   covenant : unknown
@@ -47,7 +47,7 @@ export function verify_covenant (
   // Get the mutex entries.
   const pnonces = [ covenant.pnonce, record_pn ]
   const txout   = parse_txout(deposit)
-  const entries = get_mutex_entries(context, contract, pnonces, txout)
+  const entries = get_path_mutexes(context, contract, pnonces, txout)
   // Check that we can use the deposit psigs.
   check_deposit_psigs(entries, covenant.psigs)
 }

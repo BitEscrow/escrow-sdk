@@ -17,9 +17,9 @@ import {
 } from '@scrow/core/contract'
 
 import {
+  create_deposit,
   get_deposit_ctx,
-  get_spend_state,
-  register_deposit
+  get_spend_state
 } from '@scrow/core/deposit'
 
 import {
@@ -96,11 +96,12 @@ export default async function (client : CoreClient, t : Test) {
       assert.exists(data)
       const spendout = prevout_to_txspend(data.txinput)
       verify_deposit(deposit_ctx, return_ctx, spendout)
-      const dep_id  = Buff.random(32).hex
+      const deposit_id  = Buff.random(32).hex
       const state   = get_spend_state(sequence, data.status)
-      const session = create_session(agent.signer, dep_id)
-      const pnonce  = session.record_pn
-      const deposit = register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
+      const session = create_session(agent.signer, deposit_id)
+      const record_pn = session.record_pn
+      const deposit = create_deposit({ ...deposit_ctx, deposit_id, record_pn, ...tmpl, ...spendout, ...state })
+      // const deposit = register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
       verify_covenant(deposit_ctx, contract, deposit, agent.signer, agent.signer)
       return deposit
     })

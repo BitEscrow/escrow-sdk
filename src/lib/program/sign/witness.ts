@@ -15,6 +15,10 @@ import {
 
 import { Buff } from '@cmdcode/buff'
 
+/**
+ * Returns a serialized preimage 
+ * for signing a witness statement.
+ */
 export function get_sign_preimg (
   action  : string,
   path    : string,
@@ -23,6 +27,10 @@ export function get_sign_preimg (
   return JSON.stringify([ prog_id, action, path ])
 }
 
+/**
+ * Returns a signed witness statement
+ * using the provided signer and arguments.
+ */
 export function create_witness (
   action   : string,
   path     : string,
@@ -43,6 +51,10 @@ export function create_witness (
   }
 }
 
+/**
+ * Appends an additional signature 
+ * to an existing witness statement.
+ */
 export function endorse_witness (
   signer  : Signer,
   witness : WitnessData,
@@ -54,14 +66,15 @@ export function endorse_witness (
   return { ...witness, args : [ ...args, proof ] }
 }
 
+/**
+ * Verifies that the provided 
+ * witness statement is valid.
+ */
 export function verify_witness (
   members : string[],
   proof   : string,
   witness : WitnessData
 ) {
-  /**
-   * Verify the provided witness signatures.
-   */
   const { pub, ref } = parse_proof(proof)
 
   if (!members.includes(pub)) {

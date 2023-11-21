@@ -85,9 +85,9 @@
   "scripts": {
     "build": "./build.sh",
     "release": "yarn test && yarn build",
-    "scratch": "tsx --tsconfig test/tsconfig.json test/scratch.ts",
-    "start": "tsx --tsconfig test/tsconfig.json",
-    "test": "tsx --tsconfig test/tsconfig.json test/tape.ts"
+    "scratch": "yarn load test/scratch.ts",
+    "load": "tsx --tsconfig test/tsconfig.json",
+    "test": "yarn tsc && yarn load test/tape.ts"
   },
   "devDependencies": {
     "@cmdcode/core-cmd": "1.3.8",

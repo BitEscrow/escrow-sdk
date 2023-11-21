@@ -7,6 +7,9 @@ import {
   WitnessData,
 } from '@/types/index.js'
 
+/**
+ * Main execution logic for the sign method.
+ */
 export function exec (
   params : Literal[],
   store  : StoreEntry
@@ -34,16 +37,15 @@ export function exec (
   }
 }
 
+/**
+ * Add a new witness to the array for
+ * a given action/path combination.
+ */
 function record_witness (
   store : StoreItem[],
   label : string,
   key   : string
 ) : number {
-  /**
-   * Add a new witness to the array for
-   * a given action/path combination.
-   */
-
   const idx = store.findIndex(e => e[0] === label)
     let arr : string[]
 
@@ -69,6 +71,9 @@ function record_witness (
   return arr.length
 }
 
+/**
+ * Revive a store item from string.
+ */
 function revive_data (data : string) {
   let arr : string[]
   try {
@@ -82,6 +87,9 @@ function revive_data (data : string) {
   return arr
 }
 
+/**
+ * Dump a store item to string.
+ */
 function serialize_data (data : string[]) {
   try {
     return JSON.stringify(data)

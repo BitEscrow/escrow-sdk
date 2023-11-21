@@ -7,6 +7,7 @@ import {
   ProposalData,
   WitnessData,
   ProgramData,
+  CovenantData,
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -21,6 +22,12 @@ export function parse_contract (
   contract : unknown
 ) : ContractData {
   return schema.contract.data.parse(contract)
+}
+
+export function parse_covenant (
+  covenant : unknown
+) : CovenantData {
+  return schema.deposit.covenant.parse(covenant as CovenantData)
 }
 
 export function parse_deposit (

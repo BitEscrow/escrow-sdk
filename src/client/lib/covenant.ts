@@ -1,11 +1,11 @@
-import EscrowClient        from '../class/client.js'
-import EscrowContract      from '../class/contract.js'
-import EscrowDeposit       from '../class/deposit.js'
-import { get_deposit_ctx } from '../../lib/deposit.js'
-import { create_proof }    from '../../lib/proof.js'
-import { create_covenant } from '../../lib/session.js'
-import { parse_txout }     from '../../lib/tx.js'
-import { now }             from '../../lib/util.js'
+import EscrowClient           from '../class/client.js'
+import EscrowContract         from '../class/contract.js'
+import EscrowDeposit          from '../class/deposit.js'
+import { get_deposit_ctx }    from '../../lib/deposit.js'
+import { create_proof }       from '../../lib/proof.js'
+import { create_spend_psigs } from '../../lib/session.js'
+import { parse_txout }        from '../../lib/tx.js'
+import { now }                from '../../lib/util.js'
 
 import {
   ContractData,
@@ -40,7 +40,7 @@ function add_covenant_api (client : EscrowClient) {
     const { agent_key, deposit_id, deposit_key, sequence } = deposit
     const ctx   = get_deposit_ctx(agent_key, deposit_key, sequence)
     const txo   = parse_txout(deposit)
-    const cov   = create_covenant(ctx, contract, client.signer, txo)
+    const cov   = create_spend_psigs(ctx, contract, client.signer, txo)
     const url   = `${client.host}/api/deposit/${deposit_id}/add`
     const body  = JSON.stringify(cov)
     const token = create_proof(client.signer, url + body, { stamp : now() })

@@ -15,12 +15,19 @@ import {
 
 import * as assert from '../assert.js'
 
+/**
+ * Initial values for new proofs.
+ */
 const PROOF_DEFAULTS = {
   kind  : 20000,
   stamp : 0x00000000,
   tags  : [] as Literal[][]
 }
 
+/**
+ * Create a new proof string using a provided
+ * signing device and content string (plus params).
+ */
 export function create_proof (
   signer  : SignerAPI,
   content : string,
@@ -41,10 +48,18 @@ export function create_proof (
   return Buff.join([ ref, pub, pid, sig ]).hex + encode_params(params)
 }
 
+/**
+ * Decode and parse a proof string 
+ * into a rich data object.
+ */
 export function parse_proof (proof : string) : ProofData {
+  // Split the hex and query strings.
   const [ hexstr, query ] = proof.split('?')
+  // Convert the hex string into a data stream.
   const stream = Buff.hex(hexstr).stream
+  // Assert the stream size is correct.
   assert.ok(stream.size === 160)
+  // Return a data object from the stream.
   return {
     ref    : stream.read(32).hex,
     pub    : stream.read(32).hex,
@@ -54,19 +69,18 @@ export function parse_proof (proof : string) : ProofData {
   }
 }
 
-export function parse_proofs (
-  proofs : string[]
-) : ProofData[] {
-  return proofs.map(e => parse_proof(e))
-}
-
+/**
+ * Use regex to check if a proof string is valid.
+ */
 export function validate_proof (proof : string) : boolean {
-  // Use regex to check that proof hex is valid (160 * 2 hex bytes)
-  // also use regex to check that param string is valid (url params)
   const regex = /^[0-9a-fA-F]{320}(?:\?[A-Za-z0-9_]+=[A-Za-z0-9_]+(?:&[A-Za-z0-9_]+=[A-Za-z0-9_]+)*)?$/
   return regex.test(proof)
 }
 
+/**
+ * Verify a proof string along with
+ * its matching content string.
+ */
 export function verify_proof (
   proof    : string,
   content  : string,
@@ -105,6 +119,9 @@ export function verify_proof (
   return true
 }
 
+/**
+ * Convert a proof string into a valid nostr note.
+ */
 export function create_event (
   proof   : string,
   content : string
@@ -117,6 +134,10 @@ export function create_event (
   return { kind, content, tags, pubkey: pub, id: pid, sig, created_at: stamp }
 }
 
+/**
+ * Format and encode the paramaters 
+ * that are provided with new a proof.
+ */
 export function encode_params (
   params : Literal[][] | Record<string, Literal> = []
 ) : string {
@@ -131,6 +152,9 @@ export function encode_params (
     : ''
 }
 
+/**
+ * Decode the parameters from a proof string.
+ */
 export function decode_params (str ?: string) : string[][] {
   // Return the query string as an array of params.
   return (typeof str === 'string')
@@ -138,6 +162,10 @@ export function decode_params (str ?: string) : string[][] {
     : []
 }
 
+/**
+ * Parse a proof's configuration
+ * from the provided parameters.
+ */
 export function parse_config (
   params : Literal[][] | Record<string, Literal> = []
 ) : typeof PROOF_DEFAULTS {

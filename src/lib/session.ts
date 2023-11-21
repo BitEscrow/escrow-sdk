@@ -35,82 +35,124 @@ import {
   SpendOut
 } from '../types/index.js'
 
-import * as schema from '../schema/index.js'
-
+/**
+ * Returns an agent session based on the
+ * provided signer and record id.
+ */
 export function create_session (
   agent  : Signer,
   rec_id : string
 ) : AgentSession {
   const pnonce = get_session_pnonce(agent.id, rec_id, agent)
   return {
-    agent_id   : agent.id,
-    agent_key  : agent.pubkey,
+    agent_id  : agent.id,
+    agent_key : agent.pubkey,
     record_pn : pnonce.hex
   }
 }
 
-export function create_covenant (
+/**
+ * Returns a partially-signed covenant based
+ * on the deposit context, contract data, and
+ * unspent transaction output.
+ */
+export function create_spend_psigs (
   context  : DepositContext,
   contract : ContractData,
   signer   : Signer,
   txout    : SpendOut
 ) : CovenantData {
+  // Unpack contract object.
   const { agent_id, cid, record_pn } = contract
+  // Compute the session pnonce value
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
+  // Combine pnonces into a list.
   const pnonces = [ pnonce, record_pn ]
-  const mupaths = get_mutex_entries(context, contract, pnonces, txout)
+  // Compute the musig context for each spending path.
+  const mupaths = get_path_mutexes(context, contract, pnonces, txout)
+  // Create a partial signature for each context object.
   const psigs   = create_psigs(mupaths, signer)
+  // Return the covenant object.
   return { cid, pnonce, psigs }
 }
 
-export function parse_covenant (
-  covenant : unknown
-) : CovenantData {
-  return schema.deposit.covenant.parse(covenant as CovenantData)
-}
-
-export function create_return (
+/**
+ * Returns a partially-signed transaction
+ * signature, to be used for collaboratively
+ * returning a deposit back to the sender.
+ */
+export function create_return_psig (
   address : string,
   deposit : DepositData,
   signer  : Signer,
   txfee   : number
 ) : ReturnData {
+  // Unpack the deposit object.
   const { agent_id, deposit_id, record_pn, value } = deposit
+  // Compute the session pnonce value.
   const pnonce  = get_session_pnonce(agent_id, deposit_id, signer).hex
+  // Combine pnonces into a list.
   const pnonces = [ pnonce, record_pn ]
+  // Create a return transaction using the provided params.
   const txhex   = create_tx_tmpl(address, value - txfee)
+  // Compute a musig context object for the transaction.
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
+  // Create a partial signature using the musig context.
   const psig    = create_mutex_psig(mutex, signer)
+  // Return the final payload.
   return { deposit_id, pnonce, psig, txhex }
 }
 
-export function get_mutex_entries (
+/**
+ * Compute a list of musig context objects
+ * for each spending path in the contract.
+ */
+export function get_path_mutexes (
   context  : DepositContext,
   contract : ContractData,
   pnonces  : Bytes[],
   txout    : SpendOut
 ) : MutexEntry[] {
+  // Unpack the contract object.
   const { agent_id, cid, outputs } = contract
+  // Compute a session id for the agent and contract.
   const sid = get_session_id(agent_id, cid)
+  // Return a list of musig contexts for each spending path.
   return outputs.map(([ label, vout ]) => {
+    // Create a txinput from the utxo data.
     const txinput = create_txinput(txout)
+    // Create a musig context object with the txinput.
     const mut_ctx = get_mutex_ctx(context, vout, pnonces, sid, txinput)
+    // Return the musig context as a labeled tuple.
     return [ label, mut_ctx ]
   })
 }
 
+/**
+ * Compute a musig context object for
+ * collaboratively closing a deposit.
+ */
 export function get_return_mutex (
-  deposit  : DepositData,
-  pnonces  : Bytes[],
-  txhex    : string
+  deposit : DepositData,
+  pnonces : Bytes[],
+  txhex   : string
 ) : MutexContext {
+  // Unpack the deposit object.
   const { agent_id, agent_key, deposit_id, deposit_key, sequence } = deposit
+  // Get a context object for the deposit.
   const dep_ctx = get_deposit_ctx(agent_key, deposit_key, sequence)
+  // Compute the session id for the agent and deposit.
   const sid     = get_session_id(agent_id, deposit_id)
+  // Parse the txinput from the deposit data.
   const txinput = parse_txinput(deposit)
+  // Create and return a musig context object with the txinput.
   return get_mutex_ctx(dep_ctx, txhex, pnonces, sid, txinput)
 }
 
+/**
+ * Compute and return a musig context object
+ * for a given transaction input and output.
+ */
 export function get_mutex_ctx (
   context : DepositContext,
   output  : string,
@@ -118,16 +160,23 @@ export function get_mutex_ctx (
   sid     : Bytes,
   txinput : TxPrevout
 ) : MutexContext {
+  // Unpack the context object.
   const { key_data, tap_data } = context
+  // Unpack the group pubkey for the deposit.
   const group_pub = key_data.group_pubkey
-  // This can be optimized and further broken down.
+  // Compute the transaction signature hash.
   const sighash   = create_sighash(txinput, output)
+  // Compute the nonce tweak for the given signing session.
   const nonce_twk = get_session_tweak(sid, pnonces, sighash)
+  // Get a list of tweaked pubnonces, using the session tweak.
   const pubnonces = tweak_pnonces(pnonces, nonce_twk)
+  // Compute the nonce portion of the musig protocol.
   const nonce_ctx = get_nonce_ctx(pubnonces, group_pub, sighash)
+  // Set additional options for the musig context object.
   const musig_opt = { key_tweaks : [ tap_data.taptweak ] }
+  // Combine the key and nonce data into the final musig context.
   const musig_ctx = create_ctx(key_data, nonce_ctx, musig_opt)
-
+  // Return the musig context object along with session id and tweak.
   return {
     sid,
     mutex : musig_ctx,
@@ -135,33 +184,56 @@ export function get_mutex_ctx (
   }
 }
 
+/**
+ * Compute a combined session id hash
+ * using the agent id and record id.
+ */
 export function get_session_id (
-  aid : Bytes, 
-  cid : Bytes
+  agent_id  : Bytes, 
+  record_id : Bytes
 ) {
-  return sha512(aid, cid)
+  return sha512(agent_id, record_id)
 }
 
+/**
+ * Returns a deterministic session 
+ * pnonce from the provided signer,
+ * for a given agent id and record id. 
+ */
 export function get_session_pnonce (
-  agent_id : Bytes,
-  cid      : Bytes,
-  signer   : Signer
+  agent_id  : Bytes,
+  record_id : Bytes,
+  signer    : Signer
 ) {
-  const sid = get_session_id(agent_id, cid)
+  // Compute the session id for the given agent and record.
+  const sid = get_session_id(agent_id, record_id)
+  // Compute the first portion of the nonce using the signer.
   const pn1 = signer.gen_nonce(sid.subarray(0, 32))
+  // Compute the second portion of the nonce using the signer.
   const pn2 = signer.gen_nonce(sid.subarray(32, 64))
+  // Combine and return both nonces.
   return Buff.join([ pn1, pn2 ])
 }
 
+/**
+ * Computes and returns the tweak value for
+ * a list of pnonces, for the given session 
+ * id and transaction signature hash.
+ */
 export function get_session_tweak (
   sid     : Bytes,
   pnonces : Bytes[],
   sighash : Bytes
 ) : Buff {
+  // Sort and join the list of nonces.
   const pns = Buff.join(sort_bytes(pnonces))
+  // The final tweak value uses the following format.
   return hash340 ('contract/session', sid, pns, sighash)
 }
 
+/**
+ * Tweaks a list of pnonces using the provided tweak data.
+ */
 export function tweak_pnonces (
   keys  : Bytes[],
   tweak : Bytes
@@ -169,6 +241,9 @@ export function tweak_pnonces (
   return keys.map(e => tweak_pnonce(e, tweak))
 }
 
+/**
+ * Tweak a pnonce value using the provided tweak data.
+ */
 export function tweak_pnonce (
   key   : Bytes,
   tweak : Bytes
@@ -179,15 +254,23 @@ export function tweak_pnonce (
   return Buff.join(pnonces)
 }
 
+/**
+ * Returns a list of partial signatures,
+ * from a list of musig context objects.
+ */
 export function create_psigs (
-  mutex  : MutexEntry[],
-  signer : Signer
+  mutexes : MutexEntry[],
+  signer  : Signer
 ) : [ string, string ][] {
-  return mutex.map(([ label, ctx ]) => {
+  return mutexes.map(([ label, ctx ]) => {
     return [ label, create_mutex_psig(ctx, signer) ]
   })
 }
 
+/**
+ * Returns a partial signature, using the
+ * provided signer and musig context object.
+ */
 export function create_mutex_psig (
   context : MutexContext,
   signer  : Signer
@@ -197,6 +280,10 @@ export function create_mutex_psig (
   return signer.musign(mutex, sid, opt).hex
 }
 
+/**
+ * Verify a list of partial signatures,
+ * using the provided musig context object.
+ */
 export function verify_mutex_psigs (
   mutexes : MutexEntry[],
   psigs   : [ string, string ][]
@@ -209,6 +296,10 @@ export function verify_mutex_psigs (
   }
 }
 
+/**
+ * Verify a partial signatures, using 
+ * the provided musig context object.
+ */
 export function verify_mutex_psig (
   ctx  : MutexContext,
   psig : Bytes
