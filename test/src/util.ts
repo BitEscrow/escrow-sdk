@@ -1,5 +1,5 @@
 import { Buff }   from '@cmdcode/buff'
-import { Signer } from '@scrow/core/signer'
+import { Signer } from '@cmdcode/signer'
 
 export function gen_signers (...names : string[]) {
   const signers = []
@@ -10,6 +10,6 @@ export function gen_signers (...names : string[]) {
 }
 
 export function gen_signer (name : string) {
-  const secret = Buff.str(name).digest
-  return new Signer(secret)
+  const seed = Buff.str(name).digest
+  return new Signer({ seed })
 }

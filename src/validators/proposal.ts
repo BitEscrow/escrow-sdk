@@ -7,8 +7,7 @@ import {
   MAX_EXPIRY,
   MIN_WINDOW,
   MAX_EFFECT,
-  METHOD_LIST,
-  ACTION_LIST,
+  VALID_ACTIONS
 } from '../config.js'
 
 import {
@@ -19,15 +18,14 @@ import {
 
 import {
   check_expires,
-  check_regex
+  check_regex,
+  check_valid_action
 } from './util.js'
 
-import {
-  Literal,
-  ProposalData
-} from '../types/index.js'
+import { ProposalData } from '../types/index.js'
 
 import * as assert from '../assert.js'
+import { check_program_config } from './program.js'
 
 export function validate_proposal (
   proposal : unknown
@@ -69,13 +67,34 @@ function check_payments (proposal : ProposalData) {
   }
 }
 
+/**
+ * CHECK MEMBERSHIPS
+ * - check signatures on memberships
+ * - validate member roles (need policy array)
+ * 
+ */
+
+function check_programs (
+  proposal : ProposalData
+) {
+  const { paths, programs } = proposal
+  const path_names = get_path_names(paths)
+  for (const terms of programs) {
+    const prog = parse_program(terms)
+    const { actions, params, paths, method } = prog
+    check_regex(VALID_ACTIONS, actions)
+    check_regex(path_names, paths)
+    check_program_config(method, params)
+  }
+}
+
 function check_schedule (proposal : ProposalData) {
   const { expires, paths, schedule } = proposal
   const names = get_path_names(paths)
   schedule.forEach(task => {
     const [ timer, action, regex ] = task
     check_expires(timer, expires)
-    check_action(action)
+    check_valid_action(action)
     check_regex(names, regex)
   })
 }
@@ -115,49 +134,3 @@ function check_stamps (proposal : ProposalData) {
     }
   }
 }
-
-function check_action (
-  action : string
-) {
-  if (!ACTION_LIST.includes(action)) {
-    throw new Error('Invalid action: ' + action)
-  }
-}
-
-function check_programs (
-  proposal : ProposalData
-) {
-  const { paths, programs } = proposal
-  const names = get_path_names(paths)
-  for (const terms of programs) {
-    const prog = parse_program(terms)
-    check_regex(ACTION_LIST, prog.actions)
-    check_regex(names, prog.paths)
-    check_program(prog.method, prog.params)
-  }
-}
-
-function check_program (
-  method : string,
-  params : Literal[]
-) {
-  if (!METHOD_LIST.includes(method)) {
-    throw new Error('invalid method: ' + method)
-  }
-  switch (method) {
-    case 'sign':
-      check_sign_terms(params)
-      break
-    default:
-      throw new Error('Invalid method: ' + method)
-  }
-}
-
-function check_sign_terms (params : Literal[]) {
-  const [ thold, ...pubkeys ] = params
-  if (typeof thold !== 'number' || thold > pubkeys.length) {
-    throw new Error('invalid threshold: ' + String(thold))
-  }
-  pubkeys.forEach(e => assert.valid_pubkey(e))
-}
-

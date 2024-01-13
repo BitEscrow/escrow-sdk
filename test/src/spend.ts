@@ -1,9 +1,9 @@
 
 import { combine_psigs }   from '@cmdcode/musig2'
+import { Signer }          from '@cmdcode/signer'
 import { decode_tx }       from '@scrow/tapscript/tx'
 import { get_deposit_ctx } from '../../src/lib/deposit.js'
 import { parse_txinput }   from '../../src/lib/tx.js'
-import { Signer }          from '../../src/signer.js'
 import { get_entry }       from '../../src/lib/util.js'
 
 import {
@@ -21,7 +21,7 @@ import {
 import {
   ContractData,
   DepositData,
-  ReturnData,
+  DepositReturn,
   SpendTemplate
 } from '../../src/types/index.js'
 
@@ -48,13 +48,13 @@ export function create_settlment (
 export function create_refund (
   agent   : Signer,
   deposit : DepositData,
-  request : ReturnData
+  request : DepositReturn
 ) : TxData {
-  const { record_pn }           = deposit
+  const { agent_pn }           = deposit
   const { pnonce, psig, txhex } = request
   const tx      = decode_tx(txhex, false)
   const txin    = parse_txinput(deposit)
-  const pnonces = [ pnonce, record_pn ]
+  const pnonces = [ pnonce, agent_pn ]
   const mut_ctx = get_return_mutex(deposit, pnonces, txhex)
   const psig_a  = create_mutex_psig(mut_ctx, agent)
   const musig   = combine_psigs(mut_ctx.mutex, [ psig, psig_a ])
@@ -70,13 +70,13 @@ export function sign_covenant (
   output   : SpendTemplate,
   txinput  : TxPrevout
 ) : string {
-  const { covenant, deposit_key, sequence } = deposit
-  const { agent_id, cid, record_pn }       = contract
+  const { covenant, member_pk, sequence } = deposit
+  const { agent_id, cid, agent_pn }       = contract
   assert.exists(covenant)
   const [ label, vout ]   = output
   const { pnonce, psigs } = covenant
-  const dep_ctx = get_deposit_ctx(agent.pubkey, deposit_key, sequence)
-  const pnonces = [ pnonce, record_pn ]
+  const dep_ctx = get_deposit_ctx(agent.pubkey, member_pk, sequence)
+  const pnonces = [ pnonce, agent_pn ]
   const sid     = get_session_id(agent_id, cid)
   const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
   const psig_a  = create_mutex_psig(mut_ctx, agent)

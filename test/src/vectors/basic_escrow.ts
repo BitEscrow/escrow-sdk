@@ -1,16 +1,17 @@
 import { ProposalData } from '@scrow/core'
-import { MemberData }   from '../types.js'
+import { EscrowMember } from '../types.js'
 
 const NETWORK  = 'regtest'
 
 export async function get_proposal (
-  members : MemberData[]
+  members : EscrowMember[]
 ) : Promise<ProposalData> {
   const [ alice, bob, carol ] = members
   return {
     title    : 'Basic two-party contract with third-party dispute resolution.',
+    content  : 'n/a',
     expires  : 14400,
-    details  : 'n/a',
+    members  : [],
     network  : NETWORK,
     paths    : [
       [ 'payout', 90000, await bob.wallet.new_address   ],

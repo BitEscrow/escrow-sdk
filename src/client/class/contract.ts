@@ -19,9 +19,9 @@ export default class EscrowContract extends EventEmitter {
 
   get agent () {
     return {
-      id  : this.data.agent_id,
-      key : this.data.agent_key,
-      pn  : this.data.record_pn
+      id : this.data.agent_id,
+      pk : this.data.agent_pk,
+      pn : this.data.agent_pn
     }
   }
 

@@ -1,8 +1,8 @@
-import { AgentSession } from './session.js'
+import { AgentSession } from './covenant.js'
 import { StateData }    from './vm.js'
 
 import {
-  Payment,
+  PaymentEntry,
   ProposalData
 } from './proposal.js'
 
@@ -22,7 +22,7 @@ export type SpendTemplate = [
 ]
 
 export interface ContractConfig {
-  fees      : Payment[]
+  fees      : PaymentEntry[]
   moderator : string
   published : number
 }
@@ -33,7 +33,7 @@ export interface ContractBase {
   cid         : string
   deadline    : number
   expires_at  : null | number
-  fees        : Payment[]
+  fees        : PaymentEntry[]
   moderator   : string | null
   outputs     : SpendTemplate[]
   pending     : number

@@ -8,7 +8,6 @@ import {
 } from './util.js'
 
 import {
-  init_programs,
   init_stores,
   run_program
 } from './program.js'
@@ -17,10 +16,12 @@ import {
   ProgramTerms,
   ScheduleTerms,
   PathStatus,
-  PayPath,
+  PathEntry,
   StateData,
-  WitnessData
+  WitnessData,
+  ProgramEntry
 } from '../types/index.js'
+import { parse_program } from '@/lib/parse.js'
 
 const INIT_STATE = {
   commits : [],
@@ -79,12 +80,28 @@ export function eval_schedule (
   return state
 }
 
+export function init_programs (
+  terms : ProgramTerms[]
+) : ProgramEntry[] {
+  /**
+   * Id each program term and
+   * load them into an array.
+   */
+  const entries : ProgramEntry[] = []
+  for (const term of terms) {
+    const program = parse_program(term)
+    const { method, actions, paths, prog_id, params } = program
+    entries.push([ prog_id, method, actions, paths, ...params ])
+  }
+  return entries
+}
+
 /**
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (
   contract_id : string,
-  paypaths    : PayPath[],
+  paypaths    : PathEntry[],
   progterms   : ProgramTerms[],
   published   : number,
   schedule    : ScheduleTerms[]

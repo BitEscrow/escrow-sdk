@@ -29,6 +29,7 @@ const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
 const network   = z.enum([ 'main', 'regtest', 'signet', 'testnet' ])
 const payment   = z.tuple([ num, address ])
 const paypath   = z.tuple([ label, num, address ])
+const regex     = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
 
 const hash      = hex.refine((e) => e.length === 64)
 const pubkey    = hex.refine((e) => e.length === 64 || e.length === 66)
@@ -73,6 +74,7 @@ export default {
   psig,
   pubkey,
   record,
+  regex,
   script,
   signature,
   str,

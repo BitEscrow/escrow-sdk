@@ -29,5 +29,5 @@
     "noUnusedParameters": true
   },
   "exclude": [ "dist", "node_modules", "test" ],
-  "include": [ "src/**/*.ts", "test/src/spend.ts" ]
+  "include": [ "src/**/*.ts" ]
 }

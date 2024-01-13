@@ -1,8 +1,13 @@
 import { Buff } from '@cmdcode/buff'
 
 import {
+  check_program_config,
+  validate_program_terms
+} from '@/validators/program.js'
+
+import {
   ContractData,
-  Payment,
+  PaymentEntry,
   DepositData,
   ProposalData,
   WitnessData,
@@ -13,8 +18,8 @@ import {
 import * as schema from '../schema/index.js'
 
 export function parse_payments (
-  payments : Payment[]
-) : Payment[] {
+  payments : PaymentEntry[]
+) : PaymentEntry[] {
   return schema.base.payment.array().parse(payments)
 }
 
@@ -39,12 +44,11 @@ export function parse_deposit (
 export function parse_program (
   terms : unknown[]
 ) : ProgramData {
+  validate_program_terms(terms)
   const [ method, actions, paths, ...params ] = terms
-  const parser  = schema.program.terms
-  const parsed  = parser.parse({ method, actions, paths, params })
-  const img     = [ method, ...params ]
-  const prog_id = Buff.json(img).digest.hex
-  return { prog_id, ...parsed }
+  check_program_config(method, params)
+  const prog_id = Buff.json([ method, ...params ]).digest.hex
+  return { prog_id, method, actions, paths, params }
 }
 
 export function parse_proposal (
@@ -54,9 +58,7 @@ export function parse_proposal (
 }
 
 export function parse_witness (
-  witness : unknown[]
+  witness : unknown
 ) : WitnessData {
-  const [ prog_id, method, action, path, ...args ] = witness
-  const parser  = schema.program.witness
-  return parser.parse({ prog_id, method, action, path, args })
+  return schema.vm.witness.parse(witness)
 }

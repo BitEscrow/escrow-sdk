@@ -11,6 +11,8 @@ import {
 
 import * as schema from '@/schema/index.js'
 
+import { resolve_res } from './resolve.js'
+
 /**
  * Fetch transaction data from the oracle.
  */
@@ -24,14 +26,10 @@ export async function get_tx_data (
   const res = await fetch(url)
   // If status is 404, return null.
   if (res.status === 404) return null
+  // Define the parser to be used for validation.
+  const parser = schema.oracle.txdata
   // Resolve the data received by the oracle.
-  const ret = await resolve<OracleTxData>(res)
-  // If the resolution is not ok, throw an error.
-  if (!ret.ok) throw new Error(ret.error)
-  // Validate the oracle data.
-  await schema.oracle.txdata.parseAsync(ret.data)
-  // Return the oracle data.
-  return ret.data
+  return resolve_res<OracleTxData>(res, parser)
 }
 
 /**
@@ -49,14 +47,10 @@ export async function get_spend_state (
   const res = await fetch(url)
   // If status is 404, return null.
   if (res.status === 404) return null
+  // Define the parser to be used for validation.
+  const parser = schema.oracle.txostate
   // Resolve the data received by the oracle.
-  const ret = await resolve<OracleSpendState>(res)
-  // If the resolution is not ok, throw an error.
-  if (!ret.ok) throw new Error(ret.error)
-  // Validate the oracle data.
-  await schema.oracle.txostate.parseAsync(ret.data)
-  // Return the oracle data.
-  return ret.data
+  return resolve_res<OracleSpendState>(res, parser)
 }
 
 /**
@@ -137,11 +131,7 @@ export async function fee_estimates (
   // Fetch a response from the oracle.
   const res = await fetch(url)
   // Resolve the data received by the oracle.
-  const ret = await resolve<OracleFeeEstimate>(res)
-  // If the resolution is not ok, throw an error.
-  if (!ret.ok) throw new Error(ret.error)
-  // Return the fee data.
-  return ret.data
+  return resolve_res<OracleFeeEstimate>(res)
 }
 
 /**
@@ -164,21 +154,4 @@ export async function get_fee_target (
   }
   // Else, return feerate from oracle.
   return feerate
-}
-
-/**
- * Helper method for resolving json
- * and other data from HTTP responses.
- */
-export async function resolve <T> (
-  res : Response
-) : Promise<Resolve<T>> {
-  try {
-    const json = await res.json()
-    return res.ok
-      ? { ok : true,  data  : json as T  }
-      : { ok : false, error : json.error }
-  } catch {
-    return { ok : false, error : `${res.status}: ${res.statusText}` }
-  }
 }

@@ -76,17 +76,17 @@ export function create_deposit (
  * Compute a context object for a deposit account.
  */
 export function get_deposit_ctx (
-  agent_key   : string,
-  deposit_key : string,
-  sequence    : number
+  agent_pk  : string,
+  member_pk : string,
+  sequence  : number
 ) : DepositContext {
-  const members  = [ deposit_key, agent_key ]
-  const script   = get_return_script(deposit_key, sequence)
+  const members  = [ member_pk, agent_pk ]
+  const script   = get_return_script(member_pk, sequence)
   const int_data = get_key_ctx(members)
   const tap_data = get_tapkey(int_data.group_pubkey.hex, script)
   const key_data = tweak_key_ctx(int_data, [ tap_data.taptweak ])
 
-  return { agent_key, deposit_key, sequence, script, tap_data, key_data }
+  return { agent_pk, member_pk, sequence, script, tap_data, key_data }
 }
 
 /**

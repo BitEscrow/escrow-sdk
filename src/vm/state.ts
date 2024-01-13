@@ -8,7 +8,7 @@ import {
   PathStatus,
   ProgramTerms,
   StateEntry,
-  PayPath,
+  PathEntry,
   StateData
 } from '../types/index.js'
 
@@ -19,7 +19,7 @@ const INIT_TERMS = {
 }
 
 export function init_paths (
-  paths    : PayPath[],
+  paths    : PathEntry[],
   programs : ProgramTerms[]
 ) {
   const states : StateEntry[] = []

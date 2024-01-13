@@ -11,6 +11,7 @@ import {
 import {
   Network,
   SigHashOptions,
+  TapContext,
   TxBytes,
   TxData,
   TxInput,
@@ -39,7 +40,7 @@ import {
   SpendTemplate,
   SignerAPI,
   OracleTxIn,
-  SpendOut,
+  TxOutput as SpendOut,
   DepositData
 } from '../types/index.js'
 
@@ -61,7 +62,7 @@ export function get_address (
 export function get_tapkey (
   pubkey : string,
   script : string[]
-) {
+) : TapContext {
   return tap_pubkey(pubkey, { script })
 }
 

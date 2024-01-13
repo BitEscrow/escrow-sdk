@@ -1,12 +1,12 @@
-import { taproot }         from '@scrow/tapscript/sighash'
-import { parse_sequence }  from '@scrow/tapscript/tx'
+import { taproot }        from '@scrow/tapscript/sighash'
+import { parse_sequence } from '@scrow/tapscript/tx'
 
 import {
   DepositContext,
   DepositData,
-  DepositTemplate,
+  DepositRegister,
   ReturnContext,
-  SpendOut
+  TxOutput
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -14,8 +14,8 @@ import * as schema from '../schema/index.js'
 
 export function validate_registration (
   template : unknown
-) : asserts template is DepositTemplate {
-  schema.deposit.template.parse(template)
+) : asserts template is DepositRegister {
+  schema.deposit.register.parse(template)
 }
 
 export function validate_deposit (
@@ -27,7 +27,7 @@ export function validate_deposit (
 export function verify_deposit (
   deposit_ctx : DepositContext,
   return_ctx  : ReturnContext,
-  txout       : SpendOut
+  txout       : TxOutput
 ) {
   // Unpack our transaction template.
   const { sequence, tap_data } = deposit_ctx
@@ -40,11 +40,11 @@ export function verify_deposit (
   // Get the deposit context.
   assert.ok(tap_data.tapkey === tapkey,   'Deposit tapkey does not match return tapkey!')
   // Prepare recovery tx for signature verification.
-  const opt  = { pubkey, txindex : 0 }
+  const opt  = { pubkey, txindex : 0, throws : true }
   const txin = tx.vin[0]
   assert.ok(txin.txid === txid,           'recovery txid does not match utxo')
   assert.ok(txin.vout === vout,           'recovery vout does not match utxo')
   tx.vin[0].prevout = { value : BigInt(value), scriptPubKey : scriptkey }
   // Assert that the recovery tx is fully valid for broadcast.
-  assert.ok(taproot.verify_tx(tx, opt),   'Recovery tx failed to validate!')
+  taproot.verify_tx(tx, opt)
 }

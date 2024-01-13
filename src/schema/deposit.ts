@@ -1,10 +1,8 @@
 import { z } from 'zod'
 import base  from './base.js'
-import sess  from './session.js'
 import tx    from './tx.js'
 
-const { hash, hex, num, stamp             } = base
-const { agent, covenant                   } = sess
+const { bech32, hash, hex, nonce, num, psig, stamp, str } = base
 const { close_state, spend_state, txspend } = tx
 
 const confirmed = z.object({
@@ -26,21 +24,48 @@ const unconfirmed = z.object({
 const state  = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 const status = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
-const template = z.object({
+const request = z.object({
+  address    : bech32,
+  agent_id   : hash,
+  agent_pk   : hash,
+  created_at : stamp,
+  dpid       : hash,
+  member_pk  : hash,
+  sequence   : num,
+  sig        : nonce
+})
+
+const covenant = z.object({
+  cid    : hash,
+  pnonce : nonce,
+  psigs  : z.tuple([ str, psig ]).array()
+})
+
+const register = z.object({
   agent_id  : hash,
   covenant  : covenant.optional(),
   return_tx : hex,
 })
 
-const data = agent.merge(txspend).extend({
-  status,
-  covenant    : covenant.nullable(),
-  created_at  : stamp,
-  deposit_id  : hash,
-  deposit_key : hash,
-  return_tx   : hex,
-  sequence    : num,
-  updated_at  : stamp
-}).and(state).and(spend_state).and(close_state)
+const refund = z.object({
+  dpid   : hash,
+  pnonce : nonce,
+  psig,
+  txhex  : hex
+})
 
-export default { covenant, data, state, status, template }
+const data = z.object({
+  status,
+  agent_id   : hash,
+  agent_pk   : hash,
+  agent_pn   : nonce,
+  covenant   : covenant.nullable(),
+  created_at : stamp,
+  dpid       : hash,
+  member_pk  : hash,
+  return_tx  : hex,
+  sequence   : num,
+  updated_at : stamp
+}).and(state).and(spend_state).and(close_state).and(txspend)
+
+export default { covenant, data, state, refund, request, register, status }

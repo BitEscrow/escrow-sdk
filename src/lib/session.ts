@@ -3,7 +3,6 @@ import { hash340, sha512 } from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { TxPrevout }       from '@scrow/tapscript'
 import { get_deposit_ctx } from './deposit.js'
-import { Signer }          from '../signer.js'
 
 import {
   create_ctx,
@@ -31,8 +30,9 @@ import {
   DepositData,
   MutexContext,
   MutexEntry,
-  ReturnData,
-  SpendOut
+  DepositReturn,
+  SignerAPI,
+  TxOutput
 } from '../types/index.js'
 
 /**
@@ -40,14 +40,14 @@ import {
  * provided signer and record id.
  */
 export function create_session (
-  agent  : Signer,
-  rec_id : string
+  agent     : SignerAPI,
+  record_id : string
 ) : AgentSession {
-  const pnonce = get_session_pnonce(agent.id, rec_id, agent)
+  const pnonce = get_session_pnonce(agent.id, record_id, agent)
   return {
-    agent_id  : agent.id,
-    agent_key : agent.pubkey,
-    record_pn : pnonce.hex
+    agent_id : agent.id,
+    agent_pk : agent.pubkey,
+    agent_pn : pnonce.hex
   }
 }
 
@@ -59,15 +59,15 @@ export function create_session (
 export function create_spend_psigs (
   context  : DepositContext,
   contract : ContractData,
-  signer   : Signer,
-  txout    : SpendOut
+  signer   : SignerAPI,
+  txout    : TxOutput
 ) : CovenantData {
   // Unpack contract object.
-  const { agent_id, cid, record_pn } = contract
+  const { agent_id, cid, agent_pn } = contract
   // Compute the session pnonce value
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
   // Combine pnonces into a list.
-  const pnonces = [ pnonce, record_pn ]
+  const pnonces = [ pnonce, agent_pn ]
   // Compute the musig context for each spending path.
   const mupaths = get_path_mutexes(context, contract, pnonces, txout)
   // Create a partial signature for each context object.
@@ -84,15 +84,15 @@ export function create_spend_psigs (
 export function create_return_psig (
   address : string,
   deposit : DepositData,
-  signer  : Signer,
+  signer  : SignerAPI,
   txfee   : number
-) : ReturnData {
+) : DepositReturn {
   // Unpack the deposit object.
-  const { agent_id, deposit_id, record_pn, value } = deposit
+  const { agent_id, dpid, agent_pn, value } = deposit
   // Compute the session pnonce value.
-  const pnonce  = get_session_pnonce(agent_id, deposit_id, signer).hex
+  const pnonce  = get_session_pnonce(agent_id, dpid, signer).hex
   // Combine pnonces into a list.
-  const pnonces = [ pnonce, record_pn ]
+  const pnonces = [ pnonce, agent_pn ]
   // Create a return transaction using the provided params.
   const txhex   = create_tx_tmpl(address, value - txfee)
   // Compute a musig context object for the transaction.
@@ -100,7 +100,7 @@ export function create_return_psig (
   // Create a partial signature using the musig context.
   const psig    = create_mutex_psig(mutex, signer)
   // Return the final payload.
-  return { deposit_id, pnonce, psig, txhex }
+  return { dpid, pnonce, psig, txhex }
 }
 
 /**
@@ -111,7 +111,7 @@ export function get_path_mutexes (
   context  : DepositContext,
   contract : ContractData,
   pnonces  : Bytes[],
-  txout    : SpendOut
+  txout    : TxOutput
 ) : MutexEntry[] {
   // Unpack the contract object.
   const { agent_id, cid, outputs } = contract
@@ -138,11 +138,11 @@ export function get_return_mutex (
   txhex   : string
 ) : MutexContext {
   // Unpack the deposit object.
-  const { agent_id, agent_key, deposit_id, deposit_key, sequence } = deposit
+  const { agent_id, agent_pk, dpid, member_pk, sequence } = deposit
   // Get a context object for the deposit.
-  const dep_ctx = get_deposit_ctx(agent_key, deposit_key, sequence)
+  const dep_ctx = get_deposit_ctx(agent_pk, member_pk, sequence)
   // Compute the session id for the agent and deposit.
-  const sid     = get_session_id(agent_id, deposit_id)
+  const sid     = get_session_id(agent_id, dpid)
   // Parse the txinput from the deposit data.
   const txinput = parse_txinput(deposit)
   // Create and return a musig context object with the txinput.
@@ -203,7 +203,7 @@ export function get_session_id (
 export function get_session_pnonce (
   agent_id  : Bytes,
   record_id : Bytes,
-  signer    : Signer
+  signer    : SignerAPI
 ) {
   // Compute the session id for the given agent and record.
   const sid = get_session_id(agent_id, record_id)
@@ -260,7 +260,7 @@ export function tweak_pnonce (
  */
 export function create_psigs (
   mutexes : MutexEntry[],
-  signer  : Signer
+  signer  : SignerAPI
 ) : [ string, string ][] {
   return mutexes.map(([ label, ctx ]) => {
     return [ label, create_mutex_psig(ctx, signer) ]
@@ -273,7 +273,7 @@ export function create_psigs (
  */
 export function create_mutex_psig (
   context : MutexContext,
-  signer  : Signer
+  signer  : SignerAPI
 ) : string {
   const { sid, mutex, tweak } = context
   const opt = { nonce_tweak : tweak }

@@ -1,5 +1,3 @@
-import { verify_witness } from './witness.js'
-
 import {
   Literal,
   StoreEntry,
@@ -20,20 +18,16 @@ export function exec (
   const thold = Number(threshold)
   // Return wrapped program.
   return (witness : WitnessData) => {
-    const { action, path, args } = witness
-    // For each proof in the stack:
-    for (const proof of args) {
-      // Check validity of proof.
-      const mem = members.map(e => String(e))
-      const pub = verify_witness(mem, proof, witness)
-      // Increment the proof counter
-      const count = record_witness(store[1], `${path}/${action}`, pub)
-      // If we meet the threshold, return true.
-      if (count >= thold) {
-        return true
-      }
+    // Unpack witness object.
+    const { action, path, pubkey } = witness
+    // Check if pubkey is a member of the program.
+    if (!members.includes(pubkey)) {
+      throw 'pubkey not a member of the program'
     }
-    return false
+    // Record the pubkey under path/action label, and return vote count.
+    const count = record_entry(store[1], `${path}/${action}`, pubkey)
+    // Return the status of the count.
+    return (count >= thold)
   }
 }
 
@@ -41,33 +35,42 @@ export function exec (
  * Add a new witness to the array for
  * a given action/path combination.
  */
-function record_witness (
-  store : StoreItem[],
-  label : string,
-  key   : string
+function record_entry (
+  store  : StoreItem[],
+  label  : string,
+  pubkey : string
 ) : number {
+  // Check if the label entry exists in the store.
   const idx = store.findIndex(e => e[0] === label)
+  // Initialize array object.
     let arr : string[]
-
+  // If label does not exist:
   if (idx === -1) {
-    arr = new Array(key)
+    // Add new label entry to array.
+    arr = new Array(pubkey)
   } else {
+    // Else, revive existing label entry.
     arr = revive_data(store[idx][1])
-    if (arr.includes(key)) {
-      throw `signature already exists: ${label} => ${key}`
+    // Check if pubkey already exists in array:
+    if (arr.includes(pubkey)) {
+      // Throw on duplicate key entry.
+      throw `record already exists: ${label} => ${pubkey}`
     } else {
-      arr.push(key)
+      // Add pubkey to array.
+      arr.push(pubkey)
     }
   }
-
+  // Serialize the array back into a string.
   const data = serialize_data(arr)
-
+  // If label did not exists prevously:
   if (idx === -1) {
+    // Push new label entry to store.
     store.push([ label, data ])
   } else {
+    // Else, update existing label entry.
     store[idx][1] = data
   }
-
+  // Return the new length of the label array.
   return arr.length
 }
 

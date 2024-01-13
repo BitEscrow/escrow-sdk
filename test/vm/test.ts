@@ -6,7 +6,7 @@
  */
 
 import { now }  from '@/lib/util.js'
-import { sign } from '@/lib/program/index.js'
+import { sign } from '@/lib/programs/index.js'
 
 import {
   PayPath,

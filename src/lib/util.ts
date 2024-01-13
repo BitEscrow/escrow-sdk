@@ -1,4 +1,10 @@
 import { Buff, Bytes } from '@cmdcode/buff'
+import { sha256 }      from '@cmdcode/crypto-tools/hash'
+
+import {
+  Literal,
+  ProgramTerms
+} from '@/index.js'
 
 export function exception (
   error : string,
@@ -33,7 +39,7 @@ export function is_hex (
 ) : value is string {
   if (
     typeof value === 'string'            &&
-    value.match(/[^a-fA-f0-9]/) === null &&
+    value.match(/[^a-fA-F0-9]/) === null &&
     value.length % 2 === 0
   ) { 
     return true
@@ -41,10 +47,20 @@ export function is_hex (
   return false
 }
 
-export function is_hash (
-  value : unknown
-) : value is string {
+export function is_hash (value : unknown) : value is string {
   if (is_hex(value) && value.length === 64) {
+    return true
+  }
+  return false
+}
+
+export function is_literal (value : unknown) : value is Literal {
+  if (
+    typeof value === 'string'  ||
+    typeof value === 'number'  ||
+    typeof value === 'boolean' ||
+    typeof value === null
+  ) {
     return true
   }
   return false
@@ -123,4 +139,37 @@ export function stringify (content : any) : string {
     default:
       throw new TypeError('Content type not supported: ' + typeof content)
   }
+}
+
+export function get_object_id <T extends object> (obj : T) : Buff {
+  if (Array.isArray(obj) || typeof obj !== 'object') {
+    throw new Error('not an object')
+  }
+
+  const ent = Object
+    .entries(obj)
+    .filter(([ _, val ]) => val !== undefined)
+    .sort()
+
+  return sha256(Buff.json(ent))
+}
+
+export function compare_arr (
+  arr1 : Literal[][],
+  arr2 : Literal[][]
+) {
+  const a1 = arr1.map(e => JSON.stringify(e)).sort()
+  const a2 = arr2.map(e => JSON.stringify(e)).sort()
+  return JSON.stringify(a1) === JSON.stringify(a2)
+}
+
+export function find_program_idx (
+  progs : ProgramTerms[],
+  terms : ProgramTerms,
+) {
+  const [ method, actions, paths, thold ] = terms
+  const idx = progs.findIndex(e => {
+    return (e[0] === method && e[1] === actions && e[2] === paths && e[3] === thold)
+  })
+  return (idx !== -1) ? idx : null
 }

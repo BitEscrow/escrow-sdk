@@ -22,3 +22,10 @@ interface Open {
   settled    : false
   settled_at : null
 }
+
+export interface TxOutput {
+  txid      : string,
+  vout      : number,
+  value     : number,
+  scriptkey : string
+}

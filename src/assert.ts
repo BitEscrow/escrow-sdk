@@ -11,6 +11,12 @@ export function ok (
   }
 }
 
+export function is_hex (value : string) : asserts value is string {
+  if (!util.is_hex(value)) {
+    throw new TypeError(`Invalid hex: ${value}`)
+  }
+}
+
 export function is_hash (value : string) : asserts value is string {
   if (!util.is_hash(value)) {
     throw new TypeError(`Invalid hash: ${value}`)
@@ -25,11 +31,11 @@ export function size (input : Bytes, size : number) : void {
 }
 
 export function exists <T> (
-  value ?: T | null,
-  label ?: string
+  value : T | null,
+  msg  ?: string
   ) : asserts value is NonNullable<T> {
   if (!util.exists(value)) {
-    throw new Error(`Value ${label} is null or undefined!`)
+    throw new Error(msg ?? `Value is null or undefined!`)
   }
 }
 

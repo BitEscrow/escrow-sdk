@@ -1,4 +1,3 @@
-import { Buff }             from '@cmdcode/buff'
 import { create_txhex }     from './tx.js'
 import { now, sort_record } from './util.js'
 import { DEFAULT_DEADLINE } from '../config.js'
@@ -8,13 +7,14 @@ import {
   get_path_names,
   get_path_vouts,
   get_pay_total,
+  get_proposal_id,
 } from './proposal.js'
 
 import {
   AgentSession,
   ContractConfig,
   ContractData,
-  Payment,
+  PaymentEntry,
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
@@ -41,7 +41,7 @@ export function create_contract (
     moderator,
     outputs     : get_spend_outputs(proposal, fees),
     pending     : 0,
-    prop_id     : Buff.json(proposal).digest.hex,
+    prop_id     : get_proposal_id(proposal).hex,
     published,
     settled     : false,
     settled_at  : null,
@@ -100,7 +100,7 @@ function get_deadline (
  */
 export function get_spend_outputs (
   prop : ProposalData,
-  fees : Payment[]
+  fees : PaymentEntry[]
 ) : SpendTemplate[] {
   const { payments, paths } = prop
   const total_fees = [ ...payments, ...fees ]

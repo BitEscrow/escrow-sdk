@@ -1,26 +1,24 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, label, literal, num, stamp, str } = base
+const { hash, label, literal, nonce, num, regex, stamp, str } = base
 
-const action    = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
 const commit    = z.tuple([ num, num, hash, hash ])
 const entry     = z.tuple([ hash ]).rest(literal)
 const method    = z.enum([ 'oracle', 'reveal', 'sign' ])
 const path      = z.tuple([ str, num ])
-const regex     = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
-const progdata  = z.tuple([ hash, regex, regex, label, literal.array() ])
+const manifest  = z.tuple([ hash, label, regex, regex ]).rest(literal)
 const item      = z.tuple([ label, str ])
 const store     = z.tuple([ label, item.array() ])
-
-const task      = z.tuple([ num, action, regex ])
+const task      = z.tuple([ num, str, regex ])
+const terms     = z.tuple([ str, regex, regex ]).rest(literal)
 const status    = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
 const data = z.object({
   commits  : commit.array(),
   head     : hash,
   paths    : path.array(),
-  programs : progdata.array(),
+  programs : manifest.array(),
   result   : label.nullable(),
   start    : stamp,
   steps    : num.max(255),
@@ -30,16 +28,29 @@ const data = z.object({
   updated  : stamp
 })
 
+const witness = z.object({
+  args    : literal.array(),
+  action  : str,
+  cat     : stamp,
+  method  : str,
+  path    : label,
+  prog_id : hash,
+  pubkey  : hash,
+  sig     : nonce,
+  wid     : hash,
+})
+
 export default { 
-  action,
   commit,
   data,
   entry,
+  manifest,
   method,
-  path, 
-  progdata,
+  path,
+  terms,
   regex,
   store,
   task,
-  status
+  status,
+  witness
 }

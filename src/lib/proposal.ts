@@ -1,14 +1,13 @@
+import { Buff }          from '@cmdcode/buff'
+import { sha256 }        from '@cmdcode/crypto-tools/hash'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
-import { parse_program } from './parse.js'
-import { regex }         from './util.js'
 
 import {
-  Payment,
-  PayPath,
-  ProgramQuery,
-  ProgramTerms
+  PaymentEntry,
+  PathEntry,
+  ProposalData
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -19,8 +18,8 @@ type PathTotal = [ path: string, total : number ]
  */
 export function filter_path (
   label : string,
-  paths : PayPath[]
-) : PayPath[] {
+  paths : PathEntry[]
+) : PathEntry[] {
   return paths.filter(e => e[0] === label)
 }
 
@@ -29,7 +28,7 @@ export function filter_path (
  * from an array of payment paths.
  */
 export function get_path_names (
-  paths : PayPath[]
+  paths : PathEntry[]
 ) : string[] {
   return [ ...new Set(paths.map(e => e[0])) ]
 }
@@ -39,7 +38,7 @@ export function get_path_names (
  * from an array of payments.
  */
 export function get_pay_total (
-  payments : Payment[]
+  payments : PaymentEntry[]
 ) : number {
   return payments.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
 }
@@ -49,7 +48,7 @@ export function get_pay_total (
  * from an array of payment paths.
  */
 export function get_addrs (
-  paths : PayPath[]
+  paths : PathEntry[]
 ) : string[] {
   return [ ...new Set(paths.map(e => e[2])) ]
 }
@@ -60,11 +59,11 @@ export function get_addrs (
  */
 export function get_path_vouts (
   label   : string,
-  paths   : PayPath[] = [],
-  payouts : Payment[] = []
+  paths   : PathEntry[]    = [],
+  payouts : PaymentEntry[] = []
 ) : TxOutput[] {
-  const filtered : Payment[] = filter_path(label, paths).map(e => [ e[1], e[2] ])
-  const template : Payment[] = [ ...filtered.sort(), ...payouts.sort() ]
+  const filtered : PaymentEntry[] = filter_path(label, paths).map(e => [ e[1], e[2] ])
+  const template : PaymentEntry[] = [ ...filtered.sort(), ...payouts.sort() ]
   return template.map(([ value, addr ]) => {
     const scriptPubKey = parse_addr(addr).asm
     return create_vout({ value, scriptPubKey })
@@ -76,7 +75,7 @@ export function get_path_vouts (
  * for each unique payment path.
  */
 export function get_path_total (
-  paths : PayPath[]
+  paths : PathEntry[]
 ) : PathTotal[] {
   // Setup an array for out totals.
   const path_totals : PathTotal[] = []
@@ -94,38 +93,9 @@ export function get_path_total (
   return path_totals
 }
 
-/**
- * Returns a given program from the program terms,
- * based upon the supplied search criteria.
- */
-export function find_program (
-  query : ProgramQuery,
-  terms : ProgramTerms[]
+export function get_proposal_id (
+  proposal : ProposalData
 ) {
-  // Unpack all available terms from the query.
-  const { action, includes, method, path, params } = query
-  // Convert each ProgramTerm into ProgramData.
-  let progs = terms.map(e => parse_program(e))
-  // If defined, filter programs by method.
-  if (method !== undefined) {
-    progs = progs.filter(e => e.method === method)
-  }
-  // If defined, filter programs by allowed action.
-  if (action !== undefined) {
-    progs = progs.filter(e => regex(action, e.actions))
-  }
-  // If defined, filter programs by allowed path.
-  if (path !== undefined) {
-    progs = progs.filter(e => regex(path, e.paths))
-  }
-  // If defined, filter programs by matching params and index.
-  if (Array.isArray(params)) {
-    progs = progs.filter(e => params.every((x, i) => e.params[i] === x))
-  }
-  // If defined, filter programs by matching params (any index).
-  if (Array.isArray(includes)) {
-    progs = progs.filter(e => includes.every(x => e.params.includes(x as any)))
-  }
-  // Return the first program that matches all specified criteria.
-  return progs[0]
+  const preimg = Buff.json(proposal)
+  return sha256(preimg)
 }

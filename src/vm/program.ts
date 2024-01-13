@@ -1,35 +1,16 @@
 import { Buff }          from '@cmdcode/buff'
-import { parse_program } from '../lib/parse.js'
 import { now, regex }    from '../lib/util.js'
-import { MANIFEST }      from '../lib/program/index.js'
+import { MANIFEST }      from '../lib/programs/index.js'
 import { update_path }   from './state.js'
 import { debug }         from './util.js'
 
 import {
-  ProgramTerms,
   ProgramEntry,
   StateData,
   StoreEntry,
   WitnessData,
   MethodManifest
 } from '../types/index.js'
-
-export function init_programs (
-  terms : ProgramTerms[]
-) : ProgramEntry[] {
-  /**
-   * Id each program term and
-   * load them into an array.
-   */
-  const entries : ProgramEntry[] = []
-  for (const term of terms) {
-    const program = parse_program(term)
-    const { method, actions, paths, params, prog_id } = program
-    const arr = params.map(e => String(e))
-    entries.push([ prog_id, actions, paths, method, arr ])
-  }
-  return entries
-}
 
 export function init_stores (
   prog_ids : string[]
@@ -42,7 +23,7 @@ export function run_program (
   witness : WitnessData
 ) {
   const { programs, store } = state
-  const { action, path } = witness
+  const { action, path }    = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {
     update_path(action, path, state)
@@ -69,7 +50,7 @@ function load_program (
   
   debug('[vm] loading witness program:', prog_id)
 
-  const [ _, actions, paths, method, params ] = prog
+  const [ _, method, actions, paths, ...params ] = prog
 
   if (!regex(action, actions)) {
     throw 'program does not have access to this action: ' + action

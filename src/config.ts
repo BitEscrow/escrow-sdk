@@ -7,8 +7,8 @@ export const SPEND_TXOUT_WEIGHT = 1
 export const REFUND_TX_WEIGHT = 400
 export const RETURN_TX_WEIGHT = 520
 
-export const ACTION_LIST = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
-export const METHOD_LIST = [ 'sign' ]
+export const VALID_ACTIONS = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
+export const VALID_METHODS = [ 'sign' ]
 
 export const MIN_DEADLINE = _MIN  * 30
 export const MAX_EFFECT   = _DAY  * 30

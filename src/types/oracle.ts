@@ -1,4 +1,4 @@
-import { SpendOut } from './deposit.js'
+import { TxOutput } from './tx.js'
 
 export type OracleFeeEstimate = Record<string, number>
 export type OracleTxStatus    = OracleConfirmed | OracleUnconfirmed
@@ -64,7 +64,7 @@ export interface OracleTxOut {
 }
 
 export interface OracleSpendData {
-  txspend : SpendOut
+  txspend : TxOutput
   status  : OracleTxStatus
   state   : OracleSpendState
 }

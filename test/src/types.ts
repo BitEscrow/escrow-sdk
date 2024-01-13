@@ -1,8 +1,8 @@
-import { Signer }     from '@scrow/core'
 import { CoreWallet } from '@cmdcode/core-cmd'
+import { SignerAPI }  from '@/index.js'
 
-export interface MemberData {
+export interface EscrowMember {
   label  : string,
-  signer : Signer, 
+  signer : SignerAPI, 
   wallet : CoreWallet
 }

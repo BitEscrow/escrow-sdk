@@ -11,11 +11,11 @@ export type CommitEntry = [
 ]
 
 export type ProgramEntry = [
-  prog_id : string,
-  actions : string,
-  paths   : string,
-  method  : string,
-  params  : Literal[]
+  prog_id   : string,
+  method    : string,
+  actions   : string,
+  paths     : string,
+  ...params : Literal[]
 ]
 
 export type StateEntry = [

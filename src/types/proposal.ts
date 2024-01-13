@@ -1,25 +1,21 @@
 import { Literal, Network } from './base.js'
+import { MemberData }       from './member.js'
 
-export type Member = [
-  id     : string,
-  pubkey : string
-]
-
-export type Payment = [
+export type PaymentEntry = [
   value   : number,
   address : string
 ]
 
-export type PayPath = [
+export type PathEntry = [
   path    : string,
   value   : number,
   address : string
 ]
 
 export type ProgramTerms = [
+  method    : string,
   actions   : string,
   paths     : string,
-  method    : string,
   ...params : Literal[]
 ]
 
@@ -30,20 +26,19 @@ export type ScheduleTerms = [
 ]
 
 export interface ProposalData {
-  confirmation  ?: boolean
-  deadline      ?: number
-  details        : string
-  effective     ?: number
-  expires        : number
-  fallback      ?: string
-  feerate       ?: number
-  members       ?: Member[]
-  network        : Network
-  paths          : PayPath[]
-  payments       : Payment[]
-  programs       : ProgramTerms[]
-  schedule       : ScheduleTerms[]
-  title          : string
-  value          : number
-  version        : number
+  content   ?: string
+  deadline  ?: number
+  effective ?: number
+  expires    : number
+  fallback  ?: string
+  feerate   ?: number
+  members    : MemberData[]
+  network    : Network
+  paths      : PathEntry[]
+  payments   : PaymentEntry[]
+  programs   : ProgramTerms[]
+  schedule   : ScheduleTerms[]
+  title      : string
+  value      : number
+  version    : number
 }

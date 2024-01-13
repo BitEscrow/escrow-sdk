@@ -19,8 +19,8 @@ export default class EscrowDeposit extends EventEmitter {
   get agent () {
     return {
       id  : this.data.agent_id,
-      key : this.data.agent_key,
-      pn  : this.data.record_pn
+      key : this.data.agent_pk,
+      pn  : this.data.agent_pn
     }
   }
 
@@ -57,11 +57,11 @@ export default class EscrowDeposit extends EventEmitter {
   }
 
   get id () {
-    return this.data.deposit_id
+    return this.data.dpid
   }
 
-  get deposit_key () {
-    return this.data.deposit_key
+  get member_pk () {
+    return this.data.member_pk
   }
 
   get return_tx () {

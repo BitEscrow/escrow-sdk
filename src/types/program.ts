@@ -1,9 +1,7 @@
 import { Literal }    from './base.js'
 import { StoreEntry } from './vm.js'
 
-export type ProgramMethod  = 'oracle' | 'reveal' | 'sign'
-export type ProgramData    = (LockProgramData | SignProgramData) & { prog_id : string }
-export type WitnessData    = (LockWitnessData | SignWitnessData)
+export type ProgramMethod  = 'oracle' | 'hlock' | 'sign'
 export type MethodManifest = Record<ProgramMethod, ProgramExec>
 
 export type ProgramExec = (
@@ -15,14 +13,6 @@ export type ProgramReturn = (
   witness : WitnessData
 ) => boolean | Promise<boolean>
 
-export type WitnessEntry = [
-  prog_id : string,
-  method  : ProgramMethod,
-  action  : string,
-  path    : string,
-  args    : Literal[]
-]
-
 export interface ProgramQuery {
   action   ?: string
   includes ?: Literal[]
@@ -31,32 +21,33 @@ export interface ProgramQuery {
   path     ?: string
 }
 
-export interface LockProgramData {
-  actions : string
-  method  : 'reveal'
-  paths   : string
-  params  : [ number, ...string[] ]
-}
-
-export interface LockWitnessData {
+export interface ProgramData {
   prog_id : string
-  action  : string
-  args    : string[]
-  method  : 'reveal'
-  path    : string
-}
-
-export interface SignProgramData {
+  method  : string
   actions : string
-  method  : 'sign'
+  params  : Literal[]
   paths   : string
-  params  : [ number, ...string[] ]
 }
 
-export interface SignWitnessData {
-  prog_id : string
+export interface WitnessParams {
+  action : string
+  args  ?: Literal[]
+  method : string
+  path   : string
+  pubkey : string
+}
+
+export interface WitnessTemplate {
   action  : string
-  args    : string[]
-  method  : 'sign'
+  args    : Literal[]
+  method  : string
   path    : string
+  prog_id : string
+  pubkey  : string
+}
+
+export interface WitnessData extends WitnessTemplate {
+  cat : number
+  sig : string
+  wid : string
 }

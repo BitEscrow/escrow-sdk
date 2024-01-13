@@ -2,7 +2,6 @@ import { Test }               from 'tape'
 import { Buff }               from '@cmdcode/buff'
 import { CoreClient }         from '@cmdcode/core-cmd'
 import { StateData }          from '@scrow/core'
-import { sign }               from '@scrow/core/program'
 import { get_return_ctx }     from '@scrow/core/return'
 import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
@@ -10,6 +9,11 @@ import { prevout_to_txspend } from '@scrow/core/tx'
 import { get_users }          from '../core.js'
 import { get_funds }          from '../fund.js'
 import { create_settlment }   from '../spend.js'
+
+import {
+  create_witness,
+  sign_witness
+} from '@scrow/core/witness'
 
 import {
   activate_contract,
@@ -34,12 +38,14 @@ import {
   validate_covenant,
   verify_covenant,
   validate_registration,
-  verify_witness
+  verify_witness,
+  validate_witness
 } from '@scrow/core/validate'
 
 import * as assert from '@scrow/core/assert'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
+import { Signer } from '@cmdcode/signer'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -96,11 +102,11 @@ export default async function (client : CoreClient, t : Test) {
       assert.exists(data)
       const spendout = prevout_to_txspend(data.txinput)
       verify_deposit(deposit_ctx, return_ctx, spendout)
-      const deposit_id  = Buff.random(32).hex
-      const state   = get_spend_state(sequence, data.status)
-      const session = create_session(agent.signer, deposit_id)
-      const record_pn = session.record_pn
-      const deposit = create_deposit({ ...deposit_ctx, deposit_id, record_pn, ...tmpl, ...spendout, ...state })
+      const dpid     = Buff.random(32).hex
+      const state    = get_spend_state(sequence, data.status)
+      const session  = create_session(agent.signer, dpid)
+      const agent_pn = session.agent_pn
+      const deposit  = create_deposit({ ...deposit_ctx, dpid, agent_pn, ...tmpl, ...spendout, ...state })
       // const deposit = register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
       verify_covenant(deposit_ctx, contract, deposit, agent.signer, agent.signer)
       return deposit
@@ -110,7 +116,8 @@ export default async function (client : CoreClient, t : Test) {
 
     /* ------------------ [ Activation ] ------------------ */
 
-    const { vm_state, terms } = activate_contract(contract)
+    const active_contract = activate_contract(contract)
+    const { vm_state }    = active_contract
     
     assert.exists(vm_state)
 
@@ -121,11 +128,22 @@ export default async function (client : CoreClient, t : Test) {
 
     /* ------------------- [ Evaluation ] ------------------- */
 
-    const programs = terms.programs
-    const signer   = members[0].signer
-    const witness  = sign.create_witness('dispute', 'payout', programs, signer)
+    const signer = members[0].signer
 
-    verify_witness(vm_state.programs, witness)
+    const config = {
+      action : 'dispute',
+      method: 'sign',
+      path : 'payout',
+      pubkey : signer.pubkey
+    }
+
+    const wit_tmpl = create_witness(contract, config)
+
+    validate_witness(active_contract, wit_tmpl)
+
+    const witness = sign_witness(signer, wit_tmpl)
+
+    verify_witness(active_contract, witness)
 
     if (VERBOSE) {
       console.log(banner('witness'))
@@ -156,7 +174,7 @@ export default async function (client : CoreClient, t : Test) {
     const { result } = state
 
     if (result !== null) {
-      const txdata = create_settlment(agent.signer, contract, funds, result)
+      const txdata = create_settlment(agent.signer as Signer, contract, funds, result)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))

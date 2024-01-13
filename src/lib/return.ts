@@ -1,7 +1,6 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
 import { parse_addr }   from '@scrow/tapscript/address'
 import { parse_proof }  from '@scrow/tapscript/tapkey'
-import { Signer }       from '../signer.js'
 import { base }         from '../schema/index.js'
 
 import {
@@ -22,10 +21,10 @@ import {
 } from '@scrow/tapscript/tx'
 
 import {
-  DepositConfig,
   DepositContext,
   ReturnContext,
-  SpendOut
+  SignerAPI,
+  TxOutput
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -77,17 +76,17 @@ export function get_return_script (
  * for a given unspent transaction output.
  */
 export function create_return_tx (
+  address  : string,
   context  : DepositContext,
-  signer   : Signer,
-  txout    : SpendOut,
-  options  : Partial<DepositConfig> = {}
+  signer   : SignerAPI,
+  txout    : TxOutput,
+  txfee = MIN_RECOVER_FEE
 ) : string {
   const { sequence, tap_data }        = context
   const { cblock, extension, script } = tap_data
-  const { txfee = MIN_RECOVER_FEE }   = options
   assert.ok(txout.value > txfee, 'tx value does not cover txfee')
   assert.exists(script)
-  const scriptkey = create_script_key(signer, options)
+  const scriptkey = parse_addr(address).asm
   const txin      = create_txinput(txout)
   const return_tx = create_tx({
     vin  : [{ ...txin, sequence }],
@@ -101,26 +100,6 @@ export function create_return_tx (
   return_tx.vin[0].witness = [ sig, script, cblock ]
   // assert.ok(taproot.verify_tx(recover_tx, opt), 'recovery tx failed to generate!')
   return encode_tx(return_tx).hex
-}
-
-/**
- * Create a transaction output locking script
- * based on the provided config options.
- */
-export function create_script_key (
-  signer  : Signer,
-  options : Partial<DepositConfig>
-) {
-  const { address, pubkey } = options
-  let script_key : ScriptWord[]
-  if (address !== undefined) {
-    script_key = parse_addr(address).asm
-  } else if (pubkey !== undefined) {
-    script_key = [ 'OP_1', pubkey ]
-  } else {
-    script_key = [ 'OP_1', signer.pubkey ]
-  }
-  return script_key
 }
 
 /**

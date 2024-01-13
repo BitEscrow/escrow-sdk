@@ -1,5 +1,5 @@
 import { EscrowClient } from '@scrow/core'
-import { sign }         from '@scrow/core/program'
+import { sign }         from '@/lib/programs/index.js'
 import { get_funds }    from '../fund.js'
 
 import {

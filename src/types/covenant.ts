@@ -7,9 +7,9 @@ export type MutexEntry = [
 ]
 
 export interface AgentSession {
-  agent_id  : string
-  agent_key : string
-  record_pn : string
+  agent_id : string
+  agent_pk : string
+  agent_pn : string
 }
 
 export interface CovenantData {
@@ -22,13 +22,6 @@ export interface CovenantStatus {
   confirmed : boolean
   txid      : string
   value     : number
-}
-
-export interface ReturnData {
-  deposit_id : string,
-  pnonce     : string,
-  psig       : string,
-  txhex      : string
 }
 
 export interface MutexContext {

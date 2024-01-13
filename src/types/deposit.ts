@@ -3,25 +3,26 @@ import { KeyContext } from '@cmdcode/musig2'
 import {
   AgentSession,
   CovenantData
-} from './session.js'
+} from './covenant.js'
 
 import {
   SettleState,
-  SpendState
+  SpendState,
+  TxOutput
 } from './tx.js'
 
 import {
-  Network,
+  // Network,
   ScriptWord,
   TapContext,
   TxData
 } from '@scrow/tapscript'
 
-export type DepositState  = Confirmed | Unconfirmed
+export type DepositState  = DepositConfirmed | DepositUnconfirmed
 export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
-export type DepositData   = AgentSession & DepositBase & DepositState & SpendOut & SettleState & SpendState
+export type DepositData   = AgentSession & DepositInfo & DepositState & SettleState & SpendState & TxOutput
 
-interface Confirmed {
+interface DepositConfirmed {
   confirmed    : true
   block_hash   : string
   block_height : number
@@ -29,7 +30,7 @@ interface Confirmed {
   expires_at   : number
 }
 
-interface Unconfirmed {
+interface DepositUnconfirmed {
   confirmed    : false
   block_hash   : null
   block_height : null
@@ -38,45 +39,12 @@ interface Unconfirmed {
 }
 
 export interface DepositContext {
-  agent_key   : string
-  deposit_key : string
-  key_data    : KeyContext
-  script      : ScriptWord[]
-  sequence    : number
-  tap_data    : TapContext
-}
-
-export interface DepositTemplate {
-  agent_id  : string
-  covenant ?: CovenantData
-  return_tx : string
-}
-
-export interface DepositBase {
-  created_at  : number
-  covenant    : CovenantData | null
-  deposit_id  : string
-  deposit_key : string
-  return_tx   : string
-  sequence    : number
-  status      : DepositStatus
-  updated_at  : number
-}
-
-export interface DepositConfig {
-  address ?: string
-  cid     ?: string
-  network ?: Network
-  pubkey  ?: string
-  reckey  ?: string
-  txfee   ?: number
-}
-
-export interface DepositInfo {
-  address   : string,
-  agent_id  : string,
-  agent_key : string,
+  agent_pk  : string
+  member_pk :  string
+  key_data  : KeyContext
+  script    : ScriptWord[]
   sequence  : number
+  tap_data  : TapContext
 }
 
 export interface ReturnContext {
@@ -87,9 +55,40 @@ export interface ReturnContext {
   tx        : TxData
 }
 
-export interface SpendOut {
-  txid      : string,
-  vout      : number,
-  value     : number,
-  scriptkey : string
+export interface DepositRequest {
+  created_at : number
+  address    : string
+  agent_id   : string
+  agent_pk   : string
+  member_pk  : string
+  req_id     : string
+  sequence   : number
+  sig        : string
+}
+
+export interface DepositRegister {
+  agent_id  : string
+  covenant ?: CovenantData
+  return_tx : string
+}
+
+export interface DepositReturn {
+  dpid   : string,
+  pnonce : string,
+  psig   : string,
+  txhex  : string
+}
+
+export interface DepositInfo {
+  agent_id   : string
+  agent_pk   : string
+  agent_pn   : string
+  covenant   : CovenantData | null
+  created_at : number
+  dpid       : string
+  member_pk  : string
+  return_tx  : string
+  sequence   : number
+  status     : DepositStatus
+  updated_at : number
 }

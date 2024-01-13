@@ -1,3 +1,5 @@
+import { VALID_ACTIONS } from '@/config.js'
+
 export function check_regex (
   labels : string[],
   regex  : string
@@ -14,7 +16,7 @@ export function check_label_exists (
   labels : string[]
 ) {
   if (!labels.includes(label)) {
-    throw new Error('referenced label does not exist: ' + label)
+    throw new Error('label does not exist: ' + label)
   }
 }
 
@@ -23,6 +25,14 @@ export function check_expires (
   expires   : number
 ) {
   if (timestamp >= expires) {
-    throw new Error(`time equals or exceeds expiration value:  ${String(timestamp)} >= ${expires}`)
+    throw new Error(`time is expired:  ${String(timestamp)} >= ${expires}`)
+  }
+}
+
+export function check_valid_action (
+  action : string
+) {
+  if (!VALID_ACTIONS.includes(action)) {
+    throw new Error('invalid action: ' + action)
   }
 }

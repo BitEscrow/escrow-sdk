@@ -1,4 +1,7 @@
-import { assert, Signer } from '@scrow/core'
+import { Buff }       from '@cmdcode/buff'
+import { assert }     from '@scrow/core'
+import { Signer }     from '@cmdcode/signer'
+import { get_seckey } from '@cmdcode/crypto-tools/keys'
 
 import {
   CoreClient,
@@ -6,7 +9,7 @@ import {
   CoreDaemon
 } from '@cmdcode/core-cmd'
 
-import { MemberData } from './types.js'
+import { EscrowMember } from './types.js'
 
 const DEFAULT_CONFIG = {
   core_params : [ '-txindex' ],
@@ -34,11 +37,12 @@ export function get_daemon (
 export function get_users (
   cli    : CoreClient,
   labels : string[]
-) : Promise<MemberData[]> {
+) : Promise<EscrowMember[]> {
   const users = labels.map(async label => {
+    const seed = get_seckey(Buff.str(label).digest)
     return {
       label,
-      signer : Signer.seed(label),
+      signer : new Signer({ seed }),
       wallet : await cli.load_wallet(label)
     }
   })
