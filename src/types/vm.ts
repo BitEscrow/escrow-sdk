@@ -50,7 +50,6 @@ export interface StateData {
   commits  : CommitEntry[]
   head     : string
   paths    : StateEntry[]
-  programs : ProgramEntry[]
   result   : string | null
   steps    : number
   start    : number

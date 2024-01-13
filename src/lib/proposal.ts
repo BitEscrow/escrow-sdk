@@ -3,11 +3,17 @@ import { sha256 }        from '@cmdcode/crypto-tools/hash'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
+import { parse_program } from './parse.js'
+import { regex }         from './util.js'
 
 import {
   PaymentEntry,
   PathEntry,
-  ProposalData
+  ProposalData,
+  ProgramQuery,
+  ProgramTerms,
+  ProgramData,
+  SignerAPI
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -98,4 +104,51 @@ export function get_proposal_id (
 ) {
   const preimg = Buff.json(proposal)
   return sha256(preimg)
+}
+
+
+/**
+ * Returns a given program from the program terms,
+ * based upon the supplied search criteria.
+ */
+export function find_program (
+  query : ProgramQuery,
+  terms : ProgramTerms[]
+) : ProgramData | undefined {
+  // Unpack all available terms from the query.
+  const { action, includes, method, path, params } = query
+  // Convert each ProgramTerm into ProgramData.
+  let progs = terms.map(e => parse_program(e))
+  // If defined, filter programs by method.
+  if (method !== undefined) {
+    progs = progs.filter(e => e.method === method)
+  }
+  // If defined, filter programs by allowed action.
+  if (action !== undefined) {
+    progs = progs.filter(e => regex(action, e.actions))
+  }
+  // If defined, filter programs by allowed path.
+  if (path !== undefined) {
+    progs = progs.filter(e => regex(path, e.paths))
+  }
+  // If defined, filter programs by matching params and index.
+  if (Array.isArray(params)) {
+    progs = progs.filter(e => params.every((x, i) => e.params[i] === x))
+  }
+  // If defined, filter programs by matching params (any index).
+  if (Array.isArray(includes)) {
+    progs = progs.filter(e => includes.every(x => e.params.includes(x as any)))
+  }
+  // Return the first program that matches all specified criteria.
+  return progs.at(0)
+}
+
+export function endorse_proposal (
+  signer   : SignerAPI,
+  proposal : ProposalData
+) : string {
+  const msg = get_proposal_id(proposal)
+  const pub = signer.pubkey
+  const sig = signer.sign(msg)
+  return Buff.join([ pub, sig ]).hex
 }

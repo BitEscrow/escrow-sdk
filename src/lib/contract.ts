@@ -15,9 +15,14 @@ import {
   ContractConfig,
   ContractData,
   PaymentEntry,
+  ProgramEntry,
+  ProgramTerms,
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
+import { parse_program } from './parse.js'
+import { verify_sig } from '@cmdcode/crypto-tools/signer'
+import { Bytes } from '@cmdcode/buff'
 
 /**
  * Returns a new ContractData object using the provided params.
@@ -26,9 +31,10 @@ export function create_contract (
   cid       : string,
   proposal  : ProposalData,
   session   : AgentSession,
-  options   : Partial<ContractConfig> = {}
+  options  ?: ContractConfig
 ) : ContractData {
-  const { fees = [], moderator = null, published = now() } = options
+  const { fees = [], moderator = null, published = now(), sigs = [] } = options ?? {}
+  const prop_id = get_proposal_id(proposal)
 
   return sort_record({
     ...session,
@@ -41,7 +47,9 @@ export function create_contract (
     moderator,
     outputs     : get_spend_outputs(proposal, fees),
     pending     : 0,
-    prop_id     : get_proposal_id(proposal).hex,
+    prop_id     : prop_id.hex,
+    programs    : init_programs(proposal.programs),
+    pubkeys     : init_pubkeys(prop_id, sigs),
     published,
     settled     : false,
     settled_at  : null,
@@ -67,14 +75,13 @@ export function activate_contract (
   /**
    * Activate a contract.
    */
-  const { cid, terms } = contract
-  const { paths, programs, schedule } = terms
+  const { terms } = contract
   return {
     ...contract,
     activated,
     expires_at : activated + terms.expires,
     status     : 'active',
-    vm_state   : init_vm(cid, paths, programs, activated, schedule)
+    vm_state   : init_vm(contract)
   }
 }
 
@@ -112,4 +119,35 @@ export function get_spend_outputs (
     outputs.push([ name, txhex ])
   }
   return outputs
+}
+
+function init_programs (
+  terms : ProgramTerms[]
+) : ProgramEntry[] {
+  /**
+   * Id each program term and
+   * load them into an array.
+   */
+  const entries : ProgramEntry[] = []
+  for (const term of terms) {
+    const program = parse_program(term)
+    const { method, actions, paths, prog_id, params } = program
+    entries.push([ prog_id, method, actions, paths, ...params ])
+  }
+  return entries
+}
+
+function init_pubkeys (
+  prop_id : Bytes,
+  sigs    : string[]
+) : string[] {
+  const pubkeys : string[] = []
+  sigs.forEach(e => {
+    const pub = e.slice(0, 64)
+    const sig = e.slice(64)
+    if (verify_sig(sig, prop_id, pub)) {
+      pubkeys.push(pub)
+    }
+  })
+  return pubkeys
 }

@@ -1,5 +1,5 @@
 import { AgentSession } from './covenant.js'
-import { StateData }    from './vm.js'
+import { ProgramEntry, StateData }    from './vm.js'
 
 import {
   PaymentEntry,
@@ -22,9 +22,10 @@ export type SpendTemplate = [
 ]
 
 export interface ContractConfig {
-  fees      : PaymentEntry[]
-  moderator : string
-  published : number
+  fees      ?: PaymentEntry[]
+  moderator ?: string
+  published ?: number
+  sigs      ?: string[] 
 }
 
 export interface ContractBase {
@@ -37,6 +38,8 @@ export interface ContractBase {
   moderator   : string | null
   outputs     : SpendTemplate[]
   pending     : number
+  programs    : ProgramEntry[]
+  pubkeys     : string[]
   prop_id     : string
   published   : number
   status      : ContractStatus

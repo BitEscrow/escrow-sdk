@@ -1,4 +1,4 @@
-import { find_program } from '@/lib/witness.js'
+import { find_program } from '@/lib/proposal.js'
 
 import {
   MemberData,
@@ -12,11 +12,16 @@ import {
   rem_membership
 } from '../../lib/policy.js'
 
-export class Proposal {
+import EventEmitter from './emitter.js'
+
+export class Proposal extends EventEmitter<{
+  'update' : Proposal
+}> {
 
   _data : ProposalData
 
   constructor (data : ProposalData) {
+    super()
     this._data = data
   }
 
@@ -24,16 +29,23 @@ export class Proposal {
     return this._data
   }
 
+  _update (data : ProposalData) {
+    this._data = data
+    this.emit('update', this)
+  }
+
   get_program (query : ProgramQuery) {
     return find_program(query, this.data.programs)
   }
 
   add_membership (mship : MemberData, role : RolePolicy) {
-    this._data = add_membership(mship, role, this.data)
+    const prop = add_membership(mship, role, this.data)
+    this._update(prop)
   }
 
   rem_membership (mship : MemberData, leave = true) {
-    this._data = rem_membership(mship, this.data, leave)
+    const prop = rem_membership(mship, this.data, leave)
+    this._update(prop)
   }
 
   toJSON () {

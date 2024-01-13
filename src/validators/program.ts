@@ -8,8 +8,7 @@ import {
   ContractData,
   Literal,
   ProgramTerms,
-  WitnessData,
-  WitnessTemplate
+  WitnessData
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -48,15 +47,13 @@ function check_sign_config (params : Literal[]) {
 
 export function validate_witness (
   contract : ContractData,
-  witness  : WitnessTemplate
+  witness  : WitnessData
 ) {
-  const { vm_state } = contract
-  const { action, path, prog_id, method } = witness
-
-  assert.exists(vm_state)
+  const { expires_at, programs, published } = contract
+  const { action, path, prog_id, method, stamp } = witness
 
   const pathnames = get_path_names(contract.terms.paths)
-  const program   = vm_state.programs.find(e => e[0] === prog_id)
+  const program   = programs.find(e => e[0] === prog_id)
 
   assert.ok(program !== undefined,  'program not found: ' + prog_id)
 
@@ -66,25 +63,25 @@ export function validate_witness (
   assert.ok(regex(action, actions),   'action not allowed in program')
   assert.ok(regex(path, paths),       'path not allowed in program')
   assert.ok(pathnames.includes(path), 'path does not exist in contract')
+
+  assert.exists(expires_at)
+  assert.ok(stamp > published,        'stamp exists on or before published date')
+  assert.ok(stamp < expires_at,       'stamp exists on or after expiration date')
+
+  const { sigs, wid, ...tmpl } = witness
+  const hash = get_witness_id(tmpl)
+
+  assert.ok(hash === wid,             'computed hash does not equal witness id')
 }
 
 export function verify_witness (
-  contract : ContractData,
-  witness  : WitnessData
+  witness : WitnessData
 ) {
-  const { expires_at, published } = contract
-  const { cat, sig, wid, ...tmpl } = witness
-
-  assert.exists(expires_at)
-  assert.ok(cat > published,        'stamp exists on or before published date')
-  assert.ok(cat < expires_at,       'stamp exists on or after expiration date')
-
-  const hash = get_witness_id(cat, tmpl)
-
-  assert.ok(hash === wid,           'computed hash does not equal witness id')
-
-  const pub      = witness.pubkey
-  const is_valid = verify_sig(sig, wid, pub)
-
+  const { sigs, wid } = witness
+  const is_valid = sigs.every(e => {
+    const pub = e.slice(0, 64)
+    const sig = e.slice(64)
+    return verify_sig(sig, wid, pub)
+  })
   assert.ok(is_valid,                 'signature verifcation failed')
 }

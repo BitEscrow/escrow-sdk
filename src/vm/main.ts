@@ -13,15 +13,12 @@ import {
 } from './program.js'
 
 import {
-  ProgramTerms,
-  ScheduleTerms,
   PathStatus,
-  PathEntry,
   StateData,
   WitnessData,
-  ProgramEntry
+  ProgramEntry,
+  ContractData
 } from '../types/index.js'
-import { parse_program } from '@/lib/parse.js'
 
 const INIT_STATE = {
   commits : [],
@@ -36,8 +33,9 @@ const INIT_STATE = {
  * Evaluates the witness data against the current virtual machine state.
  */
 export function eval_witness (
-  state   : StateData,
-  witness : WitnessData,
+  programs : ProgramEntry[],
+  state    : StateData,
+  witness  : WitnessData,
   marker  = now()
 ) : { error ?: string, state : StateData } {
   // Return early if there is already a result.
@@ -54,7 +52,7 @@ export function eval_witness (
     // If there is a result, return early.
     if (state.result !== null) return { state }
     // Fetch the program by id, then run the program.
-    run_program(state, witness)
+    run_program(programs, state, witness)
   } catch (err) {
     // Handle raised errors.
     error = err_handler(err)
@@ -80,38 +78,18 @@ export function eval_schedule (
   return state
 }
 
-export function init_programs (
-  terms : ProgramTerms[]
-) : ProgramEntry[] {
-  /**
-   * Id each program term and
-   * load them into an array.
-   */
-  const entries : ProgramEntry[] = []
-  for (const term of terms) {
-    const program = parse_program(term)
-    const { method, actions, paths, prog_id, params } = program
-    entries.push([ prog_id, method, actions, paths, ...params ])
-  }
-  return entries
-}
-
 /**
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (
-  contract_id : string,
-  paypaths    : PathEntry[],
-  progterms   : ProgramTerms[],
-  published   : number,
-  schedule    : ScheduleTerms[]
+  contract : ContractData
 ) : StateData {
-  const head     = contract_id
-  const paths    = init_paths(paypaths, progterms)
-  const programs = init_programs(progterms)
+  const { cid, programs, published, terms } = contract
+  const head     = cid
+  const paths    = init_paths(terms.paths, terms.programs)
   const store    = init_stores(programs.map(e => e[0]))
   const start    = published
-  const tasks    = schedule.sort((a, b) => a[0] - b[0])
+  const tasks    = terms.schedule.sort((a, b) => a[0] - b[0])
   const updated  = start
-  return { ...INIT_STATE, head, paths, programs, start, store, tasks, updated }
+  return { ...INIT_STATE, head, paths, start, store, tasks, updated }
 }

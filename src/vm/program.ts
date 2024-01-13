@@ -19,11 +19,12 @@ export function init_stores (
 }
 
 export function run_program (
-  state   : StateData,
-  witness : WitnessData
+  programs : ProgramEntry[],
+  state    : StateData,
+  witness  : WitnessData
 ) {
-  const { programs, store } = state
-  const { action, path }    = witness
+  const { store } = state
+  const { action, path } = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {
     update_path(action, path, state)

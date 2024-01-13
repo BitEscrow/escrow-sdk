@@ -29,7 +29,7 @@ export interface ProgramData {
   paths   : string
 }
 
-export interface WitnessParams {
+export interface WitnessTemplate {
   action : string
   args  ?: Literal[]
   method : string
@@ -37,17 +37,16 @@ export interface WitnessParams {
   pubkey : string
 }
 
-export interface WitnessTemplate {
+export interface WitnessPreimage {
   action  : string
   args    : Literal[]
   method  : string
   path    : string
   prog_id : string
-  pubkey  : string
+  stamp   : number
 }
 
-export interface WitnessData extends WitnessTemplate {
-  cat : number
-  sig : string
-  wid : string
+export interface WitnessData extends WitnessPreimage {
+  sigs    : string[]
+  wid     : string
 }
