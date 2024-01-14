@@ -1,8 +1,8 @@
-import { CoreWallet } from '@cmdcode/core-cmd'
-import { SignerAPI }  from '@/index.js'
+import { CoreWallet }   from '@cmdcode/core-cmd'
+import { EscrowSigner } from '@/client/class/signer.js'
 
 export interface EscrowMember {
   label  : string,
-  signer : SignerAPI, 
+  client : EscrowSigner, 
   wallet : CoreWallet
 }

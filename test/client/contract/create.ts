@@ -1,8 +1,7 @@
-import { CoreDaemon } from '@cmdcode/core-cmd'
-
-import { EscrowClient, Signer } from '@scrow/core'
-
-import ctx from '../ctx.js'
+import { CoreDaemon }   from '@cmdcode/core-cmd'
+import { EscrowClient } from '@scrow/core'
+import { get_users }    from 'test/src/core.js'
+import CONST            from '../const.js'
 
 const core = new CoreDaemon({
   network  : 'regtest',
@@ -10,16 +9,14 @@ const core = new CoreDaemon({
   verbose  : false
 })
 
-const cli = await core.startup() 
+const corecli = await core.startup()
+const members = await get_users(corecli, [ 'alice', 'bob', 'carol' ])
+const client  = new EscrowClient({
+  hostname : CONST.escrow,
+  oracle   : CONST.oracle
+})
 
-const alice = { signer : Signer.seed('alice'), wallet : await cli.load_wallet('alice') }
-const bob   = { signer : Signer.seed('bob'),   wallet : await cli.load_wallet('bob')   }
-const carol = { signer : Signer.seed('carol'), wallet : await cli.load_wallet('carol') }
-
-const hostname = ctx.escrow
-const oracle   = ctx.oracle
-
-const client   = new EscrowClient(alice.signer, { hostname, oracle })
+const [ alice, bob, carol ] = members
 
 const proposal = {
   title     : 'Basic two-party contract with third-party dispute resolution.',

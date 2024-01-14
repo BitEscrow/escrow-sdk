@@ -15,7 +15,7 @@ type Resolver = ReturnType<typeof get_fetcher>
 const DEFAULT_HOST   = 'http://localhost:3000'
 const DEFAULT_ORACLE = 'http://172.21.0.3:3000'
 
-export default class EscrowClient {
+export class EscrowClient {
   readonly _fetcher : Resolver
   readonly _host    : string
   readonly _oracle  : string

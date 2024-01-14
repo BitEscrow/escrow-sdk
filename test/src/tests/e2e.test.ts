@@ -45,6 +45,7 @@ import {
 import * as assert from '@scrow/core/assert'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
+
 import { Signer } from '@cmdcode/signer'
 
 const VERBOSE = process.env.VERBOSE === 'true'
@@ -78,7 +79,7 @@ export default async function (client : CoreClient, t : Test) {
     /* ------------------- [ Contract ] ------------------- */
 
     const cid      = Buff.random().hex
-    const session  = create_session(agent.signer, cid)
+    const session  = create_session(agent.client.signer, cid)
     const contract = create_contract(cid, proposal, session)
 
     if (VERBOSE) {
@@ -96,7 +97,7 @@ export default async function (client : CoreClient, t : Test) {
       const return_ctx = get_return_ctx(tmpl.return_tx)
       const { pubkey, sequence } = return_ctx
       const { txid, vout }       = return_ctx.tx.vin[0]
-      const deposit_key = agent.signer.pubkey
+      const deposit_key = agent.client.signer.pubkey
       const deposit_ctx = get_deposit_ctx(deposit_key, pubkey, sequence)
       const data = await client.get_txinput(txid, vout)
       assert.exists(data)
@@ -104,11 +105,11 @@ export default async function (client : CoreClient, t : Test) {
       verify_deposit(deposit_ctx, return_ctx, spendout)
       const dpid     = Buff.random(32).hex
       const state    = get_spend_state(sequence, data.status)
-      const session  = create_session(agent.signer, dpid)
+      const session  = create_session(agent.client.signer, dpid)
       const agent_pn = session.agent_pn
       const deposit  = create_deposit({ ...deposit_ctx, dpid, agent_pn, ...tmpl, ...spendout, ...state })
       // const deposit = register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
-      verify_covenant(deposit_ctx, contract, deposit, agent.signer, agent.signer)
+      verify_covenant(deposit_ctx, contract, deposit, agent.client.signer, agent.client.signer)
       return deposit
     })
 
@@ -117,7 +118,7 @@ export default async function (client : CoreClient, t : Test) {
     /* ------------------ [ Activation ] ------------------ */
 
     const active_contract = activate_contract(contract)
-    const { vm_state }    = active_contract
+    const { programs, vm_state }    = active_contract
     
     assert.exists(vm_state)
 
@@ -128,7 +129,7 @@ export default async function (client : CoreClient, t : Test) {
 
     /* ------------------- [ Evaluation ] ------------------- */
 
-    const signer = members[0].signer
+    const signer = members[0].client.signer
 
     const config = {
       action : 'dispute',
@@ -143,7 +144,7 @@ export default async function (client : CoreClient, t : Test) {
 
     const witness = sign_witness(signer, wit_tmpl)
 
-    verify_witness(active_contract, witness)
+    verify_witness(witness)
 
     if (VERBOSE) {
       console.log(banner('witness'))
@@ -152,7 +153,7 @@ export default async function (client : CoreClient, t : Test) {
 
     let state : StateData
  
-    const vm_result = eval_witness(vm_state, witness, now())
+    const vm_result = eval_witness(programs, vm_state, witness, now())
 
     if (vm_result.error !== undefined) {
       throw new Error(vm_result.error)
@@ -174,7 +175,7 @@ export default async function (client : CoreClient, t : Test) {
     const { result } = state
 
     if (result !== null) {
-      const txdata = create_settlment(agent.signer as Signer, contract, funds, result)
+      const txdata = create_settlment(agent.client.signer as Signer, contract, funds, result)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))

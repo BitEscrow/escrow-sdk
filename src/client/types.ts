@@ -4,6 +4,7 @@ import {
   ContractData,
   DepositData,
   DepositInfo,
+  MemberData,
   SignerAPI,
   WalletAPI,
   WitnessData
@@ -23,10 +24,13 @@ export type WitnessListResponse  = DataResponse<WitnessData[]>
 export interface ClientConfig {
   fetcher  ?: typeof fetch
   hostname ?: string
-  idxgen   ?: () => number
   oracle   ?: string
-  signer    : SignerAPI
-  wallet    : WalletAPI
+}
+
+export interface SignerConfig {
+  idxgen ?: () => number
+  signer  : SignerAPI
+  wallet  : WalletAPI
 }
 
 export interface DataResponse<T> {
@@ -42,5 +46,6 @@ export interface FetchConfig {
 
 export interface Membership {
   signer : SignerAPI,
+  token  : MemberData,
   wallet : WalletAPI
 }

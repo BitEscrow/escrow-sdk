@@ -1,15 +1,29 @@
-import { assert_valid } from 'node_modules/@cmdcode/crypto-tools/dist/lib/point.js'
-import { clients, roles } from './01-proposal.js'
-import { full_proposal }  from './02-negotiation.js'
+import { clients, proposal, roles } from './01-proposal.js'
 
 const [ a_client, b_client, c_client ] = clients
 
+proposal.join(roles.buyer, a_client)
+proposal.join(roles.sales, b_client)
+
 // check_membership
-console.log('alice is enrolled :', a_client.membership.exists(full_proposal))
-console.log('bob is enrolled   :', a_client.membership.exists(full_proposal))
-console.log('carol is enrolled :', a_client.membership.exists(full_proposal))
+console.log('alice is enrolled :', a_client.has_membership(proposal))
+console.log('bob is enrolled   :', b_client.has_membership(proposal))
+console.log('carol is enrolled :', c_client.has_membership(proposal))
+
+proposal.on('update', prop => {
+  console.log('proposal updated:', prop.data.title)
+})
+
+proposal.join(roles.agent, c_client)
 
 // endorse_proposal
-a_client.sign_proposal(full_proposal)
+export const signatures = [
+  a_client.sign_proposal(proposal),
+  b_client.sign_proposal(proposal),
+  c_client.sign_proposal(proposal)
+]
 
 // verify_endorsement
+console.log('endorsements:', signatures)
+
+export const full_proposal = proposal.copy

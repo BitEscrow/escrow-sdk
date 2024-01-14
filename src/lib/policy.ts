@@ -99,7 +99,7 @@ export function add_membership (
   proposal : ProposalData
 ) {
   const { pub, xpub } = mship
-  const { paths, payments, programs } = proposal
+  const { network, paths, payments, programs } = proposal
 
   if (has_membership(mship, proposal)) {
     throw new Error('previous role exists for membership')
@@ -116,13 +116,13 @@ export function add_membership (
 
   if (role.paths !== undefined) {
     for (const [ label, amt ] of role.paths) {
-      const addr = wallet.new_address()
+      const addr = wallet.new_address({ network })
       paths.push([ label, amt, addr ])
     }
   }
 
   if (role.payment !== undefined && role.payment > 0) {
-    const pay_addr = wallet.new_address()
+    const pay_addr = wallet.new_address({ network })
     payments.push([ role.payment, pay_addr ])
   }
 

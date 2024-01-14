@@ -1,5 +1,5 @@
 
-import EscrowClient              from '../class/client.js'
+import { EscrowClient }          from '../class/client.js'
 import { validate_registration } from '@/validators/index.js'
 
 import {

@@ -1,9 +1,8 @@
-import EscrowClient from './client.js'
-import EventEmitter from './emitter.js'
-
+import { EscrowClient } from './client.js'
+import { EventEmitter } from './emitter.js'
 import { DepositData }  from '../../types/index.js'
 
-export default class EscrowDeposit extends EventEmitter {
+export class EscrowDeposit extends EventEmitter {
   readonly _client : EscrowClient
   readonly _data   : DepositData
 

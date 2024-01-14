@@ -1,7 +1,11 @@
-import { Buff }       from '@cmdcode/buff'
-import { assert }     from '@scrow/core'
-import { Signer }     from '@cmdcode/signer'
-import { get_seckey } from '@cmdcode/crypto-tools/keys'
+import { assert }       from '@scrow/core'
+import { EscrowSigner } from '@/client/class/signer.js'
+
+import {
+  Seed,
+  Signer,
+  Wallet
+} from '@cmdcode/signer'
 
 import {
   CoreClient,
@@ -39,11 +43,15 @@ export function get_users (
   labels : string[]
 ) : Promise<EscrowMember[]> {
   const users = labels.map(async label => {
-    const seed = get_seckey(Buff.str(label).digest)
+    const seed   = Seed.import.from_char('alice')
+    const corew  = await cli.load_wallet(label)
+    const xpub   = await corew.xpub
+    const signer = new Signer({ seed })
+    const wallet = new Wallet(xpub)
     return {
       label,
-      signer : new Signer({ seed }),
-      wallet : await cli.load_wallet(label)
+      client : new EscrowSigner({ signer, wallet }),
+      wallet : corew
     }
   })
   return Promise.all(users)

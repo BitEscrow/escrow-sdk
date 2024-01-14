@@ -9,7 +9,7 @@
 type EventMap<T> = Map<keyof T, EventSet>
 type EventSet    = Set<Function>
 
-export default class EventEmitter <
+export class EventEmitter <
   T extends Record<string, any> = {}
 > {
   readonly _events : EventMap<T>
@@ -90,7 +90,7 @@ export default class EventEmitter <
      * */
     const methods : Function[] = []
     this._get_methods(event).forEach(fn => {
-      methods.push(fn.apply(this, args))
+      methods.push(fn.apply(this, [ args ]))
     })
 
     this._get_methods('*').forEach(fn => {

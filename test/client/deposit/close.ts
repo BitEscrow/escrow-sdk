@@ -5,7 +5,7 @@ import {
   Signer
 } from '@scrow/core'
 
-import ctx from '../ctx.js'
+import ctx from '../const.js'
 
 const core = new CoreDaemon({
   debug   : false,

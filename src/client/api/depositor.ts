@@ -18,7 +18,7 @@ import {
 /**
  * Create a deposit template for registration.
  */
-function create_deposit_api (client : EscrowSigner) {
+export function create_deposit_api (client : EscrowSigner) {
   return async (
     req  : DepositRequest,
     utxo : TxOutput
@@ -37,7 +37,7 @@ function create_deposit_api (client : EscrowSigner) {
   }
 }
 
-function fund_contract_api (client : EscrowSigner) {
+export function fund_contract_api (client : EscrowSigner) {
   return async (
     req      : DepositRequest | DepositData,
     contract : ContractData,
@@ -54,7 +54,7 @@ function fund_contract_api (client : EscrowSigner) {
   }
 }
 
-function create_return_api (client : EscrowSigner) {
+export function create_return_api (client : EscrowSigner) {
   return async (
     deposit : DepositData,
     txfee   : number

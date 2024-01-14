@@ -22,14 +22,14 @@ export function get_funds (
   const network   = contract.terms.network
   const value     = Math.ceil(contract.total / 3 + txfee)
   const templates = members.map(async mbr => {
-    const ctx  = get_deposit_ctx(agent_pk, mbr.signer.pubkey, SEQUENCE)
+    const ctx  = get_deposit_ctx(agent_pk, mbr.client.signer.pubkey, SEQUENCE)
     const addr = get_deposit_address(ctx, network)
     await mbr.wallet.ensure_funds(value)
     const txid = await mbr.wallet.send_funds(value, addr)
     const txo  = await get_utxo(cli, addr, txid)
     const ret  = await mbr.wallet.new_address
-    const rtx  = create_return_tx(ret, ctx, mbr.signer, txo, txfee)
-    const cov  = create_spend_psigs(ctx, contract, mbr.signer, txo)
+    const rtx  = create_return_tx(ret, ctx, mbr.client.signer, txo, txfee)
+    const cov  = create_spend_psigs(ctx, contract, mbr.client.signer, txo)
     return { agent_id, covenant : cov, return_tx : rtx }
   })
 

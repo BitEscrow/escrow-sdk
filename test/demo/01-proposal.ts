@@ -1,15 +1,16 @@
 
+import { get_role_policy } from '@/lib/policy.js'
 import { get_client } from './utils.js'
 
 import {
-  ProposalData,
+  EscrowProposal,
   RolePolicy
 } from '@scrow/core'
 
 export const seeds   = [ 'alice', 'bob', 'carol', 'david' ]
 export const clients = seeds.map(e => get_client(e))
 
-export let proposal : ProposalData = {
+export const proposal = new EscrowProposal({
   title    : 'Basic two-party contract with third-party dispute resolution.',
   content  : 'n/a',
   expires  : 14400,
@@ -21,9 +22,9 @@ export let proposal : ProposalData = {
   schedule : [[ 7200, 'close', 'draw' ]],
   value    : 15000,
   version  : 1
-}
+})
 
-export const roles : RolePolicy[] = [
+export const policies : RolePolicy[] = [
   {
     label : 'buyer',
     paths : [
@@ -36,7 +37,7 @@ export const roles : RolePolicy[] = [
     ]
   },
   {
-    label : 'seller',
+    label : 'sales',
     paths : [
       [ 'tails', 10000 ],
       [ 'draw',  5000  ]
@@ -55,3 +56,9 @@ export const roles : RolePolicy[] = [
     ]
   }
 ]
+
+export const roles = {
+  buyer : get_role_policy(policies, 'buyer'),
+  sales : get_role_policy(policies, 'sales'),
+  agent : get_role_policy(policies, 'agent'),
+}

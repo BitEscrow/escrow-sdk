@@ -1,6 +1,6 @@
 import { CoreDaemon } from '@cmdcode/core-cmd'
 
-import ctx from '../ctx.js'
+import ctx from '../const.js'
 
 const core = new CoreDaemon({
   debug   : false,

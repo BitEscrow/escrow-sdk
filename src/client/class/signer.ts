@@ -1,21 +1,36 @@
-import { Buff } from '@cmdcode/buff'
+import { Buff }             from '@cmdcode/buff'
+import { get_proposal_id }  from '@/lib/proposal.js'
+import { sign_witness }     from '@/lib/witness.js'
+import { SignerConfig }     from '@/client/types.js'
+import { validate_witness } from '@/validators/program.js'
 
-import { get_proposal_id } from '@/lib/proposal.js'
-import { sign_witness }    from '@/lib/witness.js'
-import { ClientConfig }    from '@/client/types.js'
+import { EscrowContract }   from './contract.js'
+import { EscrowProposal }   from './proposal.js'
 
-import depositor_api from '@/client/api/depositor.js'
-import member_api    from '@/client/api/member.js'
+import {
+  validate_proposal,
+  verify_proposal
+} from '@/validators/proposal.js'
+
+import {
+  create_deposit_api,
+  create_return_api,
+  fund_contract_api
+} from '@/client/api/depositor.js'
+
+import {
+  claim_membership_api,
+  gen_membership_api,
+  has_membership_api
+} from '@/client/api/member.js'
 
 import {
   ContractData,
   ProposalData,
   SignerAPI,
   WalletAPI,
-  WitnessTemplate
+  WitnessData
 } from '@/types/index.js'
-import { validate_witness } from '@/validators/program.js'
-import { validate_proposal, verify_proposal } from '@/validators/proposal.js'
 
 const DEFAULT_IDXGEN = () => Buff.now(4).num
 
@@ -25,10 +40,14 @@ export class EscrowSigner {
   readonly _signer  : SignerAPI
   readonly _wallet  : WalletAPI
 
-  constructor (config : ClientConfig) {
+  constructor (config : SignerConfig) {
     this._gen_idx = config.idxgen   ?? DEFAULT_IDXGEN
     this._signer  = config.signer
     this._wallet  = config.wallet
+  }
+
+  get pubkey () {
+    return this._signer.pubkey
   }
 
   get new_idx () {
@@ -43,10 +62,38 @@ export class EscrowSigner {
     return this._wallet
   }
 
-  deposit    = depositor_api(this)
-  membership = member_api(this)
+  /**
+   * endorse = {
+   *   proposal
+   *   request
+   *   witness
+   * }
+   *
+   * deposit = {
+   *   register
+   *   commit
+   *   cancel
+   * }
+   * 
+   * membership = {
+   *   create
+   *   claim
+   *   exists
+   * }
+   */
+  
+  gen_membership = gen_membership_api(this)
+  get_membership = claim_membership_api(this)
+  has_membership = has_membership_api(this)
 
-  sign_proposal (proposal : ProposalData) {
+  create_deposit = create_deposit_api(this)
+  create_refund  = create_return_api(this)
+  fund_contract  = fund_contract_api(this)
+
+  sign_proposal (proposal : ProposalData | EscrowProposal) {
+    if (proposal instanceof EscrowProposal) {
+      proposal = proposal.data
+    }
     validate_proposal(proposal)
     verify_proposal(proposal)
     const hash = get_proposal_id(proposal)
@@ -63,10 +110,13 @@ export class EscrowSigner {
   }
 
   sign_witness (
-    contract : ContractData,
-    witness  : WitnessTemplate
+    contract : ContractData | EscrowContract,
+    witness  : WitnessData
   ) {
-    const cred = this.membership.claim(contract.terms)
+    if (contract instanceof EscrowContract) {
+      contract = contract.data
+    }
+    const cred = this.get_membership(contract.terms)
     validate_witness(contract, witness)
     return sign_witness(cred.signer, witness)
   }

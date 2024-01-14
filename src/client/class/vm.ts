@@ -1,7 +1,7 @@
-import EscrowClient    from './client.js'
-import EscrowContract  from './contract.js'
-import EventEmitter    from './emitter.js'
-import { WitnessData } from '../../types/index.js'
+import { EscrowClient }   from './client.js'
+import { EscrowContract } from './contract.js'
+import { EventEmitter }   from './emitter.js'
+import { WitnessData }    from '../../types/index.js'
 
 export default class ContractVM extends EventEmitter {
   readonly _client   : EscrowClient

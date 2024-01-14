@@ -1,5 +1,3 @@
-import { Lib } from '@scrow/core/client'
-
 import { print_banner } from './utils.js'
 
 import {
@@ -7,9 +5,6 @@ import {
   proposal,
   roles
 } from './01-proposal.js'
-
-import { get_role_policy } from '@scrow/core/policy'
-
 
 /**
  * SETUP
@@ -23,18 +18,12 @@ import { get_role_policy } from '@scrow/core/policy'
  */
 const [ a_client, b_client, c_client ] = clients
 
-const buyer_cred = a_client.membership.create()
-const sales_cred = b_client.membership.create()
-const agent_cred = c_client.membership.create()
-
-const buyer_role = get_role_policy(roles, 'buyer')
-const sales_role = get_role_policy(roles, 'seller')
-const agent_role = get_role_policy(roles, 'agent')
-
-let prop = { ...proposal }
+const buyer_cred = a_client.gen_membership()
+const sales_cred = b_client.gen_membership()
+const agent_cred = c_client.gen_membership()
 
 print_banner('INITIAL PROPOSAL')
-console.log(prop)
+console.log(proposal.toJSON())
 
 /**
  * JOINING A PROPOSAL
@@ -44,15 +33,15 @@ console.log(prop)
  *   - Use an escrow client to join the existing proposal.
  */
 
-prop = Lib.add_membership(buyer_cred, buyer_role, prop)
+proposal.add_membership(buyer_cred, roles.buyer)
 
 print_banner('BUYER JOINED PROPOSAL')
-console.log(prop)
+console.log(proposal.toJSON())
 
-prop = Lib.add_membership(sales_cred, sales_role, prop)
+proposal.add_membership(sales_cred, roles.sales)
 
 print_banner('SELLER JOINED PROPOSAL')
-console.log(prop)
+console.log(proposal.toJSON())
 
 /**
  * LEAVING A PROPOSAL
@@ -61,21 +50,19 @@ console.log(prop)
  * 
  */
 
-prop = Lib.rem_membership(buyer_cred, prop)
+proposal.rem_membership(buyer_cred)
 
 print_banner('BUYER LEFT PROPOSAL')
-console.log(prop)
+console.log(proposal.toJSON())
 
-prop = Lib.rem_membership(sales_cred, prop)
+proposal.rem_membership(sales_cred)
 
 print_banner('SELLER LEFT PROPOSAL')
-console.log(prop)
+console.log(proposal.toJSON())
 
-prop = Lib.add_membership(buyer_cred, buyer_role, prop)
-prop = Lib.add_membership(sales_cred, sales_role, prop)
-prop = Lib.add_membership(agent_cred, agent_role, prop)
+proposal.add_membership(buyer_cred, roles.buyer)
+proposal.add_membership(sales_cred, roles.sales)
+proposal.add_membership(agent_cred, roles.agent)
 
 print_banner('ALL PARTIES JOINED')
-console.log(prop)
-
-export const full_proposal = { ...prop }
+console.log(proposal.toJSON())

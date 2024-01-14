@@ -1,5 +1,5 @@
-import { EscrowClient } from '../index.js'
-import { WitnessData }  from '@/types/index.js'
+import { EscrowClient, EscrowProposal } from '../index.js'
+import { CovenantData, ProposalData, WitnessData }  from '@/types/index.js'
 
 import {
   validate_proposal,
@@ -24,8 +24,11 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    proposal : Record<string, any>
+    proposal : ProposalData | EscrowProposal
   ) : Promise<ContractDataResponse> => {
+    if (proposal instanceof EscrowProposal) {
+      proposal = proposal.data
+    }
     // Validate the proposal's format.
     validate_proposal(proposal)
     // Verify the proposal's terms.
@@ -110,14 +113,13 @@ function list_witness_api (client : EscrowClient) {
 function fund_contract_api (client : EscrowClient) {
   return async (
     agent_id  : string,
-    user_id   : string,
     return_tx : string,
-    covenant ?: string
+    covenant ?: CovenantData
   ) : Promise<FundingDataResponse> => {
     // Assert that a covenant is defined.
     assert.ok(covenant !== undefined, 'covenant is undefined')
     // Create a deposit template.
-    const templ = { agent_id, user_id, return_tx, covenant }
+    const templ = { agent_id, return_tx, covenant }
     // Validate the deposit template.
     validate_registration(templ)
     // Formulate the request url.

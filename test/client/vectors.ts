@@ -1,14 +1,7 @@
-import {
-  EscrowProposal,
-  RolePolicy
-} from "@/index.js"
+import { ProposalData, RolePolicy } from "@/index.js"
 
-import { get_client } from "./utils.js"
-
-export const clients = [ 'alice', 'bob', 'carol', 'david' ].map(e => get_client(e))
-
-export function get_proposal () : EscrowProposal {
-  return new EscrowProposal({
+export function get_proposal () : ProposalData {
+  return {
     title    : 'Basic two-party contract with third-party dispute resolution.',
     content  : 'n/a',
     expires  : 14400,
@@ -20,7 +13,7 @@ export function get_proposal () : EscrowProposal {
     schedule : [[ 7200, 'close', 'draw' ]],
     value    : 15000,
     version  : 1
-  })
+  }
 }
 
 export const roles : RolePolicy[] = [

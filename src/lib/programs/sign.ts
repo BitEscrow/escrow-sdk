@@ -19,15 +19,21 @@ export function exec (
   // Return wrapped program.
   return (witness : WitnessData) => {
     // Unpack witness object.
-    const { action, path, pubkey } = witness
-    // Check if pubkey is a member of the program.
-    if (!members.includes(pubkey)) {
-      throw 'pubkey not a member of the program'
+    const { action, path, sigs } = witness
+    // Iterate through each signature in the witness.
+    for (const proof of sigs) {
+      // Slice pubkey from signature.
+      const pub = proof.slice(0, 64)
+      // Check if pubkey is a member of the program.
+      if (!members.includes(pub)) {
+        throw 'pubkey not a member of the program'
+      }
+      // Record the pubkey under path/action label, and return vote count.
+      const count = record_entry(store[1], `${path}/${action}`, pub)
+      // Return the status of the count.
+      if (count >= thold) return true
     }
-    // Record the pubkey under path/action label, and return vote count.
-    const count = record_entry(store[1], `${path}/${action}`, pubkey)
-    // Return the status of the count.
-    return (count >= thold)
+    return false
   }
 }
 

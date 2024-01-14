@@ -21,9 +21,9 @@ export async function get_proposal (
       [ 10000,  await bob.wallet.new_address ]
     ],
     programs : [
-      [ 'sign', 'dispute',       'payout', 1, alice.signer.pubkey ],
-      [ 'sign', 'resolve',       '*',      1, carol.signer.pubkey ],
-      [ 'sign', 'close|resolve', '*',      2, alice.signer.pubkey, bob.signer.pubkey ]
+      [ 'sign', 'dispute',       'payout', 1, alice.client.pubkey ],
+      [ 'sign', 'resolve',       '*',      1, carol.client.pubkey ],
+      [ 'sign', 'close|resolve', '*',      2, alice.client.pubkey, bob.client.pubkey ]
     ],
     schedule: [
       [ 7200, 'close', 'payout|return' ]

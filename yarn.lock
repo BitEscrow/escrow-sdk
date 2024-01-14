@@ -10,10 +10,10 @@
     "@noble/hashes" "^1.3.0"
     "@scure/base" "^1.1.3"
 
-"@cmdcode/core-cmd@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.4.1.tgz#16c0a8ec3cc1553b09823591c7e866ed7f6e2a63"
-  integrity sha512-SXABCxhpG6+MQjiWT09LNA9JhiT8edJrYIhkU7Z56Bjc5edU3be7JMM8JZZdiVN9zxIPwR0MeB8ukPiXhZ2zNw==
+"@cmdcode/core-cmd@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.4.3.tgz#e2e5b1fd7e7e11646766c55f5038a6f846c8336f"
+  integrity sha512-fEqKrn3TL1WkkBj/skj3RwZNSH+fuOrCVTrinbK2V0NYz38QxkxaCVhEQWCAOvgpvhD1Zb+8xrez4jVrWhf6YA==
   dependencies:
     "@cmdcode/crypto-tools" "^2.6.10"
     "@scrow/tapscript" "^2.2.1"
@@ -45,10 +45,10 @@
     "@cmdcode/buff" "^2.2.4"
     "@cmdcode/crypto-tools" "^2.6.10"
 
-"@cmdcode/signer@1.3.4":
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.3.4.tgz#aa3e5608e2e758a310ca66199562be174def6f95"
-  integrity sha512-qrP0vlfIfnrkhMNheCtXLbUGYV0c6x3QMyeHAlLAB5VWo7qLoxB3Z/knBg49+K757F/DzmnEi9QBf03/JisZcQ==
+"@cmdcode/signer@1.3.5":
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.3.5.tgz#13ffed6b0b026d8f8444dbac1ecde18175a3c723"
+  integrity sha512-TfQVNIhZJ5WeVHq//CtZiUbqpJA/kW9caF1EBG7TuQJuT08NJeQafuAsWyU7QFzt2xQp2Dz+8dDVMZfYOjHnhg==
   dependencies:
     "@cmdcode/buff" "^2.2.4"
     "@cmdcode/crypto-tools" "^2.7.4"
