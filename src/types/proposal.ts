@@ -33,7 +33,7 @@ export interface ProposalData {
   fallback  ?: string
   feerate   ?: number
   members    : MemberData[]
-  moderator  : string
+  moderator ?: string
   network    : Network
   paths      : PathEntry[]
   payments   : PaymentEntry[]

@@ -1,17 +1,17 @@
 import { z } from 'zod'
 
 type Literal = z.infer<typeof literal>
-type Json = Literal | { [key: string]: Json } | Json[]
+type Json    = Literal | { [key: string]: Json } | Json[]
 
-const address    = z.string(),
-      bool       = z.boolean(),
-      date       = z.date(),
-      index      = z.number().max(1024),
-      num        = z.number().max(Number.MAX_SAFE_INTEGER),
-      script     = z.string().array(),
-      str        = z.string(),
-      stamp      = z.number().min(500_000_000),
-      value      = z.bigint().max(100_000_000n * 21_000_000n)
+const address = z.string(),
+      bool    = z.boolean(),
+      date    = z.date(),
+      index   = z.number().max(1024),
+      num     = z.number().max(Number.MAX_SAFE_INTEGER),
+      script  = z.string().array(),
+      str     = z.string(),
+      stamp   = z.number().min(500_000_000),
+      value   = z.bigint().max(100_000_000n * 21_000_000n)
 
 const hex = z.string()
   .regex(/^[0-9a-fA-F]*$/)
