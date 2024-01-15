@@ -106,7 +106,6 @@ export function get_proposal_id (
   return sha256(preimg)
 }
 
-
 /**
  * Returns a given program from the program terms,
  * based upon the supplied search criteria.

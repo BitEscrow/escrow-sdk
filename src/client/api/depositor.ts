@@ -23,8 +23,9 @@ import {
  */
 export function register_deposit_api (client : EscrowSigner) {
   return async (
-    sess : DepositAccount,
-    utxo : TxOutput
+    sess   : DepositAccount,
+    utxo   : TxOutput,
+    txfee ?: number
   ) : Promise<DepositRegister> => {
     // Unpack the deposit object.
     const { agent_id, agent_pk, sequence } = sess
@@ -35,7 +36,7 @@ export function register_deposit_api (client : EscrowSigner) {
     // Get the context object for our deposit account.
     const ctx  = get_deposit_ctx(agent_pk, pub, sequence)
     // Create the return transaction.
-    const rtx  = create_return_tx(addr, ctx, client._signer, utxo)
+    const rtx  = create_return_tx(addr, ctx, client._signer, utxo, txfee)
     return { agent_id, return_tx : rtx }
   }
 }

@@ -10,7 +10,7 @@ import { EscrowClient }     from "@/index.js"
 import { DEFAULT_LOCKTIME } from "@/config.js"
 
 // Startup a local process of Bitcoin Core for testing.
-const core = get_daemon()
+const core = get_daemon({ network : 'regtest' })
 const cli  = await core.startup()
 
 // Define a third-party client as a coordinator.
@@ -32,14 +32,14 @@ const account_res = await client.deposit.request({
 if (!account_res.ok) throw new Error('failed')
 
 // Unpack some of the terms.
-const account = account_res.data
+const { account } = account_res.data
 
 console.log('account:', account)
 
 const address = account.address
 
 // Use our utility methods to fund the address and get the utxo.
-const txid = await fund_address(cli, 'alice', address, 10_000)
+const txid = await fund_address(cli, 'alice', address, 20_000)
 const utxo = await get_utxo(cli, address, txid)
 
 // Request the member to sign
@@ -51,4 +51,6 @@ const deposit_res = await client.deposit.register(regdata)
 // Check the response is valid.
 if (!deposit_res.ok) throw new Error('failed')
 
-console.log('deposit:', deposit_res.data)
+const { deposit } = deposit_res.data
+
+console.log('deposit:', deposit)

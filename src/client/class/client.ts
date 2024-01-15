@@ -1,9 +1,9 @@
 import { resolve_json } from '@/lib/oracle.js'
 
-import contract_api  from '@/client/api/contract.js'
-import deposit_api   from '@/client/api/deposit.js'
-import oracle_api    from '@/client/api/oracle.js'
-import witness_api   from '@/client/api/witness.js'
+import contract_api from '@/client/api/contract.js'
+import deposit_api  from '@/client/api/deposit.js'
+import oracle_api   from '@/client/api/oracle.js'
+import witness_api  from '@/client/api/witness.js'
 
 import {
   ClientConfig,

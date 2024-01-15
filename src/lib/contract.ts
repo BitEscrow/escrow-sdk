@@ -27,10 +27,10 @@ import {
 export function create_contract (
   config : ContractConfig
 ) : ContractData {
-  const fees      = config.fees ?? []
-  const terms     = config.proposal
-  const published = config.published ?? now()
-  const prop_id   = get_proposal_id(terms)
+  const terms      = config.proposal
+  const fees       = config.fees       ?? []
+  const published  = config.published  ?? now()
+  const signatures = config.signatures ?? []
 
   return sort_record({
     ...config.agent,
@@ -43,12 +43,13 @@ export function create_contract (
     moderator   : config.moderator ?? null,
     outputs     : get_spend_outputs(terms, fees),
     pending     : 0,
-    prop_id     : prop_id.hex,
+    prop_id     : get_proposal_id(terms).hex,
     programs    : init_programs(terms.programs),
-    pubkeys     : config.pubkeys   ?? [],
+    pubkeys     : signatures.map(e => e.slice(0, 64)),
     published   : published,
     settled     : false,
     settled_at  : null,
+    signatures  : signatures,
     spent       : false,
     spent_at    : null,
     spent_txid  : null,

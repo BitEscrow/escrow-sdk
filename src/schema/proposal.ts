@@ -3,7 +3,7 @@ import base  from './base.js'
 import vm    from './vm.js'
 
 const { 
-  hash, hex, literal, nonce, num, payment, 
+  hash, literal, nonce, num, payment, 
   network, paypath, regex, stamp, str 
 } = base
 
@@ -33,7 +33,6 @@ const data  = z.object({
   payments   : payment.array().default([]),
   programs   : terms.array().default([]),
   schedule   : task.array().default([]),
-  signatures : hex.array().default([]),
   title      : str,
   value      : num,
   version    : num

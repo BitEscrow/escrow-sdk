@@ -3,9 +3,9 @@ import {
   RolePolicy
 } from "@/index.js"
 
-import { get_client } from "./utils.js"
+import { get_member } from "./utils.js"
 
-export const clients = [ 'alice', 'bob', 'carol', 'david' ].map(e => get_client(e))
+export const clients = [ 'alice', 'bob', 'carol', 'david' ].map(e => get_member(e))
 
 export function get_proposal () : EscrowProposal {
   return new EscrowProposal({

@@ -2,10 +2,12 @@ const _MIN  =  60
 const _HOUR = _MIN  * 60
 const _DAY  = _HOUR * 24
 
-export const SPEND_TXIN_WEIGHT  = 1
-export const SPEND_TXOUT_WEIGHT = 1
-export const REFUND_TX_WEIGHT = 400
-export const RETURN_TX_WEIGHT = 520
+export const SPEND_TXVIN_SIZE = 48
+export const SPEND_TXWIT_SIZE = 66
+export const SPEND_TXOUT_SIZE = 43
+export const SPEND_TXDAT_SIZE = 10
+export const REFUND_TX_VSIZE  = 118
+export const RETURN_TX_VSIZE  = 520
 
 export const VALID_ACTIONS = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
 export const VALID_METHODS = [ 'sign' ]
