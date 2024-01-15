@@ -33,11 +33,13 @@ export interface ProposalData {
   fallback  ?: string
   feerate   ?: number
   members    : MemberData[]
+  moderator  : string
   network    : Network
   paths      : PathEntry[]
   payments   : PaymentEntry[]
   programs   : ProgramTerms[]
   schedule   : ScheduleTerms[]
+  signatures : string[]
   title      : string
   value      : number
   version    : number

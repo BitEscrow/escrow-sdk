@@ -28,7 +28,7 @@ import {
 /**
  * Initialization object for deposit state.
  */
-const INIT_STATE = {
+const INIT_SPEND_STATE = {
   confirmed    : false as const,
   block_hash   : null,
   block_height : null,
@@ -40,7 +40,7 @@ const INIT_STATE = {
  * Initialization object for deposit data.
  */
 const INIT_DEPOSIT = {
-  ...INIT_STATE,
+  ...INIT_SPEND_STATE,
   covenant     : null,
   created_at   : now(),
   settled      : false as const,
@@ -108,7 +108,7 @@ export function get_spend_state (
   sequence : number,
   txstatus : OracleTxStatus
 ) {
-  let state : DepositState = INIT_STATE
+  let state : DepositState = INIT_SPEND_STATE
 
   if (txstatus !== undefined && txstatus.confirmed) {
     const timelock   = parse_timelock(sequence)

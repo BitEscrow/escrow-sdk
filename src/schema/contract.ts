@@ -17,7 +17,11 @@ const agent = z.object({
 const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
 const program = z.tuple([ hash, label, regex, regex ]).rest(literal)
-const request = z.object({ proposal : terms, signatures : hex.array() })
+
+const request = z.object({
+  proposal   : terms,
+  signatures : hex.array().default([])
+})
 
 const data = z.object({
   activated   : stamp.nullable(),

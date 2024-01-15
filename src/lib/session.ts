@@ -56,7 +56,7 @@ export function create_session (
  * on the deposit context, contract data, and
  * unspent transaction output.
  */
-export function create_spend_psigs (
+export function create_covenant (
   context  : DepositContext,
   contract : ContractData,
   signer   : SignerAPI,
@@ -81,7 +81,7 @@ export function create_spend_psigs (
  * signature, to be used for collaboratively
  * returning a deposit back to the sender.
  */
-export function create_return_psig (
+export function create_return (
   address : string,
   deposit : DepositData,
   signer  : SignerAPI,

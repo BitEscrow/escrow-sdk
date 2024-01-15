@@ -10,8 +10,8 @@ import { EscrowClient }     from "@/index.js"
 import { DEFAULT_LOCKTIME } from "@/config.js"
 
 // Startup a local process of Bitcoin Core for testing.
-const core   = get_daemon()
-const cli    = await core.startup()
+const core = get_daemon()
+const cli  = await core.startup()
 
 // Define a third-party client as a coordinator.
 const client = new EscrowClient({

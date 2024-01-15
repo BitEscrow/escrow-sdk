@@ -18,7 +18,7 @@ import {
 
 const DEFAULT_IDXGEN = () => Buff.now(4).num
 
-export class EscrowMember {
+export class EscrowSigner {
 
   readonly _client  : EscrowClient
   readonly _gen_idx : () => number
@@ -38,18 +38,6 @@ export class EscrowMember {
 
   get pubkey () {
     return this._signer.pubkey
-  }
-
-  get new_idx () {
-    return this._gen_idx()
-  }
-
-  get signer () {
-    return this._signer
-  }
-
-  get wallet () {
-    return this._wallet
   }
 
   deposit = deposit_api(this)

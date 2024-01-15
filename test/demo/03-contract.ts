@@ -26,6 +26,8 @@ proposal.on('update', prop => {
 // Request the agent to join the proposal.
 proposal.join(roles.agent, c_mbr)
 
+console.log('proposal id:', proposal.id)
+
 // Have all memebers endorse the proposal.
 export const signatures = [
   a_mbr.endorse.proposal(proposal),

@@ -144,8 +144,8 @@ export function find_program (
 }
 
 export function endorse_proposal (
-  signer   : SignerAPI,
-  proposal : ProposalData
+  proposal : ProposalData,
+  signer   : SignerAPI
 ) : string {
   const msg = get_proposal_id(proposal)
   const pub = signer.pubkey

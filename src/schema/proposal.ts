@@ -3,7 +3,7 @@ import base  from './base.js'
 import vm    from './vm.js'
 
 const { 
-  hash, literal, nonce, num, payment, 
+  hash, hex, literal, nonce, num, payment, 
   network, paypath, regex, stamp, str 
 } = base
 
@@ -27,14 +27,16 @@ const data  = z.object({
   fallback  : str.optional(),
   feerate   : num.optional(),
   members   : membership.array().default([]),
-  network   : network.default('main'),
-  paths     : paypath.array().default([]),
-  payments  : payment.array(),
-  programs  : terms.array().default([]),
-  schedule  : task.array().default([]),
-  title     : str,
-  value     : num,
-  version   : num
+  moderator  : hash,
+  network    : network.default('main'),
+  paths      : paypath.array().default([]),
+  payments   : payment.array(),
+  programs   : terms.array().default([]),
+  schedule   : task.array().default([]),
+  signatures : hex.array(),
+  title      : str,
+  value      : num,
+  version    : num
 })
 
 export default { data, terms }

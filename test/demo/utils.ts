@@ -1,6 +1,6 @@
 import { Buff }           from "@cmdcode/buff"
 import { Signer, Wallet } from "@cmdcode/signer"
-import { EscrowMember }   from "@/client/class/member.js"
+import { EscrowSigner }   from "@/client/class/signer.js"
 
 /**
  * Take a string label as input, and return an
@@ -8,7 +8,7 @@ import { EscrowMember }   from "@/client/class/member.js"
  */
 export function get_member (
   alias : string
-) : EscrowMember {
+) : EscrowSigner {
   // Freeze the idx generation at 0 for test purposes.
   const idxgen = () => 0
   // Create a basic deterministic seed.
@@ -18,7 +18,7 @@ export function get_member (
   // Create a new wallet using the seed.
   const wallet = Wallet.create({ seed, network : 'regtest' })
   // Return an escrow client.
-  return new EscrowMember({ idxgen, signer, wallet })
+  return new EscrowSigner({ idxgen, signer, wallet })
 }
 
 /**

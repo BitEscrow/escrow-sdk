@@ -123,7 +123,7 @@ export function sort_record <T extends Record<string, any>> (
 export function stringify (content : any) : string {
   switch (typeof content) {
     case 'object':
-      return (content ==! null)
+      return (content !== null)
         ? JSON.stringify(content)
         : 'null'
     case 'string':

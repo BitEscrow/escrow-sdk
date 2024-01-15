@@ -1,11 +1,13 @@
 import { assert } from '@scrow/core'
-import { Wallet } from '@cmdcode/signer'
+import { Signer, Wallet } from '@cmdcode/signer'
 
 import {
   CoreClient,
   CoreConfig,
   CoreDaemon
 } from '@cmdcode/core-cmd'
+import { Buff } from '@cmdcode/buff'
+import { CoreSigner } from './types.js'
 
 const DEFAULT_CONFIG = {
   core_params : [ '-txindex' ],
@@ -28,6 +30,28 @@ export function get_daemon (
     daemon = new CoreDaemon(config)
   }
   return daemon
+}
+
+export async function get_members (
+  client  : CoreClient,
+  aliases : string[]
+) {
+  const members = aliases.map(e => get_signer(client, e))
+  return Promise.all(members)
+}
+
+export async function get_signer (
+  client : CoreClient,
+  label  : string
+) : Promise<CoreSigner> {
+  const seed = Buff.str(label)
+  const wdat = await client.load_wallet(label)
+  const xpub = await wdat.xpub
+  return {
+    core   : wdat,
+    signer : new Signer({ seed }),
+    wallet : new Wallet(xpub)
+  }
 }
 
 export async function get_wallet (

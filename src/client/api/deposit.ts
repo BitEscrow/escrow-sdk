@@ -9,7 +9,7 @@ import {
   ReturnData,
   DepositData,
   ApiResponse,
-  DepositAccount,
+  DepositSession,
   DepositRequest
 } from '@/types/index.js'
 
@@ -21,7 +21,7 @@ import * as assert from '@/assert.js'
 function request_deposit_api (client : EscrowClient) {
   return async (
     req : DepositRequest
-  ) : Promise<ApiResponse<DepositAccount>> => {
+  ) : Promise<ApiResponse<DepositSession>> => {
     // Ensure params are string values.
     const arr = Object.entries(req)
     // Build a query string with params.
@@ -29,7 +29,7 @@ function request_deposit_api (client : EscrowClient) {
     // Formulate the request.
     const url = `${client.host}/api/deposit/request?${qry}`
     // Return the response.
-    return client.fetcher<DepositAccount>({ url })
+    return client.fetcher<DepositSession>({ url })
   }
 }
 

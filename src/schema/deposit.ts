@@ -21,12 +21,13 @@ const unconfirmed = z.object({
   expires_at   : z.null()
 })
 
-const state  = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
-const status = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
+const locktime = z.union([ str, num ]).transform(e => Number(e))
+const state    = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
+const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
-const request = z.object({
-  pubkey   : hash,
-  locktime : num
+const request  = z.object({
+  locktime : locktime.optional(), 
+  pubkey   : hash
 })
 
 const account = z.object({

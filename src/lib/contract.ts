@@ -1,5 +1,6 @@
 import { create_txhex }     from './tx.js'
 import { now, sort_record } from './util.js'
+import { parse_program }    from './parse.js'
 import { DEFAULT_DEADLINE } from '../config.js'
 import { init_vm }          from '../vm/main.js'
 
@@ -11,7 +12,6 @@ import {
 } from './proposal.js'
 
 import {
-  AgentSession,
   ContractConfig,
   ContractData,
   PaymentEntry,
@@ -20,45 +20,41 @@ import {
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
-import { parse_program } from './parse.js'
-import { verify_sig } from '@cmdcode/crypto-tools/signer'
-import { Bytes } from '@cmdcode/buff'
 
 /**
  * Returns a new ContractData object using the provided params.
  */
 export function create_contract (
-  cid       : string,
-  proposal  : ProposalData,
-  session   : AgentSession,
-  options  ?: ContractConfig
+  config : ContractConfig
 ) : ContractData {
-  const { fees = [], moderator = null, published = now(), sigs = [] } = options ?? {}
-  const prop_id = get_proposal_id(proposal)
+  const fees      = config.fees ?? []
+  const terms     = config.proposal
+  const published = config.published ?? now()
+  const prop_id   = get_proposal_id(terms)
 
   return sort_record({
-    ...session,
+    ...config.agent,
     activated   : null,
     balance     : 0,
-    cid,
-    deadline    : get_deadline(proposal, published),
+    cid         : config.cid,
+    deadline    : get_deadline(terms, published),
     expires_at  : null,
-    fees,
-    moderator,
-    outputs     : get_spend_outputs(proposal, fees),
+    fees        : fees,
+    moderator   : config.moderator ?? null,
+    outputs     : get_spend_outputs(terms, fees),
     pending     : 0,
     prop_id     : prop_id.hex,
-    programs    : init_programs(proposal.programs),
-    pubkeys     : init_pubkeys(prop_id, sigs),
-    published,
+    programs    : init_programs(terms.programs),
+    pubkeys     : config.pubkeys   ?? [],
+    published   : published,
     settled     : false,
     settled_at  : null,
     spent       : false,
     spent_at    : null,
     spent_txid  : null,
     status      : 'published',
-    terms       : proposal,
-    total       : proposal.value + get_pay_total(fees),
+    terms       : terms,
+    total       : terms.value + get_pay_total(fees),
     updated_at  : published,
     vm_state    : null
   })
@@ -135,19 +131,4 @@ function init_programs (
     entries.push([ prog_id, method, actions, paths, ...params ])
   }
   return entries
-}
-
-function init_pubkeys (
-  prop_id : Bytes,
-  sigs    : string[]
-) : string[] {
-  const pubkeys : string[] = []
-  sigs.forEach(e => {
-    const pub = e.slice(0, 64)
-    const sig = e.slice(64)
-    if (verify_sig(sig, prop_id, pub)) {
-      pubkeys.push(pub)
-    }
-  })
-  return pubkeys
 }

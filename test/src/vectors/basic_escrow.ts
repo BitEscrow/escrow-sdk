@@ -1,10 +1,10 @@
 import { ProposalData } from '@scrow/core'
-import { EscrowMember } from '../types.js'
+import { CoreSigner }   from '../types.js'
 
 const NETWORK  = 'regtest'
 
 export async function get_proposal (
-  members : EscrowMember[]
+  members : CoreSigner[]
 ) : Promise<ProposalData> {
   const [ alice, bob, carol ] = members
   return {
@@ -14,16 +14,16 @@ export async function get_proposal (
     members  : [],
     network  : NETWORK,
     paths    : [
-      [ 'payout', 90000, await bob.wallet.new_address   ],
-      [ 'return', 90000, await alice.wallet.new_address ]
+      [ 'payout', 90000, await bob.core.new_address   ],
+      [ 'return', 90000, await alice.core.new_address ]
     ],
     payments : [
-      [ 10000,  await bob.wallet.new_address ]
+      [ 10000,  await bob.core.new_address ]
     ],
     programs : [
-      [ 'sign', 'dispute',       'payout', 1, alice.client.pubkey ],
-      [ 'sign', 'resolve',       '*',      1, carol.client.pubkey ],
-      [ 'sign', 'close|resolve', '*',      2, alice.client.pubkey, bob.client.pubkey ]
+      [ 'sign', 'dispute',       'payout', 1, alice.signer.pubkey ],
+      [ 'sign', 'resolve',       '*',      1, carol.signer.pubkey ],
+      [ 'sign', 'close|resolve', '*',      2, alice.signer.pubkey, bob.signer.pubkey ]
     ],
     schedule: [
       [ 7200, 'close', 'payout|return' ]

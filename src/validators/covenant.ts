@@ -15,7 +15,7 @@ import {
   CovenantData,
   DepositContext,
   DepositData,
-  DepositReturn,
+  ReturnData,
   MutexEntry,
   SignerAPI
 } from '../types/index.js'
@@ -55,7 +55,7 @@ export function verify_covenant (
 export function verify_refund (
   dp_agent : SignerAPI,
   deposit  : DepositData,
-  refund   : DepositReturn
+  refund   : ReturnData
 ) {
   const { dpid, agent_pn } = deposit
   const { pnonce, psig, txhex } = refund

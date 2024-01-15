@@ -65,7 +65,7 @@ export function validate_witness (
   assert.ok(pathnames.includes(path), 'path does not exist in contract')
 
   assert.exists(expires_at)
-  assert.ok(stamp > published,        'stamp exists on or before published date')
+  assert.ok(stamp >= published,       'stamp exists before published date')
   assert.ok(stamp < expires_at,       'stamp exists on or after expiration date')
 
   const { sigs, wid, ...tmpl } = witness

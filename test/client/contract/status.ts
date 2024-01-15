@@ -1,7 +1,4 @@
-import {
-  EscrowClient,
-  Signer
-} from '@scrow/core'
+import { EscrowClient } from '@scrow/core'
 
 import ctx from '../const.js'
 

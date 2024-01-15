@@ -1,6 +1,10 @@
 import { EventEmitter } from './emitter.js'
-import { EscrowMember } from './member.js'
-import { find_program } from '@/lib/proposal.js'
+import { EscrowSigner } from './signer.js'
+
+import {
+  find_program,
+  get_proposal_id
+} from '@/lib/proposal.js'
 
 import {
   MemberData,
@@ -13,6 +17,7 @@ import {
   add_membership,
   rem_membership
 } from '../../lib/policy.js'
+import { parse_proposal } from '@/lib/parse.js'
 
 export class EscrowProposal extends EventEmitter<{
   'update' : EscrowProposal
@@ -22,7 +27,7 @@ export class EscrowProposal extends EventEmitter<{
 
   constructor (data : ProposalData) {
     super()
-    this._data = data
+    this._data = parse_proposal(data)
   }
 
   get copy () {
@@ -33,21 +38,25 @@ export class EscrowProposal extends EventEmitter<{
     return this._data
   }
 
+  get id () {
+    return get_proposal_id(this.data).hex
+  }
+
   _update (data : ProposalData) {
-    this._data = data
+    this._data = parse_proposal(data)
     this.emit('update', this)
   }
 
   join (
     role   : RolePolicy,
-    member : EscrowMember,
+    member : EscrowSigner,
     index ?: number
   ) {
     const mdata = member.gen_membership(index)
     this.add_membership(mdata, role)
   }
 
-  leave (member : EscrowMember) {
+  leave (member : EscrowSigner) {
     const mship = member.get_membership(this)
     this.rem_membership(mship.token)
   }
