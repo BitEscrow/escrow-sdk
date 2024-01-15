@@ -11,7 +11,7 @@ import {
 import {
   ContractData,
   CovenantData,
-  DepositSession,
+  DepositAccount,
   DepositData,
   DepositRegister,
   ReturnData,
@@ -23,7 +23,7 @@ import {
  */
 export function register_deposit_api (client : EscrowSigner) {
   return async (
-    sess : DepositSession,
+    sess : DepositAccount,
     utxo : TxOutput
   ) : Promise<DepositRegister> => {
     // Unpack the deposit object.
@@ -42,7 +42,7 @@ export function register_deposit_api (client : EscrowSigner) {
 
 export function create_covenant_api (client : EscrowSigner) {
   return async (
-    req      : DepositSession | DepositData,
+    req      : DepositAccount | DepositData,
     contract : ContractData,
     utxo     : TxOutput
   ) : Promise<CovenantData> => {

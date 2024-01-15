@@ -33,6 +33,9 @@ if (!account_res.ok) throw new Error('failed')
 
 // Unpack some of the terms.
 const account = account_res.data
+
+console.log('account:', account)
+
 const address = account.address
 
 // Use our utility methods to fund the address and get the utxo.

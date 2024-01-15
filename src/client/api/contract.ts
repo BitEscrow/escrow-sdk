@@ -2,7 +2,15 @@ import { verify_endorsement } from '@/lib/member.js'
 import { get_proposal_id }    from '@/lib/proposal.js'
 import { EscrowClient }       from '@/client/class/client.js'
 import { EscrowProposal }     from '@/client/class/proposal.js'
-import { FundingData }        from '@/client/types.js'
+
+import {
+  ContractDataResponse,
+  ContractListResponse,
+  DepositListResponse,
+  FundingDataResponse,
+  WitnessDataResponse,
+  WitnessListResponse
+} from '@/client/types.js'
 
 import {
   validate_proposal,
@@ -12,9 +20,7 @@ import {
 
 import {
   ApiResponse,
-  ContractData,
   CovenantData,
-  DepositData,
   ProposalData,
   WitnessData
 }  from '@/types/index.js'
@@ -30,7 +36,7 @@ function create_contract_api (
   return async (
     proposal    : ProposalData | EscrowProposal,
     signatures ?: string[]
-  ) : Promise<ApiResponse<ContractData>> => {
+  ) : Promise<ApiResponse<ContractDataResponse>> => {
     if (proposal instanceof EscrowProposal) {
       proposal = proposal.data
     }
@@ -52,7 +58,7 @@ function create_contract_api (
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<ContractData>({ url, init })
+    return client.fetcher<ContractDataResponse>({ url, init })
   }
 }
 
@@ -62,13 +68,13 @@ function create_contract_api (
 function read_contract_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<ContractData>> => {
+  ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/${cid}`
     // Return the response.
-    return client.fetcher<ContractData>({ url })
+    return client.fetcher<ContractDataResponse>({ url })
   }
 }
 
@@ -81,11 +87,11 @@ function list_contract_api (
 ) {
   return async (
     token : string
-  ) : Promise<ApiResponse<ContractData[]>> => {
+  ) : Promise<ApiResponse<ContractListResponse>> => {
     // Formulate the request.
     const url = `${client.host}/api/contract/list`
     // Return the response.
-    return client.fetcher<ContractData[]>({ url, token })
+    return client.fetcher<ContractListResponse>({ url, token })
   }
 }
 
@@ -96,13 +102,13 @@ function list_contract_api (
 function list_funds_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<DepositData[]>> => {
+  ) : Promise<ApiResponse<DepositListResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/funds`
     // Return the response.
-    return client.fetcher<DepositData[]>({ url })
+    return client.fetcher<DepositListResponse>({ url })
   }
 }
 
@@ -113,13 +119,13 @@ function list_funds_api (client : EscrowClient) {
 function list_witness_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<WitnessData>> => {
+  ) : Promise<ApiResponse<WitnessDataResponse>> => {
      // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/witness`
     // Return the response.
-    return client.fetcher<WitnessData>({ url })
+    return client.fetcher<WitnessDataResponse>({ url })
   }
 }
 
@@ -131,7 +137,7 @@ function fund_contract_api (client : EscrowClient) {
     agent_id  : string,
     return_tx : string,
     covenant ?: CovenantData
-  ) : Promise<ApiResponse<FundingData>> => {
+  ) : Promise<ApiResponse<FundingDataResponse>> => {
     // Assert that a covenant is defined.
     assert.ok(covenant !== undefined, 'covenant is undefined')
     // Create a deposit template.
@@ -147,7 +153,7 @@ function fund_contract_api (client : EscrowClient) {
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<FundingData>({ url, init })
+    return client.fetcher<FundingDataResponse>({ url, init })
   }
 }
 
@@ -176,13 +182,13 @@ function fund_contract_api (client : EscrowClient) {
 function status_contract_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<ContractData>> => {
+  ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/${cid}/status`
     // Return the response.
-    return client.fetcher<ContractData>({ url })
+    return client.fetcher<ContractDataResponse>({ url })
   }
 }
 
@@ -193,7 +199,7 @@ function submit_witness_api (client : EscrowClient) {
   return async (
     cid     : string,
     witness : WitnessData
-  ) : Promise<ApiResponse<WitnessData[]>> => {
+  ) : Promise<ApiResponse<WitnessListResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request url.
@@ -205,7 +211,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<WitnessData[]>({ url, init })
+    return client.fetcher<WitnessListResponse>({ url, init })
   }
 }
 

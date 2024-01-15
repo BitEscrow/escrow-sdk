@@ -56,7 +56,7 @@ export interface ContractBase {
   vm_state    : null | StateData
 }
 
-export interface ContractRequest {
-  proposal    : ProposalData,
+export type ContractRequest = {
+  proposal    : ProposalData
   signatures ?: string[]
 }

@@ -54,7 +54,7 @@ export interface ReturnContext {
   tx        : TxData
 }
 
-export interface DepositSession {
+export interface DepositAccount {
   created_at : number
   address    : string
   agent_id   : string
