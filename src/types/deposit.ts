@@ -12,7 +12,6 @@ import {
 } from './tx.js'
 
 import {
-  // Network,
   ScriptWord,
   TapContext,
   TxData
@@ -55,7 +54,7 @@ export interface ReturnContext {
   tx        : TxData
 }
 
-export interface DepositRequest {
+export interface DepositAccount {
   created_at : number
   address    : string
   agent_id   : string
@@ -64,19 +63,6 @@ export interface DepositRequest {
   req_id     : string
   sequence   : number
   sig        : string
-}
-
-export interface DepositRegister {
-  agent_id  : string
-  covenant ?: CovenantData
-  return_tx : string
-}
-
-export interface DepositReturn {
-  dpid   : string,
-  pnonce : string,
-  psig   : string,
-  txhex  : string
 }
 
 export interface DepositInfo {
@@ -91,4 +77,22 @@ export interface DepositInfo {
   sequence   : number
   status     : DepositStatus
   updated_at : number
+}
+
+export interface ReturnData {
+  dpid   : string,
+  pnonce : string,
+  psig   : string,
+  txhex  : string
+}
+
+export interface DepositRequest {
+  pubkey   : string,
+  locktime : number
+}
+
+export interface DepositRegister {
+  agent_id  : string
+  covenant ?: CovenantData
+  return_tx : string
 }

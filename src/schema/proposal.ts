@@ -2,8 +2,12 @@ import { z } from 'zod'
 import base  from './base.js'
 import vm    from './vm.js'
 
-const { hash, nonce, num, payment, network, paypath, stamp, str } = base
-const { task, terms } = vm
+const { 
+  hash, literal, nonce, num, payment, 
+  network, paypath, regex, stamp, str 
+} = base
+
+const { task } = vm
 
 const membership = z.object({
    id  : hash,
@@ -12,7 +16,9 @@ const membership = z.object({
   xpub : str
 })
 
-const data = z.object({
+const terms = z.tuple([ str, regex, regex ]).rest(literal)
+
+const data  = z.object({
   content   : str,
   deadline  : num.optional(),
   duration  : num.optional(),
@@ -31,4 +37,4 @@ const data = z.object({
   version   : num
 })
 
-export default { data }
+export default { data, terms }

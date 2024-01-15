@@ -1,5 +1,5 @@
 import { EventEmitter } from './emitter.js'
-import { EscrowSigner } from './signer.js'
+import { EscrowMember } from './member.js'
 import { find_program } from '@/lib/proposal.js'
 
 import {
@@ -40,15 +40,15 @@ export class EscrowProposal extends EventEmitter<{
 
   join (
     role   : RolePolicy,
-    signer : EscrowSigner,
+    member : EscrowMember,
     index ?: number
   ) {
-    const mdata = signer.gen_membership(index)
+    const mdata = member.gen_membership(index)
     this.add_membership(mdata, role)
   }
 
-  leave (signer : EscrowSigner) {
-    const mship = signer.get_membership(this)
+  leave (member : EscrowMember) {
+    const mship = member.get_membership(this)
     this.rem_membership(mship.token)
   }
 

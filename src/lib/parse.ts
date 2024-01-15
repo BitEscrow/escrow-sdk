@@ -1,11 +1,6 @@
 import { Buff } from '@cmdcode/buff'
 
 import {
-  check_program_config,
-  validate_program_terms
-} from '@/validators/program.js'
-
-import {
   ContractData,
   PaymentEntry,
   DepositData,
@@ -44,9 +39,8 @@ export function parse_deposit (
 export function parse_program (
   terms : unknown[]
 ) : ProgramData {
-  validate_program_terms(terms)
-  const [ method, actions, paths, ...params ] = terms
-  check_program_config(method, params)
+  const parsed = schema.proposal.terms.parse(terms)
+  const [ method, actions, paths, ...params ] = parsed
   const prog_id = Buff.json([ method, ...params ]).digest.hex
   return { prog_id, method, actions, paths, params }
 }

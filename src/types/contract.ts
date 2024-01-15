@@ -1,5 +1,9 @@
 import { AgentSession } from './covenant.js'
-import { ProgramEntry, StateData }    from './vm.js'
+
+import {
+  ProgramEntry,
+  StateData
+} from './vm.js'
 
 import {
   PaymentEntry,
@@ -14,7 +18,7 @@ import {
 export type ContractStatus = 'published' | 'funded' | 'secured' | 'pending'  | 'active'  |
                              'closed'    | 'spent'  | 'settled' | 'canceled' | 'expired' | 'error'
 
-export type ContractData   = AgentSession & ContractBase & SettleState & SpendState
+export type ContractData = AgentSession & ContractBase & SettleState & SpendState
 
 export type SpendTemplate = [
   label : string,
@@ -47,4 +51,9 @@ export interface ContractBase {
   total       : number
   updated_at  : number
   vm_state    : null | StateData
+}
+
+export interface ContractRequest {
+  proposal    : ProposalData,
+  signatures ?: string[]
 }

@@ -1,7 +1,7 @@
 import { print_banner } from './utils.js'
 
 import {
-  clients,
+  members,
   proposal,
   roles
 } from './01-proposal.js'
@@ -16,11 +16,11 @@ import {
  * 
  * See the 'utils.ts' and 'vectors.ts' files for more info.
  */
-const [ a_client, b_client, c_client ] = clients
+const [ a_mbr, b_mbr, c_mbr ] = members
 
-const buyer_cred = a_client.gen_membership()
-const sales_cred = b_client.gen_membership()
-const agent_cred = c_client.gen_membership()
+const buyer_cred = a_mbr.gen_membership()
+const sales_cred = b_mbr.gen_membership()
+const agent_cred = c_mbr.gen_membership()
 
 print_banner('INITIAL PROPOSAL')
 console.log(proposal.toJSON())

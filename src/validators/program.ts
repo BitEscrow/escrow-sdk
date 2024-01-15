@@ -17,7 +17,7 @@ import * as schema from '../schema/index.js'
 export function validate_program_terms (
   terms : unknown
 ) : asserts terms is ProgramTerms {
-  schema.vm.terms.parse(terms)
+  schema.proposal.terms.parse(terms)
 }
 
 export function check_program_config (

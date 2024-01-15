@@ -1,19 +1,11 @@
-import { assert }       from '@scrow/core'
-import { EscrowSigner } from '@/client/class/signer.js'
-
-import {
-  Seed,
-  Signer,
-  Wallet
-} from '@cmdcode/signer'
+import { assert } from '@scrow/core'
+import { Wallet } from '@cmdcode/signer'
 
 import {
   CoreClient,
   CoreConfig,
   CoreDaemon
 } from '@cmdcode/core-cmd'
-
-import { EscrowMember } from './types.js'
 
 const DEFAULT_CONFIG = {
   core_params : [ '-txindex' ],
@@ -38,23 +30,25 @@ export function get_daemon (
   return daemon
 }
 
-export function get_users (
-  cli    : CoreClient,
-  labels : string[]
-) : Promise<EscrowMember[]> {
-  const users = labels.map(async label => {
-    const seed   = Seed.import.from_char('alice')
-    const corew  = await cli.load_wallet(label)
-    const xpub   = await corew.xpub
-    const signer = new Signer({ seed })
-    const wallet = new Wallet(xpub)
-    return {
-      label,
-      client : new EscrowSigner({ signer, wallet }),
-      wallet : corew
-    }
-  })
-  return Promise.all(users)
+export async function get_wallet (
+  client : CoreClient,
+  label  : string
+) {
+  const wdat = await client.load_wallet(label)
+  const xpub = await wdat.xpub
+  return new Wallet(xpub)
+}
+
+export async function fund_address (
+  client  : CoreClient,
+  label   : string,
+  address : string,
+  value   : number,
+  mine_block = true
+) : Promise<string> {
+    const wdat = await client.load_wallet(label)
+    await wdat.ensure_funds(value)
+    return wdat.send_funds(value, address, mine_block)
 }
 
 export async function get_utxo (

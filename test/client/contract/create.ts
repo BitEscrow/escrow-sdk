@@ -23,7 +23,7 @@ const proposal = {
   expires   : 14400,
   details   : 'n/a',
   network   : 'regtest',
-  moderator : alice.signer.pubkey,
+  moderator : alice.client.signer.pubkey,
   paths: [
     [ 'heads', 10000, await alice.wallet.new_address ],
     [ 'tails', 10000, await bob.wallet.new_address   ],
@@ -34,8 +34,8 @@ const proposal = {
     [ 5000,  await carol.wallet.new_address ]
   ],
   programs : [
-    [ 'sign', 'close|dispute', '*', 2, alice.signer.pubkey, bob.signer.pubkey ],
-    [ 'sign', 'resolve',       '*', 1, carol.signer.pubkey ]
+    [ 'sign', 'close|dispute', '*', 2, alice.client.signer.pubkey, bob.client.signer.pubkey ],
+    [ 'sign', 'resolve',       '*', 1, carol.client.signer.pubkey ]
   ],
   schedule: [
     [ 7200, 'close', 'draw' ]

@@ -1,4 +1,4 @@
-import { resolve_res }  from '@/lib/resolve.js'
+import { resolve_json } from '@/lib/oracle.js'
 
 import contract_api  from '@/client/api/contract.js'
 import deposit_api   from '@/client/api/deposit.js'
@@ -59,7 +59,7 @@ export function get_fetcher (
   // Return the wrapped fetch method.
   return async <T> (config : FetchConfig) => {
     // Unpack the config.
-    const { init, schema, token, url } = config
+    const { init, token, url } = config
     // Initialize the options object.
     const req = new Request(url, init)
     if (token !== undefined) {
@@ -68,6 +68,6 @@ export function get_fetcher (
     // Run the fetcher method.
     const res = await fetcher(req)
     // Resolve, validate, then return the response.
-    return resolve_res<T>(res, schema)
+    return resolve_json<T>(res)
   }
 }

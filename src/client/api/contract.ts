@@ -1,19 +1,23 @@
-import { EscrowClient, EscrowProposal } from '../index.js'
-import { CovenantData, ProposalData, WitnessData }  from '@/types/index.js'
+import { verify_endorsement } from '@/lib/member.js'
+import { get_proposal_id }    from '@/lib/proposal.js'
+import { EscrowClient }       from '@/client/class/client.js'
+import { EscrowProposal }     from '@/client/class/proposal.js'
+import { FundingData }        from '@/client/types.js'
 
 import {
   validate_proposal,
   validate_registration,
   verify_proposal
-} from '../../validators/index.js'
+} from '@/validators/index.js'
 
 import {
-  ContractDataResponse,
-  ContractListResponse,
-  DepositListResponse,
-  FundingDataResponse,
-  WitnessListResponse,
-} from '@/client/types.js'
+  ApiResponse,
+  ContractData,
+  CovenantData,
+  DepositData,
+  ProposalData,
+  WitnessData
+}  from '@/types/index.js'
 
 import * as assert from '@/assert.js'
 
@@ -24,8 +28,9 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    proposal : ProposalData | EscrowProposal
-  ) : Promise<ContractDataResponse> => {
+    proposal    : ProposalData | EscrowProposal,
+    signatures ?: string[]
+  ) : Promise<ApiResponse<ContractData>> => {
     if (proposal instanceof EscrowProposal) {
       proposal = proposal.data
     }
@@ -33,16 +38,21 @@ function create_contract_api (
     validate_proposal(proposal)
     // Verify the proposal's terms.
     verify_proposal(proposal)
+    // Verify any signatures.
+    if (signatures !== undefined) {
+      const prop_id = get_proposal_id(proposal)
+      signatures.forEach(e => verify_endorsement(prop_id, e, true))
+    }
     // Formulate the request url.
     const url  = `${client.host}/api/contract/create`
     // Formulate the request body.
     const init = {
-      body    : JSON.stringify(proposal),
+      body    : JSON.stringify({ proposal, signatures }),
       method  : 'POST',
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url, init })
+    return client.fetcher<ContractData>({ url, init })
   }
 }
 
@@ -52,13 +62,13 @@ function create_contract_api (
 function read_contract_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ContractDataResponse> => {
+  ) : Promise<ApiResponse<ContractData>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/${cid}`
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url })
+    return client.fetcher<ContractData>({ url })
   }
 }
 
@@ -69,11 +79,13 @@ function read_contract_api (client : EscrowClient) {
 function list_contract_api (
   client : EscrowClient
 ) {
-  return async (token : string) : Promise<ContractListResponse> => {
+  return async (
+    token : string
+  ) : Promise<ApiResponse<ContractData[]>> => {
     // Formulate the request.
     const url = `${client.host}/api/contract/list`
     // Return the response.
-    return client.fetcher<ContractListResponse>({ url, token })
+    return client.fetcher<ContractData[]>({ url, token })
   }
 }
 
@@ -82,13 +94,15 @@ function list_contract_api (
  * that are associated with the contract.
  */
 function list_funds_api (client : EscrowClient) {
-  return async (cid : string) : Promise<DepositListResponse> => {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<DepositData[]>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/funds`
     // Return the response.
-    return client.fetcher<DepositListResponse>({ url })
+    return client.fetcher<DepositData[]>({ url })
   }
 }
 
@@ -97,13 +111,15 @@ function list_funds_api (client : EscrowClient) {
  * that are associated with the contract.
  */
 function list_witness_api (client : EscrowClient) {
-  return async (cid : string) : Promise<WitnessListResponse> => {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<WitnessData>> => {
      // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/witness`
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url })
+    return client.fetcher<WitnessData>({ url })
   }
 }
 
@@ -115,7 +131,7 @@ function fund_contract_api (client : EscrowClient) {
     agent_id  : string,
     return_tx : string,
     covenant ?: CovenantData
-  ) : Promise<FundingDataResponse> => {
+  ) : Promise<ApiResponse<FundingData>> => {
     // Assert that a covenant is defined.
     assert.ok(covenant !== undefined, 'covenant is undefined')
     // Create a deposit template.
@@ -131,7 +147,7 @@ function fund_contract_api (client : EscrowClient) {
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<FundingDataResponse>({ url, init })
+    return client.fetcher<FundingData>({ url, init })
   }
 }
 
@@ -158,13 +174,15 @@ function fund_contract_api (client : EscrowClient) {
  * Check and update the status of a contract.
  */
 function status_contract_api (client : EscrowClient) {
-  return async (cid : string) : Promise<ContractDataResponse> => {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<ContractData>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/${cid}/status`
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url })
+    return client.fetcher<ContractData>({ url })
   }
 }
 
@@ -175,7 +193,7 @@ function submit_witness_api (client : EscrowClient) {
   return async (
     cid     : string,
     witness : WitnessData
-  ) : Promise<WitnessListResponse> => {
+  ) : Promise<ApiResponse<WitnessData[]>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request url.
@@ -187,7 +205,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url, init })
+    return client.fetcher<WitnessData[]>({ url, init })
   }
 }
 

@@ -30,7 +30,7 @@ import {
   DepositData,
   MutexContext,
   MutexEntry,
-  DepositReturn,
+  ReturnData,
   SignerAPI,
   TxOutput
 } from '../types/index.js'
@@ -86,7 +86,7 @@ export function create_return_psig (
   deposit : DepositData,
   signer  : SignerAPI,
   txfee   : number
-) : DepositReturn {
+) : ReturnData {
   // Unpack the deposit object.
   const { agent_id, dpid, agent_pn, value } = deposit
   // Compute the session pnonce value.

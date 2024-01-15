@@ -1,17 +1,15 @@
 import { exists } from './util.js'
 
 import {
+  ApiResponse,
   OracleFeeEstimate,
   OracleQuery,
   OracleSpendData,
   OracleSpendState,
-  OracleTxData,
-  Resolve
+  OracleTxData
 } from '../types/index.js'
 
 import * as schema from '@/schema/index.js'
-
-import { resolve_res } from './resolve.js'
 
 /**
  * Fetch transaction data from the oracle.
@@ -26,10 +24,16 @@ export async function get_tx_data (
   const res = await fetch(url)
   // If status is 404, return null.
   if (res.status === 404) return null
-  // Define the parser to be used for validation.
-  const parser = schema.oracle.txdata
-  // Resolve the data received by the oracle.
-  return resolve_res<OracleTxData>(res, parser)
+  // Resolve the response into json.
+  const json = await resolve_json<OracleTxData>(res)
+  // If the response failed, throw.
+  if (!json.ok) throw new Error(json.error)
+  // Parse the returned data.
+  const parsed = await schema.oracle.txdata.spa(json.data)
+  // If data fails validation, throw.
+  if (!parsed.success) throw new Error(parsed.error.toString())
+  // Return the parsed data.
+  return parsed.data
 }
 
 /**
@@ -47,10 +51,16 @@ export async function get_spend_state (
   const res = await fetch(url)
   // If status is 404, return null.
   if (res.status === 404) return null
-  // Define the parser to be used for validation.
-  const parser = schema.oracle.txostate
-  // Resolve the data received by the oracle.
-  return resolve_res<OracleSpendState>(res, parser)
+  // Resolve the response into json.
+  const json = await resolve_json<OracleSpendState>(res)
+  // If the response failed, throw.
+  if (!json.ok) throw new Error(json.error)
+  // Parse the returned data.
+  const parsed = await schema.oracle.txostate.spa(json.data)
+  // If data fails validation, throw.
+  if (!parsed.success) throw new Error(parsed.error.toString())
+  // Return the parsed data.
+  return parsed.data
 }
 
 /**
@@ -105,19 +115,22 @@ export async function get_spend_data (
 export async function broadcast_tx (
   host  : string,
   txhex : string
-) : Promise<Resolve<string>> {
+) : Promise<ApiResponse<string>> {
   // Define the url to use for fetching.
   const url = `${host}/api/tx`
-  // Fetch a response from the oracle.
-  const res = await fetch(url, {
+  // Configure the request.
+  const req = {
     body    : txhex,
     headers : { 'content-type' : 'text/plain' },
     method  : 'POST'
-  })
+  }
+  // Fetch a response from the oracle.
+  const res    = await fetch(url, req)
+  const { status, statusText } = res
   // Return a data object based on the oracle response.
   return (res.ok) 
-    ? { ok : true,  data  : await res.text() }
-    : { ok : false, error : `${res.status} : ${res.statusText}` }
+    ? { status, ok : true,  data  : await res.text() }
+    : { status, ok : false, error : statusText }
 }
 
 /**
@@ -130,8 +143,12 @@ export async function fee_estimates (
   const url = `${host}/api/fee-estimates`
   // Fetch a response from the oracle.
   const res = await fetch(url)
-  // Resolve the data received by the oracle.
-  return resolve_res<OracleFeeEstimate>(res)
+  // Resolve the response into json.
+  const json = await resolve_json<OracleFeeEstimate>(res)
+  // If the response failed, throw.
+  if (!json.ok) throw new Error(json.error)
+  // Return the parsed data.
+  return json.data
 }
 
 /**
@@ -154,4 +171,48 @@ export async function get_fee_target (
   }
   // Else, return feerate from oracle.
   return feerate
+}
+
+export async function fetcher<T> (
+  input   : URL | RequestInfo, 
+  init   ?: RequestInit,
+  fetcher = fetch
+) {
+  const res = await fetcher(input, init)
+  return resolve_json<T>(res)
+} 
+
+/**
+ * Helper method for resolving json
+ * and other data from HTTP responses.
+ */
+export async function resolve_json <T> (
+  res : Response
+) : Promise<ApiResponse<T>> {
+  const { status, statusText } = res
+
+  let data : any
+  
+  try {
+    data = await res.json()
+  } catch {
+    data = undefined
+  }
+
+  if (!res.ok) {
+    const error = (typeof data?.error === 'string')
+      ? data.error
+      : statusText
+    return { status, ok: false, error }
+  }
+
+  if (data === undefined) {
+    return {
+      status,
+      ok     : false, 
+      error  : 'data is undefined'
+    }
+  }
+
+  return { status, ok : true, data }
 }

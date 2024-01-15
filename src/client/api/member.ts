@@ -1,6 +1,6 @@
 import { Wallet }         from '@cmdcode/signer'
+import { EscrowMember }   from '@/client/class/member.js'
 import { EscrowProposal } from '@/client/class/proposal.js'
-import { EscrowSigner }   from '@/client/class/signer.js'
 import { ProposalData }   from '@/types/index.js'
 
 import {
@@ -11,8 +11,7 @@ import {
 
 import { Membership } from '../types.js'
 
-
-export function gen_membership_api (client : EscrowSigner) {
+export function gen_membership_api (client : EscrowMember) {
   return (index ?: number) => {
     const { signer, wallet } = client
     const idx = index ?? client.new_idx
@@ -21,7 +20,7 @@ export function gen_membership_api (client : EscrowSigner) {
 }
 
 export function has_membership_api (
-  client : EscrowSigner
+  client : EscrowMember
 ) {
   return (proposal : ProposalData | EscrowProposal) => {
     if (proposal instanceof EscrowProposal) {
@@ -32,7 +31,7 @@ export function has_membership_api (
 }
 
 export function claim_membership_api (
-  client : EscrowSigner
+  client : EscrowMember
 ) {
   const { signer } = client
   return (proposal : ProposalData | EscrowProposal) : Membership => {
@@ -52,7 +51,7 @@ export function claim_membership_api (
   }
 }
 
-export default function (client : EscrowSigner) {
+export default function (client : EscrowMember) {
   return {
       claim  : claim_membership_api(client),
       create : gen_membership_api(client),

@@ -3,6 +3,8 @@ import {
   SignerAPI,
   WalletAPI
 } from '@/types/index.js'
+import { Buff, Bytes } from '@cmdcode/buff'
+import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 /**
  * Create a new membership using a parent
@@ -74,4 +76,28 @@ export function rem_member_data (
   mship   : MemberData
 ) {
   return members.filter(e => e.pub !== mship.pub)
+}
+
+export function create_endorsement (
+  record_id : Bytes,
+  signer    : SignerAPI
+) {
+  const pub = signer.pubkey
+  const sig = signer.sign(record_id)
+  return Buff.join([ pub, sig ])
+}
+
+export function verify_endorsement (
+  record_id : Bytes,
+  signature : Bytes,
+  throws = false
+) {
+  const bytes = Buff.bytes(signature)
+  const pub   = bytes.subarray(0, 32)
+  const sig   = bytes.subarray(32, 96)
+  const bool  = verify_sig(sig, record_id, pub)
+  if (!bool && throws) {
+    throw new Error('invalid signature for pubkey: ' + pub.hex)
+  }
+  return bool
 }

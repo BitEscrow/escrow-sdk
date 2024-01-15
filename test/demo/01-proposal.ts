@@ -1,6 +1,6 @@
 
 import { get_role_policy } from '@/lib/policy.js'
-import { get_client } from './utils.js'
+import { get_member }      from './utils.js'
 
 import {
   EscrowProposal,
@@ -8,7 +8,7 @@ import {
 } from '@scrow/core'
 
 export const seeds   = [ 'alice', 'bob', 'carol', 'david' ]
-export const clients = seeds.map(e => get_client(e))
+export const members = seeds.map(e => get_member(e))
 
 export const proposal = new EscrowProposal({
   title    : 'Basic two-party contract with third-party dispute resolution.',

@@ -25,6 +25,11 @@ const state  = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 const status = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
 const request = z.object({
+  pubkey   : hash,
+  locktime : num
+})
+
+const account = z.object({
   address    : bech32,
   agent_id   : hash,
   agent_pk   : hash,
@@ -68,4 +73,4 @@ const data = z.object({
   updated_at : stamp
 }).and(state).and(spend_state).and(close_state).and(txspend)
 
-export default { covenant, data, state, refund, request, register, status }
+export default { account, covenant, data, state, refund, request, register, status }
