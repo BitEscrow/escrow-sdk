@@ -23,12 +23,15 @@ import {
  */
 export function register_deposit_api (client : EscrowSigner) {
   return async (
-    sess   : DepositAccount,
-    utxo   : TxOutput,
-    txfee ?: number
+    acct     : DepositAccount,
+    utxo     : TxOutput,
+    contract ?: ContractData,
+    txfee    ?: number
   ) : Promise<DepositRegister> => {
+    // Define a variable for covenant data.
+    let covenant : CovenantData | undefined
     // Unpack the deposit object.
-    const { agent_id, agent_pk, sequence } = sess
+    const { agent_id, agent_pk, sequence } = acct
     // Define our pubkey.
     const pub  = client.pubkey
     const idx  = Buff.hex(utxo.txid).slice(0, 4).num
@@ -37,22 +40,27 @@ export function register_deposit_api (client : EscrowSigner) {
     const ctx  = get_deposit_ctx(agent_pk, pub, sequence)
     // Create the return transaction.
     const rtx  = create_return_tx(addr, ctx, client._signer, utxo, txfee)
-    return { agent_id, return_tx : rtx }
+    // If contract is define, set covenant variable.
+    if (contract !== undefined) {
+      covenant = create_covenant(ctx, contract, client._signer, utxo)
+    }
+    return { agent_id, covenant, return_tx : rtx }
   }
 }
 
 export function create_covenant_api (client : EscrowSigner) {
   return async (
-    req      : DepositAccount | DepositData,
     contract : ContractData,
-    utxo     : TxOutput
+    deposit  : DepositData
   ) : Promise<CovenantData> => {
     // Unpack the deposit object.
-    const { agent_pk, sequence } = req
+    const { agent_pk, sequence, txid, vout, value, scriptkey } = deposit
     // Define our pubkey.
     const pub  = client.pubkey
     // Get the context object for our deposit account.
     const ctx  = get_deposit_ctx(agent_pk, pub, sequence)
+    // Define utxo object from deposit data.
+    const utxo = { txid, vout, value, scriptkey }
     // Create a covenant with the contract and deposit.
     return create_covenant(ctx, contract, client._signer, utxo)
   }

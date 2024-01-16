@@ -64,15 +64,14 @@ function register_deposit_api (client : EscrowClient) {
  */
 function read_deposit_api (client : EscrowClient) {
   return async (
-    dpid  : string,
-    token : string
+    dpid  : string
   ) : Promise<ApiResponse<DepositDataResponse>> => {
     // Validate the deposit id.
     assert.is_hash(dpid)
     // Formulate the request.
     const url = `${client.host}/api/deposit/${dpid}`
     // Return the response.
-    return client.fetcher<DepositDataResponse>({ url, token })
+    return client.fetcher<DepositDataResponse>({ url })
   }
 }
 
@@ -90,24 +89,22 @@ function list_deposit_api (client : EscrowClient) {
 function commit_deposit_api (client : EscrowClient) {
   return async (
     dpid     : string,
-    covenant : CovenantData,
-    token    : string
+    covenant : CovenantData
   ) : Promise<ApiResponse<FundingDataResponse>> => {
-    const url    = `${client.host}/api/deposit/${dpid}/add`
+    const url    = `${client.host}/api/deposit/${dpid}/commit`
     const body   = JSON.stringify(covenant)
     const init   = {
       body,
       method  : 'POST',
       headers : { 'content-type' : 'application/json' }
     }
-    return client.fetcher<FundingDataResponse>({ url, init, token })
+    return client.fetcher<FundingDataResponse>({ url, init })
   }
 }
 
 function close_deposit_api (client : EscrowClient) {
   return async (
-    req   : ReturnData,
-    token : string
+    req : ReturnData
   ) : Promise<ApiResponse<DepositDataResponse>> => {
     const dpid = req.dpid
     const url  = `${client._host}/api/deposit/${dpid}/close`
@@ -117,17 +114,7 @@ function close_deposit_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' },
       method  : 'POST'
     }
-    return client.fetcher<DepositDataResponse>({ url, init, token })
-  }
-}
-
-function status_deposit_api (client : EscrowClient) {
-  return async (
-    dpid : string
-  ) : Promise<ApiResponse<DepositDataResponse>> => {
-    assert.is_hash(dpid)
-    const url = `${client.host}/api/deposit/${dpid}/status`
-    return client.fetcher<DepositDataResponse>({ url })
+    return client.fetcher<DepositDataResponse>({ url, init })
   }
 }
 
@@ -138,7 +125,6 @@ export default function (client : EscrowClient) {
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     register : register_deposit_api(client),
-    request  : request_deposit_api(client),
-    status   : status_deposit_api(client),
+    request  : request_deposit_api(client)
   }
 }

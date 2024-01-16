@@ -1,23 +1,14 @@
-// make deposit
 import {
   fund_address,
   get_daemon,
   get_utxo
 } from "@scrow/test"
 
-import { members }          from "./01-proposal.js"
-import { EscrowClient }     from "@/index.js"
-import { DEFAULT_LOCKTIME } from "@/config.js"
+import { client, members } from "../proposal/configure_clients.js"
 
 // Startup a local process of Bitcoin Core for testing.
 const core = get_daemon({ network : 'regtest' })
 const cli  = await core.startup()
-
-// Define a third-party client as a coordinator.
-const client = new EscrowClient({
-  hostname : 'http://localhost:3000',
-  oracle   : 'http://172.21.0.3:3000'
-})
 
 // Unpack a member for testing.
 const [ a_mbr ] = members
@@ -25,7 +16,7 @@ const [ a_mbr ] = members
 // Request an account for the member to use.
 const account_res = await client.deposit.request({
   pubkey   : a_mbr.pubkey,
-  locktime : DEFAULT_LOCKTIME
+  locktime : 60 * 60 // 1 hour locktime
 })
 
 // Check the response is valid.

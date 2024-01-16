@@ -21,7 +21,7 @@ import {
 import {
   ContractData,
   DepositData,
-  DepositReturn,
+  ReturnData,
   SpendTemplate
 } from '../../src/types/index.js'
 
@@ -48,7 +48,7 @@ export function create_settlment (
 export function create_refund (
   agent   : Signer,
   deposit : DepositData,
-  request : DepositReturn
+  request : ReturnData
 ) : TxData {
   const { agent_pn }           = deposit
   const { pnonce, psig, txhex } = request

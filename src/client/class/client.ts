@@ -33,7 +33,7 @@ export class EscrowClient {
   get host () {
     return this._host
   }
- 
+
   contract = contract_api(this)
   deposit  = deposit_api(this)
   oracle   = oracle_api(this)

@@ -27,11 +27,11 @@ export function get_witness_id (
 
 export function create_witness (
   contract : ContractData,
-  template : WitnessTemplate,
-  stamp    = now()
+  pubkey   : string,
+  template : WitnessTemplate
 ) : WitnessData {
   const { programs } = contract.terms
-  const { args = [], action, method, path, pubkey } = template
+  const { args = [], action, method, path, stamp = now() } = template
 
   const query  = { method, action, path, includes: [ pubkey ] }
   const pdata  = find_program(query, programs)
@@ -54,7 +54,7 @@ export function sign_witness (
   signer  : SignerAPI,
   witness : WitnessData
 ) : WitnessData {
-  const { sigs, wid } = witness
+  const { sigs = [], wid } = witness
   const pub = signer.pubkey
   const sig = signer.sign(wid)
   const hex = Buff.join([ pub, sig ]).hex

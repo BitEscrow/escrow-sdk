@@ -4,6 +4,7 @@ import { EscrowClient } from './client.js'
 
 import deposit_api from '../api/depositor.js'
 import endorse_api from '../api/endorse.js'
+import request_api from '../api/request.js'
 
 import {
   claim_membership_api,
@@ -42,6 +43,7 @@ export class EscrowSigner {
 
   deposit = deposit_api(this)
   endorse = endorse_api(this)
+  request = request_api(this)
 
   gen_membership = gen_membership_api(this)
   get_membership = claim_membership_api(this)

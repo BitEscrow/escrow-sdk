@@ -8,7 +8,6 @@ import {
   ContractListResponse,
   DepositListResponse,
   FundingDataResponse,
-  WitnessDataResponse,
   WitnessListResponse
 } from '@/client/types.js'
 
@@ -106,7 +105,7 @@ function list_funds_api (client : EscrowClient) {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
-    const url = `${client.host}/api/contract/funds`
+    const url = `${client.host}/api/contract/${cid}/funds`
     // Return the response.
     return client.fetcher<DepositListResponse>({ url })
   }
@@ -119,13 +118,13 @@ function list_funds_api (client : EscrowClient) {
 function list_witness_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<WitnessDataResponse>> => {
+  ) : Promise<ApiResponse<WitnessListResponse>> => {
      // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
-    const url = `${client.host}/api/contract/witness`
+    const url = `${client.host}/api/contract/${cid}/witness`
     // Return the response.
-    return client.fetcher<WitnessDataResponse>({ url })
+    return client.fetcher<WitnessListResponse>({ url })
   }
 }
 
@@ -177,29 +176,13 @@ function fund_contract_api (client : EscrowClient) {
 // }
 
 /**
- * Check and update the status of a contract.
- */
-function status_contract_api (client : EscrowClient) {
-  return async (
-    cid : string
-  ) : Promise<ApiResponse<ContractDataResponse>> => {
-    // Validate the contract id.
-    assert.is_hash(cid)
-    // Formulate the request.
-    const url = `${client.host}/api/contract/${cid}/status`
-    // Return the response.
-    return client.fetcher<ContractDataResponse>({ url })
-  }
-}
-
-/**
  * Submit a signed statement to the contract.
  */
 function submit_witness_api (client : EscrowClient) {
   return async (
     cid     : string,
     witness : WitnessData
-  ) : Promise<ApiResponse<WitnessListResponse>> => {
+  ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request url.
@@ -211,7 +194,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url, init })
+    return client.fetcher<ContractDataResponse>({ url, init })
   }
 }
 
@@ -223,7 +206,6 @@ export default function (client : EscrowClient) {
     funds   : list_funds_api(client),
     list    : list_contract_api(client),
     read    : read_contract_api(client),
-    status  : status_contract_api(client),
     submit  : submit_witness_api(client),
     witness : list_witness_api(client)
   }

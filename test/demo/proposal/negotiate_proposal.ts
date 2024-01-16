@@ -1,10 +1,6 @@
-import { print_banner } from './utils.js'
-
-import {
-  members,
-  proposal,
-  roles
-} from './01-proposal.js'
+import { print_banner }    from '../utils.js'
+import { members }         from './configure_clients.js'
+import { proposal, roles } from './configure_proposal.js'
 
 /**
  * SETUP
@@ -16,6 +12,7 @@ import {
  * 
  * See the 'utils.ts' and 'vectors.ts' files for more info.
  */
+
 const [ a_mbr, b_mbr, c_mbr ] = members
 
 const buyer_cred = a_mbr.gen_membership()

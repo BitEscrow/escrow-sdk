@@ -34,7 +34,7 @@ export interface WitnessTemplate {
   args  ?: Literal[]
   method : string
   path   : string
-  pubkey : string
+  stamp ?: number
 }
 
 export interface WitnessPreimage {
@@ -47,6 +47,6 @@ export interface WitnessPreimage {
 }
 
 export interface WitnessData extends WitnessPreimage {
-  sigs    : string[]
-  wid     : string
+  sigs : string[]
+  wid  : string
 }
