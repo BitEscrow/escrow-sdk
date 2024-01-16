@@ -134,10 +134,9 @@ export default async function (client : CoreClient, t : Test) {
       action : 'dispute',
       method : 'sign',
       path   : 'payout',
-      pubkey : signer.pubkey
     }
 
-    const wit_tmpl = create_witness(contract, config)
+    const wit_tmpl = create_witness(contract, signer.pubkey, config)
 
     validate_witness(active_contract, wit_tmpl)
 

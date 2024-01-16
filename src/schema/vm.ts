@@ -7,8 +7,7 @@ const commit    = z.tuple([ num, num, hash, hash ])
 const entry     = z.tuple([ hash ]).rest(literal)
 const method    = z.enum([ 'oracle', 'reveal', 'sign' ])
 const path      = z.tuple([ str, num ])
-const item      = z.tuple([ label, str ])
-const store     = z.tuple([ label, item.array() ])
+const store     = z.tuple([ hash, str ]).array()
 const task      = z.tuple([ num, str, regex ])
 const status    = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
@@ -19,7 +18,7 @@ const data = z.object({
   result   : label.nullable(),
   start    : stamp,
   steps    : num.max(255),
-  store    : store.array(),
+  store    : store,
   status   : status,
   tasks    : task.array(),
   updated  : stamp

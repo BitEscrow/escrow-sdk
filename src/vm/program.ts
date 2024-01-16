@@ -7,15 +7,15 @@ import { debug }         from './util.js'
 import {
   ProgramEntry,
   StateData,
-  StoreEntry,
   WitnessData,
-  MethodManifest
+  MethodManifest,
+  StoreEntry
 } from '../types/index.js'
 
 export function init_stores (
   prog_ids : string[]
 ) : StoreEntry[] {
-  return prog_ids.map(e => [ e, new Array() ])
+  return prog_ids.map(e => [ e, '[]' ])
 }
 
 export function run_program (

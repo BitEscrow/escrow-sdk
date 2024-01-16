@@ -1,6 +1,7 @@
 import { Literal } from './base.js'
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
+export type StoreEntry = [ string, string ]
 export type WitProgram = (...args : string[]) => boolean
 
 export type CommitEntry = [
@@ -21,16 +22,6 @@ export type ProgramEntry = [
 export type StateEntry = [
   path  : string, 
   state : PathState
-]
-
-export type StoreEntry = [
-  label : string,
-  store : StoreItem[]
-]
-
-export type StoreItem = [
-  key : string,
-  val : string
 ]
 
 export type TaskEntry = [

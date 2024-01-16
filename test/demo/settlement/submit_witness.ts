@@ -4,7 +4,7 @@ import { WitnessTemplate } from '@/types/index.js'
 
 const [ a_mbr ] = members
 
-const cid = 'e60f610a4c53cc854efe0da891fed4d7cc61261ffe37ec8275de129ba20613fc'
+const cid = 'b312db089587b1b077d8fd82ca07f2668847de5412b8faeb62cb937dca9bfa45'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)

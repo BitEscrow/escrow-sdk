@@ -1,7 +1,5 @@
 import {
   Literal,
-  StoreEntry,
-  StoreItem,
   WitnessData,
 } from '@/types/index.js'
 
@@ -10,7 +8,7 @@ import {
  */
 export function exec (
   params : Literal[],
-  store  : StoreEntry
+  store  : string[]
 ) {
   // Unpack params.
   const [ threshold, ...members ] = params
@@ -29,7 +27,7 @@ export function exec (
         throw 'pubkey not a member of the program'
       }
       // Record the pubkey under path/action label, and return vote count.
-      const count = record_entry(store[1], `${path}/${action}`, pub)
+      const count = record_entry(store, `${path}/${action}`, pub)
       // Return the status of the count.
       if (count >= thold) return true
     }
@@ -42,12 +40,13 @@ export function exec (
  * a given action/path combination.
  */
 function record_entry (
-  store  : StoreItem[],
+  store  : string[],
   label  : string,
   pubkey : string
 ) : number {
+  const entries : [ string, string[] ][] = JSON.parse(store[1])
   // Check if the label entry exists in the store.
-  const idx = store.findIndex(e => e[0] === label)
+  const idx = entries.findIndex(e => e[0] === label)
   // Initialize array object.
     let arr : string[]
   // If label does not exist:
@@ -56,7 +55,7 @@ function record_entry (
     arr = new Array(pubkey)
   } else {
     // Else, revive existing label entry.
-    arr = revive_data(store[idx][1])
+    arr = entries[idx][1]
     // Check if pubkey already exists in array:
     if (arr.includes(pubkey)) {
       // Throw on duplicate key entry.
@@ -66,43 +65,43 @@ function record_entry (
       arr.push(pubkey)
     }
   }
-  // Serialize the array back into a string.
-  const data = serialize_data(arr)
   // If label did not exists prevously:
   if (idx === -1) {
     // Push new label entry to store.
-    store.push([ label, data ])
+    entries.push([ label, arr ])
   } else {
     // Else, update existing label entry.
-    store[idx][1] = data
+    entries[idx][1] = arr
   }
+  // Update store.
+  store[1] = JSON.stringify(entries)
   // Return the new length of the label array.
   return arr.length
 }
 
-/**
- * Revive a store item from string.
- */
-function revive_data (data : string) {
-  let arr : string[]
-  try {
-    arr = JSON.parse(data)
-  } catch {
-    throw new Error('program data is corrupt')
-  }
-  if (!Array.isArray(arr)) {
-    throw new Error('program data is corrupt')
-  }
-  return arr
-}
+// /**
+//  * Revive a store item from string.
+//  */
+// function revive_data (data : string) {
+//   let arr : string[]
+//   try {
+//     arr = JSON.parse(data)
+//   } catch {
+//     throw new Error('program data is corrupt')
+//   }
+//   if (!Array.isArray(arr)) {
+//     throw new Error('program data is corrupt')
+//   }
+//   return arr
+// }
 
-/**
- * Dump a store item to string.
- */
-function serialize_data (data : string[]) {
-  try {
-    return JSON.stringify(data)
-  } catch {
-    throw new Error('program failed to save data')
-  }
-}
+// /**
+//  * Dump a store item to string.
+//  */
+// function serialize_data (data : string[]) {
+//   try {
+//     return JSON.stringify(data)
+//   } catch {
+//     throw new Error('program failed to save data')
+//   }
+// }
