@@ -1,6 +1,5 @@
 import { create_txhex }     from './tx.js'
 import { now, sort_record } from './util.js'
-import { parse_program }    from './parse.js'
 import { DEFAULT_DEADLINE } from '../config.js'
 import { init_vm }          from '../vm/main.js'
 
@@ -15,8 +14,6 @@ import {
   ContractConfig,
   ContractData,
   PaymentEntry,
-  ProgramEntry,
-  ProgramTerms,
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
@@ -44,7 +41,6 @@ export function create_contract (
     outputs     : get_spend_outputs(terms, fees),
     pending     : 0,
     prop_id     : get_proposal_id(terms).hex,
-    programs    : init_programs(terms.programs),
     pubkeys     : signatures.map(e => e.slice(0, 64)),
     published   : published,
     settled     : false,
@@ -72,13 +68,14 @@ export function activate_contract (
   /**
    * Activate a contract.
    */
-  const { terms } = contract
+  const { cid, published, terms } = contract
+  const { expires, paths, programs, schedule } = terms
   return {
     ...contract,
     activated,
-    expires_at : activated + terms.expires,
+    expires_at : activated + expires,
     status     : 'active',
-    vm_state   : init_vm(contract)
+    vm_state   : init_vm({ cid, paths, programs, published, schedule })
   }
 }
 
@@ -116,20 +113,4 @@ export function get_spend_outputs (
     outputs.push([ name, txhex ])
   }
   return outputs
-}
-
-function init_programs (
-  terms : ProgramTerms[]
-) : ProgramEntry[] {
-  /**
-   * Id each program term and
-   * load them into an array.
-   */
-  const entries : ProgramEntry[] = []
-  for (const term of terms) {
-    const program = parse_program(term)
-    const { method, actions, paths, prog_id, params } = program
-    entries.push([ prog_id, method, actions, paths, ...params ])
-  }
-  return entries
 }

@@ -1,9 +1,5 @@
 import { AgentSession } from './covenant.js'
-
-import {
-  ProgramEntry,
-  StateData
-} from './vm.js'
+import { StateData }    from './vm.js'
 
 import {
   PaymentEntry,
@@ -45,7 +41,6 @@ export interface ContractBase {
   moderator   : string | null
   outputs     : SpendTemplate[]
   pending     : number
-  programs    : ProgramEntry[]
   pubkeys     : string[]
   prop_id     : string
   published   : number

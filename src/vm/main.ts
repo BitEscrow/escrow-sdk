@@ -8,6 +8,7 @@ import {
 } from './util.js'
 
 import {
+  init_programs,
   init_stores,
   run_program
 } from './program.js'
@@ -16,8 +17,7 @@ import {
   PathStatus,
   StateData,
   WitnessData,
-  ProgramEntry,
-  ContractData
+  MachineConfig
 } from '../types/index.js'
 
 const INIT_STATE = {
@@ -33,7 +33,6 @@ const INIT_STATE = {
  * Evaluates the witness data against the current virtual machine state.
  */
 export function eval_witness (
-  programs : ProgramEntry[],
   state    : StateData,
   witness  : WitnessData,
   marker  = now()
@@ -52,7 +51,7 @@ export function eval_witness (
     // If there is a result, return early.
     if (state.result !== null) return { state }
     // Fetch the program by id, then run the program.
-    run_program(programs, state, witness)
+    run_program(state, witness)
   } catch (err) {
     // Handle raised errors.
     error = err_handler(err)
@@ -82,14 +81,14 @@ export function eval_schedule (
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (
-  contract : ContractData
+  config : MachineConfig
 ) : StateData {
-  const { cid, programs, published, terms } = contract
-  const head     = cid
-  const paths    = init_paths(terms.paths, terms.programs)
+  const head     = config.cid
+  const paths    = init_paths(config.paths, config.programs)
+  const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e[0]))
-  const start    = published
-  const tasks    = terms.schedule.sort((a, b) => a[0] - b[0])
+  const start    = config.published
+  const tasks    = config.schedule.sort((a, b) => a[0] - b[0])
   const updated  = start
-  return { ...INIT_STATE, head, paths, start, store, tasks, updated }
+  return { ...INIT_STATE, head, paths, programs, start, store, tasks, updated }
 }

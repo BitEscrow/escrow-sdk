@@ -1,4 +1,5 @@
-import { Literal } from './base.js'
+import { Literal }   from './base.js'
+import { PathEntry, ProgramTerms, ScheduleTerms } from './proposal.js'
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
 export type StoreEntry = [ string, string ]
@@ -41,6 +42,7 @@ export interface StateData {
   commits  : CommitEntry[]
   head     : string
   paths    : StateEntry[]
+  programs : ProgramEntry[]
   result   : string | null
   steps    : number
   start    : number
@@ -48,4 +50,12 @@ export interface StateData {
   store    : StoreEntry[]
   tasks    : TaskEntry[]
   updated  : number
+}
+
+export interface MachineConfig {
+  cid       : string
+  paths     : PathEntry[]
+  programs  : ProgramTerms[]
+  published : number
+  schedule  : ScheduleTerms[]
 }

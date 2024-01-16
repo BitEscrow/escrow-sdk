@@ -20,9 +20,11 @@ const template : WitnessTemplate= {
   path   : 'tails'
 }
 
-const pubkey = a_mbr.get_membership(contract.terms).token.pub
+const terms  = contract.terms 
 
-let witness = create_witness(contract, pubkey, template)
+const pubkey = a_mbr.get_membership(terms).token.pub
+
+let witness = create_witness(terms.programs, pubkey, template)
 
 witness = a_mbr.endorse.witness(contract, witness)
 witness = b_mbr.endorse.witness(contract, witness)

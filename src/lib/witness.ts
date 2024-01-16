@@ -8,7 +8,7 @@ import {
 } from './util.js'
 
 import {
-  ContractData,
+  ProgramTerms,
   SignerAPI,
   WitnessData,
   WitnessPreimage,
@@ -26,11 +26,10 @@ export function get_witness_id (
 }
 
 export function create_witness (
-  contract : ContractData,
+  programs : ProgramTerms[],
   pubkey   : string,
   template : WitnessTemplate
 ) : WitnessData {
-  const { programs } = contract.terms
   const { args = [], action, method, path, stamp = now() } = template
 
   const query  = { method, action, path, includes: [ pubkey ] }

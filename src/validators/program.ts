@@ -49,11 +49,13 @@ export function validate_witness (
   contract : ContractData,
   witness  : WitnessData
 ) {
-  const { expires_at, programs, published } = contract
+  const { expires_at, published, vm_state }      = contract
   const { action, path, prog_id, method, stamp } = witness
 
+  assert.exists(vm_state)
+
   const pathnames = get_path_names(contract.terms.paths)
-  const program   = programs.find(e => e[0] === prog_id)
+  const program   = vm_state.programs.find(e => e[0] === prog_id)
 
   assert.ok(program !== undefined,  'program not found: ' + prog_id)
 

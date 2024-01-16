@@ -1,6 +1,7 @@
 import { Buff }          from '@cmdcode/buff'
-import { now, regex }    from '../lib/util.js'
-import { MANIFEST }      from '../lib/programs/index.js'
+import { parse_program } from '@/lib/parse.js'
+import { now, regex }    from '@/lib/util.js'
+import { MANIFEST }      from '@/lib/programs/index.js'
 import { update_path }   from './state.js'
 import { debug }         from './util.js'
 
@@ -9,7 +10,8 @@ import {
   StateData,
   WitnessData,
   MethodManifest,
-  StoreEntry
+  StoreEntry,
+  ProgramTerms
 } from '../types/index.js'
 
 export function init_stores (
@@ -18,12 +20,27 @@ export function init_stores (
   return prog_ids.map(e => [ e, '[]' ])
 }
 
+export function init_programs (
+  terms : ProgramTerms[]
+) : ProgramEntry[] {
+  /**
+   * Id each program term and
+   * load them into an array.
+   */
+  const entries : ProgramEntry[] = []
+  for (const term of terms) {
+    const program = parse_program(term)
+    const { method, actions, paths, prog_id, params } = program
+    entries.push([ prog_id, method, actions, paths, ...params ])
+  }
+  return entries
+}
+
 export function run_program (
-  programs : ProgramEntry[],
-  state    : StateData,
-  witness  : WitnessData
+  state   : StateData,
+  witness : WitnessData
 ) {
-  const { store } = state
+  const { programs, store } = state
   const { action, path } = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {

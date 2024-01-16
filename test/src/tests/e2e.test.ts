@@ -117,7 +117,7 @@ export default async function (client : CoreClient, t : Test) {
     /* ------------------ [ Activation ] ------------------ */
 
     const active_contract = activate_contract(contract)
-    const { programs, vm_state }    = active_contract
+    const { vm_state }    = active_contract
     
     assert.exists(vm_state)
 
@@ -136,7 +136,7 @@ export default async function (client : CoreClient, t : Test) {
       path   : 'payout',
     }
 
-    const wit_tmpl = create_witness(contract, signer.pubkey, config)
+    const wit_tmpl = create_witness(proposal.programs, signer.pubkey, config)
 
     validate_witness(active_contract, wit_tmpl)
 
@@ -151,7 +151,7 @@ export default async function (client : CoreClient, t : Test) {
 
     let state : StateData
  
-    const vm_result = eval_witness(programs, vm_state, witness, now())
+    const vm_result = eval_witness(vm_state, witness, now())
 
     if (vm_result.error !== undefined) {
       throw new Error(vm_result.error)

@@ -4,7 +4,7 @@ import proposal from './proposal.js'
 import tx       from './tx.js'
 import vm       from './vm.js'
 
-const { hash, hex, label, literal, nonce, num, payment, regex, stamp } = base
+const { hash, hex, label, nonce, num, payment, stamp } = base
 const { data : terms } = proposal
 const { close_state, spend_state } = tx
 
@@ -16,7 +16,6 @@ const agent = z.object({
 
 const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
-const program = z.tuple([ hash, label, regex, regex ]).rest(literal)
 
 const request = z.object({
   proposal   : terms,
@@ -33,7 +32,6 @@ const data = z.object({
   outputs     : output.array(),
   moderator   : hash.nullable(),
   pending     : num,
-  programs    : program.array(),
   prop_id     : hash,
   pubkeys     : hash.array(),
   published   : stamp,
