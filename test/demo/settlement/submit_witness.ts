@@ -2,9 +2,9 @@ import { client, members } from '../proposal/configure_clients.js'
 import { create_witness }  from '@/lib/witness.js'
 import { WitnessTemplate } from '@/types/index.js'
 
-const [ a_mbr ] = members
+const [ a_mbr, b_mbr ] = members
 
-const cid = 'b312db089587b1b077d8fd82ca07f2668847de5412b8faeb62cb937dca9bfa45'
+const cid = '289a63cd3afdde7d145f39ff5b3ea7caa7ece361a92c422fd8b4c8b07653b278'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)
@@ -25,6 +25,7 @@ const pubkey = a_mbr.get_membership(contract.terms).token.pub
 let witness = create_witness(contract, pubkey, template)
 
 witness = a_mbr.endorse.witness(contract, witness)
+witness = b_mbr.endorse.witness(contract, witness)
 
 console.log('witness:', witness)
 

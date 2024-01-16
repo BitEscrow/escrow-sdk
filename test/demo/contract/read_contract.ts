@@ -6,7 +6,7 @@ const client = new EscrowClient({
   oracle   : 'http://172.21.0.3:3000'
 })
 
-const cid = 'b312db089587b1b077d8fd82ca07f2668847de5412b8faeb62cb937dca9bfa45'
+const cid = '289a63cd3afdde7d145f39ff5b3ea7caa7ece361a92c422fd8b4c8b07653b278'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)

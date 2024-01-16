@@ -1,8 +1,8 @@
 import { client, members } from "../proposal/configure_clients.js"
 
 // Define the contract and deposit we will be using.
-const cid  = 'b312db089587b1b077d8fd82ca07f2668847de5412b8faeb62cb937dca9bfa45'
-const dpid = '84c16f87642b67175519c6847001fcdb26cc6065e46e4d6472da94468c60a3e6'
+const cid  = '289a63cd3afdde7d145f39ff5b3ea7caa7ece361a92c422fd8b4c8b07653b278'
+const dpid = 'ca2419d6c033223b58313368accec2266779b52da6a7404e8cdb0a7afbbc7ab8'
 
 // Unpack a member for testing.
 const [ a_mbr ] = members
