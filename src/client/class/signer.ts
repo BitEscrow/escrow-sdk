@@ -1,6 +1,7 @@
-import { Buff }         from '@cmdcode/buff'
-import { SignerConfig } from '@/client/types.js'
-import { EscrowClient } from './client.js'
+import { Buff }           from '@cmdcode/buff'
+import { Signer, Wallet } from '@cmdcode/signer'
+import { SignerConfig }   from '@/client/types.js'
+import { EscrowClient }   from './client.js'
 
 import deposit_api from '../api/depositor.js'
 import endorse_api from '../api/endorse.js'
@@ -20,6 +21,19 @@ import {
 const DEFAULT_IDXGEN = () => Buff.now(4).num
 
 export class EscrowSigner {
+
+  static load (
+    password : string,
+    payload  : string
+  ) {
+    const bytes   = Buff.bech32(payload)
+    const encdata = bytes.subarray(0, 96)
+    const xpub    = bytes.subarray(96).b58chk
+    const pass    = Buff.str(password)
+    const signer  = Signer.restore(pass, encdata)
+    const wallet  = new Wallet(xpub)
+    return new EscrowSigner({ signer, wallet })
+  }
 
   readonly _client  : EscrowClient
   readonly _gen_idx : () => number
@@ -49,4 +63,11 @@ export class EscrowSigner {
   get_membership = claim_membership_api(this)
   has_membership = has_membership_api(this)
 
+  save (password : string) {
+    const pass    = Buff.str(password)
+    const encdata = this._signer.backup(pass)
+    const xbytes  = Buff.b58chk(this._wallet.xpub)
+    const payload = Buff.join([ encdata, xbytes ])
+    return payload.to_bech32('cred')
+  }
 }

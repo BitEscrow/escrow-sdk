@@ -20,6 +20,7 @@ export interface CredentialData {
 export interface SignerAPI {
   id        : string
   pubkey    : string
+  backup    : (password : Bytes) => Bytes
   has_id    : (id : Bytes, pubkey : Bytes) => boolean
   get_id    : (id : Bytes) => SignerAPI
   gen_cred  : (idx : number, xpub : string) => CredentialData
