@@ -1,19 +1,12 @@
-
-import { EscrowClient } from './client.js'
 import { EventEmitter } from './emitter.js'
 import { ContractData } from '../../types/index.js'
 
 export class EscrowContract extends EventEmitter {
-  readonly _client : EscrowClient
   readonly _data   : ContractData
 
-  constructor (
-    client   : EscrowClient,
-    contract : ContractData
-  ) {
+  constructor (contract : ContractData) {
     super()
-    this._client = client
-    this._data   = contract
+    this._data = contract
   }
 
   get agent () {
@@ -25,61 +18,72 @@ export class EscrowContract extends EventEmitter {
   }
 
   get cid () {
-    return this._data.cid
+    return this.data.cid
   }
 
-  get client () : EscrowClient {
-    return this._client
-  }
-
-  get data () : ContractData {
+  get data () {
     return this._data
   }
 
   get date () {
-    return {
-      activated  : this.data.activated,
-      deadline   : this.data.deadline,
-      expires_at : this.data.expires_at,
-      published  : this.data.published,
-      updated_at : this.data.updated_at
-    }
+    const { activated, deadline, expires_at, published, updated_at } = this.data
+    return { activated, deadline, expires_at, published, updated_at }
   }
 
-  get funds () {
+  get amt () {
+    const { balance, fees, pending, terms, total } = this.data
     return {
-      balance : this.data.balance,
-      fees    : this.data.fees,
-      pending : this.data.pending,
-      total   : this.data.total
+      balance,
+      fees     : fees.reduce((a, b) => a + b[0], 0),
+      payments : terms.payments.reduce((a, b) => a + b[0], 0),
+      pending,
+      subtotal : terms.value,
+      total
     }
   }
 
   get moderator () {
-    return this._data.moderator
+    return this.data.moderator
   }
 
   get outputs () {
-    return this._data.outputs
+    return this.data.outputs
   }
 
   get prop_id () {
-    return this._data.prop_id
+    return this.data.prop_id
+  }
+
+  get pubkeys () {
+    return this.data.pubkeys
+  }
+
+  get signatures () {
+    return this.data.signatures
   }
 
   get status () {
-    return this._data.status
+    return this.data.status
   }
 
   get terms () {
-    return this._data.terms
+    return this.data.terms
+  }
+
+  get tx () {
+    const { settled, settled_at, spent, spent_at, spent_txid } = this.data
+    return { settled, settled_at, spent, spent_at, spent_txid }
   }
 
   get vm_state () {
     return this._data.vm_state
   }
 
-  toJSON() {
+  toJSON () {
     return this.data
+  }
+
+  toString() {
+    return JSON.stringify(this.data)
   }
 }

@@ -1,33 +1,25 @@
-import { EscrowClient }   from './client.js'
 import { EscrowContract } from './contract.js'
 import { EventEmitter }   from './emitter.js'
 import { WitnessData }    from '../../types/index.js'
 
 export default class ContractVM extends EventEmitter {
-  readonly _client   : EscrowClient
-  readonly _contract : EscrowContract
-  readonly _witness  : WitnessData[]
+  readonly _ct : EscrowContract
+  readonly _wt : WitnessData[]
 
   constructor (
-    client   : EscrowClient,
     contract : EscrowContract,
     witness  : WitnessData[]
   ) {
     super()
-    this._client   = client
-    this._contract = contract
-    this._witness  = witness
-  }
-
-  get client () : EscrowClient {
-    return this._client
+    this._ct = contract
+    this._wt  = witness
   }
 
   get contract () : EscrowContract {
-    return this._contract
+    return this._ct
   }
 
   get witness () : WitnessData[] {
-    return this._witness
+    return this._wt
   }
 }
