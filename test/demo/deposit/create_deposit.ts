@@ -27,17 +27,18 @@ const { account } = account_res.data
 
 console.log('account:', account)
 
-const address = account.address
+const address  = account.address
+const agent_id = account.agent_id
 
 // Use our utility methods to fund the address and get the utxo.
 const txid = await fund_address(cli, 'alice', address, 20_000)
 const utxo = await get_utxo(cli, address, txid)
 
 // Request the member to sign
-const regdata = await a_mbr.deposit.create_registration(account, utxo)
+const return_tx = await a_mbr.deposit.register_utxo(account, utxo)
 
 // Register the deposit with the API.
-const deposit_res = await client.deposit.register(regdata)
+const deposit_res = await client.deposit.register(agent_id, return_tx)
 
 // Check the response is valid.
 if (!deposit_res.ok) throw new Error('failed')

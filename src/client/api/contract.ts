@@ -7,19 +7,16 @@ import {
   ContractDataResponse,
   ContractListResponse,
   DepositListResponse,
-  FundingDataResponse,
   WitnessListResponse
 } from '@/client/types.js'
 
 import {
   validate_proposal,
-  validate_registration,
   verify_proposal
 } from '@/validators/index.js'
 
 import {
   ApiResponse,
-  CovenantData,
   ProposalData,
   WitnessData
 }  from '@/types/index.js'
@@ -129,34 +126,6 @@ function list_witness_api (client : EscrowClient) {
 }
 
 /**
- * Fund a contract directly using a deposit template.
- */
-function fund_contract_api (client : EscrowClient) {
-  return async (
-    agent_id  : string,
-    return_tx : string,
-    covenant ?: CovenantData
-  ) : Promise<ApiResponse<FundingDataResponse>> => {
-    // Assert that a covenant is defined.
-    assert.ok(covenant !== undefined, 'covenant is undefined')
-    // Create a deposit template.
-    const templ = { agent_id, return_tx, covenant }
-    // Validate the deposit template.
-    validate_registration(templ)
-    // Formulate the request url.
-    const url  = `${client.host}/api/deposit/register`
-    // Forulate the request body.
-    const init = {
-      method  : 'POST', 
-      body    : JSON.stringify(templ),
-      headers : { 'content-type' : 'application/json' }
-    }
-    // Return the response.
-    return client.fetcher<FundingDataResponse>({ url, init })
-  }
-}
-
-/**
  * Cancel a contract that is not active.
  */
 // function cancel_contract_api (
@@ -202,7 +171,6 @@ export default function (client : EscrowClient) {
   return {
     // cancel  : cancel_contract_api(client),
     create  : create_contract_api(client),
-    deposit : fund_contract_api(client),
     funds   : list_funds_api(client),
     list    : list_contract_api(client),
     read    : read_contract_api(client),

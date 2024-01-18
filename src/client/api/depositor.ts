@@ -13,7 +13,6 @@ import {
   CovenantData,
   DepositAccount,
   DepositData,
-  DepositRegister,
   ReturnData,
   TxOutput
 } from '@/types/index.js'
@@ -21,17 +20,14 @@ import {
 /**
  * Create a deposit template for registration.
  */
-export function register_deposit_api (client : EscrowSigner) {
+export function register_utxo_api (client : EscrowSigner) {
   return async (
-    acct     : DepositAccount,
-    utxo     : TxOutput,
-    contract ?: ContractData,
-    txfee    ?: number
-  ) : Promise<DepositRegister> => {
-    // Define a variable for covenant data.
-    let covenant : CovenantData | undefined
+    account : DepositAccount,
+    utxo    : TxOutput,
+    txfee  ?: number
+  ) : Promise<string> => {
     // Unpack the deposit object.
-    const { agent_id, agent_pk, sequence } = acct
+    const { agent_pk, sequence } = account
     // Define our pubkey.
     const pub  = client.pubkey
     const idx  = Buff.hex(utxo.txid).slice(0, 4).num
@@ -41,14 +37,28 @@ export function register_deposit_api (client : EscrowSigner) {
     // Create the return transaction.
     const rtx  = create_return_tx(addr, ctx, client._signer, utxo, txfee)
     // If contract is define, set covenant variable.
-    if (contract !== undefined) {
-      covenant = create_covenant(ctx, contract, client._signer, utxo)
-    }
-    return { agent_id, covenant, return_tx : rtx }
+    return rtx
   }
 }
 
-export function create_covenant_api (client : EscrowSigner) {
+export function commit_utxo_api (client : EscrowSigner) {
+  return async (
+    account  : DepositAccount,
+    contract : ContractData,
+    utxo     : TxOutput
+  ) : Promise<CovenantData> => {
+    // Unpack the deposit object.
+    const { agent_pk, sequence } = account
+    // Define our pubkey.
+    const pub  = client.pubkey
+    // Get the context object for our deposit account.
+    const ctx  = get_deposit_ctx(agent_pk, pub, sequence)
+    // Create a covenant with the contract and deposit.
+    return create_covenant(ctx, contract, client._signer, utxo)
+  }
+}
+
+export function commit_deposit_api (client : EscrowSigner) {
   return async (
     contract : ContractData,
     deposit  : DepositData
@@ -66,7 +76,7 @@ export function create_covenant_api (client : EscrowSigner) {
   }
 }
 
-export function create_return_api (client : EscrowSigner) {
+export function commit_return_api (client : EscrowSigner) {
   return async (
     deposit  : DepositData,
     txfee    : number,
@@ -87,8 +97,9 @@ export function create_return_api (client : EscrowSigner) {
 
 export default function (client : EscrowSigner) {
   return {
-    create_registration : register_deposit_api(client),
-    create_covenant     : create_covenant_api(client),
-    create_return       : create_return_api(client)
+    register_utxo  : register_utxo_api(client),
+    commit_utxo    : commit_utxo_api(client),
+    commit_deposit : commit_deposit_api(client),
+    commit_return  : commit_return_api(client)
   }
 }

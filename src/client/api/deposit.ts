@@ -10,7 +10,6 @@ import {
 } from '@/client/types.js'
 
 import {
-  DepositRegister,
   CovenantData,
   ReturnData,
   ApiResponse,
@@ -42,20 +41,51 @@ function request_deposit_api (client : EscrowClient) {
  */
 function register_deposit_api (client : EscrowClient) {
   return async (
-    template : DepositRegister
+    agent_id  : string,
+    return_tx : string 
   ) : Promise<ApiResponse<DepositDataResponse>> => {
+    // Create template
+    const tmpl = { agent_id, return_tx }
     // Validate the deposit template.
-    validate_registration(template)
+    validate_registration({ agent_id, return_tx })
     // Configure the url.
     const url = `${client.host}/api/deposit/register`
     // Formulate the request.
     const init = {
-      method  : 'POST', 
-      body    : JSON.stringify(template),
+      method  : 'POST',
+      body    : JSON.stringify(tmpl),
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
     return client.fetcher<DepositDataResponse>({ url, init })
+  }
+}
+
+/**
+ * Fund a contract directly using a deposit template.
+ */
+function fund_contract_api (client : EscrowClient) {
+  return async (
+    agent_id  : string,
+    return_tx : string,
+    covenant  : CovenantData
+  ) : Promise<ApiResponse<FundingDataResponse>> => {
+    // Assert that a covenant is defined.
+    assert.ok(covenant !== undefined, 'covenant is undefined')
+    // Create a deposit template.
+    const templ = { agent_id, return_tx, covenant }
+    // Validate the deposit template.
+    validate_registration(templ)
+    // Formulate the request url.
+    const url  = `${client.host}/api/deposit/register`
+    // Forulate the request body.
+    const init = {
+      method  : 'POST', 
+      body    : JSON.stringify(templ),
+      headers : { 'content-type' : 'application/json' }
+    }
+    // Return the response.
+    return client.fetcher<FundingDataResponse>({ url, init })
   }
 }
 
@@ -122,6 +152,7 @@ export default function (client : EscrowClient) {
   return {
     close    : close_deposit_api(client),
     commit   : commit_deposit_api(client),
+    fund     : fund_contract_api(client),
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     register : register_deposit_api(client),

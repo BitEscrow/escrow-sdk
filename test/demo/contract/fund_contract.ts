@@ -24,7 +24,7 @@ const { deposit } = dp_res.data
 console.log('deposit:', deposit)
 
 // Request the member to sign
-const covenant = await a_mbr.deposit.create_covenant(contract, deposit)
+const covenant = await a_mbr.deposit.commit_deposit(contract, deposit)
 
 // Register the covenant with the API.
 const cov_res = await client.deposit.commit(dpid, covenant)

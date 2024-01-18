@@ -18,6 +18,9 @@ import {
   get_daemon,
   get_utxo
 } from '@scrow/test'
+import { print_banner } from './utils.js'
+
+const VERBOSE = process.env.VERBOSE === 'true'
 
 // Startup a local process of Bitcoin Core for testing.
 const core = get_daemon({ network : 'regtest' })
@@ -113,7 +116,10 @@ if (!create_res.ok) throw create_res.error
 
 let { contract } = create_res.data
 
-console.log('contract:', contract)
+if (VERBOSE) {
+  print_banner('NEW CONTRACT')
+  console.dir(contract, { depth : null })
+}
 
 // Request an account for the member to use.
 const account_res = await client.deposit.request({
@@ -127,26 +133,37 @@ if (!account_res.ok) throw new Error('failed')
 // Unpack some of the terms.
 const { account } = account_res.data
 
-console.log('account:', account)
+if (VERBOSE) {
+  print_banner('NEW ACCOUNT')
+  console.dir(account, { depth : null })
+}
 
-const address = account.address
+const { address, agent_id } = account
 
 // Use our utility methods to fund the address and get the utxo.
 const txid = await fund_address(cli, 'alice', address, 20_000)
 const utxo = await get_utxo(cli, address, txid)
 
 // Request the member to sign
-const reg_data = await a_mbr.deposit.create_registration(account, utxo, contract)
+const return_tx = await a_mbr.deposit.register_utxo(account, utxo)
+const covenant  = await a_mbr.deposit.commit_utxo(account, contract, utxo)
 
-// Register the deposit with the API.
-const deposit_res = await client.deposit.register(reg_data)
+// Fund the contract directly with the API.
+const deposit_res = await client.deposit.fund(agent_id, return_tx, covenant)
 
 // Check the response is valid.
 if (!deposit_res.ok) throw new Error('failed')
 
-let { deposit } = deposit_res.data
+let deposit = deposit_res.data.deposit
 
-console.log('deposit:', deposit)
+contract = deposit_res.data.contract
+
+if (VERBOSE) {
+  print_banner('NEW DEPOSIT')
+  console.dir(deposit, { depth : null })
+  print_banner('UPDATED CONTRACT')
+  console.dir(contract, { depth : null })
+}
 
 const template : WitnessTemplate = {
   action : 'close',
@@ -163,7 +180,10 @@ let witness = create_witness(terms.programs, pubkey, template)
 witness = a_mbr.endorse.witness(contract, witness)
 witness = b_mbr.endorse.witness(contract, witness)
 
-console.log('witness:', witness)
+if (VERBOSE) {
+  print_banner('SIGNED WITNESS')
+  console.dir(witness, { depth : null })
+}
 
 const wit_res = await client.contract.submit(contract.cid, witness)
 
@@ -172,4 +192,7 @@ if (!wit_res.ok) throw new Error(wit_res.error)
 
 const { contract: new_contract } = wit_res.data
 
-console.log('new contract:', new_contract)
+if (VERBOSE) {
+  print_banner('SETTLED CONTRACT')
+  console.dir(new_contract, { depth : null })
+}
