@@ -14,7 +14,7 @@ import {
 } from '@/client/api/member.js'
 
 import {
-  SignerAPI,
+  CredSignerAPI,
   WalletAPI
 } from '@/types/index.js'
 
@@ -37,7 +37,7 @@ export class EscrowSigner {
 
   readonly _client  : EscrowClient
   readonly _gen_idx : () => number
-  readonly _signer  : SignerAPI
+  readonly _signer  : CredSignerAPI
   readonly _wallet  : WalletAPI
 
   constructor (config : SignerConfig) {

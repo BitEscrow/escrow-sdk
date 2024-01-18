@@ -1,11 +1,11 @@
 import { ZodTypeAny } from 'zod'
 
 import {
+  CredSignerAPI,
   ContractData,
   DepositAccount,
   DepositData,
   MemberData,
-  SignerAPI,
   WalletAPI,
   WitnessData,
 } from '@/types/index.js'
@@ -18,7 +18,7 @@ export interface ClientConfig {
 
 export interface SignerConfig extends ClientConfig {
   idxgen ?: () => number
-  signer  : SignerAPI
+  signer  : CredSignerAPI
   wallet  : WalletAPI
 }
 
@@ -30,7 +30,7 @@ export interface FetchConfig {
 }
 
 export interface Membership {
-  signer : SignerAPI,
+  signer : CredSignerAPI,
   token  : MemberData,
   wallet : WalletAPI
 }

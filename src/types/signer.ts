@@ -20,15 +20,18 @@ export interface CredentialData {
 export interface SignerAPI {
   id        : string
   pubkey    : string
-  backup    : (password : Bytes) => Bytes
-  has_id    : (id : Bytes, pubkey : Bytes) => boolean
-  get_id    : (id : Bytes) => SignerAPI
-  gen_cred  : (idx : number, xpub : string) => CredentialData
   gen_nonce : (data : Bytes) => Buff
-  gen_token : (content : string) => string
-  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
   musign    : MusignDevice
   sign      : SignDevice
+}
+
+export interface CredSignerAPI extends SignerAPI {
+  backup    : (password : Bytes) => Bytes
+  has_id    : (id : Bytes, pubkey : Bytes) => boolean
+  get_id    : (id : Bytes) => CredSignerAPI
+  gen_cred  : (idx : number, xpub : string) => CredentialData
+  gen_token : (content : string) => string
+  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
 }
 
 export interface SignOptions {

@@ -1,10 +1,11 @@
+import { Buff, Bytes } from '@cmdcode/buff'
+import { verify_sig }  from '@cmdcode/crypto-tools/signer'
+
 import {
   MemberData,
-  SignerAPI,
+  CredSignerAPI,
   WalletAPI
 } from '@/types/index.js'
-import { Buff, Bytes } from '@cmdcode/buff'
-import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 /**
  * Create a new membership using a parent
@@ -12,7 +13,7 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
  */
 export function gen_membership (
   index  : number,
-  signer : SignerAPI,
+  signer : CredSignerAPI,
   wallet : WalletAPI,
 ) : MemberData {
   return signer.gen_cred(index, wallet.xpub)
@@ -20,7 +21,7 @@ export function gen_membership (
 
 export function has_membership (
   members : MemberData[],
-  signer  : SignerAPI
+  signer  : CredSignerAPI
 ) {
   const entry = members.find(e => signer.has_id(e.id, e.pub))
   return entry !== undefined
@@ -28,7 +29,7 @@ export function has_membership (
 
 export function get_membership (
   members : MemberData[],
-  signer  : SignerAPI
+  signer  : CredSignerAPI
 ) {
   const entry = members.find(e => signer.has_id(e.id, e.pub))
 
@@ -80,7 +81,7 @@ export function rem_member_data (
 
 export function create_endorsement (
   record_id : Bytes,
-  signer    : SignerAPI
+  signer    : CredSignerAPI
 ) {
   const pub = signer.pubkey
   const sig = signer.sign(record_id)
