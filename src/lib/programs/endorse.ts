@@ -4,7 +4,7 @@ import {
 } from '@/types/index.js'
 
 /**
- * Main execution logic for the sign method.
+ * Main execution logic for the endorse method.
  */
 export function exec (
   params : Literal[],
@@ -78,30 +78,3 @@ function record_entry (
   // Return the new length of the label array.
   return arr.length
 }
-
-// /**
-//  * Revive a store item from string.
-//  */
-// function revive_data (data : string) {
-//   let arr : string[]
-//   try {
-//     arr = JSON.parse(data)
-//   } catch {
-//     throw new Error('program data is corrupt')
-//   }
-//   if (!Array.isArray(arr)) {
-//     throw new Error('program data is corrupt')
-//   }
-//   return arr
-// }
-
-// /**
-//  * Dump a store item to string.
-//  */
-// function serialize_data (data : string[]) {
-//   try {
-//     return JSON.stringify(data)
-//   } catch {
-//     throw new Error('program failed to save data')
-//   }
-// }

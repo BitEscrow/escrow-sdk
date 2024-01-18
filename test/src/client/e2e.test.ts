@@ -41,7 +41,7 @@ const proposal = {
     [ 5000,  await carol.wallet.new_address ]
   ],
   programs : [
-    [ 'sign', 'close', 'heads|tails', 2, alice.signer.pubkey, bob.signer.pubkey ]
+    [ 'endorse', 'close', 'heads|tails', 2, alice.signer.pubkey, bob.signer.pubkey ]
   ],
   schedule: [
     [ 7200, 'close', 'draw' ]

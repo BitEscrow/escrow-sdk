@@ -10,7 +10,7 @@ export const REFUND_TX_VSIZE  = 118
 export const RETURN_TX_VSIZE  = 520
 
 export const VALID_ACTIONS = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
-export const VALID_METHODS = [ 'sign' ]
+export const VALID_METHODS = [ 'endorse' ]
 
 export const MIN_DEADLINE = _MIN  * 30
 export const MAX_EFFECT   = _DAY  * 30

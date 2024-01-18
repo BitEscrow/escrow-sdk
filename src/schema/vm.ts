@@ -5,7 +5,7 @@ const { hash, hex, label, literal, num, regex, stamp, str } = base
 
 const commit    = z.tuple([ num, num, hash, hash ])
 const entry     = z.tuple([ hash ]).rest(literal)
-const method    = z.enum([ 'oracle', 'reveal', 'sign' ])
+const method    = z.enum([ 'oracle', 'reveal', 'endorse' ])
 const path      = z.tuple([ str, num ])
 const program   = z.tuple([ hash, label, regex, regex ]).rest(literal)
 const store     = z.tuple([ hash, str ]).array()

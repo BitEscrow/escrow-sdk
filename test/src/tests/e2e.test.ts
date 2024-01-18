@@ -132,7 +132,7 @@ export default async function (client : CoreClient, t : Test) {
 
     const config = {
       action : 'dispute',
-      method : 'sign',
+      method : 'endorse',
       path   : 'payout',
     }
 

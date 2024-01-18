@@ -29,7 +29,7 @@ export function check_program_config (
   }
 
   switch (method) {
-    case 'sign':
+    case 'endorse':
       check_sign_config(params)
       break
     default:

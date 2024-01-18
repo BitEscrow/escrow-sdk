@@ -1,7 +1,7 @@
 import { Literal }    from './base.js'
 import { StoreEntry } from './vm.js'
 
-export type ProgramMethod  = 'oracle' | 'hlock' | 'sign'
+export type ProgramMethod  = 'oracle' | 'hlock' | 'endorse'
 export type MethodManifest = Record<ProgramMethod, ProgramExec>
 
 export type ProgramExec = (

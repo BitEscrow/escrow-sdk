@@ -16,7 +16,7 @@ const { contract } = ct_res.data
 
 const template : WitnessTemplate= {
   action : 'close',
-  method : 'sign',
+  method : 'endorse',
   path   : 'tails'
 }
 

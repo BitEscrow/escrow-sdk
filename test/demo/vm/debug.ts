@@ -31,16 +31,16 @@ const vm_config : MachineConfig = {
     [ 'return', 0, '' ]
   ],
   programs : [
-    [ 'sign', 'dispute',       '*', 1, a_mbr.pubkey, b_mbr.pubkey ],
-    [ 'sign', 'close|resolve', '*', 2, a_mbr.pubkey, b_mbr.pubkey ],
-    [ 'sign', 'resolve',       '*', 1, c_mbr.pubkey ]
+    [ 'endorse', 'dispute',       '*', 1, a_mbr.pubkey, b_mbr.pubkey ],
+    [ 'endorse', 'close|resolve', '*', 2, a_mbr.pubkey, b_mbr.pubkey ],
+    [ 'endorse', 'resolve',       '*', 1, c_mbr.pubkey ]
   ],
   published : now(),
   schedule : [ [ 7200, 'close', 'payout|return' ] ],
 }
 
 const templates = [
-  { action: 'close', method : 'sign', path : 'payout', signers : [ a_mbr ] }
+  { action: 'close', method : 'endorse', path : 'payout', signers : [ a_mbr ] }
 ]
 
 let vm_state = init_vm(vm_config)

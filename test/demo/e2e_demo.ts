@@ -68,8 +68,8 @@ const roles : Record<string, RolePolicy> = {
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'sign', 'close',   'heads|tails', 2 ],
-      [ 'sign', 'dispute', 'heads|tails', 1 ]
+      [ 'endorse', 'close',   'heads|tails', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
   },
   sales : {
@@ -79,8 +79,8 @@ const roles : Record<string, RolePolicy> = {
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'sign', 'close',   'heads|tails', 2 ],
-      [ 'sign', 'dispute', 'heads|tails', 1 ]
+      [ 'endorse', 'close',   'heads|tails', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
   },
   agent : {
@@ -88,7 +88,7 @@ const roles : Record<string, RolePolicy> = {
     payment : 5000,
     paths   : [],
     programs : [
-      [ 'sign', 'resolve', 'heads|tails', 1 ]
+      [ 'endorse', 'resolve', 'heads|tails', 1 ]
     ]
   }
 }
@@ -167,7 +167,7 @@ if (VERBOSE) {
 
 const template : WitnessTemplate = {
   action : 'close',
-  method : 'sign',
+  method : 'endorse',
   path   : 'tails'
 }
 
