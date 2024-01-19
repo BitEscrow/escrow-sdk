@@ -1,24 +1,22 @@
-import { assert } from '@scrow/core'
+import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
+import { CoreSigner }     from './types.js'
 
 import {
   CoreClient,
   CoreConfig,
   CoreDaemon
 } from '@cmdcode/core-cmd'
-import { Buff } from '@cmdcode/buff'
-import { CoreSigner } from './types.js'
 
 const DEFAULT_CONFIG = {
-  core_params : [ '-txindex' ],
-  corepath    : 'test/bin/bitcoind',
-  clipath     : 'test/bin/bitcoin-cli',
-  confpath    : 'test/bitcoin.conf',
-  datapath    : 'test/data',
+  corepath    : 'test/bin/core/bitcoind',
+  clipath     : 'test/bin/core/bitcoin-cli',
+  confpath    : 'test/conf/regtest.conf',
+  datapath    : 'test/data/suite',
   network     : 'regtest',
   isolated    : true,
-  debug       : false,
-  verbose     : false
+  debug       : true,
+  verbose     : true
 }
 
 let daemon : CoreDaemon | null = null
@@ -68,7 +66,7 @@ export async function fund_address (
   label   : string,
   address : string,
   value   : number,
-  mine_block = true
+  mine_block = false
 ) : Promise<string> {
     const wdat = await client.load_wallet(label)
     await wdat.ensure_funds(value)
@@ -81,9 +79,17 @@ export async function get_utxo (
   txid : string
 ) {
   const tx = await cli.get_tx(txid)
-  assert.exists(tx)
+  
+  if (tx === null) {
+    throw new Error('tx not found')
+  }
+
   const vout = tx.vout.findIndex(txo => txo.scriptPubKey.address === addr)
-  assert.ok(vout !== -1, 'tx output not found')
+  
+  if (vout === -1) {
+    throw new Error('vout not found in tx')
+  }
+
   const { value, scriptPubKey } = tx.vout[vout]
   return { txid, vout, value, scriptkey : scriptPubKey.hex }
 }

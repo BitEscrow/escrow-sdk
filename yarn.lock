@@ -10,14 +10,14 @@
     "@noble/hashes" "^1.3.0"
     "@scure/base" "^1.1.3"
 
-"@cmdcode/core-cmd@1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.4.3.tgz#e2e5b1fd7e7e11646766c55f5038a6f846c8336f"
-  integrity sha512-fEqKrn3TL1WkkBj/skj3RwZNSH+fuOrCVTrinbK2V0NYz38QxkxaCVhEQWCAOvgpvhD1Zb+8xrez4jVrWhf6YA==
+"@cmdcode/core-cmd@1.4.11":
+  version "1.4.11"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.4.11.tgz#829c9989480a62fad2e6317e69f1b4181d770216"
+  integrity sha512-EFyeGglJIbAN19oPJ2biElcxate3NHvXu+VcOcar8l+bVpTtQB1HZkEZv4czO9pj+a/U5CSWGYcWpbTgFpxDxQ==
   dependencies:
-    "@cmdcode/crypto-tools" "^2.6.10"
+    "@cmdcode/crypto-tools" "^2.7.5"
     "@scrow/tapscript" "^2.2.1"
-    "@types/node" "^20.10.4"
+    "@types/node" "^20.11.5"
 
 "@cmdcode/crypto-tools@2.7.5", "@cmdcode/crypto-tools@^2.7.5":
   version "2.7.5"
@@ -400,6 +400,13 @@
   version "20.10.6"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.10.6.tgz#a3ec84c22965802bf763da55b2394424f22bfbb5"
   integrity sha512-Vac8H+NlRNNlAmDfGUP7b5h/KA+AtWIzuXy0E6OyP8f1tCLYAtPvKRRDJjAPqhpCb0t6U2j7/xqAuLEebW2kiw==
+  dependencies:
+    undici-types "~5.26.4"
+
+"@types/node@^20.11.5":
+  version "20.11.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.5.tgz#be10c622ca7fcaa3cf226cf80166abc31389d86e"
+  integrity sha512-g557vgQjUUfN76MZAN/dt1z3dzcUsimuysco0KeluHgrPdJXkP/XdAURgyO2W9fZWHRtRBiVKzKn8vyOAwlG+w==
   dependencies:
     undici-types "~5.26.4"
 

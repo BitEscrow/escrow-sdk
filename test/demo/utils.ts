@@ -8,6 +8,8 @@ import { ClientConfig }   from "@/client/types.js"
  * escrow client that is configured for testing.
  */
 
+export const sleep = (ms = 1000) => new Promise(res => setTimeout(res, ms)) 
+
 export function get_member (
   alias   : string,
   config ?: ClientConfig
