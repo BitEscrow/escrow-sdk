@@ -68,14 +68,15 @@ export function activate_contract (
   /**
    * Activate a contract.
    */
-  const { cid, published, terms } = contract
+  const { cid, terms } = contract
   const { expires, paths, programs, schedule } = terms
+  const pathnames = get_path_names(paths)
   return {
     ...contract,
     activated,
     expires_at : activated + expires,
     status     : 'active',
-    vm_state   : init_vm({ cid, paths, programs, published, schedule })
+    vm_state   : init_vm({ activated, cid, pathnames, programs, schedule })
   }
 }
 

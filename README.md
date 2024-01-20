@@ -2,64 +2,43 @@
 
 # escrow-core
 
-Core library for implenting the escrow protocol.
+A light-weight, non-custodial protocol for using Bitcoin in a `covenant-based` smart contract.
 
 Features:
-  * Method libraries for the proposal, contract, and settlement rounds of the protocol.
+  * Method libraries for every part of the protocol.
   * Multi-platform client with minimal dependencies.
   * Run-time schema validation (using zod).
-  * Showcases the power of taproot and musig2.
-  * E2E test suite with native Bitcoin Core integration.
+  * E2E test suite for regtest, signet, and testnet.
 
 Comimg Soon:
-  * Caching and hydration for the contract object.
-  * Real-time events with EventEmitter interface.
-  * Tooling for disposable private keys.
-  * More tests and documentation.
+  * Return receipts on witness submission.
+  * Improved code comments and documentation.
+  * `hashlock` and `oracle` programs for vm.
+  * OpenAPI spec document.
 
-Long Term:
-  * Spending paths with variable amounts.
-  * Extended deposit key for generating addresses.
-  * Direct change outputs into a new deposit.
-  * Refinements to the contract vm.
+## How It Works
 
-## Prelude
+The protocol involves three parties:
 
-The focus of this project is to build the best escrow platform on the planet, using Bitcoin as a form of programmable collateral, and its block-chain as a global arbitration service.
+**Members**  : The participating members of the contract.
+**Sponsors** : Those depositing funds into the contract (may be members).
+**Executor** : The host of the escrow contract (BitEscrow API).
 
-This open-source project represents my one-year tribute of chasing after that dream.
+The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
-My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am grateful.
+### Negotiation
 
-I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place, and bring society towards a golden age. Maybe we will become space-faring apes that reach beyond the moon.
+The `members` of the contract must first negotiate and agree on a `proposal` document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT). You can view an example of a proposal document [here]().
 
-> Bitcoin simply must be for enemies, or it will never be for friends.  
-> -- Mark Goodwin, [01/24/2022](https://bitcoinmagazine.com/culture/bitcoin-maximalism-and-bitcoin-adoption)
+If desired, a service `provider` can offer a platform for negotiating the proposal. The protocol is designed for third-parties to help with coordination, and offer their own services such as arbitration.
 
-## Mission Statement
+There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they all support JSON. Feel free to use your favorite one!
 
-- Make escrow cheaper, faster, and better.
-- Make bitcoin programmable again.
-- Developers. Developers. Developers.
+Once the terms have been finalized, the proposal is verified by the `executor` and converted into a `contract`. Once the contract has been created, it is available for `funding`.
 
-Core design principles for the protocol:
-
-```md
-Short and sweet.      - as few rounds of communication as possible.
-Remain discreet.      - no leaking of any sensitive information.
-Custody is cancer.    - we are strictly a non-custodial escrow protocol.
-Keys are radioactive. - bad practices can expose private keys (which give us cancer).
-```
-
-## Overview
-
-The protocol is split into three phases: `proposal`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
-
-**Proposal**:  
-
-A proposal is the pre-cursor to a contract, and contains all of the negotiable terms. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
-
-There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they (mostly) support JSON. Feel free to use your favorite one!
+> Note: The `executor` does not arbitrate disputes, nor does it take part in negotiations. This is strictly by design.
+>
+> While BitEscrow may offer separate negotiation and arbitration services, the protocol is designed for `members` to seek out their own `providers`, or coordinate amongst themselves, so that the `executor` may be involved as little as possible.
 
 **Funding**:  
 
@@ -175,9 +154,9 @@ A proposal is the precursor to creating a contract. It defines the terms of the 
   ],
   payments : [[ 10000, 'bcrt1qxemag7t72rlrhl2ezsnsprmunmnzc35nmaph6v' ]],
   programs : [
-    [ 'sign', 'dispute', 'payout', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
-    [ 'sign', 'resolve',      '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
-    [ 'sign', 'close|resolve','*', 2, 
+    [ 'endorse', 'dispute', 'payout', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
+    [ 'endorse', 'resolve',      '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
+    [ 'endorse', 'close|resolve','*', 2, 
       '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
       '4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10'
     ]
@@ -189,118 +168,6 @@ A proposal is the precursor to creating a contract. It defines the terms of the 
 ```
 
 The format is designed to be collaborative and shared between parties. Each member can add their own terms to the `paths`, `payments`, `programs`, and `schedule` fields. All other fields are require a unanimous consensus across members.
-
-The following table defines a complete list of terms that may be included in the proposal. Fields marked with a `?` are optional.
-
-| Term      | Description                                                                                                                                                       |
-|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| confirmations? | Enforce a minimum number of confirmations on deposits before being accepted. Optional.
-| details   | Detailed information about the contract.                                                                                                                          |
-| deadline?  | The amount of time (in seconds) available for funding a once a contract is published. If the funding goal is not met by the deadline, the contract is cancelled. |
-| effective? | The exact date (in UTC seconds) that a contract is scheduled to activate. If a deadline is not specified, then the effective date is used to imply a funding deadline.                             |
-| expires   | The maximum time (in seconds) that a contract can exist once published. If a contract does not settle by the expiration date, then it is cancelled.                  |
-| fallback?  | This specifies a default spending path to be used if and when a contract expires. Optional.
-| feerate? | Enforce a minimum feerate on all deposits. Optional.                                                                       |
-| network   | The blockchain that this contract is executing on. Defaults to bitcoin mainnet.                                                                                   |
-| paths     | A collection of spending outputs, labeled with a path name.                                                                                                        |
-| payments  | A collection of spending outputs that should be included in all spending paths. More details on paths and payments are described below.                             |
-| programs  | A collection of programs that will be made available in the CVM, plus their configuration. More details on programs are described below.                           |
-| schedule  | A collection of scheduled actions that will executed within the CVM. More details on the schedule are described below.                                            |
-| title     | The title of the proposal.                                                                                                                                        |
-| value     | The output value of the contract. Each set of spending outputs must sum to this total amount.                                                                     |
-| version   | A version number for the proposal specification.                                                                                                                  |
-
-### Paths and Payments
-
-The purpose of `paths` and `payments` is to collectively define a set of spending outputs that will be pre-signed by depositors, and made available to the agent for settlement.
-
-**Paths**  
-
-A spending path represents a conditional payment. It may or may not be sent, depending how the contract is settled.
-
-Each path entry must contain three items: the *label*, *output value*, and *destination address*.
-```ts
-[ 'payout', 90000, 'bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc' ]
-```
-
-**Payments**  
-
-A payment is just that: an unconditional payment to an address. A payment must be included in _all_ spending paths.
-
-Each payment entry must contain just two items: the *output value* and *destination address*.
-```ts
-[ 10000, 'bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc' ]
-```
-
-When a contract is created, the outputs specified in `paths` are grouped together by path-name, and each group is used to create a transaction template. The outputs specified in `payments` are then added to each template (along with `fees` from the agent). This creates the final set of transaction templates that each depositor must sign.
-
-The total sum for each transaction template must be identical, and must equal the `value` of the proposal.
-
-### Actions and Programs
-
-Each contract comes with a tiny virtual machine, called the CVM. The purpose of the CVM is to provide contract members an environment for updating the contract and debating how it should be settled.
-
-**Actions**  
-
-Updates to the CVM take the form of an `action` that is applied to a specified `path`:
-
-```
-close   : Settle the contract using the provided path.
-lock    : Lock a spending path from being used.
-unlock  : Unlock a spending path for use.
-dispute : Dispute a spending path and block its use.
-resolve : Resolve a dispute and settle the contract.
-```
-
-Actions can be taken within the CVM by executing a program.
-
-**Programs**  
-
-Programs are loaded into the CVM using the `programs` section of the proposal. Each program specifies the following configuration:
-
-  - The `method` used to activate the program.
-  - The `action` policy, which defines the actions this program can take. 
-  - The `path` policy, which restricts which paths this program can access. 
-  - Additional `params` that configure the method.
-
-> The regex format for actions and paths is intentionally limited: It accepts '|' for specifying multiple options, or a single '*' for specifying all options. No other patterns are allowed.
-
-The following entry is an example definition of a program:
-
-```ts
-[ 'sign', 'close|resolve', '*', 2, buyer_pubkey, seller_pubkey ]
-```
-
-Let's assume that for our `sign` program, the list of pubkeys includes the buyer and seller. The buyer and seller can use the above program to `close` or `resolve` the contract on any ('*') spending path. They can do this by using the `sign` method, which requires submitting a signed statement to the program. The program requires a minimum of two unique signatures to activate, and they must be from one of the pubkeys included in the list.
-
-The `sign` method is a basic implementation of a threshold-based multi-signature agreement. Additional methods and actions will be added to the CVM in the future.
-
-**Rules of Actions**  
-
-The logical rules for the CVM are designed to be simple and easy to follow:
-
-```
-  - An open path can be locked, disputed, or closed.
-  - A locked path can be disputed or released.
-  - A disputed path can only be resolved.
-  - Closing a path will settle the contract.
-  - Resolving a dispute will settle the contract.
-```
-
-Keeping the state of the virtual machine simple is a security feature. It prevents bugs and strange edge-cases from developing and risking the mis-direction of funds.
-
-### Scheduled Actions
-
-In addition to `programs`, an action can be executed within the CVM on a pre-defined schedule.
-
-In the proposal, each task entry must contain three items: the *timer*, *action*, and *path regex*.
-```ts
-[ 7200, 'close', 'payout|return' ]
-```
-
-The timer is defined in seconds, and will be relative to the `activated` date that is defined in the contract. Once the specified number of seconds have passed, the action will be executed inside the CVM.
-
-You may specify multiple paths. The task will execute the provided action on each path in sequential order. If the result of the action leads to a settlement, then the contract will close. If a task fails to execute on a given path (due to a rule violation), then the task will continue onto the next path.
 
 ## The Contract
 
@@ -356,15 +223,16 @@ Once funds are secured and the contract is active, the CVM is initialized and re
 ```ts
 // The state of a newly born CVM, fresh from the womb.
 state: {
-  commits : [],
-  head    : 'df015d478a970033af061c7ed0152b97907c148b51353a8a33f79cf0b3d87350',
-  paths   : [ [ 'payout', 0 ], [ 'return', 0 ] ],
-  result  : null,
-  start   : 1696362768,
-  status  : 'init',
-  steps   : 0,
-  store   : [],
-  updated : 1696362768
+  commits  : [],
+  head     : 'df015d478a970033af061c7ed0152b97907c148b51353a8a33f79cf0b3d87350',
+  paths    : [ [ 'payout', 0 ], [ 'return', 0 ] ],
+  programs : [],
+  result   : null,
+  start    : 1696362768,
+  status   : 'init',
+  steps    : 0,
+  store    : [],
+  updated  : 1696362768
 }
 ```
 
@@ -378,9 +246,9 @@ type WitnessEntry = [
 ]
 ```
 
-Currently, the CVM only supports one method, and that is the `sign` method. This method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reached. The threshold for this quorm is defined in the proposal terms.
+Currently, the CVM only supports one method, and that is the `endorse` method. This method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reached. The threshold for this quorm is defined in the proposal terms.
 
-The `sign` method uses compact signature proofs that are designed to be easy to work with. They are inspired by `NIP-26` delegation proofs, and can support an optional query string to provide additional parameters.
+The `endorse` method uses that are designed to be easy to work with. They are inspired by `NIP-26` delegation proofs, and can support an optional query string to provide additional parameters.
 
 ```ts
 // Includes a reference id, pubkey, proof id, signature and timestamp.
@@ -406,7 +274,7 @@ The CVM is designed to be extensibe. It will support many hooks and cross-platfo
 
 Deposits are the most magical part of the protocol, and a good amount of engineering has been poured into their construction.
 
-To start, each deposit account is a time-locked 2-of-2 taproot address. All deposits are guaranteed refundable, and the script path is only revealed in a worst-case scenario.
+Each deposit account is a time-locked 2-of-2 taproot address. All deposits are guaranteed refundable, and the script path is only revealed in a worst-case scenario.
 
 In addition, this address is constructed using an extended version of the musig2 protocol, optimized for non-interactive signing a batch of transactions. This protocol is compatible with BIP327 and does not comprimise on any of the security features in the specification.
 
@@ -695,3 +563,9 @@ https://github.com/cmdruid/buff
 Not a run-time dependency, but I use this to incorporate bitcoin core directly into my test suite. I also use it to mock-up core as a poor-man's electrum server. Acts as a daemon wrapper and CLI tool, provides a full wallet API, faucets, and can run bitcoin core natively within a nodejs environment (which is pretty wild).
 
 https://github.com/cmdruid/core-cmd  
+
+# Footnote
+
+My inspiration for this project comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am grateful.
+
+I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place, and bring society towards a new golden age. Maybe we will become space-faring apes that reach beyond the moon.

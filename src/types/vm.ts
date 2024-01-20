@@ -1,15 +1,21 @@
-import { Literal }   from './base.js'
-import { PathEntry, ProgramTerms, ScheduleTerms } from './proposal.js'
+import { Literal } from './base.js'
+
+import {
+  ProgramTerms,
+  ScheduleTerms
+} from './proposal.js'
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
 export type StoreEntry = [ string, string ]
 export type WitProgram = (...args : string[]) => boolean
 
 export type CommitEntry = [
-  step : number,
-  mark : number,
-  wid  : string,
-  head : string
+  step   : number,
+  stamp  : number,
+  hash   : string,
+  head   : string,
+  action : string,
+  path   : string
 ]
 
 export type ProgramEntry = [
@@ -40,10 +46,11 @@ export enum PathState {
 
 export interface StateData {
   commits  : CommitEntry[]
+  error    : string | null
   head     : string
+  output   : string | null
   paths    : StateEntry[]
   programs : ProgramEntry[]
-  result   : string | null
   steps    : number
   start    : number
   status   : PathStatus
@@ -53,9 +60,9 @@ export interface StateData {
 }
 
 export interface MachineConfig {
+  activated : number
   cid       : string
-  paths     : PathEntry[]
+  pathnames : string[]
   programs  : ProgramTerms[]
-  published : number
   schedule  : ScheduleTerms[]
 }

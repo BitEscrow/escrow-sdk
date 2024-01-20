@@ -1,16 +1,15 @@
-import { run_action }     from './action.js'
-import { get_path_names } from '../lib/proposal.js'
-import { regex }          from '../lib/util.js'
-import { debug }          from './util.js'
+import { run_action } from './action.js'
+import { now, regex }      from '../lib/util.js'
+import { debug }      from './util.js'
 
 import {
   PathState,
   PathStatus,
   ProgramTerms,
   StateEntry,
-  PathEntry,
   StateData
 } from '../types/index.js'
+import { Buff } from '@cmdcode/buff'
 
 const INIT_TERMS = {
   can_dispute : false,
@@ -19,12 +18,11 @@ const INIT_TERMS = {
 }
 
 export function init_paths (
-  paths    : PathEntry[],
+  paths    : string[],
   programs : ProgramTerms[]
 ) {
   const states : StateEntry[] = []
-  const pnames = get_path_names(paths)
-  for (const path of pnames) {
+  for (const path of paths) {
     const state = init_path_state(path, programs)
     states.push([ path, state ])
   }
@@ -33,6 +31,7 @@ export function init_paths (
 
 export function update_path (
   action : string,
+  hash   : string,
   path   : string,
   state  : StateData
 ) {
@@ -41,12 +40,13 @@ export function update_path (
   const ret = run_action(action, pst[1], state)
 
   if (ret !== null) {
+    commit_action(action, hash, path, state)
     state.paths[idx] = [ path, ret ]
     state.status = update_status(state.status, ret)
   }
 
   if (ret === PathState.closed) {
-    state.result = path
+    state.output = path
   }
 
   debug('[vm] new state:', state)
@@ -94,6 +94,31 @@ function update_status (
   } else {
     return status
   }
+}
+
+function get_hash_tip (
+  step  : number,
+  stamp : number,
+  head  : string,
+  hash  : string
+) {
+  return Buff.json([ step, stamp, head, hash ]).digest.hex
+}
+
+
+function commit_action (
+  action  : string,
+  hash    : string,
+  path    : string,
+  state   : StateData,
+) {
+  const head  = state.head
+  const stamp = now()
+  const step  = state.steps
+  state.commits.push([ step, stamp, head, hash, action, path ])
+  state.head    = get_hash_tip(step, stamp, head, hash)
+  state.updated = stamp
+  state.steps  += 1
 }
 
 function validate_path_terms (

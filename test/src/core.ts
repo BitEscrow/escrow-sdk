@@ -9,10 +9,10 @@ import {
 } from '@cmdcode/core-cmd'
 
 const DEFAULT_CONFIG = {
-  corepath    : 'test/bin/core/bitcoind',
-  clipath     : 'test/bin/core/bitcoin-cli',
-  confpath    : 'test/conf/regtest.conf',
-  datapath    : 'test/data/suite',
+  corepath    : 'test/bin/bitcoind',
+  clipath     : 'test/bin/bitcoin-cli',
+  confpath    : 'test/regtest.conf',
+  datapath    : 'test/data',
   network     : 'regtest',
   isolated    : true,
   debug       : true,

@@ -23,7 +23,7 @@ import {
 const INIT_STATE = {
   commits : [],
   error   : null,
-  result  : null,
+  output  : null,
   status  : 'init' as PathStatus,
   steps   : 0,
   store   : []
@@ -36,30 +36,30 @@ export function eval_witness (
   state    : StateData,
   witness  : WitnessData,
   marker  = now()
-) : { error ?: string, state : StateData } {
+) : StateData {
   // Return early if there is already a result.
-  if (state.result !== null) {
-    return { state }
+  if (state.output !== null) {
+    return state
   }
-  // Define our error varaible.
-  let error : string | undefined
+  // Reset our error varaible.
+  state.error = null
   // Try to run the scheduler and program.
   try {
     debug('[vm] eval witness data:', witness)
     // Evaluate the schedule for due events.
     run_schedule(state, marker)
     // If there is a result, return early.
-    if (state.result !== null) return { state }
+    if (state.output !== null) return state
     // Fetch the program by id, then run the program.
     run_program(state, witness)
   } catch (err) {
     // Handle raised errors.
-    error = err_handler(err)
+    state.error = err_handler(err)
   }
   // Update the state timestamp.
   state.updated = marker
   // Return the current state.
-  return { error, state }
+  return state
 }
 
 /**
@@ -70,7 +70,7 @@ export function eval_schedule (
   marker : number = now()
 ) : StateData {
   // Return early if there is already a result.
-  if (state.result !== null) return state
+  if (state.output !== null) return state
   // Evaluate the schedule for due events.
   run_schedule(state, marker)
   // Return the current state.
@@ -84,10 +84,10 @@ export function init_vm (
   config : MachineConfig
 ) : StateData {
   const head     = config.cid
-  const paths    = init_paths(config.paths, config.programs)
+  const paths    = init_paths(config.pathnames, config.programs)
   const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e[0]))
-  const start    = config.published
+  const start    = config.activated
   const tasks    = config.schedule.sort((a, b) => a[0] - b[0])
   const updated  = start
   return { ...INIT_STATE, head, paths, programs, start, store, tasks, updated }

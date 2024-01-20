@@ -21,8 +21,8 @@ export function run_schedule (
     if (prev <= stamp && stamp <= marker) {
       debug('[vm] running task:', task)
       run_task(action, paths, state)
-      if (state.result !== null) return
       state.tasks.shift()
+      if (state.output !== null) return
     }
   }
 }
@@ -39,8 +39,9 @@ function run_task (
   const expr  = get_access_list(pathexp, paths)
   for (const path of expr.wlist) {
     try {
-      update_path(action, path, state)
-      if (state.result !== null) return
+      const hash = state.head
+      update_path(action, hash, path, state)
+      if (state.output !== null) return
     } catch (err) {
       debug('[vm] task failed to execute:' + String(err))
     }

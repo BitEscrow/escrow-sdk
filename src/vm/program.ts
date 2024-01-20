@@ -1,6 +1,5 @@
-import { Buff }          from '@cmdcode/buff'
 import { parse_program } from '@/lib/parse.js'
-import { now, regex }    from '@/lib/util.js'
+import { regex }         from '@/lib/util.js'
 import { MANIFEST }      from '@/lib/programs/index.js'
 import { update_path }   from './state.js'
 import { debug }         from './util.js'
@@ -44,9 +43,9 @@ export function run_program (
   const { action, path } = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {
-    update_path(action, path, state)
+    const hash = witness.wid
+    update_path(action, hash, path, state)
   }
-  commit_witness(state, witness)
 }
 
 function load_program (
@@ -81,27 +80,4 @@ function load_program (
   const exec = MANIFEST[method as keyof MethodManifest]
 
   return exec(params, store)
-}
-
-function commit_witness (
-  state   : StateData,
-  witness : WitnessData
-) {
-  const head = state.head
-  const mark = now()
-  const step = state.steps
-  const wid  = Buff.json(witness).digest.hex
-  state.commits.push([ step, mark, wid, head ])
-  state.head    = get_hash_tip(step, mark, wid, head)
-  state.updated = mark
-  state.steps  += 1
-}
-
-function get_hash_tip (
-  step : number,
-  mark : number,
-  wid  : string,
-  head : string
-) {
-  return Buff.json([ step, mark, wid, head ]).digest.hex
 }
