@@ -27,7 +27,7 @@ const VERBOSE = process.env.VERBOSE === 'true'
 
 // Startup a local process of Bitcoin Core for testing.
 
-const config = CONFIG.testnet
+const config = CONFIG.staging
 const core   = get_daemon(config.core)
 const cli    = await core.startup()
 

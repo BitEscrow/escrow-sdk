@@ -2,6 +2,8 @@ import { Buff }           from "@cmdcode/buff"
 import { Signer, Wallet } from "@cmdcode/signer"
 import { EscrowSigner }   from "@/client/class/signer.js"
 import { ClientConfig }   from "@/client/types.js"
+import { parse_network }  from "@/lib/parse.js"
+import { Network }        from "@/types/index.js"
 
 /**
  * Take a string label as input, and return an
@@ -11,11 +13,13 @@ import { ClientConfig }   from "@/client/types.js"
 export const sleep = (ms = 1000) => new Promise(res => setTimeout(res, ms)) 
 
 export function get_member (
-  alias   : string,
-  config ?: ClientConfig
+  alias  : string,
+  config : ClientConfig
 ) : EscrowSigner {
   // Unpack the config object.
-  const { network } = config
+  const network = (config.network !== undefined)
+    ? parse_network(config.network)
+    : 'regtest' as Network
   // Freeze the idx generation at 0 for test purposes.
   const idxgen = () => 0
   // Create a basic deterministic seed.

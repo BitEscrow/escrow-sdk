@@ -1,3 +1,18 @@
+const mutiny = {
+  client : {
+    hostname : 'https://bitescrow-mutiny.vercel.app',
+    oracle   : 'https://mutinynet.com',
+    network  : 'signet'
+  },
+  core : {
+    cli_params  : [ '-rpcuser=mutiny', '-rpcpassword=uPCV8g5VGgf96P' ],
+    debug       : true,
+    network     : 'signet',
+    spawn       : false,
+    verbose     : true
+  }
+}
+
 const regtest = {
   client  : {
     hostname : 'http://localhost:3000',
@@ -11,16 +26,16 @@ const regtest = {
   }
 }
 
-const mutiny = {
+const staging = {
   client : {
-    hostname : 'https://bitescrow-mutiny.vercel.app',
-    oracle   : 'https://mutinynet.com',
-    network  : 'signet'
+    hostname : 'https://bitescrow.vercel.app',
+    oracle   : 'https://mempool.space',
+    network  : 'main'
   },
   core : {
-    cli_params  : [ '-rpcuser=mutiny', '-rpcpassword=uPCV8g5VGgf96P' ],
+    cli_params  : [ '-rpcuser=testnet', '-rpcpassword=bitcoin' ],
     debug       : true,
-    network     : 'signet',
+    network     : 'testnet',
     spawn       : false,
     verbose     : true
   }
@@ -41,4 +56,4 @@ const testnet = {
   }
 }
 
-export default { mutiny, regtest, testnet }
+export default { mutiny, regtest, staging, testnet }

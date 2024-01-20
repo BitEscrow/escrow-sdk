@@ -7,15 +7,14 @@ import {
   DepositData,
   MemberData,
   WalletAPI,
-  WitnessData,
-  Network,
+  WitnessData
 } from '@/types/index.js'
 
 export interface ClientConfig {
   fetcher  ?: typeof fetch
   hostname ?: string
   oracle   ?: string
-  network  ?: Network | string
+  network  ?: string
 }
 
 export interface SignerConfig extends ClientConfig {
