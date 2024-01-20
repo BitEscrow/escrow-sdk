@@ -23,13 +23,13 @@ export function run_action (
     case 'resolve':
       return exec_resolve(state)
     default:
-      throw 'Action not found: ' + action
+      throw 'action not found'
   }
 }
 
 export function exec_dispute (state : PathState) {
   if (state === PathState.disputed) {
-    throw 'Path is already in dispute.'
+    throw 'path is already in a dispute'
   } else {
     return PathState.disputed
   }
@@ -37,7 +37,7 @@ export function exec_dispute (state : PathState) {
 
 export function exec_resolve (state : StateData) {
   if (state.status !== 'disputed') {
-    throw 'State is not in a dispute.'
+    throw 'path is not in a dispute'
   } else {
     return PathState.closed
   }
@@ -45,9 +45,9 @@ export function exec_resolve (state : StateData) {
 
 export function exec_lock (state : PathState) {
   if (state === PathState.locked) {
-    throw '[vm] Path is already locked.'
+    throw 'path is already locked'
   } else if (state === PathState.disputed) {
-    throw '[vm] Path is in a dispute.'
+    throw 'path is in a dispute'
   } else {
     return PathState.locked
   }
@@ -55,7 +55,7 @@ export function exec_lock (state : PathState) {
 
 export function exec_release (state : PathState) {
   if (state !== PathState.locked) {
-    throw '[vm] Path is not locked.'
+    throw 'path is not locked'
   } else {
     return PathState.open
   }
@@ -63,9 +63,9 @@ export function exec_release (state : PathState) {
 
 function exec_close (state : PathState) {
   if (state === PathState.locked) {
-    throw '[vm] Path is locked.'
+    throw 'path is locked'
   } else if (state === PathState.disputed) {
-    throw '[vm] Path is in dispute.'
+    throw 'path is in a dispute'
   } else {
     return PathState.closed
   }

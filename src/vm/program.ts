@@ -59,10 +59,10 @@ function load_program (
   const store = stores.find(e => e[0] === prog_id)
 
   if (prog === undefined) {
-    throw 'program not found: ' + prog_id
+    throw 'program not found for id ' + prog_id
   }
   if (store === undefined) {
-    throw 'store not found:' + prog_id
+    throw 'store not found for id ' + prog_id
   }
   
   debug('[vm] loading witness program:', prog_id)
@@ -70,11 +70,11 @@ function load_program (
   const [ _, method, actions, paths, ...params ] = prog
 
   if (!regex(action, actions)) {
-    throw 'program does not have access to this action: ' + action
+    throw 'program does not have access to action ' + action
   }
 
   if (!regex(path, paths)) {
-    throw 'program does not have access to this path: ' + path
+    throw 'program does not have access to path ' + path
   }
 
   const exec = MANIFEST[method as keyof MethodManifest]

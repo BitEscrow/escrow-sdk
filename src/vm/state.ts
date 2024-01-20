@@ -1,5 +1,5 @@
 import { run_action } from './action.js'
-import { now, regex }      from '../lib/util.js'
+import { now, regex } from '../lib/util.js'
 import { debug }      from './util.js'
 
 import {
@@ -59,7 +59,7 @@ function get_path (
   const idx   = ent.findIndex(e => e[0] === key)
   const state = ent[idx][1]
   if (state === undefined) {
-    throw 'Path not found: ' + key
+    throw 'path not found for label ' + key
   }
   return [ idx, state ]
 }
@@ -126,7 +126,7 @@ function validate_path_terms (
   terms : typeof INIT_TERMS
 ) {
   if (terms.can_dispute && !terms.can_resolve) {
-    throw 'Dispute action has no resolve action: ' + path
+    throw 'dispute action has no resolve action for path ' + path
   }
   // if (terms.can_resolve && !terms.can_dispute) {
   //   throw new Error('Resolve action has no dispute action: ' + path)
@@ -139,6 +139,6 @@ export function check_stamp (
 ) {
   const { updated } = state
   if (stamp < updated) {
-    throw `Timestamp occurs before latest update: ${stamp} <= ${updated}`
+    throw `timestamp occurs before latest update: ${stamp} <= ${updated}`
   }
 }

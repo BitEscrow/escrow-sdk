@@ -7,7 +7,10 @@
       [ "endorse", "close|resolve", "*", 2, "alice", "bob" ],
       [ "endorse", "resolve",       "*", 1, "carol" ]
     ],
-    "schedule"  : [ [ 7200, "close", "payout|return" ] ],
+    "schedule"  : [
+      [ 7200, "close",   "payout|return" ],
+      [ 7200, "resolve", "return"        ]
+    ],
     "tests" : [
       {
         "comment" : "alice and bob agree on payout",
@@ -67,7 +70,7 @@
         "comment" : "alice, bob, and carol walk away",
         "error"   : null,
         "result"  : "payout",
-        "steps"   : 0,
+        "steps"   : 1,
         "stamp"   : 9999,
         "witness" : []
       },
@@ -75,7 +78,7 @@
         "comment" : "alice disputes a payout, then bob and carol walk away",
         "error"   : null,
         "result"  : "return",
-        "steps"   : 1,
+        "steps"   : 2,
         "stamp"   : 9999,
         "witness" : [
           { "action": "dispute", "method": "endorse", "path": "payout", "signers": [ "alice" ] }
@@ -84,12 +87,23 @@
       {
         "comment" : "alice and bob dispute each other, carol walks away",
         "error"   : null,
-        "result"  : "payout",
-        "steps"   : 0,
+        "result"  : "return",
+        "steps"   : 3,
         "stamp"   : 9999,
         "witness" : [
           { "action": "dispute", "method": "endorse", "path": "payout", "signers": [ "alice" ] },
           { "action": "dispute", "method": "endorse", "path": "return", "signers": [ "bob" ] }
+        ]
+      },
+      {
+        "comment" : "alice and bob try to close the same path after a dispute",
+        "error"   : "path is in a dispute",
+        "result"  : null,
+        "steps"   : 1,
+        "stamp"   : 0,
+        "witness" : [
+          { "action": "dispute", "method": "endorse", "path": "payout", "signers": [ "alice" ] },
+          { "action": "close", "method": "endorse", "path": "payout", "signers": [ "alice", "bob" ] }
         ]
       }
     ]

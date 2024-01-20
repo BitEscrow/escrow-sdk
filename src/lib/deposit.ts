@@ -28,26 +28,30 @@ import {
 /**
  * Initialization object for deposit state.
  */
-const INIT_SPEND_STATE = {
-  confirmed    : false as const,
-  block_hash   : null,
-  block_height : null,
-  block_time   : null,
-  expires_at   : null,
+const GET_INIT_SPEND_STATE = () => {
+  return {
+    confirmed    : false as const,
+    block_hash   : null,
+    block_height : null,
+    block_time   : null,
+    expires_at   : null,
+  }
 }
 
 /**
  * Initialization object for deposit data.
  */
-const INIT_DEPOSIT = {
-  ...INIT_SPEND_STATE,
-  covenant     : null,
-  created_at   : now(),
-  settled      : false as const,
-  settled_at   : null,
-  spent        : false as const,
-  spent_at     : null,
-  spent_txid   : null
+const GET_INIT_DEPOSIT = () => {
+  return {
+    ...GET_INIT_SPEND_STATE(),
+    covenant     : null,
+    created_at   : now(),
+    settled      : false as const,
+    settled_at   : null,
+    spent        : false as const,
+    spent_at     : null,
+    spent_txid   : null
+  }
 }
 
 /**
@@ -56,7 +60,7 @@ const INIT_DEPOSIT = {
 export function create_deposit (
   template : Partial<DepositData>
 ) : DepositData {
-  const deposit = { ...INIT_DEPOSIT, ...template }
+  const deposit = { ...GET_INIT_DEPOSIT(), ...template }
 
   deposit.updated_at = deposit.created_at
 
@@ -108,7 +112,7 @@ export function get_spend_state (
   sequence : number,
   txstatus : OracleTxStatus
 ) {
-  let state : DepositState = INIT_SPEND_STATE
+  let state : DepositState = GET_INIT_SPEND_STATE()
 
   if (txstatus !== undefined && txstatus.confirmed) {
     const timelock   = parse_timelock(sequence)

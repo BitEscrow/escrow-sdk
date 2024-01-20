@@ -2,7 +2,19 @@
 import { update_path }     from './state.js'
 import { debug }           from './util.js'
 import { get_access_list } from '../lib/util.js'
-import { StateData }       from '../types/index.js'
+import { VALID_ACTIONS }   from '../config.js'
+
+import {
+  ScheduleTerms,
+  StateData
+} from '../types/index.js'
+
+export function init_tasks (
+  schedule : ScheduleTerms[]
+) {
+  const tasks = [ ...schedule ]
+  return tasks.sort((a, b) => a[0] - b[0])
+}
 
 export function run_schedule (
   state  : StateData,
@@ -15,12 +27,12 @@ export function run_schedule (
   debug('[vm] running tasks up to marker:', marker)
   const tasks = get_tasks(state)
   for (const task of tasks) {
-    const [ ts, action, paths ] = task
+    const [ ts, actions, paths ] = task
     const stamp = state.start + ts
     const prev  = state.updated
     if (prev <= stamp && stamp <= marker) {
       debug('[vm] running task:', task)
-      run_task(action, paths, state)
+      run_task(actions, paths, state)
       state.tasks.shift()
       if (state.output !== null) return
     }
@@ -28,7 +40,7 @@ export function run_schedule (
 }
 
 function run_task (
-  action  : string,
+  actsexp : string,
   pathexp : string,
   state   : StateData
 ) {
@@ -36,14 +48,17 @@ function run_task (
    * Run a task within the virtual machine.
    */
   const paths = state.paths.map(e => e[0])
-  const expr  = get_access_list(pathexp, paths)
-  for (const path of expr.wlist) {
-    try {
-      const hash = state.head
-      update_path(action, hash, path, state)
-      if (state.output !== null) return
-    } catch (err) {
-      debug('[vm] task failed to execute:' + String(err))
+  const alist = get_access_list(actsexp, VALID_ACTIONS).wlist
+  const plist = get_access_list(pathexp, paths).wlist
+  for (const action of alist) {
+    for (const path of plist) {
+      try {
+        const hash = state.head
+        update_path(action, hash, path, state)
+        if (state.output !== null) return
+      } catch (err) {
+        debug('[vm] task failed to execute:' + String(err))
+      }
     }
   }
 }

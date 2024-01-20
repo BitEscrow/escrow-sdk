@@ -1,4 +1,4 @@
-import { run_schedule } from './schedule.js'
+import { init_tasks, run_schedule } from './schedule.js'
 import { init_paths }   from './state.js'
 import { now }          from '../lib/util.js'
 
@@ -17,24 +17,26 @@ import {
   PathStatus,
   StateData,
   WitnessData,
-  MachineConfig
+  MachineConfig,
+  CommitEntry
 } from '../types/index.js'
 
-const INIT_STATE = {
-  commits : [],
-  error   : null,
-  output  : null,
-  status  : 'init' as PathStatus,
-  steps   : 0,
-  store   : []
+const GET_INIT_STATE = () => {
+  return {
+    commits : [] as CommitEntry[],
+    error   : null,
+    output  : null,
+    status  : 'init' as PathStatus,
+    steps   : 0
+  }
 }
 
 /**
  * Evaluates the witness data against the current virtual machine state.
  */
 export function eval_witness (
-  state    : StateData,
-  witness  : WitnessData,
+  state   : StateData,
+  witness : WitnessData,
   marker  = now()
 ) : StateData {
   // Return early if there is already a result.
@@ -88,7 +90,7 @@ export function init_vm (
   const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e[0]))
   const start    = config.activated
-  const tasks    = config.schedule.sort((a, b) => a[0] - b[0])
+  const tasks    = init_tasks(config.schedule)
   const updated  = start
-  return { ...INIT_STATE, head, paths, programs, start, store, tasks, updated }
+  return { ...GET_INIT_STATE(), head, paths, programs, start, store, tasks, updated }
 }
