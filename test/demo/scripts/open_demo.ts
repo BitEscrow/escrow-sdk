@@ -1,14 +1,12 @@
 import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
-import { create_witness } from '@/lib/witness.js'
 
 import { print_banner, sleep } from '../utils.js'
 
 import {
   EscrowProposal,
   Network,
-  RolePolicy,
-  WitnessTemplate
+  RolePolicy
 } from "@scrow/core"
 
 import {
@@ -19,6 +17,7 @@ import {
 import {
   fund_address,
   get_daemon,
+  get_utxo
 } from '@scrow/test'
 
 import CONFIG from '../config.js'
@@ -30,7 +29,7 @@ const config = CONFIG.mutiny
 const core   = get_daemon(config.core)
 const cli    = await core.startup()
 
-console.log('chain info:', await cli.chain_info)
+const is_regtest = config.core.network === 'regtest'
 
 const aliases = [ 'alice', 'bob', 'carol', 'david' ]
 const client  = new EscrowClient(config.client)
@@ -59,7 +58,7 @@ const proposal = new EscrowProposal({
   content    : 'n/a',
   expires    : 14400,
   members    : [],
-  network    : network,
+  network    : 'testnet',
   paths      : [],
   payments   : [],
   programs   : [],
@@ -149,40 +148,17 @@ if (VERBOSE) {
 const { address, agent_id } = account
 
 // Use our utility methods to fund the address and get the utxo.
-const is_regtest = config.core.network === 'regtest'
 const txid = await fund_address(cli, 'faucet', address, 20_000, is_regtest)
 
-if (VERBOSE) {
-  print_banner('DEPOSIT TXID')
-  console.log(txid)
-  console.log('\nsleeping for 2s while tx propagates...')
+if (!is_regtest) {
+  await sleep(5000)
 }
 
-await sleep(2000)
-
-const limit = 10
-  let fails = 0,
-      utxo  = await client.oracle.get_utxo({ txid, address })
-
-while (!is_regtest && utxo === null && fails < limit) {
-  try {
-    console.log('sleeping...')
-    await sleep(5000)
-    console.log('fetching...')
-    utxo = await client.oracle.get_utxo({ txid, address })
-    if (utxo === null) throw 'utxo not found'
-  } catch (err) {
-    console.log(err)
-    fails += 1
-    continue
-  }
-}
-
-if (utxo === null) throw new Error('utxo not found')
+const utxo = await get_utxo(cli, address, txid)
 
 // Request the member to sign
-const return_tx = await a_mbr.deposit.register_utxo(account, utxo.txspend)
-const covenant  = await a_mbr.deposit.commit_utxo(account, contract, utxo.txspend)
+const return_tx = await a_mbr.deposit.register_utxo(account, utxo)
+const covenant  = await a_mbr.deposit.commit_utxo(account, contract, utxo)
 
 // Fund the contract directly with the API.
 const deposit_res = await client.deposit.fund(agent_id, return_tx, covenant)
@@ -200,48 +176,3 @@ if (VERBOSE) {
   print_banner('UPDATED CONTRACT')
   console.dir(contract, { depth : null })
 }
-
-if (contract.status !== 'active') {
-  if (!is_regtest) {
-    if (VERBOSE) console.log('sleeping...')
-    await sleep(30000)
-  }
-  if (VERBOSE) console.log('fetching...')
-  const res = await client.contract.read(contract.cid)
-  if (!res.ok) throw new Error(res.error)
-  contract = res.data.contract
-}
-
-const template : WitnessTemplate = {
-  action : 'close',
-  method : 'endorse',
-  path   : 'tails'
-}
-
-const terms  = contract.terms 
-
-const pubkey = a_mbr.get_membership(terms).token.pub
-
-let witness = create_witness(terms.programs, pubkey, template)
-
-witness = a_mbr.endorse.witness(contract, witness)
-witness = b_mbr.endorse.witness(contract, witness)
-
-if (VERBOSE) {
-  print_banner('SIGNED WITNESS')
-  console.dir(witness, { depth : null })
-}
-
-const wit_res = await client.contract.submit(contract.cid, witness)
-
-// Check the response is valid.
-if (!wit_res.ok) throw new Error(wit_res.error)
-
-const { contract: new_contract } = wit_res.data
-
-if (VERBOSE) {
-  print_banner('SETTLED CONTRACT')
-  console.dir(new_contract, { depth : null })
-}
-
-core.shutdown()

@@ -1,4 +1,6 @@
-import { resolve_json } from '@/lib/oracle.js'
+import { resolve_json }  from '@/lib/oracle.js'
+import { parse_network } from '@/lib/parse.js'
+import { Network }       from '@/types/index.js'
 
 import contract_api from '@/client/api/contract.js'
 import deposit_api  from '@/client/api/deposit.js'
@@ -14,16 +16,21 @@ type Resolver = ReturnType<typeof get_fetcher>
 
 const DEFAULT_HOST   = 'http://localhost:3000'
 const DEFAULT_ORACLE = 'http://172.21.0.3:3000'
+const DEFAULT_CHAIN  = 'regtest'
 
 export class EscrowClient {
   readonly _fetcher : Resolver
   readonly _host    : string
   readonly _oracle  : string
+  readonly _network : Network
 
   constructor (config : ClientConfig) {
     this._fetcher = get_fetcher(config.fetcher ?? fetch)
     this._host    = config.hostname ?? DEFAULT_HOST
     this._oracle  = config.oracle   ?? DEFAULT_ORACLE
+    this._network = (config.network !== undefined)
+      ? parse_network(config.network)
+      : DEFAULT_CHAIN as Network
   }
 
   get fetcher () {

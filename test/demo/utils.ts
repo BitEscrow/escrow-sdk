@@ -14,6 +14,8 @@ export function get_member (
   alias   : string,
   config ?: ClientConfig
 ) : EscrowSigner {
+  // Unpack the config object.
+  const { network } = config
   // Freeze the idx generation at 0 for test purposes.
   const idxgen = () => 0
   // Create a basic deterministic seed.
@@ -21,7 +23,7 @@ export function get_member (
   // Create a new signer using the seed.
   const signer = new Signer({ seed })
   // Create a new wallet using the seed.
-  const wallet = Wallet.create({ seed, network : 'regtest' })
+  const wallet = Wallet.create({ seed, network })
   // Return an escrow client.
   return new EscrowSigner({ ...config, idxgen, signer, wallet })
 }

@@ -3,7 +3,7 @@ import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
 import { print_banner }   from '../utils.js'
 
-import { WitnessTemplate } from "@scrow/core"
+import { Network, WitnessTemplate } from "@scrow/core"
 
 import {
   EscrowClient,
@@ -15,9 +15,15 @@ import CONFIG from '../config.js'
 const VERBOSE = process.env.VERBOSE === 'true'
 
 // Startup a local process of Bitcoin Core for testing.
-const config  = CONFIG.mutiny
+const config  = CONFIG.testnet
 const aliases = [ 'alice', 'bob', 'carol', 'david' ]
 const client  = new EscrowClient(config.client)
+
+let network = config.core.network as Network
+
+if (network === 'signet') {
+  network = 'testnet'
+}
 
 const members = aliases.map(alias => {
   // Freeze the idx generation at 0 for testing.
@@ -27,7 +33,7 @@ const members = aliases.map(alias => {
   // Create a new signer using the seed.
   const signer = new Signer({ seed })
   // Create a new wallet using the seed.
-  const wallet = Wallet.create({ seed, network : 'regtest' })
+  const wallet = Wallet.create({ seed, network })
   // Return an escrow signer.
   return new EscrowSigner({ ...config.client, idxgen, signer, wallet })
 })
@@ -35,7 +41,7 @@ const members = aliases.map(alias => {
 // Unpack our members for testing.
 const [ a_mbr, b_mbr ] = members
 
-const cid = 'c842e095ac98e43bc274c521282c506352009e921820a444c37c0992478ee962'
+const cid = '3ed7994a1aeade71a6acb8f105b0eceae8b8c61b6fda7f9dfd2e9f6fa3e33d7e'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)

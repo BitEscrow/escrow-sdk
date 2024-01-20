@@ -12,6 +12,12 @@ import {
 
 import * as schema from '../schema/index.js'
 
+export function parse_network (
+  network : unknown
+) {
+  return schema.base.network.parse(network)
+}
+
 export function parse_payments (
   payments : PaymentEntry[]
 ) : PaymentEntry[] {

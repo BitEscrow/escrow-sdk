@@ -5,7 +5,7 @@ import {
 import CONFIG from '../config.js'
 
 // Startup a local process of Bitcoin Core for testing.
-const config = CONFIG.localtest
+const config = CONFIG.regtest
 const client = new EscrowClient(config.client)
 
 const txid = '3fad0495c24ffc5e81cb52157cf2fbe7c8f4eecf70e1acd4b60dd96235703ccb'

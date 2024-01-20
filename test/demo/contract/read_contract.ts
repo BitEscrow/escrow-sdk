@@ -1,12 +1,10 @@
 import { EscrowClient } from "@scrow/core/client"
 
-// Define a third-party client as a coordinator.
-const client = new EscrowClient({
-    hostname : 'https://bitescrow-mutiny.vercel.app',
-    oracle   : 'https://mutinynet.com'
-  })
+import CONFIG from '../config.js'
 
-const cid = 'c842e095ac98e43bc274c521282c506352009e921820a444c37c0992478ee962'
+// Define a third-party client as a coordinator.
+const client = new EscrowClient(CONFIG.testnet.client)
+const cid    = '3ed7994a1aeade71a6acb8f105b0eceae8b8c61b6fda7f9dfd2e9f6fa3e33d7e'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)
