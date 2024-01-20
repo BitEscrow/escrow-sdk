@@ -98,7 +98,7 @@
     "test": "yarn tsc && yarn load test/tape.ts"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.4.11",
+    "@cmdcode/core-cmd": "1.5.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",

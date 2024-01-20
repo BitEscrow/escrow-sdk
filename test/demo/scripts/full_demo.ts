@@ -27,7 +27,7 @@ const VERBOSE = process.env.VERBOSE === 'true'
 
 // Startup a local process of Bitcoin Core for testing.
 
-const config = CONFIG.staging
+const config = CONFIG.mutiny
 const core   = get_daemon(config.core)
 const cli    = await core.startup()
 
@@ -167,9 +167,9 @@ const limit = 10
 
 while (!is_regtest && utxo === null && fails < limit) {
   try {
-    console.log('sleeping...')
+    console.log('sleeping for 5s...')
     await sleep(5000)
-    console.log('fetching...')
+    console.log('fetching utxo...')
     utxo = await client.oracle.get_utxo({ txid, address })
     if (utxo === null) throw 'utxo not found'
   } catch (err) {
@@ -204,10 +204,10 @@ if (VERBOSE) {
 
 if (contract.status !== 'active') {
   if (!is_regtest) {
-    if (VERBOSE) console.log('sleeping...')
-    await sleep(30000)
+    if (VERBOSE) console.log('sleeping for 35s...')
+    await sleep(35000)
   }
-  if (VERBOSE) console.log('fetching...')
+  if (VERBOSE) console.log('fetching contract...')
   const res = await client.contract.read(contract.cid)
   if (!res.ok) throw new Error(res.error)
   contract = res.data.contract

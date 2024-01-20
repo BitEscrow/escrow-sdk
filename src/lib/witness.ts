@@ -1,4 +1,4 @@
-import { Buff } from '@cmdcode/buff'
+import { Buff }         from '@cmdcode/buff'
 import { find_program } from './proposal.js'
 
 import {

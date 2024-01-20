@@ -10,10 +10,10 @@
     "@noble/hashes" "^1.3.0"
     "@scure/base" "^1.1.3"
 
-"@cmdcode/core-cmd@1.4.11":
-  version "1.4.11"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.4.11.tgz#829c9989480a62fad2e6317e69f1b4181d770216"
-  integrity sha512-EFyeGglJIbAN19oPJ2biElcxate3NHvXu+VcOcar8l+bVpTtQB1HZkEZv4czO9pj+a/U5CSWGYcWpbTgFpxDxQ==
+"@cmdcode/core-cmd@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.5.0.tgz#0b4496df29ec0f8e551801b975cca30b9622a6c2"
+  integrity sha512-7n7ZO59+iM/TD0Gg4jDnv12ppQcmHiqLPlfxdDsUcTFFKtCdsSEaTxrOjNSJLKc1y7DBmk0+gYiWsHFjZ6f+4g==
   dependencies:
     "@cmdcode/crypto-tools" "^2.7.5"
     "@scrow/tapscript" "^2.2.1"

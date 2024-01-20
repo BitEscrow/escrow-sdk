@@ -4,6 +4,7 @@
  * Adjust the vector and add witness statements
  * in order to compute different outcomes.
  */
+
 import { Buff }           from '@cmdcode/buff'
 import { Signer }         from '@cmdcode/signer'
 import { now }            from '@scrow/core/util'
@@ -24,7 +25,7 @@ const aliases = [ 'alice', 'bob', 'carol' ]
 
 const [ a_mbr, b_mbr, c_mbr ] = aliases.map(e => new Signer({ seed : Buff.str(e) }))
 
-const vm_config : MachineConfig = {
+const config : MachineConfig = {
   cid      : '00'.repeat(32),
   paths    : [
     [ 'payout', 0, '' ],
@@ -43,14 +44,14 @@ const templates = [
   { action: 'close', method : 'endorse', path : 'payout', signers : [ a_mbr ] }
 ]
 
-let vm_state = init_vm(vm_config)
+let vm_state = init_vm(config)
 
 console.log('init state:', vm_state)
 
 const witnesses = templates.map(e => {
   const { signers, ...tmpl } = e
   const pubkey = signers[0].pubkey
-  let witness = create_witness(vm_config.programs, pubkey, tmpl)
+  let witness = create_witness(config.programs, pubkey, tmpl)
   for (const signer of signers) {
     witness = sign_witness(signer, witness)
   }

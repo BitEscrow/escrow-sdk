@@ -5,11 +5,11 @@ const mutiny = {
     network  : 'signet'
   },
   core : {
-    cli_params  : [ '-rpcuser=mutiny', '-rpcpassword=uPCV8g5VGgf96P' ],
-    debug       : true,
-    network     : 'signet',
-    spawn       : false,
-    verbose     : true
+    debug    : true,
+    network  : 'signet',
+    rpc_user : 'mutiny',
+    rpc_pass : 'uPCV8g5VGgf96P',
+    verbose  : true
   }
 }
 
@@ -22,7 +22,7 @@ const regtest = {
   core : {
     debug   : true,
     network : 'regtest',
-    spawn   : false
+    verbose : true
   }
 }
 
@@ -33,11 +33,9 @@ const staging = {
     network  : 'main'
   },
   core : {
-    cli_params  : [ '-rpcuser=testnet', '-rpcpassword=bitcoin' ],
-    debug       : true,
-    network     : 'testnet',
-    spawn       : false,
-    verbose     : true
+    debug   : true,
+    network : 'main',
+    verbose : true
   }
 }
 
@@ -48,11 +46,9 @@ const testnet = {
     network  : 'testnet'
   },
   core : {
-    cli_params  : [ '-rpcuser=testnet', '-rpcpassword=bitcoin' ],
-    debug       : true,
-    network     : 'testnet',
-    spawn       : false,
-    verbose     : true
+    debug   : true,
+    network : 'testnet',
+    verbose : true
   }
 }
 
