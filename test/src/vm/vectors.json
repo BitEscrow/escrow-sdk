@@ -5,7 +5,7 @@
     "programs"  : [
       [ "endorse", "dispute",       "*", 1, "alice", "bob" ],
       [ "endorse", "close|resolve", "*", 2, "alice", "bob" ],
-      [ "endorse", "resolve",       "*", 1, "carol" ]
+      [ "endorse", "resolve",       "*", 1, "carol"        ]
     ],
     "schedule"  : [
       [ 7200, "close",   "payout|return" ],

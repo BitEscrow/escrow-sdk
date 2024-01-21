@@ -18,7 +18,7 @@ export function run_action (
       return exec_dispute(path)
     case 'lock':
       return exec_lock(path)
-    case 'release':
+    case 'unlock':
       return exec_release(path)
     case 'resolve':
       return exec_resolve(state)

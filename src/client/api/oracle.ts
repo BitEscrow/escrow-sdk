@@ -4,7 +4,7 @@ import {
   broadcast_tx,
   fee_estimates,
   get_fee_target,
-  get_spend_data,
+  get_utxo_data,
   get_tx_data
 } from '@/lib/oracle.js'
 
@@ -39,10 +39,10 @@ function get_txdata_api (client: EscrowClient) {
   }
 }
 
-function get_spend_data_api (client: EscrowClient) {
+function get_utxo_api (client: EscrowClient) {
   return async (query : OracleQuery) => {
     assert.is_hash(query.txid)
-    return get_spend_data(client._oracle, query)
+    return get_utxo_data(client._oracle, query)
   }
 }
 
@@ -52,6 +52,6 @@ export default function (client : EscrowClient) {
     fee_estimates : fee_estimates_api(client),
     fee_target    : get_fee_target_api(client),
     get_txdata    : get_txdata_api(client),
-    get_utxo      : get_spend_data_api(client)
+    get_utxo      : get_utxo_api(client)
   }
 }

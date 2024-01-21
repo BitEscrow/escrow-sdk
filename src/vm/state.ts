@@ -76,7 +76,7 @@ function init_path_state (
       if (regex('dispute', actexp)) terms.can_dispute = true
       if (regex('resolve', actexp)) terms.can_resolve = true
       if (regex('lock',    actexp)) terms.can_lock    = true
-      if (regex('release', actexp)) state = PathState.locked
+      if (regex('unlock',  actexp)) state = PathState.locked
     }
   }
   validate_path_terms(pathname, terms)

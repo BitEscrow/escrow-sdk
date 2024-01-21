@@ -9,7 +9,7 @@ export const SPEND_TXDAT_SIZE = 10
 export const REFUND_TX_VSIZE  = 118
 export const RETURN_TX_VSIZE  = 520
 
-export const VALID_ACTIONS = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
+export const VALID_ACTIONS = [ 'close', 'dispute', 'resolve', 'lock', 'unlock' ]
 export const VALID_METHODS = [ 'endorse' ]
 
 export const MIN_DEADLINE = _MIN  * 30

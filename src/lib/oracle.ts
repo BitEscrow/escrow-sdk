@@ -40,7 +40,7 @@ export async function get_tx_data (
  * Fetch the spending state of a transaction
  * output from the oracle.
  */
-export async function get_spend_state (
+export async function get_utxo_state (
   host : string,
   txid : string,
   vout : number
@@ -67,7 +67,7 @@ export async function get_spend_state (
  * Fetch the full status and state of a
  * transaction output from the oracle.
  */
-export async function get_spend_data (
+export async function get_utxo_data (
   host  : string,
   query : OracleQuery
 ) : Promise<OracleSpendData | null> {
@@ -95,7 +95,7 @@ export async function get_spend_data (
   // If txout is undefined, return null.
   if (txout === undefined) return null
   // Get the spend state of the txout from the oracle.
-  const state = await get_spend_state(host, txid, idx)
+  const state = await get_utxo_state(host, txid, idx)
   // If the spend state is null, return null.
   if (state === null) return null
   // Construct the returned txout.
