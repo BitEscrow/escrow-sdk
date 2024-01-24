@@ -1,4 +1,3 @@
-import { Network }           from '@scrow/tapscript'
 import { parse_deposit }     from './parse.js'
 import { get_return_script } from './return.js'
 
@@ -23,6 +22,7 @@ import {
   DepositData,
   DepositState,
   OracleTxStatus,
+  Network
 } from '../types/index.js'
 
 /**

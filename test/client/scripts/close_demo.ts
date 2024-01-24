@@ -3,7 +3,10 @@ import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
 import { print_banner }   from '@scrow/test'
 
-import { Network, WitnessTemplate } from "@scrow/core"
+import {
+  Network,
+  WitnessTemplate
+} from '@scrow/core'
 
 import {
   EscrowClient,

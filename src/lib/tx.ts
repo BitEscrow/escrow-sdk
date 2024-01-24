@@ -9,7 +9,6 @@ import {
 } from '@cmdcode/musig2'
 
 import {
-  Network,
   SigHashOptions,
   TapContext,
   TxBytes,
@@ -41,7 +40,8 @@ import {
   SignerAPI,
   OracleTxIn,
   TxOutput as SpendOut,
-  DepositData
+  DepositData,
+  Network
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -56,6 +56,9 @@ export function get_address (
   tapkey   : Bytes,
   network ?: Network
 ) {
+  if (network === 'mutiny') {
+    network = 'signet'
+  }
   return P2TR.encode(tapkey, network)
 }
 
