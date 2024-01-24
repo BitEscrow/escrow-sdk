@@ -10,7 +10,7 @@ const configs = {
   mutiny : {
     hostname : 'https://bitescrow-mutiny.vercel.app',
     oracle   : 'https://mutinynet.com',
-    network  : 'signet'
+    network  : 'mutiny'
   },
 
   signet : {

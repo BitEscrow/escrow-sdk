@@ -26,7 +26,7 @@ const json : z.ZodType<Json> = z.lazy(() =>
 )
 
 const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
-const network   = z.enum([ 'main', 'regtest', 'signet', 'testnet' ])
+const network   = z.enum([ 'main', 'regtest', 'signet', 'testnet', 'mutiny' ])
 const payment   = z.tuple([ num, address ])
 const paypath   = z.tuple([ label, num, address ])
 const regex     = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)

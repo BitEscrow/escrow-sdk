@@ -13,7 +13,7 @@ print_banner('make a deposit')
 
 console.log('copy this address :', address)
 console.log('send this amount  :', amt_total, 'sats')
-if (contract.terms.network === 'signet') {
+if (contract.terms.network === 'mutiny') {
   console.log('get funds here    : https://faucet.mutinynet.com')
 } else if (contract.terms.network === 'testnet') {
   console.log('get funds here    : https://bitcoinfaucet.uo1.net')
