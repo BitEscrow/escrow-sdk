@@ -1,5 +1,5 @@
-import { members }         from '../proposal/configure_clients.js'
-import { proposal, roles } from '../proposal/configure_proposal.js'
+import { members }         from './configure_clients.js'
+import { proposal, roles } from './configure_proposal.js'
 
 // Unpack our members for testing.
 const [ a_mbr, b_mbr, c_mbr ] = members

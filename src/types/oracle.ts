@@ -68,3 +68,10 @@ export interface OracleSpendData {
   status  : OracleTxStatus
   state   : OracleSpendState
 }
+
+export interface OracleUtxo {
+  txid   : string
+  vout   : number
+  status : OracleTxStatus,
+  value  : number
+}

@@ -41,6 +41,10 @@ export class EscrowClient {
     return this._host
   }
 
+  get network () {
+    return this._network
+  }
+
   contract = contract_api(this)
   deposit  = deposit_api(this)
   oracle   = oracle_api(this)

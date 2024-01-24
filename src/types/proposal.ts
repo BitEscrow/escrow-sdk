@@ -25,21 +25,29 @@ export type ScheduleTerms = [
   path   : string
 ]
 
+export interface ProposalTemplate extends Omit <
+ Partial<ProposalData>, 'network'
+> {
+  title   : string,
+  expires : number,
+  network : string,
+  value   : number
+}
+
 export interface ProposalData {
-  content    ?: string
-  deadline   ?: number
-  effective  ?: number
-  expires     : number
-  fallback   ?: string
-  feerate    ?: number
-  members     : MemberData[]
-  moderator  ?: string
-  network     : Network
-  paths       : PathEntry[]
-  payments    : PaymentEntry[]
-  programs    : ProgramTerms[]
-  schedule    : ScheduleTerms[]
-  title       : string
-  value       : number
-  version     : number
+  content   ?: string
+  deadline  ?: number
+  effective ?: number
+  expires    : number
+  feerate   ?: number
+  members    : MemberData[]
+  moderator ?: string
+  network    : Network
+  paths      : PathEntry[]
+  payments   : PaymentEntry[]
+  programs   : ProgramTerms[]
+  schedule   : ScheduleTerms[]
+  title      : string
+  value      : number
+  version    : number
 }

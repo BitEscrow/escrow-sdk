@@ -24,11 +24,12 @@ const request = z.object({
 
 const data = z.object({
   activated   : stamp.nullable(),
+  agent_fee   : payment,
   balance     : num,
   cid         : hash,
   deadline    : stamp,
   expires_at  : stamp.nullable(),
-  fees        : payment.array(),
+  feerate     : num,
   outputs     : output.array(),
   moderator   : hash.nullable(),
   pending     : num,
@@ -37,8 +38,12 @@ const data = z.object({
   published   : stamp,
   signatures  : hex.array(),
   status,
+  subtotal    : num,
   terms,
   total       : num,
+  txfee       : num,
+  txvin_size  : num,
+  txout_size  : num,
   updated_at  : stamp,
   vm_state    : vm.data.nullable(),
 }).and(agent).and(spend_state).and(close_state)

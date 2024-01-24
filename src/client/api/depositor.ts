@@ -1,6 +1,6 @@
 import { Buff }             from '@cmdcode/buff'
-import { create_return_tx } from '@/lib/return.js'
 import { get_deposit_ctx }  from '@/lib/deposit.js'
+import { create_return_tx } from '@/lib/return.js'
 import { EscrowSigner }     from '@/client/class/signer.js'
 
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/lib/session.js'
 
 import {
+  ApiResponse,
   ContractData,
   CovenantData,
   DepositAccount,
@@ -16,6 +17,17 @@ import {
   ReturnData,
   TxOutput
 } from '@/types/index.js'
+
+import { AccountDataResponse } from '../types.js'
+
+export function request_account_api (client : EscrowSigner) {
+  return async (
+    locktime : number
+  ) : Promise<ApiResponse<AccountDataResponse>> => {
+    const pubkey = client.pubkey
+    return client.client.deposit.request({ pubkey, locktime })
+  }
+}
 
 /**
  * Create a deposit template for registration.
@@ -35,9 +47,7 @@ export function register_utxo_api (client : EscrowSigner) {
     // Get the context object for our deposit account.
     const ctx  = get_deposit_ctx(agent_pk, pub, sequence)
     // Create the return transaction.
-    const rtx  = create_return_tx(addr, ctx, client._signer, utxo, txfee)
-    // If contract is define, set covenant variable.
-    return rtx
+    return create_return_tx(addr, ctx, client._signer, utxo, txfee)
   }
 }
 
@@ -97,6 +107,7 @@ export function commit_return_api (client : EscrowSigner) {
 
 export default function (client : EscrowSigner) {
   return {
+    request_acct   : request_account_api(client),
     register_utxo  : register_utxo_api(client),
     commit_utxo    : commit_utxo_api(client),
     commit_deposit : commit_deposit_api(client),

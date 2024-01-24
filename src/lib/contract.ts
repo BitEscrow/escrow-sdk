@@ -6,7 +6,6 @@ import { init_vm }          from '../vm/main.js'
 import {
   get_path_names,
   get_path_vouts,
-  get_pay_total,
   get_proposal_id,
 } from './proposal.js'
 
@@ -24,21 +23,26 @@ import {
 export function create_contract (
   config : ContractConfig
 ) : ContractData {
+  const agent_fee  = config.agent_fee
+  const feerate    = config.feerate
   const terms      = config.proposal
-  const fees       = config.fees       ?? []
+  const outputs    = get_spend_outputs(terms, [ agent_fee ])
   const published  = config.published  ?? now()
   const signatures = config.signatures ?? []
+  const subtotal   = terms.value + agent_fee[0]
+  const txout_size = outputs[0].length / 2
 
   return sort_record({
     ...config.agent,
     activated   : null,
+    agent_fee   : agent_fee,
     balance     : 0,
     cid         : config.cid,
     deadline    : get_deadline(terms, published),
     expires_at  : null,
-    fees        : fees,
+    feerate     : feerate,
     moderator   : config.moderator ?? null,
-    outputs     : get_spend_outputs(terms, fees),
+    outputs     : get_spend_outputs(terms, [ agent_fee ]),
     pending     : 0,
     prop_id     : get_proposal_id(terms).hex,
     pubkeys     : signatures.map(e => e.slice(0, 64)),
@@ -50,8 +54,12 @@ export function create_contract (
     spent_at    : null,
     spent_txid  : null,
     status      : 'published',
+    subtotal    : subtotal,
     terms       : terms,
-    total       : terms.value + get_pay_total(fees),
+    total       : subtotal,
+    txfee       : txout_size * feerate,
+    txvin_size  : 0,
+    txout_size  : txout_size,
     updated_at  : published,
     vm_state    : null
   })

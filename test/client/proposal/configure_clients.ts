@@ -1,5 +1,4 @@
-import { Buff }           from '@cmdcode/buff'
-import { Signer, Wallet } from '@cmdcode/signer'
+import { Seed, Signer, Wallet } from '@cmdcode/signer'
 
 import {
   EscrowClient,
@@ -19,7 +18,7 @@ export const members = aliases.map(alias => {
   // Freeze the idx generation at 0 for testing.
   const idxgen = () => 0
   // Create a basic deterministic seed for testing.
-  const seed   = Buff.str(alias).digest
+  const seed   = Seed.import.from_char(alias)
   // Create a new signer using the seed.
   const signer = new Signer({ seed })
   // Create a new wallet using the seed.

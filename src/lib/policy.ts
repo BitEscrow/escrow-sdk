@@ -21,26 +21,6 @@ import {
 
 import { RolePolicy } from '../types/index.js'
 
-export function get_role_policy (
-  roles : RolePolicy[],
-  label : string
-) {
-  const role = roles.find(e => e.label === label)
-
-  if (role === undefined) {
-    throw new Error('role does not exist: ' + label)
-  }
-
-  return role
-}
-
-export function has_role_policy (
-  roles : RolePolicy[],
-  label : string
-) {
-  return roles.find(e => e.label === label) !== undefined
-}
-
 export function get_role_data (
   member   : MemberData,
   proposal : ProposalData

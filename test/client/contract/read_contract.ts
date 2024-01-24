@@ -3,8 +3,8 @@ import { EscrowClient } from "@scrow/core/client"
 import CONFIG from '../config.js'
 
 // Define a third-party client as a coordinator.
-const client = new EscrowClient(CONFIG.testnet.client)
-const cid    = '3ed7994a1aeade71a6acb8f105b0eceae8b8c61b6fda7f9dfd2e9f6fa3e33d7e'
+const client = new EscrowClient(CONFIG.regtest.client)
+const cid    = '108abd1bcabf7c8cc4dcb8be824461b6d8146fbf3623f748bc1926ec818e42d1'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)

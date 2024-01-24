@@ -64,7 +64,7 @@ function register_deposit_api (client : EscrowClient) {
 /**
  * Fund a contract directly using a deposit template.
  */
-function fund_contract_api (client : EscrowClient) {
+function register_funds_api (client : EscrowClient) {
   return async (
     agent_id  : string,
     return_tx : string,
@@ -116,7 +116,7 @@ function list_deposit_api (client : EscrowClient) {
   }
 }
 
-function commit_deposit_api (client : EscrowClient) {
+function commit_funds_api (client : EscrowClient) {
   return async (
     dpid     : string,
     covenant : CovenantData
@@ -150,12 +150,12 @@ function close_deposit_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    close    : close_deposit_api(client),
-    commit   : commit_deposit_api(client),
-    fund     : fund_contract_api(client),
-    list     : list_deposit_api(client),
     read     : read_deposit_api(client),
+    list     : list_deposit_api(client),
+    commit   : commit_funds_api(client),
+    fund     : register_funds_api(client),
     register : register_deposit_api(client),
-    request  : request_deposit_api(client)
+    request  : request_deposit_api(client),
+    close    : close_deposit_api(client)
   }
 }

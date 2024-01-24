@@ -1,4 +1,5 @@
-import { exists } from './util.js'
+import { parse_addr } from '@scrow/tapscript/address'
+import { exists }     from './util.js'
 
 import {
   ApiResponse,
@@ -6,7 +7,8 @@ import {
   OracleQuery,
   OracleSpendData,
   OracleSpendState,
-  OracleTxData
+  OracleTxData,
+  OracleUtxo
 } from '../types/index.js'
 
 import * as schema from '@/schema/index.js'
@@ -107,6 +109,29 @@ export async function get_utxo_data (
   }
   // Return the txout aling with its state and status.
   return { txspend, status: tx.status, state }
+}
+
+export async function get_address_utxos (
+  host : string,
+  addr : string
+) : Promise<OracleSpendData[]> {
+  // Define the url to use for fetching.
+  const url = `${host}/api/address/${addr}/utxo`
+  // Fetch a response from the oracle.
+  const res = await fetcher<OracleUtxo[]>(url)
+  // If response failed, throw error.
+  if (!res.ok) throw new Error(res.error)
+  // Parse the returned data.
+  const parsed = await schema.oracle.utxo.array().spa(res.data)
+  // If data fails validation, throw.
+  if (!parsed.success) throw new Error(parsed.error.toString())
+  // Return the parsed data.
+  return parsed.data.map(({ txid, status, value, vout }) => {
+    const scriptkey = parse_addr(addr).hex
+    const state     = { spent : false as const }
+    const txspend   = { txid, vout, value, scriptkey }
+    return { state, status, txspend }
+  })
 }
 
 /**

@@ -64,11 +64,19 @@ const txdata = z.object({
   hex      : hex.optional()
 })
 
+const utxo = z.object({
+  txid  : hash,
+  vout  : num,
+  status,
+  value : num
+})
+
 export default {
   txin,
   txout,
   txdata,
   txodata  : spend,
   txostate : state,
-  txstatus : status
+  txstatus : status,
+  utxo
 }

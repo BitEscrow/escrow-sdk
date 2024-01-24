@@ -5,7 +5,8 @@ import {
   fee_estimates,
   get_fee_target,
   get_utxo_data,
-  get_tx_data
+  get_tx_data,
+  get_address_utxos
 } from '@/lib/oracle.js'
 
 import { OracleQuery } from '@/types/index.js'
@@ -46,12 +47,19 @@ function get_utxo_api (client: EscrowClient) {
   }
 }
 
+function get_addr_utxos_api (client : EscrowClient) {
+  return async (address : string) => {
+    return get_address_utxos(client._oracle, address)
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
-    broadcast_tx  : broadcast_tx_api(client),
-    fee_estimates : fee_estimates_api(client),
-    fee_target    : get_fee_target_api(client),
-    get_txdata    : get_txdata_api(client),
-    get_utxo      : get_utxo_api(client)
+    broadcast_tx      : broadcast_tx_api(client),
+    fee_estimates     : fee_estimates_api(client),
+    fee_target        : get_fee_target_api(client),
+    get_txdata        : get_txdata_api(client),
+    get_utxo          : get_utxo_api(client),
+    get_address_utxos : get_addr_utxos_api(client)
   }
 }

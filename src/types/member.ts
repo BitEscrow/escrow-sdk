@@ -9,7 +9,6 @@ export interface MemberData {
 }
 
 export interface RolePolicy {
-  label     : string
   limit    ?: number
   paths    ?: [ string, number ][]
   payment  ?: number

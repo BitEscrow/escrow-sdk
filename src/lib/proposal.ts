@@ -3,8 +3,12 @@ import { sha256 }        from '@cmdcode/crypto-tools/hash'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
-import { parse_program } from './parse.js'
 import { regex }         from './util.js'
+
+import {
+  parse_program,
+  parse_proposal
+} from './parse.js'
 
 import {
   PaymentEntry,
@@ -13,10 +17,27 @@ import {
   ProgramQuery,
   ProgramTerms,
   ProgramData,
-  SignerAPI
+  SignerAPI,
+  ProposalTemplate
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
+
+const GET_DEFAULT_PROP = () => {
+  return {
+    content  : '',
+    members  : [],
+    paths    : [],
+    payments : [],
+    programs : [],
+    schedule : [],
+    version  : 1
+  }
+}
+
+export function create_proposal(template : ProposalTemplate) {
+  return parse_proposal({ ...GET_DEFAULT_PROP(), ...template })
+}
 
 /**
  * Returns an array of payment paths

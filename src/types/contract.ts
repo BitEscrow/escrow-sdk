@@ -23,8 +23,9 @@ export type SpendTemplate = [
 
 export interface ContractConfig {
   agent       : AgentSession
+  agent_fee   : PaymentEntry
   cid         : string
-  fees       ?: PaymentEntry[]
+  feerate     : number
   moderator  ?: string
   proposal    : ProposalData
   published  ?: number
@@ -33,11 +34,12 @@ export interface ContractConfig {
 
 export interface ContractBase {
   activated   : null | number
+  agent_fee   : PaymentEntry
   balance     : number
   cid         : string
   deadline    : number
   expires_at  : null | number
-  fees        : PaymentEntry[]
+  feerate     : number
   moderator   : string | null
   outputs     : SpendTemplate[]
   pending     : number
@@ -46,8 +48,12 @@ export interface ContractBase {
   published   : number
   signatures  : string[]
   status      : ContractStatus
+  subtotal    : number
   terms       : ProposalData
   total       : number
+  txfee       : number
+  txvin_size  : number
+  txout_size  : number
   updated_at  : number
   vm_state    : null | StateData
 }

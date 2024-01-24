@@ -13,139 +13,58 @@ Features:
 Comimg Soon:
   * Return receipts on witness submission.
   * Improved code comments and documentation.
+  * new `templates` field for raw tx templates.
   * `hashlock` and `oracle` programs for vm.
   * OpenAPI spec document.
 
-## How It Works
+## Overview
+
+Click on a section title to navigate to that section.
+
+How it Works
+  - Negotiation
+  - Funding
+  - Settlement
+  - Security Model
+  - Example Flow
+
+How to Install
+  - boilerplate
+
+How to Use
+  - Create and negotiate a proposal.
+  - Endorse and submit proposal to API.
+  - Request a deposit account.
+  - Register funds in a deposit account.
+  - Fetching a contract.
+  - Funding a contract.
+  - Submit a statement to the vm.
+  - Validate settlement of contract.
+
+Development & Testing
+  - getting started
+  - using regtest
+  - using mutiny
+  - using testnet
+
+## Overview
 
 The protocol involves three parties:
 
-**Members**  : The participating members of the contract.
-**Sponsors** : Those depositing funds into the contract (may be members).
-**Executor** : The host of the escrow contract (BitEscrow API).
+**Members**  : The participating members of the contract.  
+**Funders**  : Those depositing funds into the contract (may be members).  
+**Platform** : The server hosting the escrow contract (BitEscrow API).  
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
 ### Negotiation
 
-The `members` of the contract must first negotiate and agree on a `proposal` document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT). You can view an example of a proposal document [here]().
-
-If desired, a service `provider` can offer a platform for negotiating the proposal. The protocol is designed for third-parties to help with coordination, and offer their own services such as arbitration.
-
-There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they all support JSON. Feel free to use your favorite one!
-
-Once the terms have been finalized, the proposal is verified by the `executor` and converted into a `contract`. Once the contract has been created, it is available for `funding`.
-
-> Note: The `executor` does not arbitrate disputes, nor does it take part in negotiations. This is strictly by design.
->
-> While BitEscrow may offer separate negotiation and arbitration services, the protocol is designed for `members` to seek out their own `providers`, or coordinate amongst themselves, so that the `executor` may be involved as little as possible.
-
-**Funding**:  
-
-Once the terms of a proposal have been established, the next step is to setup an escrow contract. The contract requires a collaborative agreement between three acting parties:
-
-  - The `members` of the proposal, which receive the funds.
-  - The `funders` of the proposal, which deposit the money.
-  - The escrow `agent`, which executes the terms of the contract.
-
-In order to secure funds, each funder makes a `deposit` into a 2-of-2 multi-signature address with the agent, that includes a time-locked refund path to the funder. The time-lock ensures the agent has an exclusive window to negotiate spending, while the refund output guarantees the funder can recover their funds in a worst-case scenario.
-
-Once funds are secured within a deposit address, a `covenant` is then made between the funder and agent. This covenant is constructed using a set of pre-signed transactions, with each transaction authorizing one of the spending paths of the contract.
-
-Due to the multi-signature arrangement of funds, both the agent and funder must agree on the terms of the contract. 
-
-> Note: In fact, due to the non-interactive nature of the protocol, both parties must come to a consensus in order to produce a valid signature. Part of the design intent for the proposal specification was to make this consensus robust enough that it could handle high-frequency trading.
-
-Once the covenant is made, the funds are considered to be in escrow. When the agent has collected enough funds to cover the value of the contract, the contract then becomes active.
-
-**Settlement**:
-
-The final round of the escrow process is the `settlement`. This is the most fun part of the protocol, as members of the contract now get to debate about how the money shall be spent.
-
-At this phase:
-
-  * The agent is bound by the covenant, and can only settle the contract using a pre-authorized spending path.
-  * The agent does have control over that selection process, and can implement any protocol.
-
-To maximize the power of the first point, and minimize risk from the second point, both the `members` and `agent` interact with the contract through the use of a virtual machine. The consensus of this machine is governed by the terms of the proposal, which define:
-
-  - The `paths` available to spend in the contract.
-  - The `actions` that can be taken on a given path.
-  - The `method` used to trigger those actions.
-  - The `params` used to configure each method.
-
-> Note: Each method involves the creation / validation of a cryptography proof.
-
-The sum of these definitions constitutes a `program` that can be executed.
-
-To execute a program, a `member` submits their arguments to the `agent`, who then uses the machine to evaluate the arguments. If the arguments are valid, then the machine state is updated. The agent then creates a basic commit hash that records the changes that took place. This hash is signed and returned to the `member` as a form of receipt.
-
-> Note: Each commit proof links to the previous, forming a git-style hash chain of attribution.
-
-Once the machine has computed a result for the contract, the agent then proceeds to complete each covenant and broadcast the selected path via an on-chain transaction.
-
-**Agents**  
-
-A quick note about agents. From the protocol perspective, agents are meant to be like meeseeks: their purpose in the life of a contract is to collect signatures, crunch numbers, then spit out a transaction for a nominal fee. Any descision outside of a 0 or 1 equals pain for the agent.
-
-The proposal is designed to outline a simple decision tree for the agent to follow, so that all decisions are verifiable. The agent is not designed to be an arbitrator, rather the arbitrator (if included) would be a member of the contract, and would interact with the agent under the same terms.
-
-At a high level, we are combining the use of pre-signed covenants, with a protocol for establishing an end-to-end cryptographic contract between the three parties. The contract guarantees that the agent can't cheat without being caught, and the covenant guarantees the agent has no direct control over the funds.
-
-Thankfully, all of this can done by open-source computer software. :-)
-
-## Protocol Flow
-
-> **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
-
-Step 0 (draft proposal):  
-  * Alice prepares a proposal with Bob. They both agree on Carol to resolve disputes.
-
-Step 1 (create contract):  
-  * Bob submits his proposal to the agent and receives a contract.
-  * Bob shares this contract with Alice.
-
-Step 2 (deposit & covenant):  
-  * Alice deposits her funds into a 2-of 2 account with the contract agent.
-  * Alice signs a covenant that spends her funds to either 'payout' or 'refund' path.
-  * Once the deposit is confirmed on-chain, the contract becomes active.
-  
-Step 3a (settle contract - happy path):  
-  * Alice receives her widget and forgets about Bob.
-  * The contract schedule closes automatically on 'payout'.
-  * Bob gets the funds, Alice can verify the CVM execution.
-
-Step 3b (settle contract - so-so path):  
-  * Alice doesn't like her widget.
-  * Alice and Bob both agree to sign the 'refund' path.
-  * Alice gets a partial refund, Bob still keeps his fees.
-
-Step 3c (dispute contract - unhappy path):  
-  * Alice claims she didn't get a widget, and disputes the payout.
-  * Carol now has authority to settle the contract.
-  * Carol decides on the 'refund' path.
-  * Alice gets a partial refund, Bob still keeps his fees.
-
-Step 3d (expired contract - ugly path):  
-  * Alice claims she didn't get a widget, and disputes the payout.
-  * Carol is on a two-week cruise in the bahamas.
-  * The proposal did not include any auto-settlement terms.
-  * The contract hangs in dispute until it expires.
-  * The fallback path is executed, or if not defined, all deposits are refunded.
-
-Step 3e (expired deposits - horrific path):  
-  * Everything in 3d happens, except the last bit.
-  * The entire escrow platform goes down in flames.
-  * All deposits expire, and can be swept using the refund path.
-
-## The Proposal
-
-A proposal is the precursor to creating a contract. It defines the terms of the contract and how the CVM should be initialized. It is written in a simple JSON format that is easy to read, for humans and machines alike.
+The `members` of the contract must first negotiate and agree on a `proposal` document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
 
 ```ts
 {
   title    : 'Basic two-party contract with third-party dispute resolution.',
-  details  : 'n/a',
+  content  : '{}',
   expires  : 14400,
   network  : 'regtest',
   paths: [
@@ -167,323 +86,307 @@ A proposal is the precursor to creating a contract. It defines the terms of the 
 }
 ```
 
-The format is designed to be collaborative and shared between parties. Each member can add their own terms to the `paths`, `payments`, `programs`, and `schedule` fields. All other fields are require a unanimous consensus across members.
+If desired, a service `provider` can host a platform for negotiating the proposal. The protocol is designed for third-parties to help with coordination, and offer their own services such as arbitration.
 
-## The Contract
+There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they all support JSON. Feel free to use your favorite one!
 
-The contract serves as the main document between depositors and members. It provides information for making deposits, constructing a covenant, and hosting the CVM for members to interact with.
+> Note: The `agent` does not arbitrate disputes or take part in negotiations. This is strictly by design. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+
+### Funding
+
+Once a proposal is finalized, it is delivered to the `agent` server, who hosts the contract, and coordinates with `funders`.
+
+Each funder requests a `deposit` account from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
-interface ContractData {
-  activated   : null | number
-  agent_id    : string
-  agent_key   : string
-  agent_pn    : string
-  balance     : number
-  cid         : string
-  deadline    : number
-  expires_at  : null | number
-  fees        : Payment[]
-  moderator   : string | null
-  outputs     : SpendTemplate[]
-  pending     : number
-  prop_id     : string
-  published   : number
-  settled     : boolean
-  settled_at  : number | null
-  spent       : boolean,
-  spent_at    : number | null
-  spent_txid  : string | null
-  status      : ContractStatus
-  terms       : ProposalData
-  total       : number
-  updated_at  : number
-  vm_state    : null | ContractState
+interface DepositAccount {
+  created_at : number  // UTC timestamp.
+  address    : string  // <-- deposit funds here. 
+  agent_id   : string  // ID of the agent.
+  agent_pk   : string  // Pubkey of the agent  (in 2-of-2).
+  member_pk  : string  // Pubkey of the funder (in 2-of-2).
+  req_id     : string  // Hash digest of this record.
+  sequence   : number  // Sequence value used for locktime.
+  sig        : string  // Provided by server for authenticity.
 }
 ```
 
-```ts
-// The different states of a Contract.
-export type ContractStatus = 
-  'published' | // Initial state of a contract. Can be cancelled. 
-  'funded'    | // Contract is funded, not all deposits are confirmed.
-  'secured'   | // All deposits are confirmed, awaiting delayed execution. 
-  'pending'   | // Contract is ready for activation
-  'active'    | // Contract is active, CVM running, clock is ticking.
-  'closed'    | // Contract is closed, ready for settlement.
-  'spent'     | // Contract is spent, tx in mempool.
-  'settled'   | // Contract is settled, tx is confirmed.
-  'canceled'  | // Contract canceled or expired during funding.
-  'expired'   | // Contract expired during execution.
-  'error'       // Something broke, may need manual intervention.
-```
-
-Once funds are secured and the contract is active, the CVM is initialized and ready to accept arguments.
+The funder then delivers a batch of pre-signed transactions which authorizes each of the spending paths of the contract.
 
 ```ts
-// The state of a newly born CVM, fresh from the womb.
-state: {
-  commits  : [],
-  head     : 'df015d478a970033af061c7ed0152b97907c148b51353a8a33f79cf0b3d87350',
-  paths    : [ [ 'payout', 0 ], [ 'return', 0 ] ],
-  programs : [],
-  result   : null,
-  start    : 1696362768,
-  status   : 'init',
-  steps    : 0,
-  store    : [],
-  updated  : 1696362768
+interface CovenantData {
+  cid    : string  // id of the contract.
+  pnonce : string  // public nonce (used for musig).
+  psigs  : [
+    path : string, // name of path in the contract.
+    psig : string  // partial signature (used for musig).
+  ][]
 }
 ```
 
-Arguments are supplied using signed statements. Each statement is fed into the CVM, and evaluated within the rules of the CVM. If the statement is valid, then the actions are applied, the state is updated, and a receipt is returned to the sender.
+Once the pre-signed `covenant` is made, the funds are locked in escrow. Once all deposits have bee locked and confirmed, the contract becomes active.
+
+### Settlement
+
+The final round of the escrow process is the `settlement`. This is the most fun part of the protocol, as members of the contract get to debate about how the money shall be spent.
+
+When the contract becomes active, a virtual machine is started within the contract. This vm includes the `paths`, `programs`, and `tasks` specified in the proposal.
 
 ```ts
-type WitnessEntry = [
-  stamp   : number,   // A UTC timestamp, in seconds.
-  prog_id : string,   // An identifier that calls the program.
-  ...args : Literal[] // The arguments to supply to the program.
-]
-```
-
-Currently, the CVM only supports one method, and that is the `endorse` method. This method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reached. The threshold for this quorm is defined in the proposal terms.
-
-The `endorse` method uses that are designed to be easy to work with. They are inspired by `NIP-26` delegation proofs, and can support an optional query string to provide additional parameters.
-
-```ts
-// Includes a reference id, pubkey, proof id, signature and timestamp.
-'b92e904d8819b670761e903f3d788da3ccea2db1ed9253d9fdbab427fe87022a9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be553ae992fa3b9a7fd6b6792936c2a6e6dcfbb3f091e2994df0c5cdb901e92e4abccb7ef9408028283a08c32e199036755c2401ddec831f6fad244c7aa7af8e7d4dff691c97add18871d32ec3c6c487f2433f51bf4ef3d9b2d58459aeff3b8016?stamp=1700172943'
-```
-
-Also, proofs use the same signing method as nostr notes, so technically any proof can be converted into a valid nostr note, and vice-versa. Valid proofs can also be constructed usings nostr-based signing devices (such as `NIP-07` based extensions).
-
-```ts
-// A parsed proof will look like this:
-interface ProofData {
-  ref    : string
-  pub    : string
-  pid    : string
-  sig    : string
-  params : string[][]
+{
+  commits: [],
+  error  : null,
+  head   : '21b8d90a9d5d249518f3b18a7d206a9f93a9745531f6e54a8813938f7fad42af',
+  output : null,
+  paths  : [ [ 'heads', 0 ], [ 'draw', 0 ], [ 'tails', 0 ] ],
+  programs: [
+    [
+      'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954',
+      'endorse',
+      'close',
+      'heads|tails',
+      2,
+      '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde99',
+      '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604'
+    ],
+    [
+      '0b4eb344d2824e1f0c0df2a16f312437528a49675844d7827df26b35d0da08ea',
+      'endorse',
+      'dispute',
+      'heads|tails',
+      1,
+      '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde99',
+      '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604'
+    ],
+    [
+      '65c1d6527d20713e7c16c6d4462a0885bf1a678e294426a6a20385227d81fdee',
+      'endorse',
+      'resolve',
+      'heads|tails',
+      1,
+      '36e7977d0323bbf0aeed50c8f5823c80125c7d77c742bd9a62da98e30193f1b2'
+    ]
+  ],
+  start: 1705815394,
+  steps: 0,
+  store: [
+    [ 'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954', '[]' ],
+    [ '0b4eb344d2824e1f0c0df2a16f312437528a49675844d7827df26b35d0da08ea', '[]' ],
+    [ '65c1d6527d20713e7c16c6d4462a0885bf1a678e294426a6a20385227d81fdee', '[]' ]
+  ],
+  status: 'init',
+  tasks: [ [ 7200, 'close', 'draw' ] ],
+  updated: 1705815394
 }
 ```
 
-The CVM is designed to be extensibe. It will support many hooks and cross-platform integrations in the future. It is also a work in progress, so expect bugs.
-
-## Deposits
-
-Deposits are the most magical part of the protocol, and a good amount of engineering has been poured into their construction.
-
-Each deposit account is a time-locked 2-of-2 taproot address. All deposits are guaranteed refundable, and the script path is only revealed in a worst-case scenario.
-
-In addition, this address is constructed using an extended version of the musig2 protocol, optimized for non-interactive signing a batch of transactions. This protocol is compatible with BIP327 and does not comprimise on any of the security features in the specification.
+Members of the contract can interact with the vm using signed statements, called a witness:
 
 ```ts
-interface DepositData {
-  agent_id     : string
-  agent_key    : string
-  agent_pn     : string
-  block_hash   : string | null
-  block_height : number | null
-  block_time   : number | null
-  confirmed    : boolean
-  covenant     : CovenantData | null
-  created_at   : number
-  expires_at   : number | null
-  deposit_id   : string
-  deposit_key  : string
-  return_tx    : string
-  scriptkey    : string
-  sequence     : number
-  settled      : boolean
-  settled_at   : number | null
-  spent        : boolean,
-  spent_at     : number | null
-  spent_txid   : string | null
-  status       : DepositStatus
-  txid         : string
-  updated_at   : number
-  value        : number
-  vout         : number
+{
+  action  : 'close',
+  args    : [],
+  method  : 'endorse',
+  path    : 'tails',
+  prog_id : 'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954',
+  sigs    : [
+    '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde997bd992345fdd377d1622c659450b9ee1fd05da039a3bb6b55a3e32cf353150daa4c69c57a508d648e9119b39ae0c954f5fe2368b1770b52300d23deeaac298da',
+    '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604d6946b5707550ff0e058196c3506872e722a6f30a2d8095817d2418b1617626e807cb11de648375ad0f38b08da0b6580ceb549aa2fe7d9eb96d4728f19875fdc'
+  ],
+  stamp   : 1705815394,
+  wid     : '46609fd312fb162b530d2dd562f9b946d73192c21df35e27f380bf96110efb02'
 }
 ```
 
-It is important to note that a deposit can be released from one contract, and signed to another, without requiring an on-chain transaction. This is particularly useful if a contract expires or is otherwise cancelled, as the deposits can be reused immediately.
+Each new statement updates the vm, and is added to a git-style commitment chain of hashes. Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths.
 
-The caveat with this is that there is currently no revocation protocol in place for past covenants, so technically the agent has a limited opportunity to double-spend. There are plans to impove the off-chain use of deposits in a future version of the protocol.
+Once the contract vm has settled on a spending path, the agent will complete the relevant pre-signed transaction, and broadcast it, closing the contract.
+
+The proposal, covenants, and witness statements combine to create a proof of validity on how the contract should be settled. If the platform broadcasts a transaction without a matching validity proof, then the reputation of the platform is damaged.
+
+### Protocol Flow
+
+> **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
+
+  * Alice and Bob prepare a proposal, and agree on terms / arbitration.
+  * Alice submits the proposal to the agent and receives a contract.
+  * Alice deposits her funds with the contract agent, along with a covenant.
+  * Once the deposit is confirmed on-chain, the contract becomes active.
+  
+  **(settle contract - happy path)**
+  * Alice receives her widget and forgets about Bob.
+  * The contract schedule closes automatically on 'payout'.
+  * Bob gets the funds, Alice can verify the CVM execution.
+
+  **(settle contract - so-so path)**
+  * Alice doesn't like her widget.
+  * Alice and Bob both agree to sign the 'refund' path.
+  * Alice gets a partial refund, Bob still keeps his fees.
+
+  **(dispute contract - unhappy path)**
+  * Alice didn't get the right widget, and disputes the payout.
+  * Carol now has authority to settle the contract.
+  * Carol decides on the 'refund' path.
+  * Alice gets a partial refund, Bob still keeps his fees.
+
+  **(expired contract - ugly path)**
+  * Alice claims she didn't get a widget, and disputes the payout.
+  * Carol is on a two-week cruise in the bahamas.
+  * The proposal did not include any auto-settlement terms.
+  * The contract expires, all deposits are released.
+
+  **(expired deposits - horrific path)**
+  * Everything above happens, except the last part.
+  * The entire escrow platform goes down in flames.
+  * The timelock on deposits eventually expire.
+  * Alice can sweep back her funds using the refund path.
+
+### Security Model
+
+A brief description of the security model:
+
+  * Each member joins the proposal using an anonymous credential. The involvement of a credential can be independently verified without revealing the owner.
+  
+  * Members decide the terms of the proposal, and all spending paths. The contract agent does not get involved until the proposal terms have already been finalized.
+
+  * Each member can optionally sign the proposal terms, if they wish to publicize their endorsement. This does not reveal their credential in the proposal.
+
+  * Funders ultimately decide on what transactions to sign and deliver to the agent. If there's a disagreement, funders can back out of a deposit.
+
+  * The contract agent cannot link depositors to members, nor members to credentials.
+
+  * The contract agent can only settle on transactions   provided by funders.
+  
+  * All parites independently verify the progression of the contract, and the final settlement. If the platform settles without a valid proof, their reputation is burned.
+
+Some challenges with the current model:
+
+  * The platform has a limited opportunity to censor members of a contract by ignoring their witness statements. In the short term, we plan to mitigate this using signed delivery receipts. In the long-term, we will support alternative platforms for delivery (such as nostr).
+
+  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as staking collateral.
+
+In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin.
+
+## How to Use
+
+### Creating a Signer (for contract members)
+
+Full example: [01_create_signer.ts](test/demo/01_create_signer.ts)
 
 ```ts
-type DepositStatus =
-'reserved' | // An account has been reserved, no deposit registered.
-'pending'  | // Deposit is registered in mempool and ready for signing.
-'stale'    | // Deposit is stuck in mempool, must wait for confirmation.
-'open'     | // Deposit is confirmed and ready for signing
-'locked'   | // Deposit is currently locked to a covenant.
-'spent'    | // Deposit has been spent and is awaiting confirmation.
-'settled'  | // Deposit spending tx has been confirmed.
-'expired'  | // Deposit time-lock is expired, no longer secured.
-'error'      // Something went wrong, may need manual intervention.
-```
+import { Seed, Signer, Wallet } from '@cmdcode/signer'
 
-When a contract is settled, it will appear on the blockchain as a simple P2TR (Pay to Taproot) transaction. No information about the contract, its depositors, or its participating members, are ever revealed.
+import { EscrowSigner } from '@scrow/core/client'
 
-## Covenants
+const seed = Seed.generate.bytes()
+const xpub = 'enter your own xpub here'
 
-A covenant is created using a custom protocol that wraps the musig2 protocol, and allows us to perform batch signing of transactions. It involves the use of a `root` nonce value for each signing member, which is then further tweaked in a non-interactive way. Each tweaked nonce value is then used in a standard musig2 signing session.
-
-In regards to scaling, the protocol is O(1) for the coordinated negotiation of root nonces, requires O(n = outputs) partial signatures from each depositor, and O(n * m = depositors) for verification of signatures by the agent.
-
-The protocol is relatively simple:
-
-* All parties compute a hash that commits to the full terms of the contract.
-  > Ex: hash340('root_nonce', serialize(contract_terms))
-* Each member uses this hash to produce a root nonce value using BIP340 nonce generation.
-* The agent includes their root public nonce value with the contract.
-* For _each_ transaction, the depositor performs the following:
-  - The depositor computes a second commitment that includes both root pnonces, plus the transaction.
-    > Ex: hash340('contract/root_tweak', depositor_root_pnonce, agent_root_pnonce, sighash(tx))
-  - This second hash is used to tweak the root pnonce for both the depositor and the agent.
-  - The new pnonce values are used to compute a musig2 signing session, plus partial signature for the transaction.
-* Each depositor delivers their pubkey, root pnonce value and payload of signatures to the agent.
-* The agent can select a particular transaction, compute the tweak and musig context, then finalize the signature.
-
-The purpose of the root nonce value is to guarantee that each derived nonce value is computed fairly, regardless of whom performs the computation. Each tweak extends the commitment of the root nonce value to the specific transaction being signed.
-
-The root nonce value is never used directly in any signing operation. Each partial signature is computed using a derived nonce, via the standard musig2 protocol. This includes a full commitment to the session state and tweaked nonce values.
-
-```ts
-export interface CovenantData {
-  cid    : string
-  pnonce : string
-  psigs  : [ string, string ][]
+const config = {
+  hostname : 'http://localhost:3000',
+  oracle   : 'http://172.21.0.3:3000',
+  signer   : new Signer({ seed }),
+  wallet   : new Wallet(xpub)
 }
+
+const client = new EscrowSigner(config)
 ```
 
-Each signature is flagged using the sighash flag ANYONECANPAY, allowing each deposit to be included among any combination of other inputs signed to the contract. Once all deposits and covenants have been collected for a given contract (and verified by the agent), the contract is considered active.
+### Creating a Client (for third parties)
 
-## Signatures and Signing Devices
-
-The entire protocol, software, and supporting libraries have been designed from the ground-up to incorprate signing devices at all costs. Every interaction with a user's private key is done with the concept of a signing device in mind, and all signature methods in the procotol **require** a signing device as input.
-
-In addition, the protocol is designed with the assumption that the contract agent is a dirty scoundrel who will swindle your private keys away from you using the worst tricks imaginable. All signature methods in the protocol **require** a signing device to generate nonce values and perform key operations, and **zero** trust is given to any counter-party during the signing process.
-
-Even the musig part of the protocol has been extended to require secure nonce generation *within the device* as part of the signing process.
-
-However, since we are using state-of-the-art cryptography, there is a lack of devices out there that can deliver what we need in order to build the best escrow platform on the planet.
-
-Therefore included as part of the escrow-core library is a reference implementation of a software-based signing device.
-
-This purpose of this signer is to act as a place-holder in the protocol, and clearly define what interactions take place, what information is exchanged, and what cryptographic primitives are required.
+Full example: [02_create_client.ts](test/demo/02_create_client.ts)
 
 ```ts
-class Signer {
-  // Generates a signing device from a random 32-byte value.
-  static generate (config ?: SignerConfig) : Signer
-  // Generates a signing device from the sha-256 hash of a passphrase.
-  static seed (seed : string, config ?: SignerConfig ): Signer;
-  // Provides a signing device for a given secret and configuration.
-  constructor(secret: Bytes, config?: SignerConfig);
-  // Provides a sha256 hash of the public key.
-  get id(): string;
-  // Provides the x-only public key of the device.
-  get pubkey(): string;
-  // Derives a key-pair from a derivation path. Accepts numbers and strings.
-  derive(path: string): Signer;
-  // Computes a shared-secret with the provided public key/
-  ecdh(pubkey: Bytes): Buff;
-  // Generates a nonce value for a given message, using BIP340.
-  gen_nonce(message: Bytes, options?: SignerOptions): Buff;
-  // Performs an HMAC operation using the device's internal secret.
-  hmac(message: Bytes): Buff;
-  // Produces a musig2 partial signature using the supplied context.
-  musign(context: MusigContext, auxdata: Bytes, options?: SignerOptions): Buff;
-  // Produces a BIP340 schnorr signature using the provided message.
-  sign(message: Bytes, options?: SignerOptions): string;
+import { EscrowClient } from '@scrow/core/client'
+
+const config = {
+  hostname : 'http://localhost:3000',
+  oracle   : 'http://172.21.0.3:3000'
 }
+
+const client  = new EscrowClient(config)
 ```
 
-There are three main primitives that are required in order to use the protocol:
-
-- Schnorr signatures (BIP340).
-- Musig signatures (BIP327, plus BIP340 nonce generation).
-- Additional tweaks during nonce generation (for the batch covenant signing).
-
-There's also a few neat tricks planned for a future release, so the reference signer comes packed with extra goodies.
-
-The current Signer API represents what a first-class signing device should be able to do. A future version of the API may require methods for performing internal validation, as trusting third-party software for validation of cryptographic proofs is not a good practice.
-
-## Escrow Client
-
-In addition to the core protocol, this repository includes a client library for communicating with our escrow server.
+### Creating a Proposal
 
 ```ts
-export default class EscrowClient {
-  constructor (
-    signer   : Signer, 
-    options ?: ClientOptions
-  )
+import { EscrowProposal, RolePolicy } from '@scrow/core'
 
-  contract: {
-    cancel : (cid: string)             => Promise<EscrowContract>,
-    create : (proposal : ProposalData) => Promise<EscrowContract>,
-    list   : ()                        => Promise<EscrowContract[]>
-    read   : (cid: string)             => Promise<EscrowContract>
-    status : (cid: string)             => Promise<EscrowContract>
-  }
+export const proposal = new EscrowProposal({
+  title    : 'Basic two-party contract with third-party arbitration.',
+  expires  : 14400,
+  network  : 'signet',
+  schedule : [[ 7200, 'close', 'payout|return' ]],
+  value    : 15000,
+})
 
-  covenant: {
-    add    : (
-      contract : ContractData | EscrowContract, 
-      deposit  : DepositData  | EscrowDeposit
-    ) => Promise<EscrowDeposit>
-    list   : (cid : string)        => Promise<EscrowDeposit[]>
-    remove : (deposit_id : string) => Promise<EscrowDeposit>
-  }
-
-  deposit: {
-    close: (
-      address : string, 
-      deposit : DepositData | EscrowDeposit,
-      txfee  ?: number | undefined
-    ) => Promise<EscrowDeposit>
-    create: (
-      agent_id  : string, 
-      agent_key : string, 
-      sequence  : number,
-      txid      : string,
-      options  ?: DepositConfig
-    ) => Promise<DepositTemplate>
-    list     : () => Promise<EscrowDeposit[]>
-    read     : (deposit_id : string)        => Promise<EscrowDeposit>
-    register : (template : DepositTemplate) => Promise<EscrowDeposit>
-    request  : (params ?: Record)           => Promise<DepositInfo>
-    status   : (deposit_id : string)        => Promise<EscrowDeposit>
-  }
-
-  oracle: {
-    broadcast_tx   : (txhex: string)      => Promise<Resolve<string>>
-    fee_estimates  : ()                   => Promise<OracleFeeEstimate>
-    get_fee_target : (target: number)     => Promise<number>
-    get_tx_data    : (txid: string)       => Promise<OracleTxData | null>
-    get_spend_out  : (query: OracleQuery) => Promise<OracleSpendData | null>
-  }
-
-  witness: {
-      list : (cid: string) => Promise<WitnessData[]>
-      read : (wid: string) => Promise<WitnessData>
-      submit: (
-        cid     : string, 
-        witness : WitnessEntry
-      ) => Promise<EscrowContract>
+export const roles : Record<string, RolePolicy> = {
+  buyer : {
+    paths : [
+      [ 'heads', 10000 ],
+      [ 'draw',  5000  ]
+    ],
+    programs : [
+      [ 'endorse', 'close',   'heads|tails', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
+    ]
+  },
+  seller : {
+    paths : [
+      [ 'tails', 10000 ],
+      [ 'draw',  5000  ]
+    ],
+    programs : [
+      [ 'endorse', 'close',   'heads|tails', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
+    ]
+  },
+  agent : {
+    payment  : 5000,
+    programs : [
+      [ 'endorse', 'resolve', 'heads|tails', 1 ]
+    ]
   }
 }
 ```
 
-More documentation coming soon!
+### Joining and Endorsing a Proposal
 
-## Whitepaper
+```ts
+const [ alice, bob, carol ] = signers
 
-There is work being done on a white-paper that focuses on the technical details of the protocol (including the good, bad, and ugly) in order to make things official and invite the sweet wrath of academic scrutiny.
+proposal.join(roles.buyer,  alice)
+proposal.join(roles.seller, bob)
+proposal.join(roles.agent,  carol)
+
+const signatures = signers.map(mbr => {
+  return mbr.endorse.proposal(proposal)
+})
+```
+
+### Creating a Contract
+
+```ts
+const res = await alice.client.contract.create(proposal, signatures)
+
+if (!res.ok) throw new Error(res.error)
+
+const { contract } = res.data
+```
+
+### Requesting a Deposit Account
+
+```ts
+// Request an account for the member to use.
+const res = await alice.deposit.request_acct({
+  locktime : 60 * 60 // 1 hour locktime
+})
+
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+
+// Unpack some of the terms.
+const { account } = res.data
+```
 
 ## Development / Testing
 

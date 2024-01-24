@@ -1,7 +1,9 @@
-import { EventEmitter } from './emitter.js'
-import { EscrowSigner } from './signer.js'
+import { parse_proposal } from '@/lib/parse.js'
+import { EventEmitter }   from './emitter.js'
+import { EscrowSigner }   from './signer.js'
 
 import {
+  create_proposal,
   find_program,
   get_proposal_id
 } from '@/lib/proposal.js'
@@ -10,6 +12,7 @@ import {
   MemberData,
   ProgramQuery,
   ProposalData,
+  ProposalTemplate,
   RolePolicy
 } from '@/types/index.js'
 
@@ -17,7 +20,6 @@ import {
   add_membership,
   rem_membership
 } from '../../lib/policy.js'
-import { parse_proposal } from '@/lib/parse.js'
 
 export class EscrowProposal extends EventEmitter<{
   'update' : EscrowProposal
@@ -25,9 +27,9 @@ export class EscrowProposal extends EventEmitter<{
 
   _data : ProposalData
 
-  constructor (data : ProposalData) {
+  constructor (data : ProposalTemplate) {
     super()
-    this._data = parse_proposal(data)
+    this._data = create_proposal(data)
   }
 
   get copy () {

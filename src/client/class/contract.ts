@@ -30,14 +30,15 @@ export class EscrowContract extends EventEmitter {
     return { activated, deadline, expires_at, published, updated_at }
   }
 
-  get amt () {
-    const { balance, fees, pending, terms, total } = this.data
+  get tab () {
+    const { agent_fee, balance, pending, terms, subtotal, txfee, total } = this.data
     return {
       balance,
-      fees     : fees.reduce((a, b) => a + b[0], 0),
-      payments : terms.payments.reduce((a, b) => a + b[0], 0),
+      agent_fee : agent_fee[0],
+      payments  : terms.payments.reduce((a, b) => a + b[0], 0),
       pending,
-      subtotal : terms.value,
+      subtotal,
+      txfee,
       total
     }
   }

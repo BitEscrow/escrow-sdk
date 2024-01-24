@@ -45,6 +45,7 @@ import {
 import * as assert from '@scrow/core/assert'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
+import { PaymentEntry } from '@/index.js'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -76,9 +77,11 @@ export default async function (client : CoreClient, tape : Test) {
 
       /* ------------------- [ Contract ] ------------------- */
 
-      const cid      = Buff.random().hex
-      const session  = create_session(agent.signer, cid)
-      const contract = create_contract({ cid, proposal, agent : session })
+      const cid       = Buff.random().hex
+      const session   = create_session(agent.signer, cid)
+      const agent_fee = [ 1000, agent.wallet.new_address() ] as PaymentEntry
+      const feerate   = proposal.feerate ?? 5
+      const contract  = create_contract({ cid, proposal, agent : session, agent_fee, feerate })
 
       if (VERBOSE) {
         console.log(banner('contract'))

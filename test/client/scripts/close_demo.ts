@@ -1,7 +1,7 @@
 import { create_witness } from '@/lib/witness.js'
 import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
-import { print_banner }   from '../utils.js'
+import { print_banner }   from '@scrow/test'
 
 import { Network, WitnessTemplate } from "@scrow/core"
 

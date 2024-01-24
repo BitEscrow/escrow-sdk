@@ -49,7 +49,6 @@ export const proposal = new EscrowProposal({
 
 export const roles : Record<string, RolePolicy> = {
   buyer : {
-    label : 'buyer',
     paths : [
       [ 'heads', 10000 ],
       [ 'draw',  5000  ]
@@ -60,7 +59,6 @@ export const roles : Record<string, RolePolicy> = {
     ]
   },
   sales : {
-    label : 'sales',
     paths : [
       [ 'tails', 10000 ],
       [ 'draw',  5000  ]
@@ -71,7 +69,6 @@ export const roles : Record<string, RolePolicy> = {
     ]
   },
   agent : {
-    label   : 'agent',
     payment : 5000,
     paths   : [],
     programs : [

@@ -80,14 +80,14 @@ export interface DepositInfo {
 }
 
 export interface ReturnData {
-  dpid   : string,
-  pnonce : string,
-  psig   : string,
+  dpid   : string
+  pnonce : string
+  psig   : string
   txhex  : string
 }
 
 export interface DepositRequest {
-  pubkey   : string,
+  pubkey   : string
   locktime : number
 }
 

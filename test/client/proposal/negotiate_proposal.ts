@@ -1,4 +1,4 @@
-import { print_banner }    from '../utils.js'
+import { print_banner }    from '@scrow/test'
 import { members }         from './configure_clients.js'
 import { proposal, roles } from './configure_proposal.js'
 

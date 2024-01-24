@@ -9,6 +9,9 @@ export const SPEND_TXDAT_SIZE = 10
 export const REFUND_TX_VSIZE  = 118
 export const RETURN_TX_VSIZE  = 520
 
+export const DEPOSIT_TX_SIZE  = 234
+export const DEPOSIT_TX_VSIZE = 152.25
+
 export const VALID_ACTIONS = [ 'close', 'dispute', 'resolve', 'lock', 'unlock' ]
 export const VALID_METHODS = [ 'endorse' ]
 

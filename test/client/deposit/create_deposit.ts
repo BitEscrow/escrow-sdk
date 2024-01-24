@@ -1,13 +1,9 @@
-import {
-  fund_address,
-  get_daemon,
-  get_utxo
-} from "@scrow/test"
+import { CoreUtil } from "@scrow/test"
 
 import { client, members } from "../proposal/configure_clients.js"
 
 // Startup a local process of Bitcoin Core for testing.
-const core = get_daemon({ network : 'regtest' })
+const core = CoreUtil.get_daemon({ network : 'regtest' })
 const cli  = await core.startup()
 
 // Unpack a member for testing.
@@ -31,8 +27,8 @@ const address  = account.address
 const agent_id = account.agent_id
 
 // Use our utility methods to fund the address and get the utxo.
-const txid = await fund_address(cli, 'alice', address, 20_000)
-const utxo = await get_utxo(cli, address, txid)
+const txid = await CoreUtil.fund_address(cli, 'alice', address, 20_000)
+const utxo = await CoreUtil.get_utxo(cli, address, txid)
 
 // Request the member to sign
 const return_tx = await a_mbr.deposit.register_utxo(account, utxo)
