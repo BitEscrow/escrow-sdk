@@ -51,9 +51,9 @@ Development & Testing
 
 The protocol involves three parties:
 
-**Members**  : The participating members of the contract.  
-**Funders**  : Those depositing funds into the contract (may be members).  
-**Platform** : The server hosting the escrow contract (BitEscrow API).  
+**Members** : The participating members of the contract.  
+**Funders** : Those depositing funds into the contract (may be members).  
+**Agent**   : The server agent hosting the escrow contract (BitEscrow API).  
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
@@ -86,17 +86,17 @@ The `members` of the contract must first negotiate and agree on a `proposal` doc
 }
 ```
 
-If desired, a service `provider` can host a platform for negotiating the proposal. The protocol is designed for third-parties to help with coordination, and offer their own services such as arbitration.
+If desired, a third-party can host the proposal. The protocol is designed for third-parties to help with negotiation, and offer their own services such as arbitration.
 
-There is no specification placed on how to communicate a proposal between parties. There are already many great communication protocols that exist in the wild, and they all support JSON. Feel free to use your favorite one!
+There is no specification placed on how to communicate the proposal between parties. There are so many great communication protocols that exist in the wild, and they virtually all support JSON, so feel free to use your favorite one!
 
-> Note: The `agent` does not arbitrate disputes or take part in negotiations. This is strictly by design. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+> Note: The server `agent` does not take part in negotiations or arbitrate disputes. This is strictly by design. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
 
 ### Funding
 
-Once a proposal is finalized, it is delivered to the `agent` server, who hosts the contract, and coordinates with `funders`.
+Once a final proposal has been delivered to our server, all terms and endorsements are validated, then a `contract` is formed. The contract is assigned a signing `agent`, which is used to coordinate deposits.
 
-Each funder requests a `deposit` account from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+Each funder requests a deposit `account` from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
@@ -111,7 +111,7 @@ interface DepositAccount {
 }
 ```
 
-The funder then delivers a batch of pre-signed transactions which authorizes each of the spending paths of the contract.
+The funder then delivers a batch of pre-signed transactions (called a `covenant`), which authorizes each of the spending paths of the contract.
 
 ```ts
 interface CovenantData {
@@ -124,11 +124,11 @@ interface CovenantData {
 }
 ```
 
-Once the pre-signed `covenant` is made, the funds are locked in escrow. Once all deposits have bee locked and confirmed, the contract becomes active.
+Once the covenant is made, the funds are locked in escrow. Once all the required funds have bee locked and confirmed, the contract becomes active.
 
 ### Settlement
 
-The final round of the escrow process is the `settlement`. This is the most fun part of the protocol, as members of the contract get to debate about how the money shall be spent.
+The final round of the escrow protocol is the `settlement`. This is the most exciting round, as members of the contract get to debate over how the money shall be spent.
 
 When the contract becomes active, a virtual machine is started within the contract. This vm includes the `paths`, `programs`, and `tasks` specified in the proposal.
 
@@ -198,11 +198,13 @@ Members of the contract can interact with the vm using signed statements, called
 }
 ```
 
-Each new statement updates the vm, and is added to a git-style commitment chain of hashes. Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths.
+Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. The chain validates the full running history of the vm, from activation to settlement.
 
 Once the contract vm has settled on a spending path, the agent will complete the relevant pre-signed transaction, and broadcast it, closing the contract.
 
-The proposal, covenants, and witness statements combine to create a proof of validity on how the contract should be settled. If the platform broadcasts a transaction without a matching validity proof, then the reputation of the platform is damaged.
+The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment. There is zero ambiguity left to the `agent`.
+
+Each contract settlement on mainnet will include a valid proof in order to keep our reputation intact.
 
 ### Protocol Flow
 
@@ -269,151 +271,69 @@ In terms of security, speed, and simplicity, we believe this is the best non-cus
 
 ## How to Use
 
-### Creating a Signer (for contract members)
+This readme will be an mixture of documentation and code examples. The full documentation is still a work in progress.
 
-Full example: [01_create_signer.ts](test/demo/01_create_signer.ts)
+The two main resources for example code are here:
 
-```ts
-import { Seed, Signer, Wallet } from '@cmdcode/signer'
+  [test/client](test/client) : Example usage of the full BitEscrow API.
+  [test/demo](test/demo)     : Step-by-step example of the protocol.
 
-import { EscrowSigner } from '@scrow/core/client'
+### Protocol Demo
 
-const seed = Seed.generate.bytes()
-const xpub = 'enter your own xpub here'
+Below is a step-by-step guide through the protocol.
 
-const config = {
-  hostname : 'http://localhost:3000',
-  oracle   : 'http://172.21.0.3:3000',
-  signer   : new Signer({ seed }),
-  wallet   : new Wallet(xpub)
-}
+> Click on a section to view the example code:
 
-const client = new EscrowSigner(config)
-```
+ 1. [Create a Client](test/demo/01_create_client.ts)
+ 2. [Create a Signer](test/demo/02_create_signer.ts)
+ 3. [Build a Proposal](test/demo/02_create_proposal.ts)
+ 4. [Roles and Endorsment](test/demo/02_roles_and_endorse.ts)
+ 5. [Create a Contract](test/demo/02_create_contract.ts)
+ 6. [Request a Deposit Accout](test/demo/02_request_account.ts)
+ 7. [Deposit funds into a Contract](test/demo/02_deposit_funds.ts)
+ 8. [Monitor a Contract](test/demo/02_check_contract.ts)
+ 9. [Settle a Contract](test/demo/02_settle_contract.ts)
 
-### Creating a Client (for third parties)
+### API Demo
 
-Full example: [02_create_client.ts](test/demo/02_create_client.ts)
-
-```ts
-import { EscrowClient } from '@scrow/core/client'
-
-const config = {
-  hostname : 'http://localhost:3000',
-  oracle   : 'http://172.21.0.3:3000'
-}
-
-const client  = new EscrowClient(config)
-```
-
-### Creating a Proposal
-
-```ts
-import { EscrowProposal, RolePolicy } from '@scrow/core'
-
-export const proposal = new EscrowProposal({
-  title    : 'Basic two-party contract with third-party arbitration.',
-  expires  : 14400,
-  network  : 'signet',
-  schedule : [[ 7200, 'close', 'payout|return' ]],
-  value    : 15000,
-})
-
-export const roles : Record<string, RolePolicy> = {
-  buyer : {
-    paths : [
-      [ 'heads', 10000 ],
-      [ 'draw',  5000  ]
-    ],
-    programs : [
-      [ 'endorse', 'close',   'heads|tails', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
-    ]
-  },
-  seller : {
-    paths : [
-      [ 'tails', 10000 ],
-      [ 'draw',  5000  ]
-    ],
-    programs : [
-      [ 'endorse', 'close',   'heads|tails', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
-    ]
-  },
-  agent : {
-    payment  : 5000,
-    programs : [
-      [ 'endorse', 'resolve', 'heads|tails', 1 ]
-    ]
-  }
-}
-```
-
-### Joining and Endorsing a Proposal
-
-```ts
-const [ alice, bob, carol ] = signers
-
-proposal.join(roles.buyer,  alice)
-proposal.join(roles.seller, bob)
-proposal.join(roles.agent,  carol)
-
-const signatures = signers.map(mbr => {
-  return mbr.endorse.proposal(proposal)
-})
-```
-
-### Creating a Contract
-
-```ts
-const res = await alice.client.contract.create(proposal, signatures)
-
-if (!res.ok) throw new Error(res.error)
-
-const { contract } = res.data
-```
-
-### Requesting a Deposit Account
-
-```ts
-// Request an account for the member to use.
-const res = await alice.deposit.request_acct({
-  locktime : 60 * 60 // 1 hour locktime
-})
-
-// Check the response is valid.
-if (!res.ok) throw new Error(res.error)
-
-// Unpack some of the terms.
-const { account } = res.data
-```
+Documentation coming soon!
 
 ## Development / Testing
 
-The documentation for development and testing is currently being fleshed out for an open beta release.
+This project uses the following scripts:
 
-If you want to see a naive end-to-end demonstration of the of the protocol, you can use the follwoing command:
+```md
+  build         : Compiles the contents of `src` folder to `dist`. 
+  demo <chain>  : Runs the protocol demo for the provided chain.
+  load <script> : Executes the script at the provided path.
+  release       : Builds and tests the current source for release.
+  scratch       : Executes the `test/scratch.ts` file.
+  test          : Runs the current test suite in `test/tape.ts`.
+```
+
+Example of running the demo on the mutiny chain (using npm):
 
 ```bash
-## Using Yarn:
-VERBOSE=true yarn test
-## Using NPM:
+npm run demo mutiny
+```
+
+> The available chains are mutiny, signet, and testnet. Main chain coming soon!
+
+Example of running the current test suite in verbose mode:
+
+```bash
 VERBOSE=true npm run test
 ```
 
-This should spin up an isolated `regtest` version of Bitcoin core (which comes packaged with the repo), and run a flurry of methods which exercise the entire protocol. The full end-to-end test is located in `test/src/tests/e2e.test.ts`.
+Please stay tuned for more documentation and updates!
 
-Over the next month, we'll be adding more concrete examples using the `EscrowClient`, plus opening our escrow server to public beta on `testnet` and `mutinynet`.
+## Questions / Issues
 
-Please stay tuned!
-
-## Issues / Questions / Comments
-
-Please feel free to post any kind of issue on the tracker. All feedback is welcome.
+Please feel free to post questions or comments on the issue board. All feedback is welcome.
 
 ## Contribution
 
-Help wanted. All contributions are welcome. :-)
+Help wanted. All contributions are welcome!
 
 ## Resources
 
@@ -467,8 +387,14 @@ Not a run-time dependency, but I use this to incorporate bitcoin core directly i
 
 https://github.com/cmdruid/core-cmd  
 
+**signer**  
+
+Reference implementation of the new hybrid signing device / wallet we are building for BitEscrow. The documentation needs to be updated. WIP.
+
+https://github.com/cmdruid/signer  
+
 # Footnote
 
-My inspiration for this project comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am grateful.
+My inspiration for this project comes from the Bitcoin space, and the incredibly talented people that contribute. I will be forever grateful for their knowledge, kindness and spirit.
 
-I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place, and bring society towards a new golden age. Maybe we will become space-faring apes that reach beyond the moon.
+I wish for Bitcoin to win all the marbles; and be the new global reserve marbles that we fight over. I firmly believe a better money system will make the world a better place. Maybe we will reach beyond the moon.

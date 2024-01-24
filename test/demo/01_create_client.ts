@@ -1,29 +1,33 @@
 import { EscrowClient } from '@scrow/core/client'
 
-export const regtest_config = {
-  hostname : 'http://localhost:3000',
-  oracle   : 'http://172.21.0.3:3300',
-  network  : 'regtest'
+const configs = {
+  regtest : {
+    hostname : 'http://localhost:3000',
+    oracle   : 'http://172.21.0.3:3300',
+    network  : 'regtest'
+  },
+
+  mutiny : {
+    hostname : 'https://bitescrow-mutiny.vercel.app',
+    oracle   : 'https://mutinynet.com',
+    network  : 'signet'
+  },
+
+  signet : {
+    hostname : 'https://bitescrow-signet.vercel.app',
+    oracle   : 'https://mempool.space/signet',
+    network  : 'signet'
+  },
+
+  testnet : {
+    hostname : 'https://bitescrow-testnet.vercel.app',
+    oracle   : 'https://mempool.space/testnet',
+    network  : 'regtest'
+  }
 }
 
-export const mutiny_config = {
-  hostname : 'https://bitescrow-mutiny.vercel.app',
-  oracle   : 'https://mutinynet.com',
-  network  : 'signet'
-}
+const network = process.argv.slice(2)[0] ?? 'regtest'
 
-export const signet_config = {
-  hostname : 'https://bitescrow-signet.vercel.app',
-  oracle   : 'https://mempool.space/signet',
-  network  : 'signet'
-}
-
-export const testnet_config = {
-  hostname : 'https://bitescrow-testnet.vercel.app',
-  oracle   : 'https://mempool.space/testnet',
-  network  : 'regtest'
-}
-
-export const client_config = regtest_config
+export const client_config = configs[network as keyof typeof configs]
 
 export const client = new EscrowClient(client_config)

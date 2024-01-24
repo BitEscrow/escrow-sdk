@@ -1,6 +1,6 @@
 import { print_banner } from '@scrow/test'
 import { client }       from './01_create_client.js'
-import { cid }          from './07_fund_contract.js'
+import { cid }          from './07_deposit_funds.js'
 
 const ival    = 10, 
       retries = 6,

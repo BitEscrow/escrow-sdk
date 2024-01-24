@@ -2,7 +2,7 @@ import { print_banner } from '@scrow/test'
 import { members }      from './02_create_signer.js'
 import { client }       from './01_create_client.js'
 import { contract }     from './05_create_contract.js'
-import { account }      from './06_request_deposit.js'
+import { account }      from './06_request_account.js'
 
 const { address, agent_id } = account
 

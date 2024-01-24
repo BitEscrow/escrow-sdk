@@ -4,7 +4,7 @@ import { client }       from './01_create_client.js'
 import {
   proposal,
   signatures
-} from './04_join_and_endorse.js'
+} from './04_roles_and_endorse.js'
 
 const res = await client.contract.create(proposal, signatures)
 

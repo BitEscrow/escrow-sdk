@@ -4,7 +4,7 @@ import { members }      from './02_create_signer.js'
 import {
   proposal,
   roles
-} from './03_create_proposal.js'
+} from './03_build_proposal.js'
 
 const [ alice, bob, carol ] = members
 
