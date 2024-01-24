@@ -31,6 +31,7 @@ export function create_contract (
   const signatures = config.signatures ?? []
   const subtotal   = terms.value + agent_fee[0]
   const txout_size = outputs[0][1].length / 2
+  const txfee      = txout_size * feerate
 
   return sort_record({
     ...config.agent,
@@ -56,8 +57,8 @@ export function create_contract (
     status      : 'published',
     subtotal    : subtotal,
     terms       : terms,
-    total       : subtotal,
-    txfee       : txout_size * feerate,
+    total       : subtotal + txfee,
+    txfee       : txfee,
     txvin_size  : 0,
     txout_size  : txout_size,
     updated_at  : published,
