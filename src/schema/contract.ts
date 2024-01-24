@@ -28,6 +28,8 @@ const data = z.object({
   balance     : num,
   cid         : hash,
   deadline    : stamp,
+  est_txfee   : num,
+  est_txsize  : num,
   expires_at  : stamp.nullable(),
   feerate     : num,
   outputs     : output.array(),
@@ -41,11 +43,9 @@ const data = z.object({
   subtotal    : num,
   terms,
   total       : num,
-  txfee       : num,
-  txvin_size  : num,
-  txout_size  : num,
   updated_at  : stamp,
   vm_state    : vm.data.nullable(),
+  vout_size   : num
 }).and(agent).and(spend_state).and(close_state)
 
 export default { agent, data, output, request, status }

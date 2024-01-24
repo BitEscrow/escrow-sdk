@@ -38,6 +38,8 @@ export interface ContractBase {
   balance     : number
   cid         : string
   deadline    : number
+  est_txfee   : number
+  est_txsize  : number
   expires_at  : null | number
   feerate     : number
   moderator   : string | null
@@ -51,11 +53,9 @@ export interface ContractBase {
   subtotal    : number
   terms       : ProposalData
   total       : number
-  txfee       : number
-  txvin_size  : number
-  txout_size  : number
   updated_at  : number
   vm_state    : null | StateData
+  vout_size   : number
 }
 
 export type ContractRequest = {

@@ -24,7 +24,7 @@ const VERBOSE = process.env.VERBOSE === 'true'
 
 // Startup a local process of Bitcoin Core for testing.
 
-const config = CONFIG.mutiny
+const config = CONFIG.regtest
 const core   = CoreUtil.get_daemon(config.core)
 const cli    = await core.startup()
 
@@ -120,76 +120,84 @@ if (VERBOSE) {
   console.dir(contract, { depth : null })
 }
 
-// Request an account for the member to use.
-const account_res = await client.deposit.request({
-  pubkey   : a_mbr.pubkey,
-  locktime : 60 * 60 // 1 hour locktime
-})
-
-// Check the response is valid.
-if (!account_res.ok) throw new Error(account_res.error)
-
-// Unpack some of the terms.
-const { account } = account_res.data
-
-if (VERBOSE) {
-  print_banner('NEW ACCOUNT')
-  console.dir(account, { depth : null })
-}
-
-const { address, agent_id } = account
-
-// Use our utility methods to fund the address and get the utxo.
 const is_regtest = config.core.network === 'regtest'
-const txid = await CoreUtil.fund_address(cli, 'faucet', address, 20_000, is_regtest)
 
-if (VERBOSE) {
-  print_banner('DEPOSIT TXID')
-  console.log(txid)
-  console.log('\nsleeping for 2s while tx propagates...')
-}
+const deposits : [ EscrowSigner, number ][] = [
+  [ a_mbr, 10_000 ],
+  [ b_mbr, 6_980  ]
+]
 
-await sleep(2000)
+for (const [ mbr, amt ] of deposits) {
 
-const limit = 10
-  let fails = 0,
-      utxo  = await client.oracle.get_utxo({ txid, address })
+  // Request an account for the member to use.
+  const account_res = await client.deposit.request({
+    pubkey   : a_mbr.pubkey,
+    locktime : 60 * 60 // 1 hour locktime
+  })
 
-while (!is_regtest && utxo === null && fails < limit) {
-  try {
-    console.log('sleeping for 5s...')
-    await sleep(5000)
-    console.log('fetching utxo...')
-    utxo = await client.oracle.get_utxo({ txid, address })
-    if (utxo === null) throw 'utxo not found'
-  } catch (err) {
-    console.log(err)
-    fails += 1
-    continue
+  // Check the response is valid.
+  if (!account_res.ok) throw new Error(account_res.error)
+
+  // Unpack some of the terms.
+  const { account } = account_res.data
+
+  if (VERBOSE) {
+    print_banner(`NEW ACCOUNT`)
+    console.dir(account, { depth : null })
   }
-}
 
-if (utxo === null) throw new Error('utxo not found')
+  const { address, agent_id } = account
 
-// Request the member to sign
-const return_tx = await a_mbr.deposit.register_utxo(account, utxo.txspend)
-const covenant  = await a_mbr.deposit.commit_utxo(account, contract, utxo.txspend)
+  const txid = await CoreUtil.fund_address(cli, 'faucet', address, amt, is_regtest)
 
-// Fund the contract directly with the API.
-const deposit_res = await client.deposit.fund(agent_id, return_tx, covenant)
+  if (VERBOSE) {
+    print_banner('DEPOSIT TXID')
+    console.log(txid)
+    console.log('\nsleeping for 2s while tx propagates...')
+  }
 
-// Check the response is valid.
-if (!deposit_res.ok) throw new Error(deposit_res.error)
+  await sleep(2000)
 
-let deposit = deposit_res.data.deposit
+  const limit = 10
+    let fails = 0,
+        utxo  = await client.oracle.get_utxo({ txid, address })
 
-contract = deposit_res.data.contract
+  while (!is_regtest && utxo === null && fails < limit) {
+    try {
+      console.log('sleeping for 5s...')
+      await sleep(5000)
+      console.log('fetching utxo...')
+      utxo = await client.oracle.get_utxo({ txid, address })
+      if (utxo === null) throw 'utxo not found'
+    } catch (err) {
+      console.log(err)
+      fails += 1
+      continue
+    }
+  }
 
-if (VERBOSE) {
-  print_banner('NEW DEPOSIT')
-  console.dir(deposit, { depth : null })
-  print_banner('UPDATED CONTRACT')
-  console.dir(contract, { depth : null })
+  if (utxo === null) throw new Error('utxo not found')
+
+  // Request the member to sign
+  const return_tx = await a_mbr.deposit.register_utxo(account, utxo.txspend)
+  const covenant  = await a_mbr.deposit.commit_utxo(account, contract, utxo.txspend)
+
+  // Fund the contract directly with the API.
+  const deposit_res = await client.deposit.fund(agent_id, return_tx, covenant)
+
+  // Check the response is valid.
+  if (!deposit_res.ok) throw new Error(deposit_res.error)
+
+  const deposit = deposit_res.data.deposit
+
+  contract = deposit_res.data.contract
+
+  if (VERBOSE) {
+    print_banner(`NEW DEPOSIT FROM ${mbr.pubkey}`)
+    console.dir(deposit, { depth : null })
+    print_banner('UPDATED CONTRACT')
+    console.dir(contract, { depth : null })
+  }
 }
 
 if (contract.status !== 'active') {

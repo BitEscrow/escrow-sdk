@@ -6,10 +6,13 @@ import { account }      from './06_request_deposit.js'
 
 const { address, agent_id } = account
 
+const vin_fee   = contract.feerate * 65
+const amt_total = contract.total + vin_fee
+
 print_banner('make a deposit')
 
 console.log('copy this address :', address)
-console.log('send this amount  :', contract.total, 'sats')
+console.log('send this amount  :', amt_total, 'sats')
 if (contract.terms.network === 'signet') {
   console.log('get funds here    : https://faucet.mutinynet.com')
 } else if (contract.terms.network === 'testnet') {

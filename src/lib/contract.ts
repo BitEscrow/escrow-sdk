@@ -30,8 +30,8 @@ export function create_contract (
   const published  = config.published  ?? now()
   const signatures = config.signatures ?? []
   const subtotal   = terms.value + agent_fee[0]
-  const txout_size = outputs[0][1].length / 2
-  const txfee      = txout_size * feerate
+  const vout_size  = outputs[0][1].length / 2
+  const txfee      = vout_size * feerate
 
   return sort_record({
     ...config.agent,
@@ -40,6 +40,8 @@ export function create_contract (
     balance     : 0,
     cid         : config.cid,
     deadline    : get_deadline(terms, published),
+    est_txfee   : txfee,
+    est_txsize  : vout_size,
     expires_at  : null,
     feerate     : feerate,
     moderator   : config.moderator ?? null,
@@ -58,11 +60,9 @@ export function create_contract (
     subtotal    : subtotal,
     terms       : terms,
     total       : subtotal + txfee,
-    txfee       : txfee,
-    txvin_size  : 0,
-    txout_size  : txout_size,
     updated_at  : published,
-    vm_state    : null
+    vm_state    : null,
+    vout_size   : vout_size
   })
 }
 

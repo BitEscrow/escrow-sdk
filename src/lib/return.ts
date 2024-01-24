@@ -29,7 +29,7 @@ import {
 
 import * as assert from '../assert.js'
 
-const MIN_RECOVER_FEE = 10000
+const MIN_RECOVER_FEE = 1000
 
 /**
  * Computes and returns a context 

@@ -7,7 +7,7 @@ import {
 
 const config = {
   hostname : 'http://localhost:3000',
-  oracle   : 'http://172.21.0.3:3000'
+  oracle   : 'http://172.21.0.3:3300'
 }
 
 const aliases = [ 'alice', 'bob', 'carol', 'david' ]
