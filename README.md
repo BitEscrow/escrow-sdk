@@ -256,13 +256,13 @@ Below is a step-by-step guide through the protocol using code examples.
 
  1. [Create a Client](test/demo/01_create_client.ts)
  2. [Create a Signer](test/demo/02_create_signer.ts)
- 3. [Build a Proposal](test/demo/02_create_proposal.ts)
- 4. [Roles and Endorsment](test/demo/02_roles_and_endorse.ts)
- 5. [Create a Contract](test/demo/02_create_contract.ts)
- 6. [Request a Deposit Accout](test/demo/02_request_account.ts)
- 7. [Deposit funds into a Contract](test/demo/02_deposit_funds.ts)
- 8. [Monitor a Contract](test/demo/02_check_contract.ts)
- 9. [Settle a Contract](test/demo/02_settle_contract.ts)
+ 3. [Build a Proposal](test/demo/03_create_proposal.ts)
+ 4. [Roles and Endorsment](test/demo/04_roles_and_endorse.ts)
+ 5. [Create a Contract](test/demo/05_create_contract.ts)
+ 6. [Request a Deposit Accout](test/demo/06_request_account.ts)
+ 7. [Deposit funds into a Contract](test/demo/07_deposit_funds.ts)
+ 8. [Monitor a Contract](test/demo/08_check_contract.ts)
+ 9. [Settle a Contract](test/demo/09_settle_contract.ts)
 
  > Click on a section to view the example code.
 
