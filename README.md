@@ -247,8 +247,8 @@ This readme will be an mixture of documentation and links to code examples. The 
 
 The two main resources for example code are here:
 
-  [test/client](test/client) - : Example usage of the full BitEscrow API.  
-  [test/demo](test/demo) ----- : Step-by-step example of the protocol.  
+  [test/client](test/client) : Example usage of the full BitEscrow API.  
+  [test/demo](test/demo) : Step-by-step example of the protocol.  
 
 ### Protocol Demo
 
