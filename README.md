@@ -243,7 +243,7 @@ In terms of security, speed, and simplicity, we believe this is the best non-cus
 
 ## How to Use
 
-This readme will be an mixture of documentation and code examples. The full documentation is still a work in progress.
+This readme will be an mixture of documentation and links to code examples. The full documentation is still a work in progress.
 
 The two main resources for example code are here:
 
@@ -252,7 +252,7 @@ The two main resources for example code are here:
 
 ### Protocol Demo
 
-Below is a step-by-step guide through the protocol.
+Below is a step-by-step guide through the protocol using code examples.
 
  1. [Create a Client](test/demo/01_create_client.ts)
  2. [Create a Signer](test/demo/02_create_signer.ts)
