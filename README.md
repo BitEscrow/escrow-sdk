@@ -19,41 +19,13 @@ Comimg Soon:
 
 ## Overview
 
-Click on a section title to navigate to that section.
-
-How it Works
-  - Negotiation
-  - Funding
-  - Settlement
-  - Security Model
-  - Example Flow
-
-How to Install
-  - boilerplate
-
-How to Use
-  - Create and negotiate a proposal.
-  - Endorse and submit proposal to API.
-  - Request a deposit account.
-  - Register funds in a deposit account.
-  - Fetching a contract.
-  - Funding a contract.
-  - Submit a statement to the vm.
-  - Validate settlement of contract.
-
-Development & Testing
-  - getting started
-  - using regtest
-  - using mutiny
-  - using testnet
-
-## Overview
-
 The protocol involves three parties:
 
+```md
 **Members** : The participating members of the contract.  
 **Funders** : Those depositing funds into the contract (may be members).  
-**Agent**   : The server agent hosting the escrow contract (BitEscrow API).  
+**Agent**   : The server agent hosting the escrow contract (BitEscrow API).
+```
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
@@ -215,29 +187,29 @@ Each contract settlement on mainnet will include a valid proof in order to keep 
   * Alice deposits her funds with the contract agent, along with a covenant.
   * Once the deposit is confirmed on-chain, the contract becomes active.
   
-  **(settle contract - happy path)**
+  **[ settle contract - happy path ]**
   * Alice receives her widget and forgets about Bob.
   * The contract schedule closes automatically on 'payout'.
   * Bob gets the funds, Alice can verify the CVM execution.
 
-  **(settle contract - so-so path)**
+  **[ settle contract - so-so path ]**
   * Alice doesn't like her widget.
   * Alice and Bob both agree to sign the 'refund' path.
   * Alice gets a partial refund, Bob still keeps his fees.
 
-  **(dispute contract - unhappy path)**
+  **[ dispute contract - unhappy path ]**
   * Alice didn't get the right widget, and disputes the payout.
   * Carol now has authority to settle the contract.
   * Carol decides on the 'refund' path.
   * Alice gets a partial refund, Bob still keeps his fees.
 
-  **(expired contract - ugly path)**
+  **[ expired contract - ugly path ]**
   * Alice claims she didn't get a widget, and disputes the payout.
   * Carol is on a two-week cruise in the bahamas.
   * The proposal did not include any auto-settlement terms.
   * The contract expires, all deposits are released.
 
-  **(expired deposits - horrific path)**
+  **[ expired deposits - horrific path ]**
   * Everything above happens, except the last part.
   * The entire escrow platform goes down in flames.
   * The timelock on deposits eventually expire.
@@ -275,14 +247,12 @@ This readme will be an mixture of documentation and code examples. The full docu
 
 The two main resources for example code are here:
 
-  [test/client](test/client) : Example usage of the full BitEscrow API.
-  [test/demo](test/demo)     : Step-by-step example of the protocol.
+  [test/client](test/client) - : Example usage of the full BitEscrow API.  
+  [test/demo](test/demo) ----- : Step-by-step example of the protocol.  
 
 ### Protocol Demo
 
 Below is a step-by-step guide through the protocol.
-
-> Click on a section to view the example code:
 
  1. [Create a Client](test/demo/01_create_client.ts)
  2. [Create a Signer](test/demo/02_create_signer.ts)
@@ -293,6 +263,8 @@ Below is a step-by-step guide through the protocol.
  7. [Deposit funds into a Contract](test/demo/02_deposit_funds.ts)
  8. [Monitor a Contract](test/demo/02_check_contract.ts)
  9. [Settle a Contract](test/demo/02_settle_contract.ts)
+
+ > Click on a section to view the example code.
 
 ### API Demo
 
