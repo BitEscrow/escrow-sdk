@@ -30,7 +30,7 @@ export function create_contract (
   const published  = config.published  ?? now()
   const signatures = config.signatures ?? []
   const subtotal   = terms.value + agent_fee[0]
-  const txout_size = outputs[0].length / 2
+  const txout_size = outputs[0][1].length / 2
 
   return sort_record({
     ...config.agent,
