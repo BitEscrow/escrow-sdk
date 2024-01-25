@@ -187,29 +187,29 @@ Each contract settlement on mainnet will include a valid proof to maintain our r
   * Alice deposits her funds with the contract agent, along with a covenant.
   * Once the deposit is confirmed on-chain, the contract becomes active.
   
-  **[ settle contract - happy path ]**
+  **Happy Path: Settle on Payout**
   * Alice receives her widget and forgets about Bob.
   * The contract schedule closes automatically on 'payout'.
   * Bob gets the funds, Alice can verify the CVM execution.
 
-  **[ settle contract - so-so path ]**
+  **Neutral Path: Settle on Refund**
   * Alice doesn't like her widget.
   * Alice and Bob both agree to sign the 'refund' path.
   * Alice gets a partial refund, Bob still keeps his fees.
 
-  **[ dispute contract - unhappy path ]**
+  **Unhappy Path: Dispute Settlement**
   * Alice didn't get the right widget, and disputes the payout.
   * Carol now has authority to settle the contract.
   * Carol decides on the 'refund' path.
   * Alice gets a partial refund, Bob still keeps his fees.
 
-  **[ expired contract - ugly path ]**
+  **Ugly Path: Contract Expires**
   * Alice claims she didn't get a widget, and disputes the payout.
   * Carol is on a two-week cruise in the bahamas.
   * The proposal did not include any auto-settlement terms.
   * The contract expires, all deposits are released.
 
-  **[ expired deposits - horrific path ]**
+  **Worst Path: Deposits Expire**
   * Everything above happens, except the last part.
   * The entire escrow platform goes down in flames.
   * The timelock on deposits eventually expire.
@@ -398,7 +398,7 @@ if (!res.ok) throw new Error('failed')
 export const { contract, deposit } = res.data
 ```
 
-### Monitor a Contract
+### Checking a Contract
 
 ```ts
 const res = await client.contract.read(cid)
