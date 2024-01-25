@@ -98,7 +98,7 @@ export function add_membership (
   if (is_member(mship, proposal)) {
     throw new Error('previous role exists for membership')
   }
- 
+
   const wallet = new Wallet(xpub)
   const pol    = Buff.json(role).digest.hex
   const rolls  = proposal.members.filter(e => e.pol === pol)

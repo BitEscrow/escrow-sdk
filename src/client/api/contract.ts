@@ -1,6 +1,8 @@
 import { verify_endorsement } from '@/lib/member.js'
 import { get_proposal_id }    from '@/lib/proposal.js'
 import { EscrowClient }       from '@/client/class/client.js'
+import { parse_proposal }     from '@/lib/parse.js'
+import { verify_proposal }    from '@/validators/index.js'
 
 import {
   ContractDataResponse,
@@ -8,11 +10,6 @@ import {
   DepositListResponse,
   WitnessListResponse
 } from '@/client/types.js'
-
-import {
-  validate_proposal,
-  verify_proposal
-} from '@/validators/index.js'
 
 import {
   ApiResponse,
@@ -32,13 +29,13 @@ function create_contract_api (
     proposal    : ProposalData,
     signatures ?: string[]
   ) : Promise<ApiResponse<ContractDataResponse>> => {
-    // Validate the proposal's format.
-    validate_proposal(proposal)
+    // Parse and validate the proposal.
+    const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
-    verify_proposal(proposal)
+    verify_proposal(prop)
     // Verify any signatures.
     if (signatures !== undefined) {
-      const prop_id = get_proposal_id(proposal)
+      const prop_id = get_proposal_id(prop)
       signatures.forEach(e => verify_endorsement(prop_id, e, true))
     }
     // Formulate the request url.

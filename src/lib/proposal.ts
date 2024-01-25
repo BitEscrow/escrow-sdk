@@ -167,8 +167,8 @@ export function endorse_proposal (
   proposal : ProposalData,
   signer   : SignerAPI
 ) : string {
-  const msg = get_proposal_id(proposal)
-  const pub = signer.pubkey
-  const sig = signer.sign(msg)
+  const msg  = get_proposal_id(proposal)
+  const pub  = signer.pubkey
+  const sig  = signer.sign(msg)
   return Buff.join([ pub, sig ]).hex
 }

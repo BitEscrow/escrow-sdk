@@ -1,12 +1,11 @@
 contrib
-test/data
-test/bitcoin.conf
 coredata
 dist
 node_modules
+src/**/_*
+test/data
+test/bitcoin.conf
 TODO.md
 NOTES.md
 *.log
 .env*
-
-src/**/_*

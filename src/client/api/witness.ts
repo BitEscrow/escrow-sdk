@@ -40,7 +40,7 @@ export function sign_witness_api (signer : EscrowSigner) {
   ) => {
     const terms = contract.terms
     const cred  = signer.membership.claim(terms)
-      let wdat  = create_witness(terms.programs, signer.pubkey, template)
+      let wdat  = create_witness(terms.programs, cred.data.pub, template)
     validate_witness(contract, wdat)
     return sign_witness(cred.signer, wdat)
   }

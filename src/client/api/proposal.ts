@@ -1,15 +1,12 @@
 import { EscrowSigner }     from '@/client/class/signer.js'
 import { endorse_proposal } from '@/lib/proposal.js'
+import { parse_proposal }   from '@/lib/parse.js'
+import { verify_proposal }  from '@/validators/proposal.js'
 
 import {
   add_membership,
   rem_membership
 } from '@/lib/policy.js'
-
-import {
-  validate_proposal,
-  verify_proposal
-} from '@/validators/proposal.js'
 
 import { ProposalData, RolePolicy } from '@/types/index.js'
 
@@ -40,9 +37,9 @@ export function leave_proposal_api (signer : EscrowSigner) {
 
 export function endorse_proposal_api (client : EscrowSigner) {
   return (proposal : ProposalData) => {
-    validate_proposal(proposal)
-    verify_proposal(proposal)
-    return endorse_proposal(proposal, client._signer)
+    const prop = parse_proposal(proposal)
+    verify_proposal(prop)
+    return endorse_proposal(prop, client._signer)
   }
 }
 
