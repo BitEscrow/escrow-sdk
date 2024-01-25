@@ -2,13 +2,13 @@
 
 # escrow-core
 
-A light-weight, non-custodial protocol for using Bitcoin in a `covenant-based` smart contract.
+A light-weight, non-custodial protocol for locking Bitcoin in a covenant-based smart contract.
 
 Features:
   * Method libraries for every part of the protocol.
   * Multi-platform client with minimal dependencies.
   * Run-time schema validation (using zod).
-  * E2E test suite for regtest, signet, and testnet.
+  * E2E demo and test suite for signet, testnet, and mutiny.
 
 Comimg Soon:
   * Return receipts on witness submission.
@@ -31,7 +31,7 @@ The protocol is split into three phases: `negotiation`, `funding`, and `settleme
 
 ### Negotiation
 
-The `members` of the contract must first negotiate and agree on a `proposal` document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
+The [members](docs/proposal.md) of the contract must first negotiate and agree on a [proposal](docs/proposal.md) document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
 
 ```ts
 {
@@ -62,13 +62,13 @@ If desired, a third-party can host the proposal. The protocol is designed for th
 
 There is no specification placed on how to communicate the proposal between parties. There are so many great communication protocols that exist in the wild, and they virtually all support JSON, so feel free to use your favorite one!
 
-> Note: The server `agent` does not take part in negotiations or arbitrate disputes. This is strictly by design. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+> Note: The server `agent` does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
 
 ### Funding
 
-Once a final proposal has been delivered to our server, all terms and endorsements are validated, then a `contract` is formed. The contract is assigned a signing `agent`, which is used to coordinate deposits.
+Once a final proposal has been delivered to our server, all terms and endorsements are validated, then a [contract](docs/contract.md) is formed. The contract is assigned a signing [agent](docs/contract.md), which is used to coordinate deposits.
 
-Each funder requests a deposit `account` from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+Each funder requests a deposit [account](docs/deposit.md) from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
@@ -83,7 +83,7 @@ interface DepositAccount {
 }
 ```
 
-The funder then delivers a batch of pre-signed transactions (called a `covenant`), which authorizes each of the spending paths of the contract.
+The funder then delivers a batch of pre-signed transactions (called a [covenant](docs/deposit.md)), which authorizes each of the spending paths of the contract.
 
 ```ts
 interface CovenantData {
@@ -152,7 +152,7 @@ When the contract becomes active, a virtual machine is started within the contra
 }
 ```
 
-Members of the contract can interact with the vm using signed statements, called a witness:
+Members of the contract can interact with the vm using signed statements, called a [witness](docs/contract.md) statement:
 
 ```ts
 {
@@ -174,7 +174,7 @@ Members can use the vm to settle on a spending path, or lock, unlock, and disput
 
 Once the contract vm has settled on a spending path, the agent will complete the relevant pre-signed transaction, and broadcast it, closing the contract.
 
-The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the `agent`.
+The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the agent.
 
 Each contract settlement on mainnet will include a valid proof to maintain our reputation.
 
@@ -450,7 +450,7 @@ To get started, make sureyou are running `v19+` of node, then install the projec
 
 ```sh
 node --version  # should be v19+
-node install    # install dependencies
+npm install     # install dependencies
 ```
 
 This project uses the following scripts:
