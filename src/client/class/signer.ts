@@ -3,15 +3,11 @@ import { Signer, Wallet } from '@cmdcode/signer'
 import { SignerConfig }   from '@/client/types.js'
 import { EscrowClient }   from './client.js'
 
-import deposit_api from '../api/depositor.js'
-import endorse_api from '../api/endorse.js'
-import request_api from '../api/request.js'
-
-import {
-  claim_membership_api,
-  gen_membership_api,
-  has_membership_api
-} from '@/client/api/member.js'
+import deposit_api  from '../api/depositor.js'
+import member_api   from '../api/member.js'
+import proposal_api from '../api/proposal.js'
+import request_api  from '../api/request.js'
+import witness_api  from '../api/witness.js'
 
 import {
   CredSignerAPI,
@@ -55,13 +51,11 @@ export class EscrowSigner {
     return this._signer.pubkey
   }
 
-  deposit = deposit_api(this)
-  endorse = endorse_api(this)
-  request = request_api(this)
-
-  gen_membership = gen_membership_api(this)
-  get_membership = claim_membership_api(this)
-  has_membership = has_membership_api(this)
+  deposit    = deposit_api(this)
+  membership = member_api(this)
+  proposal   = proposal_api(this)
+  request    = request_api(this)
+  witness    = witness_api(this)
 
   save (password : string) {
     const pass    = Buff.str(password)

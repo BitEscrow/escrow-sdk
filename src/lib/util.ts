@@ -6,7 +6,7 @@ import {
   ProgramTerms
 } from '@/index.js'
 
-export function exception (
+export function fail (
   error : string,
   throws = false
 ) : false {

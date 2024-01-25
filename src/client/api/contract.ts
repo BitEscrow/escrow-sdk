@@ -1,7 +1,6 @@
 import { verify_endorsement } from '@/lib/member.js'
 import { get_proposal_id }    from '@/lib/proposal.js'
 import { EscrowClient }       from '@/client/class/client.js'
-import { EscrowProposal }     from '@/client/class/proposal.js'
 
 import {
   ContractDataResponse,
@@ -30,12 +29,9 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    proposal    : ProposalData | EscrowProposal,
+    proposal    : ProposalData,
     signatures ?: string[]
   ) : Promise<ApiResponse<ContractDataResponse>> => {
-    if (proposal instanceof EscrowProposal) {
-      proposal = proposal.data
-    }
     // Validate the proposal's format.
     validate_proposal(proposal)
     // Verify the proposal's terms.

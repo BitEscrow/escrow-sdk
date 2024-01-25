@@ -13,7 +13,7 @@ if (!dp_res.ok) throw new Error(dp_res.error)
 
 const { deposit } = dp_res.data
 
-const ret_data = await a_mbr.deposit.commit_return(deposit, 1000)
+const ret_data = await a_mbr.deposit.close_deposit(deposit, 1000)
 
 // Request an account for the member to use.
 const ret_res = await client.deposit.close(ret_data)

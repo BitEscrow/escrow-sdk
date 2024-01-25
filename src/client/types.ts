@@ -31,8 +31,8 @@ export interface FetchConfig {
 }
 
 export interface Membership {
+  data   : MemberData,
   signer : CredSignerAPI,
-  token  : MemberData,
   wallet : WalletAPI
 }
 

@@ -21,6 +21,20 @@ import {
 
 import { RolePolicy } from '../types/index.js'
 
+const GET_DEFAULT_POLICY = () => {
+  return {
+    limit    : 1,
+    paths    : [],
+    programs : []
+  }
+}
+
+export function create_policy (
+  policy : RolePolicy
+) : RolePolicy {
+  return { ...GET_DEFAULT_POLICY(), ...policy }
+}
+
 export function get_role_data (
   member   : MemberData,
   proposal : ProposalData
@@ -64,7 +78,7 @@ export function check_role_data (
   }
 }
 
-export function has_membership (
+export function is_member (
   mship    : MemberData,
   proposal : ProposalData
 ) {
@@ -81,7 +95,7 @@ export function add_membership (
   const { pub, xpub } = mship
   const { network, paths, payments, programs } = proposal
 
-  if (has_membership(mship, proposal)) {
+  if (is_member(mship, proposal)) {
     throw new Error('previous role exists for membership')
   }
  

@@ -1,6 +1,3 @@
 export * from './class/client.js'
-export * from './class/contract.js'
-export * from './class/deposit.js'
-export * from './class/proposal.js'
 export * from './class/signer.js'
 export * from './types.js'

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import base  from './base.js'
 
 const { 
-  hash, literal, nonce, num, payment, 
+  hash, label, literal, nonce, num, payment, 
   network, paypath, regex, stamp, str 
 } = base
 
@@ -21,6 +21,13 @@ const payments = payment.array()
 const programs = terms.array()
 const schedule = task.array()
 
+const policy = z.object({
+  limit    : num,
+  paths    : z.tuple([ label, num ]).array(),
+  payment  : num.optional(),
+  programs : terms.array()
+})
+
 const data  = z.object({
   content    : str,
   deadline   : num.optional(),
@@ -29,16 +36,26 @@ const data  = z.object({
   expires    : num,
   fallback   : str.optional(),
   feerate    : num.optional(),
-  members    : members.default([]),
+  members    : members,
   moderator  : hash.optional(),
-  network    : network.default('main'),
-  paths      : paths.default([]),
-  payments   : payments.default([]),
-  programs   : programs.default([]),
-  schedule   : schedule.default([]),
+  network    : network,
+  paths      : paths,
+  payments   : payments,
+  programs   : programs,
+  schedule   : schedule,
   title      : str,
   value      : num,
   version    : num
 })
 
-export default { data, members, paths, payments, programs, schedule, task, terms }
+export default {
+  data,
+  members,
+  paths,
+  payments,
+  policy,
+  programs,
+  schedule,
+  task,
+  terms
+}

@@ -1,7 +1,8 @@
 import { print_banner } from '@scrow/test'
-import { members }      from './02_create_signer.js'
 
-const signer   = members[0]
+import { signers } from './02_create_signer.js'
+
+const signer   = signers[0]
 const locktime = 60 * 60 // 1 hour locktime
 
 const res = await signer.deposit.request_acct(locktime)

@@ -11,9 +11,9 @@ proposal.join(roles.agent, c_mbr)
 
 // Have all memebers endorse the proposal.
 export const signatures = [
-  a_mbr.endorse.proposal(proposal),
-  b_mbr.endorse.proposal(proposal),
-  c_mbr.endorse.proposal(proposal)
+  a_mbr.proposal.endorse(proposal),
+  b_mbr.proposal.endorse(proposal),
+  c_mbr.proposal.endorse(proposal)
 ]
 
 // Submit the proposal to the API to create a contract.

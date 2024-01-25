@@ -8,3 +8,5 @@ TODO.md
 NOTES.md
 *.log
 .env*
+
+src/**/_*

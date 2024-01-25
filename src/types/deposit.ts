@@ -66,9 +66,6 @@ export interface DepositAccount {
 }
 
 export interface DepositInfo {
-  agent_id   : string
-  agent_pk   : string
-  agent_pn   : string
   covenant   : CovenantData | null
   created_at : number
   dpid       : string

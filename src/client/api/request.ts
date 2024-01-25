@@ -16,9 +16,21 @@ export function request_contracts_api (signer : EscrowSigner) {
   }
 }
 
+export function sign_request_api (client : EscrowSigner) {
+  return (
+    url    : string, 
+    body   : string = '{}',
+    method : string = 'GET'
+  ) => {
+    const content = method + url + body
+    return client._signer.gen_token(content)
+  }
+}
+
 export default function (client : EscrowSigner) {
   return {
     contracts : request_contracts_api(client),
-    deposits  : request_deposits_api(client)
+    deposits  : request_deposits_api(client),
+    get_token : sign_request_api(client)
   }
 }

@@ -30,9 +30,9 @@ fi
 
 # Construct the file path
 filepath=${demo_paths[$selection]}
-fullpath="test/demo/$filepath"
+fullpath="demo/$filepath"
 
 # Output the full path
 echo "Executing demo script '$filepath' on $NETWORK network ..."
 
-yarn load $fullpath $NETWORK
+npm run load $fullpath $NETWORK

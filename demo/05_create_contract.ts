@@ -1,10 +1,7 @@
 import { print_banner } from '@scrow/test'
-import { client }       from './01_create_client.js'
 
-import {
-  proposal,
-  signatures
-} from './04_roles_and_endorse.js'
+import { client }               from './01_create_client.js'
+import { proposal, signatures } from './04_roles_and_endorse.js'
 
 const res = await client.contract.create(proposal, signatures)
 

@@ -86,7 +86,7 @@ export function commit_deposit_api (client : EscrowSigner) {
   }
 }
 
-export function commit_return_api (client : EscrowSigner) {
+export function close_deposit_api (client : EscrowSigner) {
   return async (
     deposit  : DepositData,
     txfee    : number,
@@ -111,6 +111,6 @@ export default function (client : EscrowSigner) {
     register_utxo  : register_utxo_api(client),
     commit_utxo    : commit_utxo_api(client),
     commit_deposit : commit_deposit_api(client),
-    commit_return  : commit_return_api(client)
+    close_deposit  : close_deposit_api(client)
   }
 }

@@ -1,6 +1,8 @@
 import { print_banner } from '@scrow/test'
-import { members }      from './02_create_signer.js'
+
+import { faucet }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
+import { signers }      from './02_create_signer.js'
 import { contract }     from './05_create_contract.js'
 import { account }      from './06_request_account.js'
 
@@ -13,11 +15,7 @@ print_banner('make a deposit')
 
 console.log('copy this address :', address)
 console.log('send this amount  :', amt_total, 'sats')
-if (contract.terms.network === 'mutiny') {
-  console.log('get funds here    : https://faucet.mutinynet.com')
-} else if (contract.terms.network === 'testnet') {
-  console.log('get funds here    : https://bitcoinfaucet.uo1.net')
-}
+console.log('get funds here    :', faucet)
 
 const ival    = 30,
       retries = 6,
@@ -39,7 +37,7 @@ while (utxos.length === 0 && curr < retries) {
 if (utxos.length === 0) throw new Error('utxo not found')
 
 // Request the member to sign
-const signer    = members[0]
+const signer    = signers[0]
 const utxo      = utxos[0].txspend
 const return_tx = await signer.deposit.register_utxo(account, utxo)
 const covenant  = await signer.deposit.commit_utxo(account, contract, utxo)

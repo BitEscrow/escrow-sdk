@@ -5,7 +5,7 @@ import { Network }       from '@/types/index.js'
 import contract_api from '@/client/api/contract.js'
 import deposit_api  from '@/client/api/deposit.js'
 import oracle_api   from '@/client/api/oracle.js'
-import witness_api  from '@/client/api/witness.js'
+import witness_api  from '@/client/api/wid.js'
 
 import {
   ClientConfig,
@@ -15,7 +15,7 @@ import {
 type Resolver = ReturnType<typeof get_fetcher>
 
 const DEFAULT_HOST   = 'http://localhost:3000'
-const DEFAULT_ORACLE = 'http://172.21.0.3:3000'
+const DEFAULT_ORACLE = 'http://172.21.0.3:3300'
 const DEFAULT_CHAIN  = 'regtest'
 
 export class EscrowClient {

@@ -245,26 +245,207 @@ In terms of security, speed, and simplicity, we believe this is the best non-cus
 
 This readme will be an mixture of documentation and links to code examples. The full documentation is still a work in progress.
 
-The two main resources for example code are here:
+Below is a step-by-step guide through the protocol.
 
-  [test/client](test/client) : Example usage of the full BitEscrow API.  
-  [test/demo](test/demo) : Step-by-step example of the protocol.  
+### Create a Client
 
-### Protocol Demo
+```ts
+import { EscrowClient } from '@scrow/core/client'
 
-Below is a step-by-step guide through the protocol using code examples.
+const config = {
+  hostname : 'https://bitescrow-signet.vercel.app',
+  oracle   : 'https://mempool.space/signet',
+  network  : 'signet'
+}
 
- 1. [Create a Client](test/demo/01_create_client.ts)
- 2. [Create a Signer](test/demo/02_create_signer.ts)
- 3. [Build a Proposal](test/demo/03_create_proposal.ts)
- 4. [Roles and Endorsment](test/demo/04_roles_and_endorse.ts)
- 5. [Create a Contract](test/demo/05_create_contract.ts)
- 6. [Request a Deposit Accout](test/demo/06_request_account.ts)
- 7. [Deposit funds into a Contract](test/demo/07_deposit_funds.ts)
- 8. [Monitor a Contract](test/demo/08_check_contract.ts)
- 9. [Settle a Contract](test/demo/09_settle_contract.ts)
+// Create a new client.
+export const client = new EscrowClient(config)
+```
 
- > Click on a section to view the example code.
+> Code example: [01_create_client](demo/01_create_client.ts)
+
+### Create a Signer
+
+```ts
+import { Seed, Signer, Wallet } from '@cmdcode/signer'
+import { EscrowSigner }         from '@scrow/core/client'
+
+const seed = Seed.import.from_words(user_words)
+
+const signer_config = {
+  ...config,
+  signer : new Signer({ seed }),
+  wallet : new Wallet(xpub)
+}
+
+export const signer = new EscrowSigner(signer_config)
+```
+
+> Code example: [02_create_signer](demo/02_create_signer.ts)
+
+### Build a Proposal
+
+```ts
+import { create_policy, create_proposal } from '@scrow/core'
+
+const template = create_proposal({
+  title    : 'Basic two-party contract with third-party arbitration.',
+  expires  : 14400,
+  network  : 'signet',
+  schedule : [[ 7200, 'close', 'draw' ]],
+  value    : 15000,
+})
+
+const roles = {
+  buyer : create_policy({
+    paths : [
+      [ 'heads', 10000 ],
+      [ 'draw',  5000  ]
+    ],
+    programs : [
+      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+    ]
+  }),
+  seller : create_policy({
+    paths : [
+      [ 'tails', 10000 ],
+      [ 'draw',  5000  ]
+    ],
+    programs : [
+      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+    ]
+  }),
+  agent : create_policy({
+    payment  : 5000,
+    programs : [
+      [ 'endorse', 'resolve', 'heads|tails|draw', 1 ]
+    ]
+  })
+}
+
+```
+> Code example: [03_create_proposal](demo/03_create_proposal.ts)
+
+
+### Roles and Endorsements
+
+```ts
+const [ a_signer, b_signer, c_signer ] = signers
+
+let proposal = template
+
+proposal = a_signer.proposal.join(proposal, roles.buyer)
+proposal = b_signer.proposal.join(proposal, roles.seller)
+proposal = c_signer.proposal.join(proposal, roles.agent)
+
+const signatures = signers.map(mbr => {
+  return mbr.proposal.endorse(proposal)
+})
+
+export { proposal, signatures }
+```
+> Code example: [04_roles_and_endorse](demo/04_roles_and_endorse.ts)
+
+### Create a Contract
+
+```ts
+const res = await client.contract.create(proposal, signatures)
+
+if (!res.ok) throw new Error(res.error)
+
+export const { contract } = res.data
+```
+
+> Code example: [05_create_contract](demo/05_create_contract.ts)
+
+### Request a Deposit Account
+
+```ts
+const locktime = 60 * 60 // 1 hour locktime
+
+const res = await signer.deposit.request_acct(locktime)
+
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+
+// Unpack some of the terms.
+export const { account } = res.data
+```
+
+> Code example: [06_request_account](demo/06_request_account.ts)
+
+### Deposit funds into a Contract
+
+```ts
+const { address, agent_id } = account
+
+const utxos = await client.oracle.get_address_utxos(address)
+
+if (utxos.length === 0) throw new Error('utxo not found')
+
+// Request the member to sign
+const { txspend } = utxos[0]
+const return_tx = await signer.deposit.register_utxo(account, txspend)
+const covenant  = await signer.deposit.commit_utxo(account, contract, txspend)
+
+// Fund the contract 
+const res = await client.deposit.fund(agent_id, return_tx, covenant)
+
+// Check the response is valid.
+if (!res.ok) throw new Error('failed')
+
+export const { contract, deposit } = res.data
+```
+
+> Code example: [07_deposit_funds](demo/07_deposit_funds.ts)
+
+### Monitor a Contract
+
+```ts
+const res = await client.contract.read(cid)
+
+if (!res.ok) throw new Error(res.error)
+
+const { contract } = res.data
+
+if (contract.activated === null) {
+  throw new Error('contract is not active')
+}
+```
+
+> Code example: [08_check_contract](demo/08_check_contract.ts)
+
+### Settle a Contract
+
+```ts
+const [ a_signer, b_signer ] = signers
+
+const template = {
+  action : 'close',
+  method : 'endorse',
+  path   : 'tails'
+}
+
+const contract = active_contract
+
+let witness : WitnessData
+
+// Alice signs the initial statement.
+witness = a_signer.witness.sign(contract, template)
+// Bob endoreses the statement from Alice.
+witness = b_signer.witness.endorse(contract, witness)
+
+const res = await client.contract.submit(contract.cid, witness)
+
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+
+export const settled_contract = res.data.contract
+```
+
+> Code example: [09_settle_contract](demo/09_settle_contract.ts)
 
 ### API Demo
 
@@ -289,7 +470,7 @@ Example of running the demo on the mutiny chain (using npm):
 npm run demo mutiny
 ```
 
-> The available chains are mutiny, signet, and testnet. Main chain coming soon!
+> The available test chains are mutiny, signet, and testnet.
 
 Example of running the current test suite in verbose mode:
 

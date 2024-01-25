@@ -1,8 +1,9 @@
 import { print_banner } from '@scrow/test'
+
 import { client }       from './01_create_client.js'
 import { cid }          from './07_deposit_funds.js'
 
-const ival    = 10, 
+const ival    = 10,
       retries = 6,
       sleep   = (ms : number) => new Promise(res => setTimeout(res, ms))
 
@@ -15,6 +16,7 @@ while (res.ok && res.data.contract.activated === null && curr < retries) {
   console.log(`[${curr}/${retries}] re-checking contract in ${ival} seconds...`)
   await sleep(ival * 1000)
   res = await client.contract.read(cid)
+  curr += 1
 }
 
 if (!res.ok) throw new Error(res.error)

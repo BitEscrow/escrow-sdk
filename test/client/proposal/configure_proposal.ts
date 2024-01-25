@@ -1,6 +1,6 @@
-import { EscrowProposal, RolePolicy } from '@scrow/core'
+import { ProposalData, RolePolicy } from '@scrow/core'
 
-export const proposal = new EscrowProposal({
+export const proposal : ProposalData = {
   title      : 'Basic two-party contract with third-party dispute resolution.',
   content    : 'n/a',
   expires    : 14400,
@@ -12,7 +12,7 @@ export const proposal = new EscrowProposal({
   schedule   : [[ 7200, 'close', 'draw' ]],
   value      : 15000,
   version    : 1
-})
+}
 
 export const roles : Record<string, RolePolicy> = {
   buyer : {
