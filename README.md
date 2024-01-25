@@ -170,13 +170,13 @@ Members of the contract can interact with the vm using signed statements, called
 }
 ```
 
-Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. The chain validates the full running history of the vm, from activation to settlement.
+Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full history of the vm, from activation to settlement.
 
 Once the contract vm has settled on a spending path, the agent will complete the relevant pre-signed transaction, and broadcast it, closing the contract.
 
-The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment. There is zero ambiguity left to the `agent`.
+The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the `agent`.
 
-Each contract settlement on mainnet will include a valid proof in order to keep our reputation intact.
+Each contract settlement on mainnet will include a valid proof to maintain our reputation.
 
 ### Protocol Flow
 
@@ -219,33 +219,31 @@ Each contract settlement on mainnet will include a valid proof in order to keep 
 
 A brief description of the security model:
 
-  * Each member joins the proposal using an anonymous credential. The involvement of a credential can be independently verified without revealing the owner.
+  * Each member joins the proposal using an anonymous credential. The involvement of a credential can be independently verified without revealing the owner to the agent.
   
   * Members decide the terms of the proposal, and all spending paths. The contract agent does not get involved until the proposal terms have already been finalized.
 
-  * Each member can optionally sign the proposal terms, if they wish to publicize their endorsement. This does not reveal their credential in the proposal.
+  * Each member can optionally sign the proposal terms, if they wish to publicize their involvement. This does not reveal their credential in the proposal.
 
   * Funders ultimately decide on what transactions to sign and deliver to the agent. If there's a disagreement, funders can back out of a deposit.
 
   * The contract agent cannot link depositors to members, nor members to credentials.
 
-  * The contract agent can only settle on transactions   provided by funders.
+  * The contract agent can only settle via transactions provided by funders.
   
-  * All parites independently verify the progression of the contract, and the final settlement. If the platform settles without a valid proof, their reputation is burned.
+  * All parites independently verify the progression of the contract and final settlement. If an agent settles the contract without publicizing a valid proof, their reputation is burned.
 
 Some challenges with the current model:
 
-  * The platform has a limited opportunity to censor members of a contract by ignoring their witness statements. In the short term, we plan to mitigate this using signed delivery receipts. In the long-term, we will support alternative platforms for delivery (such as nostr).
+  * The agent has limited opportunity to censor members of a contract by ignoring their witness statements. In the short term, we plan to mitigate this using signed delivery receipts. In the long-term, we will support alternative platforms for publishing (such as nostr).
 
-  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as staking collateral.
+  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as the agent staking collateral.
 
 In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin.
 
 ## How to Use
 
-This readme will be an mixture of documentation and links to code examples. The full documentation is still a work in progress.
-
-Below is a step-by-step guide through the protocol. This guide also includes a live demo that you can run yourself. To view the demo, simply clone this repository, then run the following commands:
+Below is a step-by-step guide through the protocol. This guide follows a live demo that you can run yourself. To run the demo, simply clone this repository, then run the following commands:
 
 ```sh
 npm install           # Install all package dependencies.
@@ -257,7 +255,6 @@ npm run demo {chain}  # Run the demo using the selected chain.
 Read more info about the demo [here](demo/README.md).
 
 ### Create a Client
-
 
 ```ts
 import { EscrowClient } from '@scrow/core/client'
@@ -273,8 +270,6 @@ const config = {
 
 export const client = new EscrowClient(config)
 ```
-
-> Code example: [01_create_client](demo/01_create_client.ts)
 
 ### Create a Signer
 
@@ -451,6 +446,13 @@ Documentation coming soon!
 
 ## Development / Testing
 
+To get started, make sureyou are running `v19+` of node, then install the project dependencies using your node manager of choice:
+
+```sh
+node --version  # should be v19+
+node install    # install dependencies
+```
+
 This project uses the following scripts:
 
 ```md
@@ -480,7 +482,7 @@ Please stay tuned for more documentation and updates!
 
 ## Questions / Issues
 
-Please feel free to post questions or comments on the issue board. All feedback is welcome.
+Feel free to post questions or comments on the issue board. All feedback is welcome.
 
 ## Contribution
 
@@ -522,7 +524,7 @@ https://github.com/cmdruid/musig2
 
 **crypto tools**  
 
-Provides a full suite of cryptographic primities and other useful tools. Wraps the noble-curve and noble-hash libraries (and cross-checks them with other implementations). Also provides an extended protocol for BIP32 key-derivation that supports strings and urls.
+Provides a suite of cryptography primitives and tools. Wraps the noble-curve and noble-hash libraries (and cross-checks them with other implementations).
 
 https://github.com/cmdruid/crypto-tools  
 
