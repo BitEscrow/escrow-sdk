@@ -245,20 +245,32 @@ In terms of security, speed, and simplicity, we believe this is the best non-cus
 
 This readme will be an mixture of documentation and links to code examples. The full documentation is still a work in progress.
 
-Below is a step-by-step guide through the protocol.
+Below is a step-by-step guide through the protocol. This guide also includes a live demo that you can run yourself. To view the demo, simply clone this repository, then run the following commands:
+
+```sh
+npm install           # Install all package dependencies.
+npm run demo {chain}  # Run the demo using the selected chain.
+```
+
+> Note: The current chains available are `mutiny`, `signet`, and `testnet`. The default chain is `mutiny`.
+
+Read more info about the demo [here](demo/README.md).
 
 ### Create a Client
+
 
 ```ts
 import { EscrowClient } from '@scrow/core/client'
 
 const config = {
+  // The URL to our escrow server.
   hostname : 'https://bitescrow-signet.vercel.app',
+  // The URL to an electrum-based indexer (your choice).
   oracle   : 'https://mempool.space/signet',
+  // The network you are using.
   network  : 'signet'
 }
 
-// Create a new client.
 export const client = new EscrowClient(config)
 ```
 
@@ -280,8 +292,6 @@ const signer_config = {
 
 export const signer = new EscrowSigner(signer_config)
 ```
-
-> Code example: [02_create_signer](demo/02_create_signer.ts)
 
 ### Build a Proposal
 
@@ -326,8 +336,6 @@ const roles = {
 }
 
 ```
-> Code example: [03_create_proposal](demo/03_create_proposal.ts)
-
 
 ### Roles and Endorsements
 
@@ -346,7 +354,6 @@ const signatures = signers.map(mbr => {
 
 export { proposal, signatures }
 ```
-> Code example: [04_roles_and_endorse](demo/04_roles_and_endorse.ts)
 
 ### Create a Contract
 
@@ -358,7 +365,6 @@ if (!res.ok) throw new Error(res.error)
 export const { contract } = res.data
 ```
 
-> Code example: [05_create_contract](demo/05_create_contract.ts)
 
 ### Request a Deposit Account
 
@@ -373,8 +379,6 @@ if (!res.ok) throw new Error(res.error)
 // Unpack some of the terms.
 export const { account } = res.data
 ```
-
-> Code example: [06_request_account](demo/06_request_account.ts)
 
 ### Deposit funds into a Contract
 
@@ -399,8 +403,6 @@ if (!res.ok) throw new Error('failed')
 export const { contract, deposit } = res.data
 ```
 
-> Code example: [07_deposit_funds](demo/07_deposit_funds.ts)
-
 ### Monitor a Contract
 
 ```ts
@@ -414,8 +416,6 @@ if (contract.activated === null) {
   throw new Error('contract is not active')
 }
 ```
-
-> Code example: [08_check_contract](demo/08_check_contract.ts)
 
 ### Settle a Contract
 
@@ -444,8 +444,6 @@ if (!res.ok) throw new Error(res.error)
 
 export const settled_contract = res.data.contract
 ```
-
-> Code example: [09_settle_contract](demo/09_settle_contract.ts)
 
 ### API Demo
 
