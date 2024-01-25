@@ -1,16 +1,16 @@
 import { print_banner } from '@scrow/test'
-
+import { poll, sleep }  from './00_demo_config.js'
 import { client }       from './01_create_client.js'
 import { cid }          from './07_deposit_funds.js'
 
-const ival    = 10,
-      retries = 6,
-      sleep   = (ms : number) => new Promise(res => setTimeout(res, ms))
+const [ ival, retries ] = poll
 
 let curr = 1,
     res  = await client.contract.read(cid)
 
-console.log('\n')
+print_banner('awaiting on-chain confirmation of funds')
+
+console.log('depending on the network, this could take a while!\n')
 
 while (res.ok && res.data.contract.activated === null && curr < retries) {
   console.log(`[${curr}/${retries}] re-checking contract in ${ival} seconds...`)

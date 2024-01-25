@@ -194,13 +194,13 @@ export async function get_fee_target (
   const feerate = quotes[index]
   // If feerate does not exist, throw an error.
   if (typeof feerate !== 'number') {
-    throw new Error('No quote available for target: ' + index)
+    throw new Error('No quote available for fee target: ' + index)
   }
   // Else, return feerate from oracle.
   return feerate
 }
 
-export async function fetcher<T> (
+export async function fetcher <T> (
   input   : URL | RequestInfo, 
   init   ?: RequestInit,
   fetcher = fetch

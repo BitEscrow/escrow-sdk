@@ -31,8 +31,19 @@ const faucets = {
   testnet : 'https://bitcoinfaucet.uo1.net'
 }
 
+const poll_rates = {
+  mutiny  : [ 10, 6  ],
+  regtest : [ 10, 6  ],
+  signet  : [ 60, 30 ],
+  testnet : [ 60, 30 ]
+}
+
 export const network = process.argv.slice(2)[0] ?? 'signet'
+
 export const config  = configs[network as keyof typeof configs]
 export const faucet  = faucets[network as keyof typeof faucets]
+export const poll    = poll_rates[network as keyof typeof faucets]
 
 export const members = [ 'alice', 'bob', 'carol' ]
+
+export const sleep   = (ms : number) => new Promise(res => setTimeout(res, ms))

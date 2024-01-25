@@ -1,6 +1,7 @@
 import { print_banner } from '@scrow/test'
 
-import { faucet }       from './00_demo_config.js'
+import { faucet, poll, sleep } from './00_demo_config.js'
+
 import { client }       from './01_create_client.js'
 import { signers }      from './02_create_signer.js'
 import { contract }     from './05_create_contract.js'
@@ -10,31 +11,29 @@ const { address, agent_id } = account
 
 const vin_fee   = contract.feerate * 65
 const amt_total = contract.total + vin_fee
+const btc_total = amt_total / 100_000_000
 
 print_banner('make a deposit')
 
 console.log('copy this address :', address)
-console.log('send this amount  :', amt_total, 'sats')
-console.log('get funds here    :', faucet)
+console.log('send this amount  :', `${amt_total} sats || ${btc_total} btc`)
+console.log('get funds here    :', faucet, '\n')
 
-const ival    = 30,
-      retries = 6,
-      sleep   = (ms : number) => new Promise(res => setTimeout(res, ms))
+const [ ival, retries ] = poll
 
 let curr  = 1,
     utxos = await client.oracle.get_address_utxos(address)
-
-console.log('\n')
 
 while (utxos.length === 0 && curr < retries) {
   console.log(`[${curr}/${retries}] checking address in ${ival} seconds...`)
   await sleep(ival * 1000)
   utxos = await client.oracle.get_address_utxos(address)
-  console.log('utxos:', utxos)
   curr += 1
 }
 
 if (utxos.length === 0) throw new Error('utxo not found')
+
+console.log('\nutxo:', utxos[0])
 
 // Request the member to sign
 const signer    = signers[0]
