@@ -172,8 +172,10 @@ export async function fee_estimates (
   const json = await resolve_json<OracleFeeEstimate>(res)
   // If the response failed, throw.
   if (!json.ok) throw new Error(json.error)
-  // Return the parsed data.
-  return json.data
+  // Return the parsed data with rounded values.
+  const ent = Object.entries(json.data)
+  const rnd = ent.map(([ k, v ]) => [ [ k, Math.ceil(v)] ])
+  return Object.fromEntries(rnd)
 }
 
 /**
