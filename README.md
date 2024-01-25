@@ -19,11 +19,11 @@ Comimg Soon:
 
 ## Overview
 
-The protocol involves three parties:
+The protocol involves collaboration between three parties:
 
 ```md
 **Members** : The participating members of the contract.  
-**Funders** : Those depositing funds into the contract (may be members).  
+**Funders** : Those funding the contract (whom may be members).  
 **Agent**   : The server agent hosting the escrow contract (BitEscrow API).
 ```
 
@@ -31,7 +31,7 @@ The protocol is split into three phases: `negotiation`, `funding`, and `settleme
 
 ### Negotiation
 
-The [members](docs/proposal.md) of the contract must first negotiate and agree on a [proposal](docs/proposal.md) document. This is a human-readable document which contains all of the terms of the contract. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
+The members must first negotiate and agree on a [proposal](docs/proposal.md) document. This is a human-readable document which contains all of the terms of the contract. It is written in JSON format, and designed for collaboration (much like a PSBT).
 
 ```ts
 {
@@ -66,7 +66,7 @@ There is no specification placed on how to communicate the proposal between part
 
 ### Funding
 
-Once a final proposal has been delivered to our server, all terms and endorsements are validated, then a [contract](docs/contract.md) is formed. The contract is assigned a signing [agent](docs/contract.md), which is used to coordinate deposits.
+Once a final proposal has been delivered to our server, we will validate the terms and any endorsements, then publish a [contract](docs/contract.md). This contract is assigned a signing [agent](docs/contract.md), which is used to coordinate deposits.
 
 Each funder requests a deposit [account](docs/deposit.md) from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
@@ -83,7 +83,7 @@ interface DepositAccount {
 }
 ```
 
-The funder then delivers a batch of pre-signed transactions (called a [covenant](docs/deposit.md)), which authorizes each of the spending paths of the contract.
+The funder verifies the account, then transfers funds to the account address. Once the transaction is visible in the mempool, the funder delivers a pre-signed `refund transaction` the the agent for safe-keeping, plus a batch of partial signatures (for each spending path in the contract). These partial signatures form a [covenant](docs/deposit.md) between their deposit and the contract.
 
 ```ts
 interface CovenantData {
@@ -96,11 +96,11 @@ interface CovenantData {
 }
 ```
 
-Once the covenant is made, the funds are locked in escrow. Once all the required funds have bee locked and confirmed, the contract becomes active.
+Once a covenant is made, the deposit is locked in escrow. When enough funds have been locked and confirmed, the contract becomes active.
 
 ### Settlement
 
-The final round of the escrow protocol is the `settlement`. This is the most exciting round, as members of the contract get to debate over how the money shall be spent.
+The final round of the protocol is the `settlement`. This is the most exciting round, as members of the contract get to debate over how the money shall be spent.
 
 When the contract becomes active, a virtual machine is started within the contract. This vm includes the `paths`, `programs`, and `tasks` specified in the proposal.
 
@@ -152,7 +152,7 @@ When the contract becomes active, a virtual machine is started within the contra
 }
 ```
 
-Members of the contract can interact with the vm using signed statements, called a [witness](docs/contract.md) statement:
+Members of the contract interact with this vm using signed statements, called a [witness](docs/contract.md) statement:
 
 ```ts
 {
@@ -172,11 +172,11 @@ Members of the contract can interact with the vm using signed statements, called
 
 Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full history of the vm, from activation to settlement.
 
-Once the contract vm has settled on a spending path, the agent will complete the relevant pre-signed transaction, and broadcast it, closing the contract.
+Once the vm has settled on a spending path, the agent will complete the relevant signature from each covenant, then broadcast a final transaction to close the contract.
 
 The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the agent.
 
-Each contract settlement on mainnet will include a valid proof to maintain our reputation.
+Each contract settlement on mainnet will be backed by a valid proof to maintain our reputation.
 
 ### Protocol Flow
 
