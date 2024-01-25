@@ -182,10 +182,10 @@ Every contract settled on mainnet will be backed by a valid proof to maintain ou
 
 > **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
 
-  * Alice and Bob prepare a proposal, and agree on terms / arbitration.
-  * Alice submits the proposal to the agent and receives a contract.
-  * Alice deposits her funds with the contract agent, along with a covenant.
-  * Once the deposit is confirmed on-chain, the contract becomes active.
+  1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
+  2. Alice submits the proposal to the agent and receives a contract.
+  3. Alice deposits her funds with the contract agent, along with a covenant.
+  4. Once the deposit is confirmed on-chain, the contract becomes active.
   
   **Happy Path: Settle on Payout**
   * Alice receives her widget and forgets about Bob.
