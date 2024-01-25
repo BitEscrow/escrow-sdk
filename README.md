@@ -152,7 +152,7 @@ When the contract becomes active, a virtual machine is started within the contra
 }
 ```
 
-Members of the contract interact with this vm using signed statements, called a [witness](docs/contract.md) statement:
+Members of the contract interact with this vm by submitting signed statements to the agent, called a [witness](docs/contract.md) statement:
 
 ```ts
 {
@@ -170,13 +170,13 @@ Members of the contract interact with this vm using signed statements, called a 
 }
 ```
 
-Members can use the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full history of the vm, from activation to settlement.
+Members can instruct the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full history of the vm, from activation to settlement.
 
 Once the vm has settled on a spending path, the agent will complete the relevant signature from each covenant, then broadcast a final transaction to close the contract.
 
 The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the agent.
 
-Each contract settlement on mainnet will be backed by a valid proof to maintain our reputation.
+Every contract settled on mainnet will be backed by a valid proof to maintain our reputation.
 
 ### Protocol Flow
 
