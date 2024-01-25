@@ -66,9 +66,9 @@ There is no specification placed on how to communicate the proposal between part
 
 ### Funding
 
-Once a final proposal has been delivered to our server, we will validate the terms and any endorsements, then publish a [contract](docs/contract.md). This contract is assigned a signing [agent](docs/contract.md), which is used to coordinate deposits.
+Once a final proposal has been delivered to our server, we will validate the terms (plus any endorsements), then publish an open [contract](docs/contract.md). This contract is also assigned an [agent](docs/contract.md) for coordinating deposits.
 
-Each funder requests a deposit [account](docs/deposit.md) from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds, each funder requests a deposit [account](docs/deposit.md) from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
@@ -77,13 +77,13 @@ interface DepositAccount {
   agent_id   : string  // ID of the agent.
   agent_pk   : string  // Pubkey of the agent  (in 2-of-2).
   member_pk  : string  // Pubkey of the funder (in 2-of-2).
-  req_id     : string  // Hash digest of this record.
+  req_id     : string  // Hash digest of the account record.
   sequence   : number  // Sequence value used for locktime.
-  sig        : string  // Provided by server for authenticity.
+  sig        : string  // Provided by our server for authenticity.
 }
 ```
 
-The funder verifies the account, then transfers funds to the account address. Once the transaction is visible in the mempool, the funder delivers a pre-signed `refund transaction` the the agent for safe-keeping, plus a batch of partial signatures (for each spending path in the contract). These partial signatures form a [covenant](docs/deposit.md) between their deposit and the contract.
+The funder verifies the account, then transfers funds to the address. Once the transaction is visible in the mempool, the funder delivers a pre-signed refund transaction to the agent, plus a batch of partial signatures (for each spending path in the contract). These partial signatures form a [covenant](docs/deposit.md) between their deposit and the contract.
 
 ```ts
 interface CovenantData {
