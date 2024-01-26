@@ -1,6 +1,5 @@
-import { Buff }           from '@cmdcode/buff'
+import { Buff, Bytes }    from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
-import { SignerConfig }   from '@/client/types.js'
 import { EscrowClient }   from './client.js'
 
 import deposit_api  from '../api/depositor.js'
@@ -10,7 +9,13 @@ import request_api  from '../api/request.js'
 import witness_api  from '../api/witness.js'
 
 import {
+  ClientConfig,
+  SignerConfig
+} from '@/client/types.js'
+
+import {
   CredSignerAPI,
+  Network,
   WalletAPI
 } from '@/types/index.js'
 
@@ -18,7 +23,20 @@ const DEFAULT_IDXGEN = () => Buff.now(4).num
 
 export class EscrowSigner {
 
+  static create (
+    config : ClientConfig,
+    seed   : Bytes,
+    xpub  ?: string
+  ) {
+    const signer = new Signer({ seed })
+    const wallet = (xpub !== undefined)
+      ? new Wallet(xpub)
+      : Wallet.generate({ seed, network : config.network as Network })
+    return new EscrowSigner({ ...config, signer, wallet })
+  }
+
   static load (
+    config   : ClientConfig,
     password : string,
     payload  : string
   ) {
@@ -28,7 +46,7 @@ export class EscrowSigner {
     const pass    = Buff.str(password)
     const signer  = Signer.restore(pass, encdata)
     const wallet  = new Wallet(xpub)
-    return new EscrowSigner({ signer, wallet })
+    return new EscrowSigner({ ...config, signer, wallet })
   }
 
   readonly _client  : EscrowClient
