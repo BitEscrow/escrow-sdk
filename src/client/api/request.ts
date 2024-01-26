@@ -2,7 +2,9 @@ import { EscrowSigner } from '@/client/class/signer.js'
 
 export function request_deposits_api (signer : EscrowSigner) {
   return () => {
-    const url = `${signer.client.host}/api/deposit/list`
+    const pub  = signer.pubkey
+    const host = signer.client.host
+    const url  = `${host}/api/deposit/list?pubkey=${pub}`
     const content = 'GET' + url
     return signer._signer.gen_token(content)
   }
@@ -10,7 +12,9 @@ export function request_deposits_api (signer : EscrowSigner) {
 
 export function request_contracts_api (signer : EscrowSigner) {
   return () => {
-    const url = `${signer.client.host}/api/contract/list`
+    const pub  = signer.pubkey
+    const host = signer.client.host
+    const url  = `${host}/api/contract/list?pubkey=${pub}`
     const content = 'GET' + url
     return signer._signer.gen_token(content)
   }

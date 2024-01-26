@@ -104,10 +104,11 @@ function read_deposit_api (client : EscrowClient) {
 
 function list_deposit_api (client : EscrowClient) {
   return async (
-    token : string
+    pubkey : string,
+    token  : string
   ) : Promise<ApiResponse<DepositListResponse>> => {
     // Formulate the request.
-    const url = `${client.host}/api/deposit/list`
+    const url = `${client.host}/api/deposit/list?pubkey=${pubkey}`
     // Return the response.
     return client.fetcher<DepositListResponse>({ url, token })
   }

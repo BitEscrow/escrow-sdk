@@ -68,14 +68,13 @@ function read_contract_api (client : EscrowClient) {
  * Return a list of contracts that 
  * are associated with a given pubkey.
  */
-function list_contract_api (
-  client : EscrowClient
-) {
+function list_contract_api (client : EscrowClient) {
   return async (
-    token : string
+    pubkey : string,
+    token  : string
   ) : Promise<ApiResponse<ContractListResponse>> => {
     // Formulate the request.
-    const url = `${client.host}/api/contract/list`
+    const url = `${client.host}/api/contract/list?pubkey=${pubkey}`
     // Return the response.
     return client.fetcher<ContractListResponse>({ url, token })
   }
