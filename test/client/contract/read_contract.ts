@@ -4,7 +4,7 @@ import CONFIG from '../config.js'
 
 // Define a third-party client as a coordinator.
 const client = new EscrowClient(CONFIG.regtest.client)
-const cid    = '108abd1bcabf7c8cc4dcb8be824461b6d8146fbf3623f748bc1926ec818e42d1'
+const cid    = '798e5e4a51e60dea79690dcd3114f65fa510c539514e8f89d6a22beaed98473a'
 
 // Request an account for the member to use.
 const ct_res = await client.contract.read(cid)

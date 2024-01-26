@@ -20,14 +20,14 @@ export function request_contracts_api (signer : EscrowSigner) {
   }
 }
 
-export function sign_request_api (client : EscrowSigner) {
+export function sign_request_api (signer : EscrowSigner) {
   return (
     url    : string, 
-    body   : string = '{}',
+    body   : string = '',
     method : string = 'GET'
   ) => {
     const content = method + url + body
-    return client._signer.gen_token(content)
+    return signer._signer.gen_token(content)
   }
 }
 
