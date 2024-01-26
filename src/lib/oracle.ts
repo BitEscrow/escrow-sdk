@@ -174,7 +174,7 @@ export async function fee_estimates (
   if (!json.ok) throw new Error(json.error)
   // Return the parsed data with rounded values.
   const ent = Object.entries(json.data)
-  const rnd = ent.map(([ k, v ]) => [ [ k, Math.ceil(v)] ])
+  const rnd = ent.map(([ k, v ]) => [ k, Math.ceil(v) ])
   return Object.fromEntries(rnd)
 }
 
