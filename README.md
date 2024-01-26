@@ -60,9 +60,9 @@ The members must first negotiate and agree on a [proposal](docs/proposal.md) doc
 
 If desired, a third-party can host the proposal. The protocol is designed for third-parties to help with negotiation, and offer their own services such as arbitration.
 
-There is no specification placed on how to communicate the proposal between parties. There are so many great communication protocols that exist in the wild, and they virtually all support JSON, so feel free to use your favorite one!
+There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
 
-> Note: The server `agent` does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+> Note: The server agent does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
 
 ### Funding
 

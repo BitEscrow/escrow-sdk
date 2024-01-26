@@ -3,17 +3,14 @@ import { EscrowClient }          from '../class/client.js'
 import { validate_registration } from '@/validators/index.js'
 
 import {
+  CovenantData,
+  ReturnData,
+  ApiResponse,
+  DepositRequest,
   AccountDataResponse,
   DepositDataResponse,
   DepositListResponse,
   FundingDataResponse
-} from '@/client/types.js'
-
-import {
-  CovenantData,
-  ReturnData,
-  ApiResponse,
-  DepositRequest
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'

@@ -1,6 +1,9 @@
-import { EscrowClient }        from '../class/client.js'
-import { WitnessDataResponse } from '../types.js'
-import { ApiResponse }         from '../../types/index.js'
+import { EscrowClient } from '../class/client.js'
+
+import {
+  ApiResponse,
+  WitnessDataResponse
+} from '@/types/index.js'
 
 import * as assert from '@/assert.js'
 

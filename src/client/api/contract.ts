@@ -5,14 +5,11 @@ import { parse_proposal }     from '@/lib/parse.js'
 import { verify_proposal }    from '@/validators/index.js'
 
 import {
+  ApiResponse,
   ContractDataResponse,
   ContractListResponse,
   DepositListResponse,
-  WitnessListResponse
-} from '@/client/types.js'
-
-import {
-  ApiResponse,
+  WitnessListResponse,
   ProposalData,
   WitnessData
 }  from '@/types/index.js'

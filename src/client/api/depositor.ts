@@ -9,6 +9,7 @@ import {
 } from '@/lib/session.js'
 
 import {
+  AccountDataResponse,
   ApiResponse,
   ContractData,
   CovenantData,
@@ -17,8 +18,6 @@ import {
   ReturnData,
   TxOutput
 } from '@/types/index.js'
-
-import { AccountDataResponse } from '../types.js'
 
 export function request_account_api (client : EscrowSigner) {
   return async (
