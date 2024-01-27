@@ -74,8 +74,8 @@ export function get_fetcher (
     // Initialize the options object.
     if (token !== undefined) {
       init.headers = {
-        ...init.headers, 
-        'Authorization' :'Token ' + token
+        ...init.headers,
+        'Authorization' :'Bearer ' + token
       }
     }
     // Run the fetcher method.

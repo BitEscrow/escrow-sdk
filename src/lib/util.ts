@@ -66,6 +66,25 @@ export function is_literal (value : unknown) : value is Literal {
   return false
 }
 
+export function is_uint (
+  value : unknown, 
+  max_val = Number.MAX_SAFE_INTEGER
+) : value is Number {
+  if (typeof value === 'string') {
+    value = Number(value)
+  }
+  if (typeof value !== 'number') {
+    return false
+  }
+  return (
+    typeof value === 'number' &&
+    !isNaN(value)             && 
+    value >= 0                && 
+    value <= max_val          && 
+    Math.floor(value) === value
+  )
+}
+
 export function now () {
   return Math.floor(Date.now() / 1000)
 }
