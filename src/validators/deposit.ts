@@ -1,10 +1,19 @@
+import { Bytes }          from '@cmdcode/buff'
 import { taproot }        from '@scrow/tapscript/sighash'
 import { parse_sequence } from '@scrow/tapscript/tx'
+import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 
 import {
+  get_deposit_address,
+  get_deposit_ctx
+} from '@/lib/deposit.js'
+
+import {
+  DepositAccount,
   DepositContext,
   DepositData,
   DepositRegister,
+  Network,
   ReturnContext,
   TxOutput
 } from '../types/index.js'
@@ -22,6 +31,20 @@ export function validate_deposit (
   deposit : Record<string, any>
 ) : asserts deposit is DepositData {
   schema.deposit.data.parse(deposit)
+}
+
+export function verify_account (
+  account  : DepositAccount,
+  fund_pub : Bytes,
+  host_pub : Bytes,
+  network  : Network
+) {
+  const { address, agent_pk, member_pk, req_id, sequence, sig } = account
+  const ctx  = get_deposit_ctx(agent_pk, member_pk, sequence)
+  const addr = get_deposit_address(ctx, network)
+  assert.ok(fund_pub === member_pk, 'member pubkey does not match!')
+  assert.ok(address  === addr,      'account address does not match!')
+  verify_sig(sig, req_id, host_pub, { throws : true })
 }
 
 export function verify_deposit (

@@ -49,20 +49,26 @@ export class EscrowSigner {
     return new EscrowSigner({ ...config, signer, wallet })
   }
 
-  readonly _client  : EscrowClient
-  readonly _gen_idx : () => number
-  readonly _signer  : CredSignerAPI
-  readonly _wallet  : WalletAPI
+  readonly _client    : EscrowClient
+  readonly _host_pub ?: string
+  readonly _gen_idx   : () => number
+  readonly _signer    : CredSignerAPI
+  readonly _wallet    : WalletAPI
 
   constructor (config : SignerConfig) {
-    this._client  = new EscrowClient(config)
-    this._gen_idx = config.idxgen ?? DEFAULT_IDXGEN
-    this._signer  = config.signer
-    this._wallet  = config.wallet
+    this._client   = new EscrowClient(config)
+    this._gen_idx  = config.idxgen ?? DEFAULT_IDXGEN
+    this._host_pub = config.host_pub
+    this._signer   = config.signer
+    this._wallet   = config.wallet
   }
 
   get client () {
     return this._client
+  }
+
+  get host_pub () {
+    return this._host_pub
   }
 
   get pubkey () {

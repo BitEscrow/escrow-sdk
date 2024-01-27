@@ -1,7 +1,8 @@
 import { Buff }             from '@cmdcode/buff'
-import { get_deposit_ctx }  from '@/lib/deposit.js'
 import { create_return_tx } from '@/lib/return.js'
 import { EscrowSigner }     from '@/client/class/signer.js'
+import { get_deposit_ctx }  from '@/lib/deposit.js'
+import { verify_account }   from '@/validators/deposit.js'
 
 import {
   create_covenant,
@@ -25,6 +26,17 @@ export function request_account_api (client : EscrowSigner) {
   ) : Promise<ApiResponse<AccountDataResponse>> => {
     const pubkey = client.pubkey
     return client.client.deposit.request({ pubkey, locktime })
+  }
+}
+
+export function verify_account_api (signer : EscrowSigner) {
+  return (account : DepositAccount) : void => {
+    const host_pub = signer.host_pub
+    const network  = signer.client.network
+    if (host_pub === undefined) {
+      throw new Error('host pubkey is not set on device')
+    }
+    verify_account(account, signer.pubkey, host_pub, network)
   }
 }
 
@@ -106,10 +118,11 @@ export function close_deposit_api (client : EscrowSigner) {
 
 export default function (client : EscrowSigner) {
   return {
-    request_acct   : request_account_api(client),
-    register_utxo  : register_utxo_api(client),
-    commit_utxo    : commit_utxo_api(client),
-    commit_deposit : commit_deposit_api(client),
-    close_deposit  : close_deposit_api(client)
+    request_account : request_account_api(client),
+    verify_account  : verify_account_api(client),
+    register_utxo   : register_utxo_api(client),
+    commit_utxo     : commit_utxo_api(client),
+    commit_deposit  : commit_deposit_api(client),
+    close_deposit   : close_deposit_api(client)
   }
 }

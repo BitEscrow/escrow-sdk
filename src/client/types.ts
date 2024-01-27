@@ -14,9 +14,10 @@ export interface ClientConfig {
 }
 
 export interface SignerConfig extends ClientConfig {
-  idxgen ?: () => number
-  signer  : CredSignerAPI
-  wallet  : WalletAPI
+  host_pub ?: string
+  idxgen   ?: () => number
+  signer    : CredSignerAPI
+  wallet    : WalletAPI
 }
 
 export interface FetchConfig {
