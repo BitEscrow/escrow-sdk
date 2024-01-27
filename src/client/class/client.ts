@@ -74,7 +74,7 @@ export function get_fetcher (
     // Initialize the options object.
     const req = new Request(url, init)
     if (token !== undefined) {
-      req.headers.append('token', token)
+      req.headers.append('Authorization', 'Token ' + token)
     }
     // Run the fetcher method.
     const res = await fetcher(req)

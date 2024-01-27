@@ -415,13 +415,13 @@ Before making a deposit, we have to request an account from the escrow server. E
 const pubkey   = a_signer.pubkey
 const locktime = 60 * 60 // 1 hour locktime
 // Fetch a new account from the server.
-const res = await client.deposit.request_acct(pubkey, locktime)
+const res = await client.deposit.request({ pubkey, locktime })
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the account data.
 const { account } = res.data
 // Validate the account is issued by the escrow server.
-a_signer.deposit.verify_acct(account)
+a_signer.deposit.verify_account(account)
 ```
 
 > For more information on the `account` interface, [click here](docs/deposit.md).
@@ -518,6 +518,21 @@ export const settled_contract = res.data.contract
 > For more information on the `witness` interface, [click here](docs/witness.md).
 
 ### API Demo
+
+```md
+  /contract
+    /create
+    /fund
+    /list
+    /cancel
+    /read
+    /submit
+    /witness
+  deposit/
+  witness/
+  status
+  terms
+```
 
 Documentation coming soon!
 

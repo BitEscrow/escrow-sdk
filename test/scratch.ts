@@ -1,3 +1,16 @@
-import { Buff } from "@cmdcode/buff";
+import { EscrowSigner } from '@scrow/core'
+import { Buff }         from '@cmdcode/buff'
 
-console.log(Buff.str('alice').digest.hex)
+const seed = Buff.str('alice').digest
+
+console.log('seed:', seed.hex)
+
+const signer = EscrowSigner.create({}, seed)
+
+const backup = signer.save('test')
+
+console.log('backup:', backup)
+
+const signer2 = EscrowSigner.load({}, 'test', backup)
+
+console.log('is restored:', signer.pubkey === signer2.pubkey)

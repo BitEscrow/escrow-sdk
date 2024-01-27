@@ -41,8 +41,8 @@ export class EscrowSigner {
     payload  : string
   ) {
     const bytes   = Buff.bech32(payload)
-    const encdata = bytes.subarray(0, 96)
-    const xpub    = bytes.subarray(96).b58chk
+    const encdata = bytes.subarray(0, 64)
+    const xpub    = bytes.subarray(64).b58chk
     const pass    = Buff.str(password)
     const signer  = Signer.restore(pass, encdata)
     const wallet  = new Wallet(xpub)

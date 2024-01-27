@@ -46,10 +46,10 @@
     "@cmdcode/buff" "^2.2.4"
     "@cmdcode/crypto-tools" "^2.6.10"
 
-"@cmdcode/signer@1.3.11":
-  version "1.3.11"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.3.11.tgz#3d76cebdb01e0ff976ca0a0eb891cfe7c1fdc9e0"
-  integrity sha512-knsG0ilHzKEcIB7mh0iYaQRVVXUIbpxsgdkDTOgg+lvKsYrf/6hsJ7+mOiB4dJUaz7mlr6EUtq58XuVDToRazA==
+"@cmdcode/signer@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.0.tgz#a8b3b89cd047fa0da2cdb661904c3dfb9caac0b5"
+  integrity sha512-jqMjF8SGn0M6O7qWY4KwnYXUQUJsB7z8jFtgrvgzSyq90DxUIuAnwI20L+YICrWDULihnfPgiQVkWq2hHnh1FA==
   dependencies:
     "@cmdcode/buff" "^2.2.4"
     "@cmdcode/crypto-tools" "^2.7.5"
