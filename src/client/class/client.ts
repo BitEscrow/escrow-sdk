@@ -70,14 +70,16 @@ export function get_fetcher (
   // Return the wrapped fetch method.
   return async <T> (config : FetchConfig) => {
     // Unpack the config.
-    const { init, token, url } = config
+    const { init = {}, token, url } = config
     // Initialize the options object.
-    const req = new Request(url, init)
     if (token !== undefined) {
-      req.headers.append('Authorization', 'Token ' + token)
+      init.headers = {
+        ...init.headers, 
+        'Authorization' :'Token ' + token
+      }
     }
     // Run the fetcher method.
-    const res = await fetcher(req)
+    const res = await fetcher(url, init)
     // Resolve, validate, then return the response.
     return resolve_json<T>(res)
   }
