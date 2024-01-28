@@ -160,7 +160,8 @@ export function stringify (content : any) : string {
   }
 }
 
-export function get_object_id <T extends object> (obj : T) : Buff {
+export function get_object_id <T extends object> (
+  obj : T) : Buff {
   if (Array.isArray(obj) || typeof obj !== 'object') {
     throw new Error('not an object')
   }

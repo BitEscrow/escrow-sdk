@@ -1,5 +1,6 @@
 import { Buff, Bytes }     from '@cmdcode/buff'
 import { hash340, sha512 } from '@cmdcode/crypto-tools/hash'
+import { parse_extkey }    from '@cmdcode/crypto-tools/hd'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { TxPrevout }       from '@scrow/tapscript'
 import { get_deposit_ctx } from './deposit.js'
@@ -12,7 +13,7 @@ import {
 
 import {
   create_sighash,
-  create_tx_tmpl,
+  create_tx_template,
   create_txinput,
   parse_txinput
 }  from './tx.js'
@@ -30,7 +31,6 @@ import {
   DepositData,
   MutexContext,
   MutexEntry,
-  ReturnData,
   SignerAPI,
   TxOutput
 } from '../types/index.js'
@@ -81,26 +81,29 @@ export function create_covenant (
  * signature, to be used for collaboratively
  * returning a deposit back to the sender.
  */
-export function create_return (
-  address : string,
+export function create_return_psig (
   deposit : DepositData,
   signer  : SignerAPI,
   txfee   : number
-) : ReturnData {
+) : string {
   // Unpack the deposit object.
-  const { agent_id, dpid, agent_pn, value } = deposit
+  const { agent_id, agent_pn, dpid, value, spend_xpub } = deposit
+  // Parse the return pubkey from the xpub.
+  const return_pk = parse_extkey(spend_xpub).pubkey
   // Compute the session pnonce value.
   const pnonce  = get_session_pnonce(agent_id, dpid, signer).hex
   // Combine pnonces into a list.
   const pnonces = [ pnonce, agent_pn ]
+  // Create locking script.
+  const script  = [ 'OP_1', return_pk ]
   // Create a return transaction using the provided params.
-  const txhex   = create_tx_tmpl(address, value - txfee)
+  const txhex   = create_tx_template(script, value - txfee)
   // Compute a musig context object for the transaction.
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
   // Create a partial signature using the musig context.
   const psig    = create_mutex_psig(mutex, signer)
-  // Return the final payload.
-  return { dpid, pnonce, psig, txhex }
+  // Return the pnonce and psig.
+  return Buff.join([ pnonce, psig ]).hex
 }
 
 /**
@@ -138,9 +141,14 @@ export function get_return_mutex (
   txhex   : string
 ) : MutexContext {
   // Unpack the deposit object.
-  const { agent_id, agent_pk, dpid, member_pk, sequence } = deposit
+  const { 
+    agent_id, agent_pk, dpid, 
+    deposit_pk, sequence, spend_xpub
+  } = deposit
+    // Parse the return pubkey from the xpub.
+  const return_pk = parse_extkey(spend_xpub).pubkey
   // Get a context object for the deposit.
-  const dep_ctx = get_deposit_ctx(agent_pk, member_pk, sequence)
+  const dep_ctx = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
   // Compute the session id for the agent and deposit.
   const sid     = get_session_id(agent_id, dpid)
   // Parse the txinput from the deposit data.

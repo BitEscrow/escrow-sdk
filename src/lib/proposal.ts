@@ -57,7 +57,8 @@ export function filter_path (
 export function get_path_names (
   paths : PathEntry[]
 ) : string[] {
-  return [ ...new Set(paths.map(e => e[0])) ]
+  const pnames = new Set(paths.map(e => e[0]))
+  return [ ...pnames ].sort()
 }
 
 /**
@@ -77,7 +78,8 @@ export function get_pay_total (
 export function get_addrs (
   paths : PathEntry[]
 ) : string[] {
-  return [ ...new Set(paths.map(e => e[2])) ]
+  const addrs = new Set(paths.map(e => e[2]))
+  return [ ...addrs ]
 }
 
 /**

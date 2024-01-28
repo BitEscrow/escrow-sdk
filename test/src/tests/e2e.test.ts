@@ -1,13 +1,13 @@
 import { Test }               from 'tape'
 import { Buff }               from '@cmdcode/buff'
 import { CoreClient }         from '@cmdcode/core-cmd'
+import { parse_extkey }       from '@cmdcode/crypto-tools/hd'
 import { Signer }             from '@cmdcode/signer'
-import { get_return_ctx }     from '@scrow/core/return'
+import { prevout_to_txspend } from '@scrow/core/tx'
 import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
-import { prevout_to_txspend } from '@scrow/core/tx'
 import { get_members }        from '../core.js'
-import { get_funds }          from '../fund.js'
+import { register_funds }     from '../fund.js'
 import { create_settlment }   from '../spend.js'
 
 import {
@@ -32,20 +32,19 @@ import {
 } from '@scrow/core/vm'
 
 import {
-  verify_deposit,
   validate_proposal,
   verify_proposal,
-  validate_covenant,
   verify_covenant,
-  validate_registration,
+  validate_register_req,
   verify_witness,
   validate_witness
 } from '@scrow/core/validate'
 
+import { PaymentEntry } from '@/types/index.js'
+
 import * as assert from '@scrow/core/assert'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
-import { PaymentEntry } from '@/index.js'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -90,27 +89,28 @@ export default async function (client : CoreClient, tape : Test) {
 
       /* ------------------- [ Funding ] ------------------- */
 
-      const templates = await get_funds(contract, members)
+      const registrations = await register_funds(contract, members)
 
-      const promises  = templates.map(async tmpl => {
-        validate_registration(tmpl)
-        validate_covenant(tmpl.covenant)
-        const return_ctx = get_return_ctx(tmpl.return_tx)
-        const { pubkey, sequence } = return_ctx
-        const { txid, vout }       = return_ctx.tx.vin[0]
-        const deposit_key = agent.signer.pubkey
-        const deposit_ctx = get_deposit_ctx(deposit_key, pubkey, sequence)
-        const data = await client.get_txinput(txid, vout)
-        assert.exists(data)
-        const spendout = prevout_to_txspend(data.txinput)
-        verify_deposit(deposit_ctx, return_ctx, spendout)
+      const promises = registrations.map(async tmpl => {
+        const { utxo, ...template } = tmpl
+        const { deposit_pk, sequence, spend_xpub } = template
+        const { txid, vout } = utxo
+        validate_register_req(template)
+        const agent_id  = agent.signer.id
+        const agent_pk  = agent.signer.pubkey
+        const return_pk = parse_extkey(spend_xpub).pubkey
+        const dep_ctx   = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
+        const tx_data   = await client.get_txinput(txid, vout)
+        assert.ok(tx_data !== null, 'there is no tx data')
+        const spendout = prevout_to_txspend(tx_data.txinput)
+        // verify_deposit(dep_ctx, return_ctx, spendout)
         const dpid     = Buff.random(32).hex
-        const state    = get_spend_state(sequence, data.status)
+        const state    = get_spend_state(sequence, tx_data.status)
         const session  = create_session(agent.signer, dpid)
         const agent_pn = session.agent_pn
-        const deposit  = create_deposit({ ...deposit_ctx, dpid, agent_pn, ...tmpl, ...spendout, ...state })
-        // const deposit = register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
-        verify_covenant(deposit_ctx, contract, deposit, agent.signer, agent.signer)
+        const deposit  = create_deposit({ ...dep_ctx, dpid, agent_id, agent_pn, ...template, ...spendout, ...state })
+        // const deposit  = register_deposit(dep_ctx, dpid, pnonce, tmpl, spendout, state)
+        verify_covenant(dep_ctx, contract, deposit, agent.signer, agent.signer)
         return deposit
       })
 

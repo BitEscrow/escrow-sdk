@@ -1,5 +1,4 @@
 import { create_covenant }  from '@scrow/core/session'
-import { create_return_tx } from '@scrow/core/return'
 import { create_timelock }  from '@scrow/core/tx'
 import { get_utxo }         from './core.js'
 import { CoreSigner }       from './types.js'
@@ -14,30 +13,33 @@ import {
   get_deposit_ctx
 } from '@scrow/core/deposit'
 
-const SEQUENCE = create_timelock(60 * 60 * 2)
+const locktime = 60 * 60 * 2
 
-export function get_funds (
+export async function register_funds (
   contract : ContractData,
   members  : CoreSigner[],
   txfee     = 1000 
 ) {
-  const { agent_id, agent_pk } = contract
+  const { agent_pk } = contract
   const cli       = members[0].core.client
   const faucet    = cli.core.faucet
   const network   = contract.terms.network
   const value     = Math.ceil(contract.total / 3 + txfee)
-  const templates = members.map(async mbr => {
-    const ctx  = get_deposit_ctx(agent_pk, mbr.signer.pubkey, SEQUENCE)
+  const templates = members.map(async (mbr) => {
+    const deposit_pk = mbr.signer.pubkey
+    const return_pk  = mbr.wallet.pubkey
+    const sequence   = create_timelock(locktime)
+    const spend_xpub = mbr.wallet.xpub
+    const ctx  = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
     const addr = get_deposit_address(ctx, network)
+    console.log('addr1:', addr)
     await faucet.ensure_funds(value)
     const txid = await faucet.send_funds(value, addr)
-    const txo  = await get_utxo(cli, addr, txid)
-    assert.exists(txo)
-    const ret  = await mbr.core.new_address
-    const rtx  = create_return_tx(ret, ctx, mbr.signer, txo, txfee)
-    const cov  = create_covenant(ctx, contract, mbr.signer, txo)
-    return { agent_id, covenant : cov, return_tx : rtx }
+    const utxo = await get_utxo(cli, addr, txid)
+    assert.exists(utxo)
+    const covenant = create_covenant(ctx, contract, mbr.signer, utxo)
+    return { covenant, deposit_pk, sequence, spend_xpub, utxo }
   })
-
+  await cli.mine_blocks(1)
   return Promise.all(templates)
 }

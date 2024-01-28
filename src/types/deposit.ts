@@ -38,12 +38,13 @@ interface DepositUnconfirmed {
 }
 
 export interface DepositContext {
-  agent_pk  : string
-  member_pk :  string
-  key_data  : KeyContext
-  script    : ScriptWord[]
-  sequence  : number
-  tap_data  : TapContext
+  agent_pk   : string
+  deposit_pk : string
+  key_data   : KeyContext
+  return_pk  : string
+  script     : ScriptWord[]
+  sequence   : number
+  tap_data   : TapContext
 }
 
 export interface ReturnContext {
@@ -55,25 +56,27 @@ export interface ReturnContext {
 }
 
 export interface DepositAccount {
-  created_at : number
+  acct_id    : string
+  acct_sig   : string
   address    : string
   agent_id   : string
   agent_pk   : string
-  member_pk  : string
-  req_id     : string
+  created_at : number
+  deposit_pk : string
   sequence   : number
-  sig        : string
+  spend_xpub : string
 }
 
 export interface DepositInfo {
-  covenant   : CovenantData | null
-  created_at : number
-  dpid       : string
-  member_pk  : string
-  return_tx  : string
-  sequence   : number
-  status     : DepositStatus
-  updated_at : number
+  covenant    : CovenantData | null
+  created_at  : number
+  deposit_pk  : string
+  dpid        : string
+  return_psig : string | null
+  sequence    : number
+  status      : DepositStatus
+  updated_at  : number
+  spend_xpub  : string
 }
 
 export interface ReturnData {
@@ -83,13 +86,28 @@ export interface ReturnData {
   txhex  : string
 }
 
-export interface DepositRequest {
-  pubkey   : string
-  locktime : number
+export interface AccountRequest {
+  deposit_pk : string
+  locktime  ?: number
+  spend_xpub : string
 }
 
-export interface DepositRegister {
-  agent_id  : string
-  covenant ?: CovenantData
-  return_tx : string
+export interface RegisterRequest {
+  covenant    ?: CovenantData
+  deposit_pk   : string
+  return_psig ?: string
+  sequence     : number
+  spend_xpub   : string
+}
+
+export interface ExtendedKey {
+  prefix : number
+  depth  : number
+  fprint : number
+  index  : number
+  code   : string
+  type   : number
+  key    : string
+  seckey : string
+  pubkey : string
 }

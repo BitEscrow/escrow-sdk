@@ -23,10 +23,8 @@ import {
 export function create_contract (
   config : ContractConfig
 ) : ContractData {
-  const agent_fee  = config.agent_fee
-  const feerate    = config.feerate
-  const terms      = config.proposal
-  const outputs    = get_spend_outputs(terms, [ agent_fee ])
+  const { agent_fee, feerate, proposal: terms } = config
+  const outputs    = get_spend_templates(terms, [ agent_fee ])
   const published  = config.published  ?? now()
   const signatures = config.signatures ?? []
   const subtotal   = terms.value + agent_fee[0]
@@ -45,7 +43,7 @@ export function create_contract (
     expires_at  : null,
     feerate     : feerate,
     moderator   : config.moderator ?? null,
-    outputs     : get_spend_outputs(terms, [ agent_fee ]),
+    outputs     : outputs,
     pending     : 0,
     prop_id     : get_proposal_id(terms).hex,
     pubkeys     : signatures.map(e => e.slice(0, 64)),
@@ -74,53 +72,60 @@ export function activate_contract (
   contract  : ContractData,
   activated : number = now()
 ) : ContractData {
-  /**
-   * Activate a contract.
-   */
+  // Unpack contract object.
   const { cid, terms } = contract
+  // Unpack terms object.
   const { expires, paths, programs, schedule } = terms
+  // Define a hard expiration date.
+  const expires_at = activated + expires
+  // Collect the path names.
   const pathnames = get_path_names(paths)
-  return {
-    ...contract,
-    activated,
-    expires_at : activated + expires,
-    status     : 'active',
-    vm_state   : init_vm({ activated, cid, pathnames, programs, schedule })
-  }
+  // Initialize the virtual machine.
+  const vm_state = init_vm({ activated, cid, pathnames, programs, schedule })
+  // Return the activated contract state.
+  return { ...contract, activated, expires_at, status : 'active', vm_state }
 }
 
 /**
- * Returns the effective deadline
- * based on the proposal data.
+ * Returns a relative deadline (in seconds) 
+ * for receiving deposits.
  */
 function get_deadline (
-  proposal : ProposalData,
-  created  : number
+  proposal  : ProposalData,
+  published : number
 ) {
+  // Unpack the proposal object.
   const { deadline, effective } = proposal
+  // If an effective date is set:
   if (effective !== undefined) {
-    return effective - created
+    // Return remaining time until effective date.
+    return effective - published
   } else {
-    return created + (deadline ?? DEFAULT_DEADLINE)
+    // Return published date, plus deadline.
+    return published + (deadline ?? DEFAULT_DEADLINE)
   }
 }
 
 /**
- * Compute the spending output transactions
- * for each path in the proposal.
+ * Convert each spending path in the proposal
+ * into a transaction output template.
  */
-export function get_spend_outputs (
-  prop : ProposalData,
-  fees : PaymentEntry[]
+export function get_spend_templates (
+  proposal : ProposalData,
+  fees     : PaymentEntry[]
 ) : SpendTemplate[] {
-  const { payments, paths } = prop
-  const total_fees = [ ...payments, ...fees ]
-  const path_names = get_path_names(paths)
-  const outputs : SpendTemplate[] = []
-  for (const name of path_names) {
-    const vout  = get_path_vouts(name, paths, total_fees)
+  // Unpack proposal object.
+  const { payments, paths } = proposal
+  // Collect and sort path names.
+  const pathnames = get_path_names(paths)
+  const pay_total = [ ...payments, ...fees ]
+  // Return labeled array of spend templates.
+  return pathnames.map(pathname => {
+    // Get a list of tx outputs.
+    const vout  = get_path_vouts(pathname, paths, pay_total)
+    // Combine the outputs into a tx template (hex).
     const txhex = create_txhex(vout)
-    outputs.push([ name, txhex ])
-  }
-  return outputs
+    // Return the txhex as an array entry.
+    return [ pathname, txhex ]
+  })
 }

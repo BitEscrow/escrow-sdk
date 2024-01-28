@@ -74,7 +74,7 @@ function list_contract_api (client : EscrowClient) {
     token  : string
   ) : Promise<ApiResponse<ContractListResponse>> => {
     // Formulate the request.
-    const url = `${client.host}/api/contract/list?pubkey=${pubkey}`
+    const url = `${client.host}/api/contract/list/${pubkey}`
     // Return the response.
     return client.fetcher<ContractListResponse>({ url, token })
   }

@@ -76,26 +76,27 @@ export function get_return_script (
  * for a given unspent transaction output.
  */
 export function create_return_tx (
-  address  : string,
-  context  : DepositContext,
-  signer   : SignerAPI,
-  txout    : TxOutput,
+  address : string,
+  context : DepositContext,
+  signer  : SignerAPI,
+  txout   : TxOutput,
   txfee = MIN_RECOVER_FEE
 ) : string {
-  const { sequence, tap_data }        = context
-  const { cblock, extension, script } = tap_data
-  assert.ok(txout.value > txfee, 'tx value does not cover txfee')
+  const { return_pk, sequence, tap_data } = context
+  const { cblock, extension, script }     = tap_data
+  assert.ok(txout.value > txfee,         'tx value does not cover txfee')
+  assert.ok(signer.pubkey === return_pk, 'signer does not control return pubkey')
   assert.exists(script)
-  const scriptkey = parse_addr(address).asm
-  const txin      = create_txinput(txout)
+  const tx_input  = create_txinput(txout)
   const return_tx = create_tx({
-    vin  : [{ ...txin, sequence }],
+    vin  : [{ ...tx_input, sequence }],
     vout : [{
       value        : txout.value - txfee,
-      scriptPubKey : scriptkey
+      scriptPubKey : parse_addr(address).asm
     }]
   })
-  const opt : SigHashOptions = { extension, pubkey: signer.pubkey, txindex : 0, throws: true }
+
+  const opt : SigHashOptions = { extension, txindex : 0, throws: true }
   const sig = sign_tx(signer, return_tx, opt)
   return_tx.vin[0].witness = [ sig, script, cblock ]
   // assert.ok(taproot.verify_tx(recover_tx, opt), 'recovery tx failed to generate!')

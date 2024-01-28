@@ -1,4 +1,5 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
+import { P2TR }         from '@scrow/tapscript/address'
 import { taproot }      from '@scrow/tapscript/sighash'
 import { parse_script } from '@scrow/tapscript/script'
 import { tap_pubkey }   from '@scrow/tapscript/tapkey'
@@ -17,11 +18,6 @@ import {
   TxOutput,
   TxPrevout
 } from '@scrow/tapscript'
-
-import {
-  P2TR,
-  parse_addr
-} from '@scrow/tapscript/address'
 
 import {
   create_prevout,
@@ -161,11 +157,10 @@ export function get_signed_tx (
   return encode_tx(txdata)
 }
 
-export function create_tx_tmpl (
-  address : string,
-  value   : number
+export function create_tx_template (
+  script : string[],
+  value  : number
 ) {
-  const script = parse_addr(address).asm
   const txout  = create_vout({ value, scriptPubKey : script })
   return create_txhex([ txout ])
 }

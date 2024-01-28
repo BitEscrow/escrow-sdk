@@ -1,6 +1,7 @@
 
 import { combine_psigs }   from '@cmdcode/musig2'
 import { Signer }          from '@cmdcode/signer'
+import { parse_extkey }    from '@cmdcode/crypto-tools/hd'
 import { decode_tx }       from '@scrow/tapscript/tx'
 import { get_deposit_ctx } from '../../src/lib/deposit.js'
 import { parse_txinput }   from '../../src/lib/tx.js'
@@ -70,17 +71,18 @@ export function sign_covenant (
   output   : SpendTemplate,
   txinput  : TxPrevout
 ) : string {
-  const { covenant, member_pk, sequence } = deposit
-  const { agent_id, cid, agent_pn }       = contract
+  const { covenant, deposit_pk, sequence, spend_xpub } = deposit
+  const { agent_id, cid, agent_pn } = contract
   assert.exists(covenant)
   const [ label, vout ]   = output
   const { pnonce, psigs } = covenant
-  const dep_ctx = get_deposit_ctx(agent.pubkey, member_pk, sequence)
-  const pnonces = [ pnonce, agent_pn ]
-  const sid     = get_session_id(agent_id, cid)
-  const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
-  const psig_a  = create_mutex_psig(mut_ctx, agent)
-  const psig_d  = get_entry(label, psigs)
-  const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
+  const return_pk = parse_extkey(spend_xpub).pubkey
+  const dep_ctx   = get_deposit_ctx(agent.pubkey, deposit_pk, return_pk, sequence)
+  const pnonces   = [ pnonce, agent_pn ]
+  const sid       = get_session_id(agent_id, cid)
+  const mut_ctx   = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
+  const psig_a    = create_mutex_psig(mut_ctx, agent)
+  const psig_d    = get_entry(label, psigs)
+  const musig     = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
   return musig.append(0x81).hex
 }

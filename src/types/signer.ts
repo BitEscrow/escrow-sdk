@@ -40,6 +40,7 @@ export interface SignOptions {
 
 export interface WalletAPI {
   xpub : string
+  has_account : (extkey : string) => boolean
   get_account : (id : Bytes) => WalletAPI
   has_address : (addr : string, limit ?: number) => boolean
   new_address : () => string

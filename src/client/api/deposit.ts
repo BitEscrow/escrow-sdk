@@ -1,16 +1,17 @@
 
 import { EscrowClient }          from '../class/client.js'
-import { validate_registration } from '@/validators/index.js'
+import { validate_register_req } from '@/validators/index.js'
 
 import {
   CovenantData,
   ReturnData,
   ApiResponse,
-  DepositRequest,
+  AccountRequest,
   AccountDataResponse,
   DepositDataResponse,
   DepositListResponse,
-  FundingDataResponse
+  FundingDataResponse,
+  RegisterRequest
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -18,18 +19,20 @@ import * as assert from '@/assert.js'
 /**
  * Request a deposit account from the provider.
  */
-function request_deposit_api (client : EscrowClient) {
+function request_account_api (client : EscrowClient) {
   return async (
-    req : DepositRequest
+    request : AccountRequest
   ) : Promise<ApiResponse<AccountDataResponse>> => {
-    // Ensure params are string values.
-    const arr = Object.entries(req)
-    // Build a query string with params.
-    const qry = new URLSearchParams(arr).toString()
     // Formulate the request.
-    const url = `${client.host}/api/deposit/request?${qry}`
+    const url = `${client.host}/api/deposit/request`
+    // Formulate the request.
+    const init = {
+      method  : 'POST',
+      body    : JSON.stringify(request),
+      headers : { 'content-type' : 'application/json' }
+    }
     // Return the response.
-    return client.fetcher<AccountDataResponse>({ url })
+    return client.fetcher<AccountDataResponse>({ url, init })
   }
 }
 
@@ -38,19 +41,16 @@ function request_deposit_api (client : EscrowClient) {
  */
 function register_deposit_api (client : EscrowClient) {
   return async (
-    agent_id  : string,
-    return_tx : string 
+    request : RegisterRequest
   ) : Promise<ApiResponse<DepositDataResponse>> => {
-    // Create template
-    const tmpl = { agent_id, return_tx }
-    // Validate the deposit template.
-    validate_registration({ agent_id, return_tx })
+    // Validate the request.
+    validate_register_req(request)
     // Configure the url.
     const url = `${client.host}/api/deposit/register`
     // Formulate the request.
     const init = {
       method  : 'POST',
-      body    : JSON.stringify(tmpl),
+      body    : JSON.stringify(request),
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
@@ -63,22 +63,18 @@ function register_deposit_api (client : EscrowClient) {
  */
 function register_funds_api (client : EscrowClient) {
   return async (
-    agent_id  : string,
-    return_tx : string,
-    covenant  : CovenantData
+    request : RegisterRequest
   ) : Promise<ApiResponse<FundingDataResponse>> => {
     // Assert that a covenant is defined.
-    assert.ok(covenant !== undefined, 'covenant is undefined')
-    // Create a deposit template.
-    const templ = { agent_id, return_tx, covenant }
-    // Validate the deposit template.
-    validate_registration(templ)
+    assert.ok(request.covenant !== undefined, 'covenant is undefined')
+    // Validate the request.
+    validate_register_req(request)
     // Formulate the request url.
     const url  = `${client.host}/api/deposit/register`
     // Forulate the request body.
     const init = {
-      method  : 'POST', 
-      body    : JSON.stringify(templ),
+      method  : 'POST',
+      body    : JSON.stringify(request),
       headers : { 'content-type' : 'application/json' }
     }
     // Return the response.
@@ -108,7 +104,7 @@ function list_deposit_api (client : EscrowClient) {
     token  : string
   ) : Promise<ApiResponse<DepositListResponse>> => {
     // Formulate the request.
-    const url = `${client.host}/api/deposit/list?pubkey=${pubkey}`
+    const url = `${client.host}/api/deposit/list/${pubkey}`
     // Return the response.
     return client.fetcher<DepositListResponse>({ url, token })
   }
@@ -153,7 +149,7 @@ export default function (client : EscrowClient) {
     commit   : commit_funds_api(client),
     fund     : register_funds_api(client),
     register : register_deposit_api(client),
-    request  : request_deposit_api(client),
+    request  : request_account_api(client),
     close    : close_deposit_api(client)
   }
 }
