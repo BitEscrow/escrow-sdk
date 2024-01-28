@@ -1,3 +1,5 @@
+import { Buff }             from '@cmdcode/buff'
+import { sha256 }           from '@cmdcode/crypto-tools/hash'
 import { create_txhex }     from './tx.js'
 import { now, sort_record } from './util.js'
 import { DEFAULT_DEADLINE } from '../config.js'
@@ -18,25 +20,34 @@ import {
 } from '../types/index.js'
 
 /**
- * Returns a new ContractData object using the provided params.
+ * Returns a new ContractData object.
  */
 export function create_contract (
-  config : ContractConfig
+  config     : ContractConfig,
+  terms      : ProposalData,
+  signatures : string[] = []
 ) : ContractData {
-  const { agent_fee, feerate, proposal: terms } = config
-  const outputs    = get_spend_templates(terms, [ agent_fee ])
-  const published  = config.published  ?? now()
-  const signatures = config.signatures ?? []
-  const subtotal   = terms.value + agent_fee[0]
-  const vout_size  = outputs[0][1].length / 2
-  const txfee      = vout_size * feerate
-
+  // Unpack the contract config object.
+  const { agent_fee, feerate, published, session } = config
+  // Define or create the contract outputs.
+  const outputs   = config.outputs ?? get_spend_templates(terms, [ agent_fee ])
+  // Define or compute the proposal id.
+  const prop_id   = config.prop_id ?? get_proposal_id(terms)
+  // Define or compute the contract id.
+  const cid       = config.cid     ?? get_contract_id(prop_id, published, outputs)
+  // Calculate the subtotal.
+  const subtotal  = terms.value + agent_fee[0]
+  // Calculate the vout size of the tx output.
+  const vout_size = outputs[0][1].length / 2
+  // Calculate the transaction fee.
+  const txfee     = vout_size * feerate
+  // Return a completed contract.
   return sort_record({
-    ...config.agent,
+    ...session,
     activated   : null,
     agent_fee   : agent_fee,
     balance     : 0,
-    cid         : config.cid,
+    cid         : cid,
     deadline    : get_deadline(terms, published),
     est_txfee   : txfee,
     est_txsize  : vout_size,
@@ -45,7 +56,7 @@ export function create_contract (
     moderator   : config.moderator ?? null,
     outputs     : outputs,
     pending     : 0,
-    prop_id     : get_proposal_id(terms).hex,
+    prop_id     : prop_id,
     pubkeys     : signatures.map(e => e.slice(0, 64)),
     published   : published,
     settled     : false,
@@ -62,6 +73,25 @@ export function create_contract (
     vm_state    : null,
     vout_size   : vout_size
   })
+}
+
+/**
+ * Compute the hash identifier
+ * for an escrow contract.
+ */
+export function get_contract_id (
+  prop_id   : string,
+  published : number,
+  templates : SpendTemplate[]
+) {
+  // Collect template hex and sort.
+  const outhex = templates.map(e => e[1]).sort()
+  // Convert published stamp into bytes.
+  const stamp  = Buff.num(published, 4)
+  // Assemble the pre-image template.
+  const preimg = Buff.join([ prop_id, stamp, ...outhex ])
+  // Hash the image and return as hex.
+  return sha256(preimg).hex
 }
 
 /**
@@ -118,6 +148,7 @@ export function get_spend_templates (
   const { payments, paths } = proposal
   // Collect and sort path names.
   const pathnames = get_path_names(paths)
+  // Collect payments.
   const pay_total = [ ...payments, ...fees ]
   // Return labeled array of spend templates.
   return pathnames.map(pathname => {

@@ -2,7 +2,7 @@ import { get_return_script } from './return.js'
 import { validate_deposit }  from '@/validators/deposit.js'
 
 import {
-  now,
+  get_object_id,
   sort_record
 } from './util.js'
 
@@ -22,7 +22,9 @@ import {
   DepositData,
   DepositState,
   OracleTxStatus,
-  Network
+  Network,
+  AgentSession,
+  RegisterRequest
 } from '../types/index.js'
 
 /**
@@ -44,14 +46,14 @@ const GET_INIT_SPEND_STATE = () => {
 const GET_INIT_DEPOSIT = () => {
   return {
     ...GET_INIT_SPEND_STATE(),
-    covenant     : null,
-    created_at   : now(),
-    return_psig  : null,
-    settled      : false as const,
-    settled_at   : null,
-    spent        : false as const,
-    spent_at     : null,
-    spent_txid   : null
+    covenant    : null,
+    return_psig : null,
+    settled     : false as const,
+    settled_at  : null,
+    spent       : false as const,
+    spent_at    : null,
+    spent_txid  : null,
+    status      : 'pending'
   }
 }
 
@@ -59,12 +61,21 @@ const GET_INIT_DEPOSIT = () => {
  * Returns a new DepositData object from a partial template.
  */
 export function create_deposit (
-  template : Partial<DepositData>
+  created_at  : number,
+  request     : RegisterRequest,
+  session     : AgentSession,
+  state       : DepositState,
 ) : DepositData {
-  // Initialize our deposit object.
-  const deposit = { ...GET_INIT_DEPOSIT(), ...template }
-  // Initialize the updated date.
-  deposit.updated_at = deposit.created_at
+  // Separate utxo from request object.
+  const { utxo, ...rest } = request
+  // Create our deposit id.
+  const dpid       = get_deposit_id(created_at, request)
+  // Initialize our update timestamp.
+  const updated_at = created_at
+  // Unpack our data objects into a template.
+  const template   = { ...GET_INIT_DEPOSIT(), ...rest, ...session, ...state, ...utxo }
+  // Add remaining data to complete deposit object.
+  const deposit    = { ...template, dpid, created_at, updated_at }
   // If deposit is confirmed:
   if (deposit.confirmed) {
     // If a covenant exists:
@@ -75,9 +86,6 @@ export function create_deposit (
       // Set the deposit as open.
       deposit.status = 'open'
     }
-  } else {
-    // Set the deposit as pending.
-    deposit.status = 'pending'
   }
   // Validate the final object.
   validate_deposit(deposit)
@@ -106,6 +114,15 @@ export function get_deposit_ctx (
   const key_data = tweak_key_ctx(int_data, [ tap_data.taptweak ])
   // Return context object.
   return { agent_pk, deposit_pk, return_pk, sequence, script, tap_data, key_data }
+}
+
+export function get_deposit_id (
+  created_at : number,
+  request    : RegisterRequest,
+) {
+  const { covenant, return_psig, utxo, ...rest } = request
+  const preimg = { ...rest, ...utxo, created_at }
+  return get_object_id(preimg).hex
 }
 
 /**

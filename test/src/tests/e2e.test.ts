@@ -1,11 +1,10 @@
 import { Test }               from 'tape'
-import { Buff }               from '@cmdcode/buff'
 import { CoreClient }         from '@cmdcode/core-cmd'
 import { parse_extkey }       from '@cmdcode/crypto-tools/hd'
 import { Signer }             from '@cmdcode/signer'
-import { prevout_to_txspend } from '@scrow/core/tx'
 import { create_session }     from '@scrow/core/session'
 import { now }                from '@scrow/core/util'
+import { get_proposal_id }    from '@/lib/proposal.js'
 import { get_members }        from '../core.js'
 import { register_funds }     from '../fund.js'
 import { create_settlment }   from '../spend.js'
@@ -18,11 +17,14 @@ import {
 import {
   activate_contract,
   create_contract,
+  get_contract_id,
+  get_spend_templates,
 } from '@scrow/core/contract'
 
 import {
   create_deposit,
   get_deposit_ctx,
+  get_deposit_id,
   get_spend_state
 } from '@scrow/core/deposit'
 
@@ -77,11 +79,15 @@ export default async function (client : CoreClient, tape : Test) {
 
       /* ------------------- [ Contract ] ------------------- */
 
-      const cid       = Buff.random().hex
-      const session   = create_session(agent.signer, cid)
       const agent_fee = [ 1000, agent.wallet.new_address() ] as PaymentEntry
       const feerate   = proposal.feerate ?? 5
-      const contract  = create_contract({ cid, proposal, agent : session, agent_fee, feerate })
+      const outputs   = get_spend_templates(proposal, [ agent_fee ])
+      const published = now()
+      const prop_id   = get_proposal_id(proposal)
+      const cid       = get_contract_id(prop_id, published, outputs)
+      const session   = create_session(agent.signer, cid)
+      const ct_config = { agent_fee, cid, feerate, outputs, published, session }
+      const contract  = create_contract(ct_config, proposal)
 
       if (VERBOSE) {
         console.log(banner('contract'))
@@ -92,22 +98,21 @@ export default async function (client : CoreClient, tape : Test) {
 
       const registrations = await register_funds(contract, members)
 
-      const promises = registrations.map(async tmpl => {
-        const { covenant, deposit_pk, sequence, spend_xpub, utxo } = tmpl
+      const promises = registrations.map(async req => {
+        const { deposit_pk, sequence, spend_xpub, utxo } = req
         const { txid, vout } = utxo
-        validate_register_req(tmpl)
+        validate_register_req(req)
         const agent_pk  = agent.signer.pubkey
         const return_pk = parse_extkey(spend_xpub).pubkey
         const dep_ctx   = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
         const tx_data   = await client.get_txinput(txid, vout)
         assert.ok(tx_data !== null, 'there is no tx data')
-        const spendout  = prevout_to_txspend(tx_data.txinput)
         verify_deposit(dep_ctx, utxo)
-        const dpid      = Buff.random(32).hex
+        const created   = now()
+        const dpid      = get_deposit_id(created, req)
         const state     = get_spend_state(sequence, tx_data.status)
         const session   = create_session(agent.signer, dpid)
-        const full_ctx  = { ...dep_ctx, ...session, ...spendout, ...state }
-        const deposit   = create_deposit({ ...full_ctx, covenant, dpid, spend_xpub })
+        const deposit   = create_deposit(created, req, session, state)
         // const deposit  = register_deposit(dep_ctx, dpid, pnonce, tmpl, spendout, state)
         verify_covenant(dep_ctx, contract, deposit, agent.signer, agent.signer)
         return deposit

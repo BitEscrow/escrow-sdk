@@ -1,14 +1,17 @@
 import { Buff }          from '@cmdcode/buff'
-import { sha256 }        from '@cmdcode/crypto-tools/hash'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
-import { regex }         from './util.js'
 
 import {
   parse_program,
   parse_proposal
 } from './parse.js'
+
+import {
+  get_object_id,
+  regex
+} from './util.js'
 
 import {
   PaymentEntry,
@@ -19,7 +22,7 @@ import {
   ProgramData,
   SignerAPI,
   ProposalTemplate
-} from '../types/index.js'
+} from '@/types/index.js'
 
 type PathTotal = [ path: string, total : number ]
 
@@ -36,6 +39,7 @@ const GET_DEFAULT_PROP = () => {
 }
 
 export function create_proposal(template : ProposalTemplate) {
+  // Create a proposal object.
   return parse_proposal({ ...GET_DEFAULT_PROP(), ...template })
 }
 
@@ -47,6 +51,7 @@ export function filter_path (
   label : string,
   paths : PathEntry[]
 ) : PathEntry[] {
+  // Return a filtered list of paths by label.
   return paths.filter(e => e[0] === label)
 }
 
@@ -57,7 +62,9 @@ export function filter_path (
 export function get_path_names (
   paths : PathEntry[]
 ) : string[] {
+  // Collect a unique set of pathnames
   const pnames = new Set(paths.map(e => e[0]))
+  // Return pathnames as a sorted list.
   return [ ...pnames ].sort()
 }
 
@@ -68,6 +75,7 @@ export function get_path_names (
 export function get_pay_total (
   payments : PaymentEntry[]
 ) : number {
+  // Return the value total of all payments.
   return payments.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
 }
 
@@ -78,7 +86,9 @@ export function get_pay_total (
 export function get_addrs (
   paths : PathEntry[]
 ) : string[] {
+  // Collect a set of unique addresses.
   const addrs = new Set(paths.map(e => e[2]))
+  // Return the set as an array.
   return [ ...addrs ]
 }
 
@@ -87,14 +97,19 @@ export function get_addrs (
  * an array of payment paths and array of payments.
  */
 export function get_path_vouts (
-  label   : string,
-  paths   : PathEntry[]    = [],
-  payouts : PaymentEntry[] = []
+  label    : string,
+  paths    : PathEntry[]    = [],
+  payments : PaymentEntry[] = []
 ) : TxOutput[] {
+  // Filter paths based on their label.
   const filtered : PaymentEntry[] = filter_path(label, paths).map(e => [ e[1], e[2] ])
-  const template : PaymentEntry[] = [ ...filtered.sort(), ...payouts.sort() ]
+  // Collect a sorted list of selected paths and payments.
+  const template : PaymentEntry[] = [ ...filtered.sort(), ...payments.sort() ]
+  // Return a list of tx outputs.
   return template.map(([ value, addr ]) => {
+    // Parse the scriptkey from the address.
     const scriptPubKey = parse_addr(addr).asm
+    // Create a tx output object.
     return create_vout({ value, scriptPubKey })
   })
 }
@@ -125,8 +140,8 @@ export function get_path_total (
 export function get_proposal_id (
   proposal : ProposalData
 ) {
-  const preimg = Buff.json(proposal)
-  return sha256(preimg)
+  // Return object id of proposal.
+  return get_object_id(proposal).hex
 }
 
 /**

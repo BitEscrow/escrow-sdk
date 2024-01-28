@@ -150,7 +150,8 @@ export async function broadcast_tx (
     method  : 'POST'
   }
   // Fetch a response from the oracle.
-  const res    = await fetch(url, req)
+  const res = await fetch(url, req)
+  // Unpack response object.
   const { status, statusText } = res
   // Return a data object based on the oracle response.
   return (res.ok) 
@@ -205,7 +206,9 @@ export async function fetcher <T> (
   init   ?: RequestInit,
   fetcher = fetch
 ) {
+  // Fetch response using fetcher.
   const res = await fetcher(input, init)
+  // Resolve response as json.
   return resolve_json<T>(res)
 } 
 
@@ -216,30 +219,36 @@ export async function fetcher <T> (
 export async function resolve_json <T> (
   res : Response
 ) : Promise<ApiResponse<T>> {
+  // Unpack response object.
   const { status, statusText } = res
-
+  // Initialize our data variable.
   let data : any
-  
+  // Try to resolve the data:
   try {
+    // Resolve the data as json.
     data = await res.json()
   } catch {
+    // Else, leave undefined.
     data = undefined
   }
-
+  // If the response is not ok:
   if (!res.ok) {
+    // Find and set error message.
     const error = (typeof data?.error === 'string')
       ? data.error
       : statusText
+    // Return response with error.
     return { status, ok: false, error }
   }
-
+  // If data is undefined:
   if (data === undefined) {
+    // Return response with error.
     return {
       status,
       ok     : false, 
       error  : 'data is undefined'
     }
   }
-
+  // Return response with data.
   return { status, ok : true, data }
 }

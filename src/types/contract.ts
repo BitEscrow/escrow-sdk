@@ -22,14 +22,14 @@ export type SpendTemplate = [
 ]
 
 export interface ContractConfig {
-  agent       : AgentSession
   agent_fee   : PaymentEntry
-  cid         : string
+  cid        ?: string
   feerate     : number
   moderator  ?: string
-  proposal    : ProposalData
-  published  ?: number
-  signatures ?: string[]
+  outputs    ?: SpendTemplate[]
+  prop_id    ?: string
+  published   : number
+  session     : AgentSession
 }
 
 export interface ContractBase {

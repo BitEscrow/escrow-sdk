@@ -74,9 +74,9 @@ export interface DepositInfo {
   dpid        : string
   return_psig : string | null
   sequence    : number
+  spend_xpub  : string
   status      : DepositStatus
   updated_at  : number
-  spend_xpub  : string
 }
 
 export interface ReturnData {
