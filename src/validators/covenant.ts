@@ -3,6 +3,8 @@ import { parse_txout }    from '@/lib/tx.js'
 import { parse_covenant } from '@/lib/parse.js'
 import { get_entry }      from '../lib/util.js'
 
+import { get_close_tx_template } from '@/lib/deposit.js'
+
 import {
   get_path_mutexes,
   get_return_mutex,
@@ -15,9 +17,9 @@ import {
   CovenantData,
   DepositContext,
   DepositData,
-  ReturnData,
   MutexEntry,
-  SignerAPI
+  SignerAPI,
+  SpendRequest
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -52,16 +54,16 @@ export function verify_covenant (
   check_deposit_psigs(entries, covenant.psigs)
 }
 
-export function verify_refund (
+export function verify_spend_req (
   dp_agent : SignerAPI,
   deposit  : DepositData,
-  refund   : ReturnData
+  request  : SpendRequest
 ) {
-  const { dpid, agent_pn } = deposit
-  const { pnonce, psig, txhex } = refund
-  assert.ok(dpid === refund.dpid, 'deposit_id does not match')
+  const { agent_pn, spend_xpub, value } = deposit
+  const { feerate, pnonce, psig } = request
   check_deposit_agent(dp_agent, deposit)
   const pnonces = [ pnonce, agent_pn ]
+  const txhex   = get_close_tx_template(value, spend_xpub, feerate)
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
   verify_mutex_psig(mutex, psig)
 }

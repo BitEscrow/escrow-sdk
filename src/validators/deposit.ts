@@ -5,6 +5,7 @@ import {
   DepositContext,
   DepositData,
   RegisterRequest,
+  SpendRequest,
   TxOutput
 } from '../types/index.js'
 
@@ -21,6 +22,12 @@ export function validate_register_req (
   template : unknown
 ) : asserts template is RegisterRequest {
   schema.deposit.reg_req.parse(template)
+}
+
+export function validate_spend_req (
+  template : unknown
+) : asserts template is SpendRequest {
+  schema.deposit.spend_req.parse(template)
 }
 
 export function validate_deposit (

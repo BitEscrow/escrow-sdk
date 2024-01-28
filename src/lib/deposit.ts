@@ -1,5 +1,7 @@
-import { get_return_script } from './return.js'
+import { parse_extkey }      from '@cmdcode/crypto-tools/hd'
 import { validate_deposit }  from '@/validators/deposit.js'
+import { get_return_script } from './return.js'
+import { RETURN_TX_VSIZE }   from '@/config.js'
 
 import {
   get_object_id,
@@ -12,6 +14,7 @@ import {
 } from '@cmdcode/musig2'
 
 import {
+  create_tx_template,
   get_address,
   get_tapkey,
   parse_timelock
@@ -159,4 +162,23 @@ export function get_spend_state (
   }
   // Return the spend state.
   return state
+}
+
+export function get_ext_pubkey (xpub : string) {
+  return parse_extkey(xpub).pubkey
+}
+
+export function get_close_tx_template (
+  value   : number,
+  xpub    : string,
+  feerate : number
+) {
+  // Parse the return pubkey.
+  const return_pk = get_ext_pubkey(xpub)
+  // Create locking script.
+  const script  = [ 'OP_1', return_pk ]
+  // Calculate the transaction fee.
+  const txfee = Math.ceil(RETURN_TX_VSIZE * feerate)
+  // Return a transaction using the provided params.
+  return create_tx_template(script, value - txfee)
 }

@@ -58,6 +58,12 @@ const reg_req = z.object({
   utxo        : txspend
 })
 
+const spend_req = z.object({
+  pnonce : nonce,
+  psig   : hex,
+  txfee  : num
+})
+
 const data = z.object({
   status,
   agent_id    : hash,
@@ -73,4 +79,4 @@ const data = z.object({
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state).and(txspend)
 
-export default { account, covenant, data, state, acct_req, reg_req, status }
+export default { account, covenant, data, state, acct_req, reg_req, spend_req, status }

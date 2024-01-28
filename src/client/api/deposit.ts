@@ -1,17 +1,23 @@
 
-import { EscrowClient }          from '../class/client.js'
-import { validate_account_req, validate_register_req } from '@/validators/index.js'
+import { EscrowClient } from '../class/client.js'
+
+import {
+  validate_account_req,
+  validate_covenant,
+  validate_register_req,
+  validate_spend_req
+} from '@/validators/index.js'
 
 import {
   CovenantData,
-  ReturnData,
   ApiResponse,
   AccountRequest,
   AccountDataResponse,
   DepositDataResponse,
   DepositListResponse,
   FundingDataResponse,
-  RegisterRequest
+  RegisterRequest,
+  SpendRequest
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -104,6 +110,8 @@ function list_deposit_api (client : EscrowClient) {
     pubkey : string,
     token  : string
   ) : Promise<ApiResponse<DepositListResponse>> => {
+    // Validate the pubkey.
+    assert.is_hash(pubkey)
     // Formulate the request.
     const url = `${client.host}/api/deposit/list/${pubkey}`
     // Return the response.
@@ -116,26 +124,32 @@ function commit_funds_api (client : EscrowClient) {
     dpid     : string,
     covenant : CovenantData
   ) : Promise<ApiResponse<FundingDataResponse>> => {
+    // Validate the deposit id.
+    assert.is_hash(dpid)
+    // Validate the covenant.
+    validate_covenant(covenant)
+    // Create the request url.
     const url    = `${client.host}/api/deposit/${dpid}/commit`
-    const body   = JSON.stringify(covenant)
+    // Create the request object.
     const init   = {
-      body,
+      body    : JSON.stringify(covenant),
       method  : 'POST',
       headers : { 'content-type' : 'application/json' }
     }
+    // Fetch and return a response.
     return client.fetcher<FundingDataResponse>({ url, init })
   }
 }
 
 function close_deposit_api (client : EscrowClient) {
   return async (
-    req : ReturnData
+    dpid : string,
+    req  : SpendRequest
   ) : Promise<ApiResponse<DepositDataResponse>> => {
-    const dpid = req.dpid
+    validate_spend_req(req)
     const url  = `${client._host}/api/deposit/${dpid}/close`
-    const body = JSON.stringify(req)
     const init = {
-      body,
+      body    : JSON.stringify(req),
       headers : { 'content-type': 'application/json' },
       method  : 'POST'
     }

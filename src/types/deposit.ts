@@ -101,6 +101,12 @@ export interface RegisterRequest {
   utxo         : TxOutput
 }
 
+export interface SpendRequest {
+  feerate : number
+  pnonce  : string
+  psig    : string
+}
+
 export interface ExtendedKey {
   prefix : number
   depth  : number
