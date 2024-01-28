@@ -7,7 +7,7 @@ import { signers }      from './02_create_signer.js'
 import { contract }     from './05_create_contract.js'
 import { account }      from './06_request_account.js'
 
-const { address, agent_id } = account
+const { address } = account
 
 const vin_fee   = contract.feerate * 65
 const amt_total = contract.total + vin_fee
@@ -38,11 +38,11 @@ console.log('\nutxo:', utxos[0])
 // Request the member to sign
 const signer    = signers[0]
 const utxo      = utxos[0].txspend
-const return_tx = await signer.deposit.register_utxo(account, utxo)
-const covenant  = await signer.deposit.commit_utxo(account, contract, utxo)
+const covenant  = signer.deposit.commit_utxo(account, contract, utxo)
+const reg_req   = { ...account, covenant, utxo }
 
 // Fund the contract 
-const res = await client.deposit.fund(agent_id, return_tx, covenant)
+const res = await client.deposit.fund(reg_req)
 
 // Check the response is valid.
 if (!res.ok) throw new Error('failed')

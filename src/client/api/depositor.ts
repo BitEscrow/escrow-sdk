@@ -10,8 +10,7 @@ import {
 } from '@/lib/session.js'
 
 import {
-  AccountDataResponse,
-  ApiResponse,
+  AccountRequest,
   ContractData,
   CovenantData,
   DepositAccount,
@@ -20,14 +19,13 @@ import {
 } from '@/types/index.js'
 
 export function request_account_api (signer : EscrowSigner) {
-  return async (
+  return (
     locktime : number,
     index   ?: number
-  ) : Promise<ApiResponse<AccountDataResponse>> => {
+  ) : AccountRequest => {
     const deposit_pk = signer.pubkey
     const spend_xpub = signer.get_account(index).xpub
-    const req = { deposit_pk, locktime, spend_xpub }
-    return signer.client.deposit.request(req)
+    return { deposit_pk, locktime, spend_xpub }
   }
 }
 
@@ -38,11 +36,11 @@ export function verify_account_api (signer : EscrowSigner) {
 }
 
 export function commit_utxo_api (signer : EscrowSigner) {
-  return async (
+  return (
     account  : DepositAccount,
     contract : ContractData,
     utxo     : TxOutput
-  ) : Promise<CovenantData> => {
+  ) : CovenantData => {
     // Unpack the deposit object.
     const { agent_pk, sequence, spend_xpub } = account
     // Check if account xpub is valid.
@@ -61,10 +59,10 @@ export function commit_utxo_api (signer : EscrowSigner) {
 }
 
 export function commit_deposit_api (signer : EscrowSigner) {
-  return async (
+  return (
     contract : ContractData,
     deposit  : DepositData
-  ) : Promise<CovenantData> => {
+  ) : CovenantData => {
     // Unpack the deposit object.
     const { 
       agent_pk, sequence, txid, vout, 
@@ -88,11 +86,11 @@ export function commit_deposit_api (signer : EscrowSigner) {
 }
 
 export function close_deposit_api (signer : EscrowSigner) {
-  return async (
+  return (
     deposit  : DepositData,
     txfee    : number,
     address ?: string
-  ) : Promise<string> => {
+  ) : string => {
     // Unpack signer object.
     const { txid } = deposit
     if (address === undefined) {

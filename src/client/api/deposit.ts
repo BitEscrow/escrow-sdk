@@ -1,6 +1,6 @@
 
 import { EscrowClient }          from '../class/client.js'
-import { validate_register_req } from '@/validators/index.js'
+import { validate_account_req, validate_register_req } from '@/validators/index.js'
 
 import {
   CovenantData,
@@ -23,6 +23,7 @@ function request_account_api (client : EscrowClient) {
   return async (
     request : AccountRequest
   ) : Promise<ApiResponse<AccountDataResponse>> => {
+    validate_account_req(request)
     // Formulate the request.
     const url = `${client.host}/api/deposit/request`
     // Formulate the request.
