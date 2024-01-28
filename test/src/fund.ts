@@ -32,7 +32,6 @@ export async function register_funds (
     const spend_xpub = mbr.wallet.xpub
     const ctx  = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
     const addr = get_deposit_address(ctx, network)
-    console.log('addr1:', addr)
     await faucet.ensure_funds(value)
     const txid = await faucet.send_funds(value, addr)
     const utxo = await get_utxo(cli, addr, txid)
