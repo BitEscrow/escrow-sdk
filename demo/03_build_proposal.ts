@@ -5,6 +5,9 @@ import {
   create_proposal
 } from '@scrow/core'
 
+/**
+ * Define our proposal template.
+ */
 export const template = create_proposal({
   title    : 'Basic two-party contract with third-party arbitration.',
   expires  : 14400,
@@ -13,6 +16,9 @@ export const template = create_proposal({
   value    : 15000,
 })
 
+/**
+ * Define our proposal roles.
+ */
 export const roles = {
   buyer : create_policy({
     paths : [

@@ -2,5 +2,7 @@ import { EscrowClient } from '@scrow/core/client'
 
 import { config } from './00_demo_config.js'
 
-// Create a new client.
+/**
+ * Define our API client.
+ */
 export const client = new EscrowClient(config)

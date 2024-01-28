@@ -2,6 +2,7 @@ import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
 
 import {
+  AccountRequest,
   DepositContext,
   DepositData,
   RegisterRequest,
@@ -14,7 +15,7 @@ import * as schema from '../schema/index.js'
 
 export function validate_account_req (
   template : unknown
-) : asserts template is RegisterRequest {
+) : asserts template is AccountRequest {
   schema.deposit.acct_req.parse(template)
 }
 
