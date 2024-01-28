@@ -98,6 +98,7 @@ export interface RegisterRequest {
   return_psig ?: string
   sequence     : number
   spend_xpub   : string
+  utxo         : TxOutput
 }
 
 export interface ExtendedKey {

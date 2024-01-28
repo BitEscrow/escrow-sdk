@@ -43,18 +43,19 @@ const covenant = z.object({
   psigs  : z.tuple([ str, psig ]).array()
 })
 
-const account_req = z.object({
+const acct_req = z.object({
   deposit_pk : hash,
   locktime   : locktime.optional(),
   spend_xpub : str
 })
 
-const register_req = z.object({
+const reg_req = z.object({
   covenant    : covenant.optional(),
   deposit_pk  : hash,
   return_psig : hex.optional(),
   sequence    : num,
-  spend_xpub  : str
+  spend_xpub  : str,
+  utxo        : txspend
 })
 
 const data = z.object({
@@ -72,4 +73,4 @@ const data = z.object({
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state).and(txspend)
 
-export default { account, covenant, data, state, account_req, register_req, status }
+export default { account, covenant, data, state, acct_req, reg_req, status }

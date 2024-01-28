@@ -37,7 +37,8 @@ import {
   verify_covenant,
   validate_register_req,
   verify_witness,
-  validate_witness
+  validate_witness,
+  verify_deposit
 } from '@scrow/core/validate'
 
 import { PaymentEntry } from '@/types/index.js'
@@ -92,23 +93,21 @@ export default async function (client : CoreClient, tape : Test) {
       const registrations = await register_funds(contract, members)
 
       const promises = registrations.map(async tmpl => {
-        const { utxo, ...template } = tmpl
-        const { deposit_pk, sequence, spend_xpub } = template
+        const { covenant, deposit_pk, sequence, spend_xpub, utxo } = tmpl
         const { txid, vout } = utxo
-        validate_register_req(template)
-        const agent_id  = agent.signer.id
+        validate_register_req(tmpl)
         const agent_pk  = agent.signer.pubkey
         const return_pk = parse_extkey(spend_xpub).pubkey
         const dep_ctx   = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
         const tx_data   = await client.get_txinput(txid, vout)
         assert.ok(tx_data !== null, 'there is no tx data')
-        const spendout = prevout_to_txspend(tx_data.txinput)
-        // verify_deposit(dep_ctx, return_ctx, spendout)
-        const dpid     = Buff.random(32).hex
-        const state    = get_spend_state(sequence, tx_data.status)
-        const session  = create_session(agent.signer, dpid)
-        const agent_pn = session.agent_pn
-        const deposit  = create_deposit({ ...dep_ctx, dpid, agent_id, agent_pn, ...template, ...spendout, ...state })
+        const spendout  = prevout_to_txspend(tx_data.txinput)
+        verify_deposit(dep_ctx, utxo)
+        const dpid      = Buff.random(32).hex
+        const state     = get_spend_state(sequence, tx_data.status)
+        const session   = create_session(agent.signer, dpid)
+        const full_ctx  = { ...dep_ctx, ...session, ...spendout, ...state }
+        const deposit   = create_deposit({ ...full_ctx, covenant, dpid, spend_xpub })
         // const deposit  = register_deposit(dep_ctx, dpid, pnonce, tmpl, spendout, state)
         verify_covenant(dep_ctx, contract, deposit, agent.signer, agent.signer)
         return deposit
