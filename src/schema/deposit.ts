@@ -59,9 +59,9 @@ const reg_req = z.object({
 })
 
 const spend_req = z.object({
-  pnonce : nonce,
-  psig   : hex,
-  txfee  : num
+  feerate : num,
+  pnonce  : nonce,
+  psig    : hex,
 })
 
 const data = z.object({

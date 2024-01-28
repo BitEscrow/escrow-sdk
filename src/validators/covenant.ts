@@ -68,7 +68,6 @@ export function verify_spend_req (
   verify_mutex_psig(mutex, psig)
 }
 
-
 function check_deposit_agent (
   agent    : SignerAPI,
   deposit  : DepositData
