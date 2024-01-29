@@ -1,11 +1,31 @@
+# Contract Documentation
+
+Work in progreess. Check back later!
+
+## Creating a Contract
+
+## Funding a Contract
+
+## Deadline for Collecting Funds
+
+## Contract Activation
+
+## Contract Virtual Machine (CVM)
+
+## Settling a Contract
+
+## Handling Disputes
+
+## Validating Execution
+
+## Contract Expiration
+
 ```ts
 interface ContractRequest {
   proposal    : ProposalData
   signatures ?: string[]
 }
-```
 
-```ts
 type SpendTemplate = [ label : string, txhex : string ]
 
 interface ContractData {
@@ -42,9 +62,6 @@ interface ContractData {
   vout_size   : number
 }
 
-```
-
-```ts
 export type ContractStatus = 
   'published' | 
   'funded'    | 
@@ -57,4 +74,23 @@ export type ContractStatus =
   'canceled'  | 
   'expired'   | 
   'error'
+
+interface WitnessTemplate {
+  action : string
+  args  ?: Literal[]
+  method : string
+  path   : string
+  stamp ?: number
+}
+
+interface WitnessData {
+  action  : string
+  args    : Literal[]
+  method  : string
+  path    : string
+  prog_id : string
+  sigs    : string[]
+  stamp   : number
+  wid     : string
+}
 ```

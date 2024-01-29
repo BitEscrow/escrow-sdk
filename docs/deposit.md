@@ -1,15 +1,34 @@
+# Deposit Documentation
+
+Work in progreess. Check back later!
+
+## Requesting a Deposit Account
+
 ```ts
 interface DepositAccount {
-  created_at : number
-  address    : string
-  agent_id   : string
-  agent_pk   : string
-  member_pk  : string
-  req_id     : string
-  sequence   : number
-  sig        : string
+  acct_id    : string  // Hash identifer for the account record.
+  acct_sig   : string  // Signature for the account record.
+  address    : string  // On-chain address for receiving funds.
+  agent_id   : string  // Identifier of the deposit agent.
+  agent_pk   : string  // Public key of the deposit agent.
+  created_at : number  // Account creation timestamp (in seconds).
+  deposit_pk : string  // Public key of the funder making the deposit.
+  sequence   : number  // Locktime converted into a sequence value.
+  spend_xpub : string  // The extended key used for returning funds.
 }
 ```
+
+## Sending funds to a Deposit Address
+
+## Registering funds at a Deposit Address
+
+## Locking a Deposit to a Contract
+
+## Released Depoists
+
+## Expired Deposits
+
+## Returning a Deposit
 
 ```ts
 interface CovenantData {
@@ -28,14 +47,15 @@ interface DepositData {
   confirmed    : boolean
   covenant     : CovenantData | null
   created_at   : number
+  deposit_pk   : string
   dpid         : string
   expires_at   : number
-  member_pk    : string
-  return_tx    : string
+  return_psig  : string | null
   scriptkey    : string
   sequence     : number
   settled      : boolean
   settled_at   : number | null
+  spend_xpub   : string
   spent        : boolean,
   spent_at     : number | null
   spent_txid   : string | null
@@ -45,9 +65,7 @@ interface DepositData {
   value        : number
   vout         : number
 }
-```
 
-```ts
 type DepositStatus = 
   'reserved' | 
   'pending'  | 

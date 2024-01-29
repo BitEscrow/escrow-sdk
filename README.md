@@ -72,14 +72,15 @@ To deposit funds, each funder requests a deposit [account](docs/deposit.md) from
 
 ```ts
 interface DepositAccount {
-  created_at : number  // UTC timestamp.
-  address    : string  // <-- deposit funds here. 
-  agent_id   : string  // ID of the agent.
-  agent_pk   : string  // Pubkey of the agent  (in 2-of-2).
-  member_pk  : string  // Pubkey of the funder (in 2-of-2).
-  req_id     : string  // Hash digest of the account record.
-  sequence   : number  // Sequence value used for locktime.
-  sig        : string  // Provided by our server for authenticity.
+  acct_id    : string  // Hash identifer for the account record.
+  acct_sig   : string  // Signature for the account record.
+  address    : string  // On-chain address for receiving funds.
+  agent_id   : string  // Identifier of the deposit agent.
+  agent_pk   : string  // Public key of the deposit agent.
+  created_at : number  // Account creation timestamp (in seconds).
+  deposit_pk : string  // Public key of the funder making the deposit.
+  sequence   : number  // Locktime converted into a sequence value.
+  spend_xpub : string  // The extended key used for returning funds.
 }
 ```
 
@@ -270,7 +271,7 @@ const config = {
   network  : 'signet'
 }
 // Create an EscrowClient using the above config.
-export const client = new EscrowClient(config)
+const client = new EscrowClient(config)
 ```
 
 For a complete list of the `EscrowClient` API, [click here](docs/client.md).
@@ -289,9 +290,11 @@ import { EscrowSigner }         from '@scrow/core/client'
 
 // Import a seed using BIP39 seed words.
 const seed = Seed.import.from_words(user_words)
+
 // We can specify a pubkey that belongs to the escrow
 // server, to verify any signed payloads from the server.
 const host_pubkey = '31c82c5c86465b22adaa5e57a85593a7741eddc75f3699cc415af72c0dd13efd',
+
 // We'll use the existing configuration for the client,
 // plus include our Signer and Wallet interfaces.
 const signer_config = {
@@ -300,8 +303,9 @@ const signer_config = {
   signer : new Signer({ seed }),
   wallet : new Wallet(xpub)
 }
+
 // Create an EscrowSigner using the above config.
-export const signer = new EscrowSigner(signer_config)
+const signer = new EscrowSigner(signer_config)
 ```
 
 The `EscrowSigner` is designed to run in insecure environments. The `Signer` handles money flowing into a contract (via a 2-of-2 account), while the `Wallet` handles money flowing out (by generating addresses).
@@ -363,13 +367,13 @@ const roles = {
 
 ```
 
-For more information on the `proposal` process, [click here](docs/proposal.md).
+For more information building a `proposal`, [click here](docs/proposal.md).
 
 ### Roles and Endorsements
 
 After the template and roles are defined, we can invite each `EscrowSigner` to join the proposal under a given role. This process allows the user to review the role information, before adding their credentials to the proposal.
 
-When all roles have been filled and the proposal is final, users can optionally provide a signature as proof of their endorsement of the terms.
+When the proposal is completed, users can optionally provide a signature as proof of their endorsement of the terms.
 
 ```ts
 // Each member is an EscrowSigner object.
@@ -386,9 +390,6 @@ const signatures = signers.map(mbr => {
   // Collect an endorsement from the user's signer.
   return mbr.proposal.endorse(proposal)
 })
-
-// Return our completed proposal and signatures.
-export { proposal, signatures }
 ```
 
 ### Create a Contract
@@ -401,7 +402,7 @@ const res = await client.contract.create(proposal, signatures)
 // Check that the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack and return the contract data.
-export const { contract } = res.data
+const { contract } = res.data
 ```
 
 For more information on the `contract` interface, [click here](docs/contract.md).
@@ -411,17 +412,20 @@ For more information on the `contract` interface, [click here](docs/contract.md)
 Before making a deposit, we have to request an account from the escrow server. Each account is a time-locked 2-of-2 multi-signature address between the `funder` and the server `agent`.
 
 ```ts
-// Specify the lock-time that we wish to use.
-const pubkey   = a_signer.pubkey
-const locktime = 60 * 60 // 1 hour locktime
-// Fetch a new account from the server.
-const res = await client.deposit.request({ pubkey, locktime })
+// Define our deposit locktime.
+const locktime = 60 * 60  // 1 hour locktime
+// Define our funder for the deposit.
+const funder   = signers[0]
+// Get an account request from the funder device.
+const acct_req = funder.deposit.request_account(locktime)
+// Submit the account request to the server
+const acct_res = await client.deposit.request(acct_req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the account data.
 const { account } = res.data
-// Validate the account is issued by the escrow server.
-a_signer.deposit.verify_account(account)
+// Verify the account issued by the escrow server.
+funder.deposit.verify_account(account)
 ```
 
 > For more information on the `account` interface, [click here](docs/deposit.md).
@@ -441,18 +445,18 @@ const { address, agent_id } = account
 const utxos = await client.oracle.get_address_utxos(address)
 // There should be at least one utxo present.
 if (utxos.length === 0) throw new Error('utxo not found')
-// The utxo that we want should be at index 0.
-const { txspend } = utxos[0]
-// To register a utxo, we require a pre-signed refund transaction.
-const return_tx = await signer.deposit.register_utxo(account, txspend)
-// To lock the utxo, we need a batch of partial signatures.
-const covenant  = await signer.deposit.commit_utxo(account, contract, txspend)
-// Fund the contract by submitting the registration and covenant together.
-const res = await client.deposit.fund(agent_id, return_tx, covenant)
+// Get the output data from the utxo.
+const utxo     = utxos[0].txspend
+// Request the funders device to sign a covenant.
+const covenant = signer.deposit.commit_utxo(account, contract, utxo)
+// Build our registration request to the server.
+const reg_req  = { covenant, deposit_pk, sequence, spend_xpub, utxo }
+// Deliver our registration request to the server.
+const res = await client.deposit.fund(reg_req)
 // Check the response is valid.
 if (!res.ok) throw new Error('failed')
 // Unpack the response data, which should be the deposit and updated contract.
-export const { contract, deposit } = res.data
+const { contract, deposit } = res.data
 ```
 
 > For more information on the `deposit` interface, [click here](docs/deposit.md).
@@ -512,29 +516,14 @@ const res = await client.contract.submit(contract.cid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // The returned contract should be settled.
-export const settled_contract = res.data.contract
+const settled_contract = res.data.contract
+// Fetch the settlement tx from the oracle.
+const txdata = await client.oracle.get_txdata(settled_contract.spent_txid)
+// Print the transaction data to console.
+console.dir(txdata, { depth : null })
 ```
 
 > For more information on the `witness` interface, [click here](docs/witness.md).
-
-### API Demo
-
-```md
-  /contract
-    /create
-    /fund
-    /list
-    /cancel
-    /read
-    /submit
-    /witness
-  deposit/
-  witness/
-  status
-  terms
-```
-
-Documentation coming soon!
 
 ## Development / Testing
 

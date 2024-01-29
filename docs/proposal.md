@@ -1,3 +1,23 @@
+# Proposal Documentation
+
+Work in progreess. Check back later!
+
+## Creating a Proposal
+
+## Terms of a Proposal
+
+## Third-Party Arbitration
+
+## Using Role Policies
+
+## Joining a Proposal
+
+## Member Credentials
+
+## Endorse a Proposal
+
+## Submit a Proposal
+
 ```ts
 type PaymentEntry = [
   value   : number,
@@ -40,9 +60,7 @@ export interface ProposalData {
   value      : number
   version    : number
 }
-```
 
-```ts
 interface MemberData {
   id   : string
   pub  : string

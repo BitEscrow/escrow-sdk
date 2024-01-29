@@ -10,17 +10,15 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 externalDocs:
-  description: Find out more about BitEscrow API
-  url: https://bitescrow.dev
+  description: Find out more about BitEscrow
+  url: http://bitescrow.app
 servers:
-  - url: "http://localhost:3000"
-    description: Local Server
-  - url: "http://localhost:3000"
-    description: Preview Server (testnet)
-  - url: "http://localhost:3000"
-    description: Preview Server (mutinynet)
-  - url: "http://localhost:3000"
-    description: Production Server (mainnet)
+  - url: "https://bitescrow-mutiny.vercel.app"
+    description: Mutinynet Server
+  - url: "https://bitescrow-signet.vercel.app"
+    description: Signet Server
+  - url: "https://bitescrow-testnet.vercel.app"
+    description: Testnet Server
 tags:
   - name: contract
     externalDocs:
@@ -52,11 +50,10 @@ paths:
             application/json:
               schema:
                 "$ref": '#/components/schemas/ContractData'
-            
         "400":
-          description: Invalid request
+          description: invalid request
         "422":
-          description: Invalid format
+          description: input failed validation
         "403":
           description: Invalid input
         "500":
@@ -70,9 +67,16 @@ paths:
       summary: "create a new contract"
       description: "Takes a proposal document (in JSON) as input, and returns a contract."
       requestBody:
-        $ref: "#/components/requestBodies/Proposal"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractRequest"
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractDataResponse"
           description: ok
         "400":
           description: Invalid request
@@ -93,6 +97,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/token'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractListResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -106,6 +116,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/cid'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractDataResponse"
+          description: ok
         "405":
           description: Invalid input
 
@@ -119,32 +135,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/cid'
       responses:
-        "405":
-          description: Invalid input
-
-  /api/contract/{cid}/register:
-    post:
-      tags:
-        - contract
-      operationId: contractDeposit
-      summary: "deposit into contract"
-      description: "Register a deposit and commitment to the contract. This is a faster method than registering the deposit and commitment separately."
-      parameters:
-        - $ref: '#/components/parameters/cid'
-      responses:
-        "405":
-          description: Invalid input
-
-  /api/contract/{cid}/status:
-    get:
-      tags:
-        - contract
-      operationId: contractStatus
-      summary: "check contract status"
-      description: "Evaluates the current state of the contract, and returns the updated contract data."
-      parameters:
-        - $ref: '#/components/parameters/cid'
-      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositListResponse"
+          description: ok
         "405":
           description: Invalid input
 
@@ -158,8 +154,17 @@ paths:
       parameters:
         - $ref: '#/components/parameters/cid'
       requestBody:
-        $ref: "#/components/requestBodies/Witness"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WitnessData"
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractDataResponse"
+          description: ok
         "405":
           description: Invalid input
 
@@ -173,6 +178,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/cid'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WitnessListResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -186,6 +197,36 @@ paths:
       parameters:
         - $ref: '#/components/parameters/token'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositListResponse"
+          description: ok
+        "405":
+          description: Invalid input
+          
+  /api/deposit/request:
+    get:
+      tags:
+        - deposit
+      operationId: requestAccount
+      summary: "request a deposit account"
+      description: "Returns the contract data, based on the provided contract id."
+      parameters:
+        - $ref: '#/components/parameters/pubkey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDataResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -197,21 +238,17 @@ paths:
       summary: "register a deposit"
       description: "Returns the contract data, based on the provided contract id."
       requestBody:
-        $ref: "#/components/requestBodies/DepositRegister"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WitnessData"
       responses:
-        "405":
-          description: Invalid input
-          
-  /api/deposit/request:
-    get:
-      tags:
-        - deposit
-      operationId: requestDeposit
-      summary: "request a deposit account"
-      description: "Returns the contract data, based on the provided contract id."
-      parameters:
-        - $ref: '#/components/parameters/pubkey'
-      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositDataResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -225,6 +262,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/dpid'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositDataResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -237,7 +280,18 @@ paths:
       description: "Returns the contract data, based on the provided contract id."
       parameters:
         - $ref: '#/components/parameters/dpid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpendRequest"
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositDataResponse"
+          description: ok
         "405":
           description: Invalid input
 
@@ -250,20 +304,18 @@ paths:
       description: "Returns the contract data, based on the provided contract id."
       parameters:
         - $ref: '#/components/parameters/dpid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CovenantData"
       responses:
-        "405":
-          description: Invalid input
-
-  /api/deposit/{dpid}/status:
-    get:
-      tags:
-        - deposit
-      operationId: depositStatus
-      summary: "close a deposit"
-      description: "Returns the contract data, based on the provided contract id."
-      parameters:
-        - $ref: '#/components/parameters/dpid'
-      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundingDataResponse"
+          description: ok
         "405":
           description: Invalid input
           
@@ -277,29 +329,36 @@ paths:
       parameters:
         - $ref: '#/components/parameters/wid'
       responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WitnessDataResponse"
+          description: ok
         "405":
           description: Invalid input
 
 components:
+
   parameters:
     cid:
       name: "cid"
       in: "path"
       required: true
       schema:
-        type: "string"
+        type: string
     dpid:
       name: "dpid"
       in: "path"
       required: true
       schema:
-        type: "string"
+        type: string
     pubkey:
       name: "pubkey"
       in: "query"
       required: true
       schema:
-        type: "string"
+        type: string
     token:
       name: "token"
       in: "header"
@@ -312,147 +371,435 @@ components:
       in: "path"
       required: true
       schema:
-        type: "string"
-  requestBodies:
-    DepositCommit:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              covenant:
-                type: string
-      description: Deposit Registration.
-      required: true
-    DepositFund:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              agent_id:
-                type: string
-              return_tx:
-                type: string
-              covenant:
-                type: string
-      description: Deposit Registration.
-      required: true
-    DepositRegister:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              agent_id:
-                type: string
-              return_tx:
-                type: string
-      description: Deposit Registration.
-      required: true
-    Proposal:
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ProposalData"
-      description: Proposal document.
-      required: true
-    Witness:
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/WitnessData"
-      description: Witness statement.
-      required: true
+        type: string
+     
   schemas:
+  
+    AccountRequest:
+      type: object
+      properties:
+        deposit_pk:
+          type: string
+        locktime:
+          type: number
+          nullable: true
+        spend_xpub:
+          type: string
+      required:
+        - deposit_pk
+        - spend_xpub
+
+    SpendRequest:
+      type: object
+      properties:
+        feerate:
+          type: number
+        pnonce:
+          type: string
+        psig:
+          type: string
+      required:
+        - feerate
+        - pnonce
+        - psig
+
+    ContractRequest:
+        type: object
+        properties:
+          proposal:
+            $ref: '#/components/schemas/ProposalData'
+          signatures:
+            type: array
+            items:
+              type: string
+            minItems: 0
+            uniqueItems: true
+        required:
+          - proposal
+    
+    AccountDataResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/DepositAccount'
+
+    ContractDataResponse:
+      type: object
+      properties:
+        contract:
+          $ref: '#/components/schemas/ContractData'
+          
+    ContractListResponse:
+      type: object
+      properties:
+        contracts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractData'
+            
+    DepositDataResponse:
+      type: object
+      properties:
+        deposit:
+          $ref: '#/components/schemas/DepositData'
+
+    DepositListResponse:
+      type: object
+      properties:
+        deposits:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepositData'
+
+    WitnessDataResponse:
+      type: object
+      properties:
+        witness:
+          $ref: '#/components/schemas/WitnessData'
+
+    WitnessListResponse:
+      type: object
+      properties:
+        witnesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/WitnessData'
+
+    FundingDataResponse:
+      type: object
+      properties:
+        contract:
+          $ref: '#/components/schemas/ContractData'
+        deposit:
+          $ref: '#/components/schemas/DepositData'
+          
     ContractData:
       type: object
       properties:
         activated:
           type: number
           nullable: true
+        agent_fee:
+          $ref: '#/components/schemas/PaymentEntry'
         agent_id:
           type: string
-        agent_key:
+        agent_pk:
           type: string
-        record_pn:
+        agent_pn:
+          type: string
         balance:
           type: number
         cid:
           type: string
         deadline:
           type: number
+        est_txfee:
+          type: number
+        est_txsize:
+          type: number
         expires_at:
           type: number
           nullable: true
-        fees:
-          type: string
+        feerate:
+          type: number
         moderator:
           type: string
           nullable: true
         outputs:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/SpendTemplate'
         pending:
           type: number
+        pubkeys:
+          type: array
+          items:
+            type: string
         prop_id:
           type: string
         published:
           type: number
+        settled:
+          type: boolean
+        settled_at:
+          type: number
+          nullable: true
+        signatures:
+          type: array
+          items:
+            type: string
         spent:
           type: boolean
         spent_at:
           type: number
           nullable: true
         spent_txid:
-          nullable: true
-        settled:
-          type: boolean
-        settled_at:
-          type: number
+          type: string
           nullable: true
         status:
-          type: string
+          $ref: '#/components/schemas/ContractStatus'
+        subtotal:
+          type: number
         terms:
-          $ref: "#/components/schemas/ProposalData"
+          $ref: '#/components/schemas/ProposalData'
         total:
           type: number
         updated_at:
           type: number
         vm_state:
+          $ref: '#/components/schemas/StateData'
+          nullable: true
+        vout_size:
+          type: number
+
+    ContractStatus:
+      type: string
+      enum:
+        - published
+        - funded
+        - secured
+        - pending
+        - active
+        - closed
+        - spent
+        - settled
+        - canceled
+        - expired
+        - error
+      
+    SpendTemplate:
+      type: array
+      items:
+        type: object
+        properties:
+          label:
+            type: string
+          txhex:
+            type: string
+      
+    StateData:
+      type: object
+      # Define the structure of StateData here
+ 
+    CovenantData:
+      type: object
+      properties:
+        cid:
+          type: string
+        pnonce:
+          type: string
+        psigs:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              psig:
+                type: string
+    
+    DepositAccount:
+      type: object
+      properties:
+        acct_id:
+          type: string
+          description: Hash identifier for the account record.
+        acct_sig:
+          type: string
+          description: Signature for the account record.
+        address:
+          type: string
+          description: On-chain address for receiving funds.
+        agent_id:
+          type: string
+          description: Identifier of the deposit agent.
+        agent_pk:
+          type: string
+          description: Public key of the deposit agent.
+        created_at:
+          type: number
+          description: Account creation timestamp (in seconds).
+        deposit_pk:
+          type: string
+          description: Public key of the funder making the deposit.
+        sequence:
+          type: number
+          description: Locktime converted into a sequence value.
+        spend_xpub:
+          type: string
+          description: The extended key used for returning funds.
+      required:
+        - acct_id
+        - acct_sig
+        - address
+        - agent_id
+        - agent_pk
+        - created_at
+        - deposit_pk
+        - sequence
+        - spend_xpub
+    
+    DepositData:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        agent_pk:
+          type: string
+        agent_pn:
+          type: string
+        block_hash:
           type: string
           nullable: true
+        block_height:
+          type: number
+          nullable: true
+        block_time:
+          type: number
+          nullable: true
+        confirmed:
+          type: boolean
+        covenant:
+          $ref: '#/components/schemas/CovenantData'
+          nullable: true
+        created_at:
+          type: number
+        deposit_pk:
+          type: string
+        dpid:
+          type: string
+        expires_at:
+          type: number
+        return_psig:
+          type: string
+          nullable: true
+        scriptkey:
+          type: string
+        sequence:
+          type: number
+        settled:
+          type: boolean
+        settled_at:
+          type: number
+          nullable: true
+        spend_xpub:
+          type: string
+        spent:
+          type: boolean
+        spent_at:
+          type: number
+          nullable: true
+        spent_txid:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DepositStatus'
+        txid:
+          type: string
+        updated_at:
+          type: number
+        value:
+          type: number
+        vout:
+          type: number
+
+    DepositStatus:
+      type: string
+      enum:
+        - reserved
+        - pending
+        - stale
+        - open
+        - locked
+        - spent
+        - settled
+        - expired
+        - error
     
+    PaymentEntry:
+      type: array
+      items:
+        type: object
+        properties:
+          value:
+            type: number
+          address:
+            type: string
+
+    PathEntry:
+      type: array
+      items:
+        type: object
+        properties:
+          path:
+            type: string
+          value:
+            type: number
+          address:
+            type: string
+
+    ProgramTerms:
+      type: array
+      items:
+        type: object
+        properties:
+          method:
+            type: string
+          actions:
+            type: string
+          paths:
+            type: string
+          params:
+            type: array
+            items:
+              $ref: '#/components/schemas/Literal'
+    
+    ScheduleTerms:
+      type: array
+      items:
+        type: object
+        properties:
+          stamp:
+            type: number
+          action:
+            type: string
+          path:
+            type: string
+
     ProposalData:
       type: object
       properties:
-        confirmation:
-          type: boolean
+        content:
+          type: string
+          nullable: true
         deadline:
           type: number
-        details:
-          type: string
+          nullable: true
         effective:
           type: number
+          nullable: true
         expires:
           type: number
-        fallback:
-          type: string
         feerate:
           type: number
+          nullable: true
         members:
           type: array
           items:
-            $ref: '#/components/schemas/Member'
+            $ref: '#/components/schemas/MemberData'
+        moderator:
+          type: string
+          nullable: true
         network:
           $ref: '#/components/schemas/Network'
         paths:
           type: array
           items:
-            $ref: '#/components/schemas/PayPath'
+            $ref: '#/components/schemas/PathEntry'
         payments:
           type: array
           items:
-            $ref: '#/components/schemas/Payment'
+            $ref: '#/components/schemas/PaymentEntry'
         programs:
           type: array
           items:
@@ -468,8 +815,8 @@ components:
         version:
           type: number
       required:
-        - details
         - expires
+        - members
         - network
         - paths
         - payments
@@ -478,184 +825,33 @@ components:
         - title
         - value
         - version
-
-    Member:
-      type: array
-      prefixItems:
-        - type: string  # id
-        - type: string  # pubkey
-      minItems: 2
-      maxItems: 2
-
-    Payment:
-      type: array
-      prefixItems:
-        - type: number  # value
-        - type: string  # address
-      minItems: 2
-      maxItems: 2
-
-    PayPath:
-      type: array
-      prefixItems:
-        - type: string  # path
-        - type: number  # value
-        - type: string  # address
-      minItems: 3
-      maxItems: 3
-
-    ProgramTerms:
-      type: array
-      prefixItems:
-        - type: string  # method
-        - type: string  # actions
-        - type: string  # paths
-      minItems: 4  # Adjust based on minimum number of elements expected
-      additionalItems: 
-        $ref: '#/components/schemas/Literal'
-
-    ScheduleTerms:
-      type: array
-      prefixItems:
-        - type: number  # stamp
-        - type: string  # action
-        - type: string  # path
-      minItems: 3
-      maxItems: 3
-      
+        
     Literal:
-      type: string | number | boolean | null
+      types: [ string, number, boolean, null ]
       
     Network:
       type: string
-        
-    CovenantData:
+
+    MemberData:
       type: object
       properties:
-        cid:
+        id:
           type: string
-        pnonce:
+        pub:
           type: string
-        psigs:
-          type: array
-          items:
-            $ref: '#/components/schemas/Psig'
+        sig:
+          type: string
+        xpub:
+          type: string
       required:
-        - cid
-        - pnonce
-        - psigs
- 
-    Psig:
-      type: array
-      prefixItems:
-        - type: string  # label
-        - type: string  # psig
-      minItems: 2
-      maxItems: 2
-
-    DepositData:
-      type: object
-      properties:
-        agent_id:
-          type: string
-        agent_key:
-          type: string
-        record_pn:
-          type: string
-        created_at:
-          type: number
-        covenant:
-          $ref: '#/components/schemas/CovenantData'
-        deposit_id:
-          type: string
-        deposit_key:
-          type: string
-        return_tx:
-          type: string
-        sequence:
-          type: number
-        status:
-          $ref: '#/components/schemas/DepositStatus'
-        updated_at:
-          type: number
-        confirmed:
-          type: boolean
-        block_hash:
-          type: string
-          nullable: true
-        block_height:
-          type: integer
-          nullable: true
-        block_time:
-          type: integer
-          nullable: true
-        expires_at:
-          type: integer
-          nullable: true
-        txid:
-          type: string
-        vout:
-          type: integer
-        value:
-          type: number
-        scriptkey:
-          type: string
-        spent:
-          type: boolean
-        spent_at:
-          type: number
-          nullable: true
-        spent_txid:
-          nullable: true
-        settled:
-          type: boolean
-        settled_at:
-          type: number
-          nullable: true
-      required:
-        - agent_id
-        - agent_key
-        - record_pn
-        - created_at
-        - deposit_id
-        - deposit_key
-        - return_tx
-        - sequence
-        - status
-        - updated_at
-        - confirmed
-        - block_hash
-        - block_height
-        - block_time
-        - expires_at
-        - txid
-        - vout
-        - value
-        - scriptkey
-        - spent
-        - spent_at
-        - spent_txid
-        - settled
-        - settled_at
-
-    DepositStatus:
-      type: string
-      enum:
-        - reserved
-        - pending
-        - stale
-        - open
-        - locked
-        - spent
-        - settled
-        - expired
-        - error
+        - id
+        - pub
+        - sig
+        - xpub
         
     WitnessData:
       type: object
       properties:
-        prog_id:
-          type: string
         action:
           type: string
         args:
@@ -664,40 +860,24 @@ components:
             $ref: '#/components/schemas/Literal'
         method:
           type: string
-          enum:
-            - sign
-            - reveal
         path:
           type: string
+        prog_id:
+          type: string
+        sigs:
+          type: array
+          items:
+            type: string
+        stamp:
+          type: number
+        wid:
+          type: string
       required:
-        - prog_id
         - action
         - args
         - method
         - path
-
-    ContractResponse:
-      type: object
-      properties:
-        contract:
-          $ref: '#/components/schemas/ContractData'
-
-    DepositResponse:
-      type: object
-      properties:
-        deposit:
-          $ref: '#/components/schemas/DepositData'
-          
-    FundingResponse:
-      type: object
-      properties:
-        contract:
-          $ref: '#/components/schemas/ContractData'
-        deposit:
-          $ref: '#/components/schemas/DepositData'
-
-    WitnessResponse:
-      type: object
-      properties:
-        witness:
-          $ref: '#/components/schemas/WitnessData'
+        - prog_id
+        - sigs
+        - stamp
+        - wid
