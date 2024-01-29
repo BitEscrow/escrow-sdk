@@ -34,11 +34,9 @@ Comimg Soon:
 
 The protocol involves collaboration between three parties:
 
-```md
 **Members** : The participating members of the contract.  
 **Funders** : Those funding the contract (whom may be members).  
 **Server**  : The escrow server hosting the contract (BitEscrow API).
-```
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
@@ -75,7 +73,7 @@ If desired, a third-party can host the proposal. The protocol is designed for th
 
 There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
 
-> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the server being involved.
 
 ### Funding
 
@@ -197,7 +195,7 @@ Members of the contract interact with this vm by submitting signed statements, c
 }
 ```
 
-Members can instruct the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded in hash-chain of commitments. This chain validates the full history of the vm, from activation to settlement.
+Members can instruct the vm to settle on a given path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full execution history of the vm, from activation to settlement:
 
 ```ts
 vm_state: {
