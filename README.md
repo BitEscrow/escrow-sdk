@@ -37,7 +37,7 @@ The protocol involves collaboration between three parties:
 ```md
 **Members** : The participating members of the contract.  
 **Funders** : Those funding the contract (whom may be members).  
-**Agent**   : The server agent hosting the escrow contract (BitEscrow API).
+**Server**  : The escrow server hosting the contract (BitEscrow API).
 ```
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
@@ -75,21 +75,21 @@ If desired, a third-party can host the proposal. The protocol is designed for th
 
 There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
 
-> Note: The server agent does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
+> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members and third-parties can negotiate freely, without the agent being involved.
 
 ### Funding
 
-Once a final proposal has been delivered to our server, we will validate the terms (plus any endorsements), then publish an open [contract](docs/contract.md). This contract is also assigned an [agent](docs/contract.md) for coordinating deposits.
+Once a final proposal has been delivered to the server, the terms and endorsements are validated, then an open [contract](docs/contract.md) is published.
 
-To deposit funds, each funder requests a deposit [account](docs/deposit.md) from the agent. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds, each funder requests a deposit [account](docs/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
   acct_id    : string  // Hash identifer for the account record.
   acct_sig   : string  // Signature for the account record.
   address    : string  // On-chain address for receiving funds.
-  agent_id   : string  // Identifier of the deposit agent.
-  agent_pk   : string  // Public key of the deposit agent.
+  agent_id   : string  // Identifier of the server agent.
+  agent_pk   : string  // Public key of the server agent.
   created_at : number  // Account creation timestamp (in seconds).
   deposit_pk : string  // Public key of the funder making the deposit.
   sequence   : number  // Locktime converted into a sequence value.
@@ -97,7 +97,9 @@ interface DepositAccount {
 }
 ```
 
-The funder verifies the account, then transfers funds to the address. Once the transaction is visible in the mempool, the funder delivers a pre-signed refund transaction to the agent, plus a batch of partial signatures (for each spending path in the contract). These partial signatures form a [covenant](docs/deposit.md) between their deposit and the contract.
+The funder verifies the account information, then sends their funds to the address. This is the most critical step the protocol, as the transfer of funds commits to the xpub being used. Make sure that the xpub is correct!
+
+Once the transaction is visible in the mempool, the funder can register the deposit on the escrow server, and commit the funds to a contract using a partially-signed [covenant](docs/deposit.md):
 
 ```ts
 interface CovenantData {
@@ -110,63 +112,74 @@ interface CovenantData {
 }
 ```
 
+These partial signatures pre-authorize the spending of the deposit, and are constructed based on the contract terms.
+
 Once a covenant is made, the deposit is locked in escrow. When enough funds have been locked and confirmed, the contract becomes active.
 
 ### Settlement
 
-The final round of the protocol is the `settlement`. This is the most exciting round, as members of the contract get to debate over how the money shall be spent.
+The final round of the protocol is the `settlement`. This is the most exciting round, as members get to deliberate over how the money shall be spent.
 
-When the contract becomes active, a virtual machine is started within the contract. This vm includes the `paths`, `programs`, and `tasks` specified in the proposal.
+When the contract is activated, a virtual machine is started. This vm is initialized using the `paths`, `programs`, and `tasks` specified in the proposal, along with the contract id:
 
 ```ts
-{
-  commits: [],
-  error  : null,
-  head   : '21b8d90a9d5d249518f3b18a7d206a9f93a9745531f6e54a8813938f7fad42af',
-  output : null,
-  paths  : [ [ 'heads', 0 ], [ 'draw', 0 ], [ 'tails', 0 ] ],
-  programs: [
+vm_state: {
+  commits  : [],
+  error    : null,
+  head     : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
+  output   : null,
+  paths    : [ [ 'draw', 0 ], [ 'heads', 0 ], [ 'tails', 0 ] ],
+  programs : [
     [
-      'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954',
+      '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b',
       'endorse',
       'close',
-      'heads|tails',
+      'heads|tails|draw',
       2,
-      '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde99',
-      '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604'
+      'effe19ba82f5451739b1d3471dae675c476147bab74e6654f1aaba82e2d96d9f',
+      'f1b1d3a097db6acb76e9296e1e41db169a781813301b4853207ee3b6e39c72b9'
     ],
     [
-      '0b4eb344d2824e1f0c0df2a16f312437528a49675844d7827df26b35d0da08ea',
+      'cf236c4e91678bddaaa482d41720f277bb7d2e4540a0fc47736b999a54d29e39',
       'endorse',
       'dispute',
       'heads|tails',
       1,
-      '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde99',
-      '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604'
+      'effe19ba82f5451739b1d3471dae675c476147bab74e6654f1aaba82e2d96d9f',
+      'f1b1d3a097db6acb76e9296e1e41db169a781813301b4853207ee3b6e39c72b9'
     ],
     [
-      '65c1d6527d20713e7c16c6d4462a0885bf1a678e294426a6a20385227d81fdee',
+      'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a',
       'endorse',
       'resolve',
-      'heads|tails',
+      'heads|tails|draw',
       1,
-      '36e7977d0323bbf0aeed50c8f5823c80125c7d77c742bd9a62da98e30193f1b2'
+      'bbcd74c7c9a1a9d30ac3f2acbc55bae1ba2b5c76f93eb335f2a4478b61fed189'
     ]
   ],
-  start: 1705815394,
-  steps: 0,
-  store: [
-    [ 'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954', '[]' ],
-    [ '0b4eb344d2824e1f0c0df2a16f312437528a49675844d7827df26b35d0da08ea', '[]' ],
-    [ '65c1d6527d20713e7c16c6d4462a0885bf1a678e294426a6a20385227d81fdee', '[]' ]
+  start : 1706511301,
+  steps : 0,
+  store : [
+    [
+      '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b',
+      '[]'
+    ],
+    [
+      'cf236c4e91678bddaaa482d41720f277bb7d2e4540a0fc47736b999a54d29e39',
+      '[]'
+    ],
+    [
+      'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a',
+      '[]'
+    ]
   ],
-  status: 'init',
-  tasks: [ [ 7200, 'close', 'draw' ] ],
-  updated: 1705815394
+  status  : 'init',
+  tasks   : [ [ 7200, 'close', 'draw' ] ],
+  updated : 1706511301
 }
 ```
 
-Members of the contract interact with this vm by submitting signed statements to the agent, called a [witness](docs/contract.md) statement:
+Members of the contract interact with this vm by submitting signed statements, called a [witness](docs/contract.md):
 
 ```ts
 {
@@ -174,23 +187,44 @@ Members of the contract interact with this vm by submitting signed statements to
   args    : [],
   method  : 'endorse',
   path    : 'tails',
-  prog_id : 'ac5c38273690b4c5d970b7075fcb65c59a19418884eca43e888fad969e122954',
+  prog_id : '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b',
   sigs    : [
-    '08a053368720d0c9d91cb2ff2ba574fe41430bf29fd6bf2e84362354e26dde997bd992345fdd377d1622c659450b9ee1fd05da039a3bb6b55a3e32cf353150daa4c69c57a508d648e9119b39ae0c954f5fe2368b1770b52300d23deeaac298da',
-    '48ac68e8df9add2805d4e5379c12325bc518ec0c9592058b8636ebe28ce8c604d6946b5707550ff0e058196c3506872e722a6f30a2d8095817d2418b1617626e807cb11de648375ad0f38b08da0b6580ceb549aa2fe7d9eb96d4728f19875fdc'
+    'effe19ba82f5451739b1d3471dae675c476147bab74e6654f1aaba82e2d96d9f...',
+    'f1b1d3a097db6acb76e9296e1e41db169a781813301b4853207ee3b6e39c72b9...'
   ],
-  stamp   : 1705815394,
-  wid     : '46609fd312fb162b530d2dd562f9b946d73192c21df35e27f380bf96110efb02'
+  stamp   : 1706511302,
+  wid     : '8859eb66bf8fd0d2868d74fefbbaf5f73408c9072c99b4d8df3348f1479bf5f5'
 }
 ```
 
-Members can instruct the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded into a hash-chain. This chain validates the full history of the vm, from activation to settlement.
+Members can instruct the vm to settle on a spending path, or lock, unlock, and dispute paths. Each statement that updates the vm is recorded in hash-chain of commitments. This chain validates the full history of the vm, from activation to settlement.
 
-Once the vm has settled on a spending path, the agent will complete the relevant signature from each covenant, then broadcast a final transaction to close the contract.
+```ts
+vm_state: {
+  commits: [[
+    // Position of the commit in the chain,
+    step   : 0,
+    // UTC timestamp of the commit.
+    stamp  : 1706511302,
+    // Previous head, before the commit.
+    head   : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
+    // The witness id of the statement being committed.
+    wid    : '8859eb66bf8fd0d2868d74fefbbaf5f73408c9072c99b4d8df3348f1479bf5f5',
+    // The action that was performed.
+    action : 'close',
+    // The path that was evaluated.
+    path   : 'tails'
+  ]],
+  // The (now updated) head of the chain.
+  head: '41cf5e1a716067f9255580c96a808d5999c602fb2092b1789fb1ffb574c93597',
+}
+```
 
-The proposal, covenants, and vm combine to create a proof of validity. This proof covers how the contract should execute at any moment, with zero ambiguity left to the agent.
+Once the vm has settled on a spending path, the server will complete the related signatute for each deposit, then broadcast a final transaction to close the contract.
 
-Every contract settled on mainnet will be backed by a valid proof to maintain our reputation.
+The proposal, covenants, statements, and commit history all combine to create a fully-auditable proof of execution for the contract. This proof covers how the contract should execute at any moment, with zero ambiguity.
+
+Every contract settled on mainnet will be backed by a valid proof of execution in order to maintain our reputation as an escrow server.
 
 ### Protocol Flow
 
@@ -201,57 +235,59 @@ Every contract settled on mainnet will be backed by a valid proof to maintain ou
   3. Alice deposits her funds with the contract agent, along with a covenant.
   4. Once the deposit is confirmed on-chain, the contract becomes active.
   
-  **Happy Path: Settle on Payout**
-  * Alice receives her widget and forgets about Bob.
-  * The contract schedule closes automatically on 'payout'.
-  * Bob gets the funds, Alice can verify the CVM execution.
+  **Happy Path: Settle on Payout**  
 
-  **Neutral Path: Settle on Refund**
-  * Alice doesn't like her widget.
-  * Alice and Bob both agree to sign the 'refund' path.
-  * Alice gets a partial refund, Bob still keeps his fees.
+  5a. Alice receives her widget and forgets about Bob.  
+  6a. The contract schedule closes automatically on 'payout'.  
+  7a. Bob gets the funds, Alice can verify the CVM execution.  
 
-  **Unhappy Path: Dispute Settlement**
-  * Alice didn't get the right widget, and disputes the payout.
-  * Carol now has authority to settle the contract.
-  * Carol decides on the 'refund' path.
-  * Alice gets a partial refund, Bob still keeps his fees.
+  **Neutral Path: Settle on Refund**  
 
-  **Ugly Path: Contract Expires**
-  * Alice claims she didn't get a widget, and disputes the payout.
-  * Carol is on a two-week cruise in the bahamas.
-  * The proposal did not include any auto-settlement terms.
-  * The contract expires, all deposits are released.
+  5b. Alice doesn't like her widget.  
+  6b. Alice and Bob both agree to sign the 'refund' path.  
+  7b. Alice gets a partial refund, Bob still keeps his fees.  
 
-  **Worst Path: Deposits Expire**
-  * Everything above happens, except the last part.
-  * The entire escrow platform goes down in flames.
-  * The timelock on deposits eventually expire.
-  * Alice can sweep back her funds using the refund path.
+  **Unhappy Path: Dispute Settlement**  
+
+  5c. Alice didn't get the right widget, and disputes the payout.  
+  6c. Carol steps in, and decides on the 'refund' path.  
+  7c. Alice gets a partial refund, Bob still keeps his fees.  
+
+  **Ugly Path: Contract Expires**  
+
+  5d. Alice claims she didn't get a widget, and disputes the payout.  
+  6d. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
+  7d. The contract expires, all deposits are released.  
+
+  **Worst Path: Deposits Expire**  
+
+  5e. Everything above happens, except the last part.  
+  6e. The entire escrow platform goes down in flames.  
+  7e. The timelock on deposits expire, Alice can spend via the refund path.  
 
 ### Security Model
 
 A brief description of the security model:
 
-  * Each member joins the proposal using an anonymous credential. The involvement of a credential can be independently verified without revealing the owner to the agent.
+  * Each member participates using an anonymous credential. Credentials can be verified and claimed without revealing the owner to the escrow server.
   
-  * Members decide the terms of the proposal, and all spending paths. The contract agent does not get involved until the proposal terms have already been finalized.
+  * Members decide the terms of the proposal and all spending paths. The escrow server is not involved until the terms have already been finalized.
 
-  * Each member can optionally sign the proposal terms, if they wish to publicize their involvement. This does not reveal their credential in the proposal.
+  * Anyone can choose to endorse a proposal to publicize their support. Members do not reveal their credential by making an endorsement.
 
-  * Funders ultimately decide on what transactions to sign and deliver to the agent. If there's a disagreement, funders can back out of a deposit.
+  * Funders decide what transactions to sign and deliver to the escrow server. If there's a disagreement, funders can refund a deposit collaboratively or wait out the timelock.
 
-  * The contract agent cannot link depositors to members, nor members to credentials.
+  * The escrow server cannot link funders to a member of the contract.
 
-  * The contract agent can only settle via transactions provided by funders.
+  * The escrow server can only settle using transactions provided by funders.
   
-  * All parites independently verify the progression of the contract and final settlement. If an agent settles the contract without publicizing a valid proof, their reputation is burned.
+  * All parites independently verify the progression of the contract and final settlement. If the server settles a contract without a valid proof, their reputation is burned.
 
 Some challenges with the current model:
 
-  * The agent has limited opportunity to censor members of a contract by ignoring their witness statements. In the short term, we plan to mitigate this using signed delivery receipts. In the long-term, we will support alternative platforms for publishing (such as nostr).
+  * The escrow server has an ability to censor members of a contract by ignoring their statements. In the short term, we plan to mitigate this using time-stamped delivery receipts. In the long-term, we plan to support open platforms (such as nostr) where delivery can be independently verified.
 
-  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as the agent staking collateral.
+  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as the server staking some collateral.
 
 In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin.
 
@@ -275,7 +311,7 @@ The `EscrowClient` is a basic client for consuming our API. It is designed to be
 ```ts
 import { EscrowClient } from '@scrow/core/client'
 
-const config = {
+const client_config = {
   // The URL to our escrow server.
   hostname : 'https://bitescrow-signet.vercel.app',
   // The URL to an electrum-based indexer of your choice.
@@ -283,55 +319,66 @@ const config = {
   // The network you are using.
   network  : 'signet'
 }
+
 // Create an EscrowClient using the above config.
-const client = new EscrowClient(config)
+const client = new EscrowClient(client_config)
 ```
 
 For a complete list of the `EscrowClient` API, [click here](docs/client.md).
 
 ### Create a Signer
 
-The `EscrowSigner` is used to represent a member of a contract, and perform signature operations on their behalf.
-
-It is designed to wrap a more basic `Signer` and `Wallet` API, which can be provided by an external software or hardware device for added security.
-
-By default, we provide a basic software implementation of the `Signer` and `Wallet`, plus a `Seed` utility for generating or importing seed material.
+The `EscrowSigner` is used to represent a member of a contract, and perform signature operations on their behalf. The fastest way to setup a new `EscrowSigner` is to generate one randomly:
 
 ```ts
-import { Seed, Signer, Wallet } from '@cmdcode/signer'
-import { EscrowSigner }         from '@scrow/core/client'
+import { EscrowSigner } from '@scrow/core/client'
 
-// Import a seed using BIP39 seed words.
-const seed = Seed.import.from_words(user_words)
+// Generate a new EscrowSigner from scratch.
+const signer = EscrowSigner.generate(client_config, xpub)
+```
 
-// We can specify a pubkey that belongs to the escrow
-// server, to verify any signed payloads from the server.
-const host_pubkey = '31c82c5c86465b22adaa5e57a85593a7741eddc75f3699cc415af72c0dd13efd',
+You can also create an `EscrowSigner` using BIP39 seed words.
 
-// We'll use the existing configuration for the client,
-// plus include our Signer and Wallet interfaces.
-const signer_config = {
-  ...config,
-  host_pubkey,
-  signer : new Signer({ seed }),
-  wallet : new Wallet(xpub)
-}
+```ts
+const words = [ 'your', 'bip39', 'seed', 'words' ]
+const pass  = 'optional BIP39 password'
+const xpub  = 'your xpub goes here'
 
 // Create an EscrowSigner using the above config.
+const signer = EscrowSigner
+  .import(client_config, xpub)
+  .from_words(words, pass)
+```
+
+The `EscrowSigner` is built to plug into a more basic `SignerAPI` and `WalletAPI`, which can be hosted outside the browser in an extension or external software application.
+
+```ts
+import { Signer, Wallet } from '@cmdcode/signer'
+import { EscrowSigner }   from '@scrow/core/client'
+
+// These are created outside the browser, and can be
+// provided through the browser window object.
+const signer_api = new Signer({ seed : 'your seed' })
+const wallet_api = new Wallet('your_xpub')
+
+const signer_config = {
+  ...client_config,
+  signer : signer_api,
+  wallet : wallet_api
+}
+
 const signer = new EscrowSigner(signer_config)
 ```
 
-The `EscrowSigner` is designed to run in insecure environments. The `Signer` handles money flowing into a contract (via a 2-of-2 account), while the `Wallet` handles money flowing out (by generating addresses).
+The `EscrowSigner` is designed for insecure environments. The signing key has no direct access to funds, addresses are generated by the xpub, and all transactions are signed and verified before deposit.
 
-The private key for the `Signer` can be considered disposable, as any credential generated by the signer can be recovered by the `Wallet`.
-
-The `Wallet` is created using an xpub (provided by the user), so the private key for the wallet is never exposed during the escrow process.
+The signing key is also disposable, and can be tossed from memory once the funding transactions have been signed. Credentials generated by the signer are independently recoverable by the xpub.
 
 For a complete list of the `EscrowSigner` API, [click here](docs/signer.md).
 
 ### Build a Proposal
 
-A proposal can be built any number of ways. We have provided some tools to make this drafting process easier, through the use of a `template` and `roles`.
+The proposal can be built any number of ways. We have provided some tools to make this process easier, through the use of `roles`:
 
 ```ts
 import { create_policy, create_proposal } from '@scrow/core'
@@ -346,9 +393,8 @@ const template = create_proposal({
   value    : 15000,
 })
 
-// We can create a dictionary of roles for users to choose from.
-// Each policy defines what information needs to be added to the
-// proposal for a given role.
+// We can create roles for users to choose from. Each policy 
+// defines what information is needed for a given role.
 const roles = {
   buyer : create_policy({
     paths : [
@@ -380,37 +426,38 @@ const roles = {
 
 ```
 
-For more information building a `proposal`, [click here](docs/proposal.md).
-
-### Roles and Endorsements
-
-After the template and roles are defined, we can invite each `EscrowSigner` to join the proposal under a given role. This process allows the user to review the role information, before adding their credentials to the proposal.
-
-When the proposal is completed, users can optionally provide a signature as proof of their endorsement of the terms.
+After the template and roles are defined, we can invite each `EscrowSigner` to join the proposal as a given role. This allows the user to review the details before adding their credentials to the proposal.
 
 ```ts
 // Each member is an EscrowSigner object.
 const [ a_signer, b_signer, c_signer ] = signers
-// Define our template from earlier.
+
+// Use our template from earlier.
 let proposal = template
 
-// Call each EscrowSigner to join the proposal as a given role.
+// Call each signer to join the proposal as a given role.
 proposal = a_signer.proposal.join(proposal, roles.buyer)
 proposal = b_signer.proposal.join(proposal, roles.seller)
 proposal = c_signer.proposal.join(proposal, roles.agent)
+```
 
+When the proposal is completed, signers can optionally provide a signature as proof of their endorsement. This also tags the proposal with your signer pubkey for future lookups, without revealing which credential is yours.
+
+```ts
 const signatures = signers.map(mbr => {
   // Collect an endorsement from the user's signer.
   return mbr.proposal.endorse(proposal)
 })
 ```
 
+For more information on building a `proposal`, [click here](docs/proposal.md).
+
 ### Create a Contract
 
-Once we have collected a complete proposal, it is easy to convert into a contract via our API.
+Once you have a complete proposal, it is easy to convert into a contract.
 
 ```ts
-// Request to create a contract using the proposal and optional signatures.
+// Request to create a contract from the proposal (and optional signatures).
 const res = await client.contract.create(proposal, signatures)
 // Check that the response is valid.
 if (!res.ok) throw new Error(res.error)
@@ -429,7 +476,7 @@ Before making a deposit, we have to request an account from the escrow server. E
 const locktime = 60 * 60  // 1 hour locktime
 // Define our funder for the deposit.
 const funder   = signers[0]
-// Get an account request from the funder device.
+// Get an account request from the signing device.
 const acct_req = funder.deposit.request_account(locktime)
 // Submit the account request to the server
 const acct_res = await client.deposit.request(acct_req)
@@ -437,7 +484,7 @@ const acct_res = await client.deposit.request(acct_req)
 if (!res.ok) throw new Error(res.error)
 // Unpack the account data.
 const { account } = res.data
-// Verify the account issued by the escrow server.
+// Verify the account.
 funder.deposit.verify_account(account)
 ```
 
@@ -449,7 +496,7 @@ After verifying the account information, funders can safely make a deposit to th
 
 Deposits must first be registered before they can be locked to a contract. The API allows us to perform each action separately, or both at once.
 
-In the example below, we will register and commit the utxo to the contract using the `fund` API.
+In the example below, we will register and commit a utxo to the contract using the `fund` API.
 
 ```ts
 // Unpack the address and agent_id from the account.
@@ -476,7 +523,7 @@ const { contract, deposit } = res.data
 
 ### Contract Activation
 
-The contract will not activate until all the required funds are deposited and confirmed on the blockchain.
+The contract will activate once all the required funds are deposited and confirmed on the blockchain.
 
 You can use the `EscrowClient` to poll the contract endpoint periodically. Once the confirmed `balance` matches or exceeds the `total` value, the contract will activate automatically.
 
@@ -497,44 +544,62 @@ if (contract.activated === null) {
 }
 ```
 
-Once the contract is active, members can start submitting their statements to the virtual machine (CVM).
-
 ### Settle a Contract
 
-Members can use their `EscrowSigner` to create a signed statement for the CVM, or endorse another member's statement.
-
-The default method for taking actions in the CVM is the `endorse` method, which accepts a threshold of digital signatures from members.
-
-In the below example, we will be using `endorse` method to create a signed statement, then collect additional signatures from other members.
+Once the contract is active, members can start submitting their statements to the contract's virtual machine (CVM).
 
 ```ts
 // The members we will be using to sign.
 const [ a_signer, b_signer ] = signers
+```
+
+The default method for taking actions in the CVM is the `endorse` method, which accepts a threshold of signatures from members.
+
+```ts
 // The template statement we will be signing.
 const template = {
   action : 'close',    // We want to close the contract. 
   method : 'endorse',  // Using the endorse method.
-  path   : 'tails'     // Using the provided path.
+  path   : 'tails'     // And settle on the 'tails' path.
 }
-// Define we are working with the active contract from earlier.
+```
+
+Each member can use their `EscrowSigner` to create and sign a statement, or to sign another member's statement.
+
+```ts
+// We are working with the active contract from earlier.
 const contract = active_contract
 // Define an empty variable for our "witness" statement.
 let witness : WitnessData
-// Alice create and signs the initial statement.
+// Alice provides the initial statement.
 witness = a_signer.witness.sign(contract, template)
 // Bob endoreses the statement from Alice.
 witness = b_signer.witness.endorse(contract, witness)
-// Submit the completed witness statement to the contract.
+```
+
+Once we have a statement with enough signatures, we submit it to the contract for evaluation.
+
+```ts
+// Submit the completed statement to the contract.
 const res = await client.contract.submit(contract.cid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // The returned contract should be settled.
 const settled_contract = res.data.contract
+```
+
+If the statement is valid, then the contract will broadcast a settlement transaction.
+
+```ts
+// Get the transaction id from the contract.
+const txid = settled_contract.spent_txid
 // Fetch the settlement tx from the oracle.
-const txdata = await client.oracle.get_txdata(settled_contract.spent_txid)
+const txdata = await client.oracle.get_txdata(txid)
 // Print the transaction data to console.
 console.dir(txdata, { depth : null })
 ```
+
+And that is it! The transaction will display on-chain as an anonymous coinjoin of single-key spends, and can be fee-bumped by any recipient of the contract using CPFP.
 
 > For more information on the `witness` interface, [click here](docs/witness.md).
 
