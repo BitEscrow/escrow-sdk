@@ -112,10 +112,16 @@ function list_deposit_api (client : EscrowClient) {
   ) : Promise<ApiResponse<DepositListResponse>> => {
     // Validate the pubkey.
     assert.is_hash(pubkey)
-    // Formulate the request.
+    // Define the request url.
     const url = `${client.host}/api/deposit/list/${pubkey}`
+    // Define the request config.
+    const init = {
+      method  : 'POST',
+      body    : token,
+      headers : { 'content-type' : 'text/plain' }
+    }
     // Return the response.
-    return client.fetcher<DepositListResponse>({ url, token })
+    return client.fetcher<DepositListResponse>({ url, init })
   }
 }
 

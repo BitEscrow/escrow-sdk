@@ -5,7 +5,7 @@ export function request_deposits_api (signer : EscrowSigner) {
     const pub  = signer.pubkey
     const host = signer.client.host
     const url  = `${host}/api/deposit/list/${pub}`
-    const content = 'GET' + url
+    const content = 'POST' + url
     return signer._signer.gen_token(content)
   }
 }
@@ -15,7 +15,7 @@ export function request_contracts_api (signer : EscrowSigner) {
     const pub  = signer.pubkey
     const host = signer.client.host
     const url  = `${host}/api/contract/list/${pub}`
-    const content = 'GET' + url
+    const content = 'POST' + url
     return signer._signer.gen_token(content)
   }
 }

@@ -73,10 +73,16 @@ function list_contract_api (client : EscrowClient) {
     pubkey : string,
     token  : string
   ) : Promise<ApiResponse<ContractListResponse>> => {
-    // Formulate the request.
-    const url = `${client.host}/api/contract/list/${pubkey}`
+    // Define the request url.
+    const url  = `${client.host}/api/contract/list/${pubkey}`
+    // Define the request config.
+    const init = {
+      method  : 'POST',
+      body    : token,
+      headers : { 'content-type' : 'text/plain' }
+    }
     // Return the response.
-    return client.fetcher<ContractListResponse>({ url, token })
+    return client.fetcher<ContractListResponse>({ url, init })
   }
 }
 
