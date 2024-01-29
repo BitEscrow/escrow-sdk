@@ -6,15 +6,15 @@ A private, non-custodial protocol for using Bitcoin in a covenant-based smart co
 
 Key Features:
 
-  * 100% private. All on-chain transactions appear as single-key spends. Participation is done through randomly generated credentials. Only requires a signing key (hot), and wallet xpub (cold) to participate.
+  * __100% private.__ All on-chain transactions appear as single-key spends. Participation is done through randomly generated credentials. Only requires a signing key (hot), and wallet xpub (cold) to participate.
 
-  * 100% non-custodial. Money is secured in a collaborative 2-of-2 contract. All payouts are pre-signed before deposit. Returns are locked to a cold-stored xpub of your choice.
+  * __100% non-custodial.__ Money is secured in a collaborative 2-of-2 contract. All payouts are pre-signed before deposit. Returns are locked to a cold-stored xpub of your choice.
 
-  * 100% auditable. All contract terms, inputs, and operations are signed and recorded in a commit chain. Each transaction is backed by a verifiable commit history.
+  * __100% auditable.__ All contract terms, inputs, and operations are signed and recorded in a commit chain. Each transaction is backed by a verifiable commit history.
 
-  * Designed for trustless environments. Signing keys are disposable and have no capacity to sweep funds. All terms are signed up-front and verifiable before deposit. 
+  * __Designed for trustless environments.__ Signing keys are disposable and have no capacity to sweep funds. All terms are signed up-front and verifiable before deposit. 
 
-  * Designed to be robust. Deposits can be re-used if a contract cancels or expires. Credentials are recoverable via your xpub. Refunds are signed upfront and broadcast automatically on expiration. 
+  * __Designed to be robust.__ Deposits can be re-used if a contract cancels or expires. Credentials are recoverable via your xpub. Refunds are signed upfront and broadcast automatically on expiration. 
 
 Package Features:
 

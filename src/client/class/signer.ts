@@ -1,17 +1,19 @@
 import { Buff, Bytes }    from '@cmdcode/buff'
-import { Signer, Wallet } from '@cmdcode/signer'
 import { EscrowClient }   from './client.js'
+import { SignerConfig }   from '../types.js'
+
+import {
+  Seed,
+  Signer,
+  Wallet
+} from '@cmdcode/signer'
 
 import deposit_api  from '../api/depositor.js'
+import import_api   from '../api/importer.js'
 import member_api   from '../api/member.js'
 import proposal_api from '../api/proposal.js'
 import request_api  from '../api/request.js'
 import witness_api  from '../api/witness.js'
-
-import {
-  ClientConfig,
-  SignerConfig
-} from '@/client/types.js'
 
 import {
   CredSignerAPI,
@@ -24,7 +26,7 @@ const DEFAULT_IDXGEN = () => Buff.now(4).num
 export class EscrowSigner {
 
   static create (
-    config : ClientConfig,
+    config : Partial<SignerConfig>,
     seed   : Bytes,
     xpub  ?: string
   ) {
@@ -35,8 +37,18 @@ export class EscrowSigner {
     return new EscrowSigner({ ...config, signer, wallet })
   }
 
+  static generate (
+    config : Partial<SignerConfig>,
+    xpub  ?: string
+  ) {
+    const seed = Buff.random(32)
+    return EscrowSigner.create(config, seed, xpub)
+  }
+
+  static import = import_api
+
   static load (
-    config   : ClientConfig,
+    config   : Partial<SignerConfig>,
     password : string,
     payload  : string
   ) {
@@ -47,6 +59,11 @@ export class EscrowSigner {
     const signer  = Signer.restore(pass, encdata)
     const wallet  = new Wallet(xpub)
     return new EscrowSigner({ ...config, signer, wallet })
+  }
+
+  static util = {
+    gen_seed  : Seed.generate.bytes,
+    gen_words : Seed.generate.words
   }
 
   readonly _client    : EscrowClient

@@ -1,5 +1,4 @@
 import { Buff }            from '@cmdcode/buff'
-import { Signer, Wallet }  from '@cmdcode/signer'
 import { EscrowSigner }    from '@scrow/core/client'
 import { config, members } from './00_demo_config.js'
 
@@ -10,16 +9,8 @@ import { config, members } from './00_demo_config.js'
 function create_signer (alias : string) {
   // Simple hash of a string. For testing only.
   const seed = Buff.str(alias).digest
-  // Create a wallet and xpub from seed.
-  const xpub = Wallet.create({ seed }).xpub
-  // Build our escrow signer config.
-  const signer_config = {
-    ...config,
-    signer : new Signer({ seed }),
-    wallet : new Wallet(xpub)
-  }
   // Return an escrow signer.
-  return new EscrowSigner(signer_config)
+  return EscrowSigner.create(config, seed)
 }
 
 /**
