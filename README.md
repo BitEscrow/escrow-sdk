@@ -34,9 +34,9 @@ Comimg Soon:
 
 The protocol involves collaboration between three parties:
 
-**Members** : The participating members of the contract.  
-**Funders** : Those funding the contract (whom may be members).  
-**Server**  : The escrow server hosting the contract (BitEscrow API).
+`Members` : The participating members of the contract.  
+`Funders` : Those funding the contract (whom may be members).  
+`Server ` : The escrow server hosting the contract (BitEscrow API).
 
 The protocol is split into three phases: `negotiation`, `funding`, and `settlement`. Each phase represents a round of communication in the protocol.
 
