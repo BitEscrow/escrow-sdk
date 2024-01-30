@@ -61,7 +61,6 @@ interface RegisterRequest {
 
 ```ts
 
-}
 ```
 
 ## View Contracts by Registered Pubkey

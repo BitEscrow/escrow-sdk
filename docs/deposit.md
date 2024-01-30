@@ -1,8 +1,27 @@
-# Deposit Documentation
+# Deposits
 
 Work in progreess. Check back later!
 
-## Requesting a Deposit Account
+**Sections**
+
+1. [Request an Account]()
+2. [Verify an Account]()
+3. [Deposit Funds]()
+4. [Create a Covenant]()
+5. [Register a Deposit]()
+6. [Lock a Deposit]()
+7. [Close a Deposit]()
+
+**Interfaces**
+
+- [AccountRequest]
+- [DepositAccount]
+- [CovenantData]
+- [SpendingData]
+- [RegisterRequest]
+- [DepositData]
+
+### Requesting a Deposit Account
 
 ```ts
 interface DepositAccount {

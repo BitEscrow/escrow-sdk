@@ -1,6 +1,25 @@
-# Contract Documentation
+# Contracts
 
 Work in progreess. Check back later!
+
+**Sections**
+
+1. [Creating a Contract]()
+2. [Funding a Contract]()
+3. [Contract Activation]()
+4. [Virtual Machine (CVM)]()
+4. [Submitting Statements]()
+5. [Validating Execution]()
+6. [Sweeping Funds]()
+
+**Interfaces**
+
+- [ContractRequest]
+- [ContractData]
+- [ContractStatus]
+- [WitnessTemplate]
+- [WitnessData]
+- [MachineState]
 
 ## Creating a Contract
 
