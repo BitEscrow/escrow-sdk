@@ -7,9 +7,6 @@ rm -rf ./dist
 yarn tsc
 yarn rollup -c rollup.config.ts --configPlugin typescript
 
-## Remove the webcrypto import from the module file.
-sed -i '/import { webcrypto } from '\''crypto'\'';/d' "./dist/module.mjs"
-
 ## Resolve path aliases in files.
 
 DIRECTORY="./dist"                 # The file path to search.
@@ -17,7 +14,6 @@ EXTENSIONS=("js" "ts")             # The file extensions to target. Add more ext
 ABSOLUTE_PATH="@/"                 # The path we are replacing.
 DEPTH_OFFSET=3                     # The offset for our depth counter.
 
-# Resolve 
 for EXTENSION in "${EXTENSIONS[@]}"
 do
     # Loop through all files in the directory that match the current extension.

@@ -15,19 +15,13 @@ const onwarn = (warning) => {
     warning.message.includes('@__PURE__')
   ) {
     return
-  } else if (
-    warning.code === 'MISSING_NODE_BUILTINS' &&
-    warning.ids.toString() === [ 'crypto' ].toString()
-  ) {
-    return
   }
-
   throw new Error(warning)
 }
 
 export default {
   input: 'src/index.ts',
-//  onwarn,
+  onwarn,
   output: [
     {
       file: 'dist/main.cjs',

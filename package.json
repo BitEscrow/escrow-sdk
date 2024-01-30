@@ -96,28 +96,29 @@
     "release": "yarn test && yarn build",
     "scratch": "yarn load test/scratch.ts",
     "load": "tsx --tsconfig test/tsconfig.json",
-    "test": "yarn tsc && yarn load test/tape.ts"
+    "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.5.0",
+    "@cmdcode/core-cmd": "1.5.1",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@types/node": "^20.10.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.11.10",
     "@types/tape": "^5.6.4",
-    "rollup": "^4.7.0",
-    "tape": "^5.7.2",
+    "rollup": "^4.9.6",
+    "tap-spec": "^5.0.0",
+    "tape": "^5.7.4",
     "tslib": "^2.6.2",
     "tsx": "^4.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@cmdcode/buff": "2.2.4",
-    "@cmdcode/crypto-tools": "2.7.5",
-    "@cmdcode/musig2": "2.4.2",
-    "@cmdcode/signer": "1.4.0",
-    "@scrow/tapscript": "2.2.1",
+    "@cmdcode/buff": "2.2.5",
+    "@cmdcode/crypto-tools": "2.7.6",
+    "@cmdcode/musig2": "2.4.3",
+    "@cmdcode/signer": "1.4.1",
+    "@scrow/tapscript": "2.2.2",
     "zod": "^3.22.4"
   }
 }
