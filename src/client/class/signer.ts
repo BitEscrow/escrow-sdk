@@ -9,7 +9,6 @@ import {
 } from '@cmdcode/signer'
 
 import deposit_api  from '../api/depositor.js'
-import import_api   from '../api/importer.js'
 import member_api   from '../api/member.js'
 import proposal_api from '../api/proposal.js'
 import request_api  from '../api/request.js'
@@ -45,7 +44,27 @@ export class EscrowSigner {
     return EscrowSigner.create(config, seed, xpub)
   }
 
-  static import = import_api
+  static import (
+    config : Partial<SignerConfig>,
+    xpub  ?: string
+  ) {
+    return {
+      from_phrase : (
+        phrase : string,
+        salt  ?: string | undefined
+      ) => {
+        const seed = Seed.import.from_char(phrase, salt)
+        return EscrowSigner.create(config, seed, xpub)
+      },
+      from_words : (
+        words     : string | string[],
+        password ?: string | undefined
+      ) => {
+        const seed = Seed.import.from_words(words, password)
+        return EscrowSigner.create(config, seed, xpub)
+      }
+    }
+  }
 
   static load (
     config   : Partial<SignerConfig>,
