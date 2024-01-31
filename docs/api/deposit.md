@@ -1,12 +1,12 @@
 # Deposit API
 
-[`/api/deposit/request`](#request-a-deposit-account)  
-[`/api/deposit/register`](#register-a-deposit)  
-[`/api/deposit/commit`](#commit-to-a-contract)  
-[`/api/deposit/list/:pubkey`](#list-deposits-by-pubkey)  
-[`/api/deposit/:dpid`](#read-a-deposit-by-id)  
-[`/api/deposit/:dpid/lock`](#lock-funds-to-a-contract)  
-[`/api/deposit/:dpid/close`](#close-a-deposit)  
+- [/api/deposit/request](#request-a-deposit-account)  
+- [/api/deposit/register](#register-a-deposit)  
+- [/api/deposit/commit](#commit-to-a-contract)  
+- [/api/deposit/list/:pubkey](#list-deposits-by-pubkey)  
+- [/api/deposit/:dpid](#read-a-deposit-by-id)  
+- [/api/deposit/:dpid/lock](#lock-funds-to-a-contract)  
+- [/api/deposit/:dpid/close](#close-a-deposit)  
 
 ## Request a Deposit Account
 

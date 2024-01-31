@@ -1,8 +1,8 @@
 # Contract Interfaces
 
-[ContractData](#contractdata)
-[ContractStatus](#contractstatus)
-[StateData](#statedata)
+[ContractData](#contractdata)  
+[ContractStatus](#contractstatus)  
+[StateData](#statedata)  
 
 ## ContractData
 

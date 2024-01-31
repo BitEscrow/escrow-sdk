@@ -1,12 +1,12 @@
 # Contract API
 
-[`/api/contract/create`](#create-a-contract)  
-[`/api/contract/list/:pubkey`](#list-contracts-by-pubkey)  
-[`/api/contract/:cid`](#read-a-contract-by-id)  
-[`/api/contract/:cid/cancel`](#cancel-a-contract)  
-[`/api/contract/:cid/funds`](#list-funds-in-a-contract)  
-[`/api/contract/:cid/submit`](#submit-a-witness-statement)  
-[`/api/contract/:cid/witness`](#list-statements-in-a-contract)  
+- [/api/contract/create](#create-a-contract)
+- [/api/contract/list/:pubkey](#list-contracts-by-pubkey)
+- [/api/contract/:cid](#read-a-contract-by-id)
+- [/api/contract/:cid/cancel](#cancel-a-contract)
+- [/api/contract/:cid/funds](#list-funds-in-a-contract)
+- [/api/contract/:cid/submit](#submit-a-witness-statement)
+- [/api/contract/:cid/witness](#list-statements-in-a-contract)
 
 ## Create a Contract
 

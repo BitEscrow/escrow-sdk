@@ -1,9 +1,9 @@
 # Deposit Interfaces
 
-[DepositAccount](#depositaccount)
-[CovenantData](#covenantdata)
-[DepositData](#depositdata)
-[DepositStatus](#depositstatus)
+[DepositAccount](#depositaccount)  
+[CovenantData](#covenantdata)  
+[DepositData](#depositdata)  
+[DepositStatus](#depositstatus)  
 
 ## DepositAccount
 
