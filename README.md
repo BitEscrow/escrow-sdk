@@ -30,7 +30,31 @@ Comimg Soon:
   * new `templates` field for raw tx templates.
   * `hashlock` and `oracle` programs for vm.
 
-## Overview
+## Index
+
+1. [Protocol Overview](#protocol-overview)  
+  a. [Negotiation](#negotiation)  
+  b. [Funding](#funding)  
+  c. [Settlement](#settlement)  
+  d. [Protocol Flow](#protocol-flow)  
+  e. [Security Model](#security-model)  
+2. [How to Use](#how-to-use)  
+  a. [Create a Client](#create-a-client)  
+  b. [Create a Signer](#create-a-signer)  
+  c. [Build a Proposal](#build-a-proposal)  
+  d. [Complete a Proposal](#complete-a-proposal)  
+  e. [Create a Contract](#create-a-contract)  
+  f. [Request an Account](#request-an-account)  
+  g. [Deposit Funds](#deposit-funds)  
+  h. [Contract Activation](#contract-activation)  
+  i. [Settle a Contract](#settle-a-contract)  
+3. [Development & Testing](#development--testing)
+4. [Questions & Issues](#questions--issues)
+5. [Contribution](#contribution)
+6. [Resources](#resources)
+7. [Footnote](#footnote)
+
+## Protocol Overview
 
 The protocol involves collaboration between three parties:
 
@@ -424,6 +448,8 @@ const roles = {
 
 ```
 
+### Complete a Proposal
+
 After the template and roles are defined, we can invite each `EscrowSigner` to join the proposal as a given role. This allows the user to review the details before adding their credentials to the proposal.
 
 ```ts
@@ -465,7 +491,7 @@ const { contract } = res.data
 
 For more information on the `contract` interface, [click here](docs/contract.md).
 
-### Request a Deposit Account
+### Request an Account
 
 Before making a deposit, we have to request an account from the escrow server. Each account is a time-locked 2-of-2 multi-signature address between the `funder` and the server `agent`.
 
@@ -488,7 +514,7 @@ funder.deposit.verify_account(account)
 
 > For more information on the `account` interface, [click here](docs/deposit.md).
 
-### Deposit funds into a Contract
+### Deposit Funds
 
 After verifying the account information, funders can safely make a deposit to the account address. Once the deposit transaction is visible in the mempool, we can grab the `utxo` data using an oracle.
 
