@@ -14,8 +14,7 @@ Work in progreess. Check back later!
 
 **Interfaces**
 
-- [ProposalData](#proposaldata)
-- [RolePolicy](#rolepolicy)
+- [Proposal Interfaces](./interfaces/proposal.md)
 
 ## Proposal Overview
 

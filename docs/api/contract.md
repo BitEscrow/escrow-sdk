@@ -1,99 +1,165 @@
 # Contract API
 
-Work in progreess. Check back later!
+[`/api/contract/create`](#create-a-contract)  
+[`/api/contract/list/:pubkey`](#list-contracts-by-pubkey)  
+[`/api/contract/:cid`](#read-a-contract-by-id)  
+[`/api/contract/:cid/cancel`](#cancel-a-contract)  
+[`/api/contract/:cid/funds`](#list-funds-in-a-contract)  
+[`/api/contract/:cid/submit`](#submit-a-witness-statement)  
+[`/api/contract/:cid/witness`](#list-statements-in-a-contract)  
 
 ## Create a Contract
 
-`/api/contract/create`
-
-**Request Example**
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'POST'
+endpoint : '/api/contract/create'
+headers  : { 'content-type' : 'application/json' }
+body     : JSON.stringify(contract_request)
 ```
 
-**Response Example**
+**Request Body**
 
 ```ts
-interface goes here
+interface ContractRequest {
+  proposal    : ProposalData
+  signatures ?: string[]
+}
 ```
 
-## Read a Contract
-
-`/api/contract/<cid>`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface ContractDataResponse {
+  data : {
+    contract : ContractData
+  }
+}
 ```
 
-**Response Example**
+## List Contracts By Pubkey
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/contract/list/:pubkey'
+headers  : { 'Authorization' : 'Token ' + auth_token }
 ```
 
-## View Contracts by Registered Pubkey
-
-`/api/contract/list/<pubkey>`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface ContractListResponse {
+  data : {
+    contracts : ContractData[]
+  }
+}
 ```
 
-**Response Example**
+## Read a Contract By Id
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/contract/:cid'
 ```
 
-## View Contract Deposits
-
-`/api/contract/<cid>/funds`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface ContractDataResponse {
+  data : {
+    contract : ContractData
+  }
+}
 ```
 
-**Response Example**
+## Cancel a Contract
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/contract/:cid/cancel'
+headers  : { 'Authorization' : 'Token ' + auth_token }
+```
+
+**Response Interface**
+
+```ts
+interface ContractDataResponse {
+  data : {
+    contract : ContractData
+  }
+}
+```
+
+## List Funds in a Contract
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/contract/:cid/funds'
+```
+
+**Response Interface**
+
+```ts
+interface DepositListResponse {
+  data : {
+    deposits : DepositData[]
+  }
+}
 ```
 
 ## Submit a Witness Statement
 
-`/api/contract/<cid>/submit`
-
-**Request Example**
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'POST'
+endpoint : '/api/contract/:cid/submit'
+headers  : { 'content-type' : 'application/json' }
+body     : JSON.stringify(witness_request)
 ```
 
-**Response Example**
+**Request Body**
 
 ```ts
-interface goes here
+interface WitnessRequest {
+  witness : WitnessData
+}
 ```
 
-## View Witness Statements
-
-`/api/contract/<cid>/witness`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface ContractDataResponse {
+  data : {
+    contract : ContractData
+  }
+}
 ```
 
-**Response Example**
+## List Statements in a Contract
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/contract/:cid/witness'
+```
+
+**Response Interface**
+
+```ts
+interface WitnessListResponse {
+  data : {
+    statements : WitnessData[]
+  }
+}
 ```

@@ -1,6 +1,12 @@
 # Deposit API
 
-Work in progreess. Check back later!
+[`/api/deposit/request`](#request-a-deposit-account)  
+[`/api/deposit/register`](#register-a-deposit)  
+[`/api/deposit/commit`](#commit-to-a-contract)  
+[`/api/deposit/list/:pubkey`](#list-deposits-by-pubkey)  
+[`/api/deposit/:dpid`](#read-a-deposit-by-id)  
+[`/api/deposit/:dpid/lock`](#lock-funds-to-a-contract)  
+[`/api/deposit/:dpid/close`](#close-a-deposit)  
 
 ## Request a Deposit Account
 
@@ -13,7 +19,7 @@ headers  : { 'content-type' : 'application/json' }
 body     : JSON.stringify(account_request)
 ```
 
-**Request Interface**
+**Request Body**
 
 ```ts
 interface AccountRequest {
@@ -44,85 +50,159 @@ headers  : { 'content-type' : 'application/json' }
 body     : JSON.stringify(register_request)
 ```
 
-**Request Interface**
+**Request Body**
 
 ```ts
 interface RegisterRequest {
-  covenant    ?: CovenantData  // Covenant that locks the UTXO.
-  deposit_pk   : string        // Public key of the funder making the deposit.
-  return_psig ?: string        // Pre-authorization for returning the deposit.
-  sequence     : number        // Locktime converted into a sequence value.
-  spend_xpub   : string        // The extended key used for returning funds.
-  utxo         : TxOutput      // The unspent output to register as a deposit.
+  deposit_pk  : string        // Public key of the funder making the deposit.
+  return_psig : string        // Pre-authorization for returning the deposit.
+  sequence    : number        // Locktime converted into a sequence value.
+  spend_xpub  : string        // The extended key used for returning funds.
+  utxo        : TxOutput      // The unspent output to register as a deposit.
 }
 ```
 
 **Response Interface**
 
 ```ts
-
+interface DepositDataResponse {
+  data : {
+    deposit : DepositData
+  }
+}
 ```
 
-## View Contracts by Registered Pubkey
+## Commit to a Contract
 
-`/api/contract/list/<pubkey>`
-
-**Request Example**
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'POST'
+endpoint : '/api/deposit/commit'
+headers  : { 'content-type' : 'application/json' }
+body     : JSON.stringify(commit_request)
 ```
 
-**Response Example**
+**Request Body**
 
 ```ts
-interface goes here
+interface CommitRequest extends RegisterRequest {
+  covenant    : CovenantData  // Covenant that locks the UTXO.
+  deposit_pk  : string        // Public key of the funder making the deposit.
+  return_psig : string        // Pre-authorization for returning the deposit.
+  sequence    : number        // Locktime converted into a sequence value.
+  spend_xpub  : string        // The extended key used for returning funds.
+  utxo        : TxOutput      // The unspent output to register as a deposit.
+}
 ```
 
-## View Contract Deposits
-
-`/api/contract/<cid>/funds`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface FundDataResponse {
+  data : {
+    contract : ContractData
+    deposit  : DepositData
+  }
+}
 ```
 
-**Response Example**
+## List Deposits By Pubkey
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/deposit/:pubkey'
+headers  : { 'Authorization' : 'Token ' + auth_token }
 ```
 
-## Submit a Witness Statement
-
-`/api/contract/<cid>/submit`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface DepositListResponse {
+  data : {
+    deposits : DepositData[]
+  }
+}
 ```
 
-**Response Example**
+## Read a Deposit By Id
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'GET'
+endpoint : '/api/deposit/:dpid'
 ```
 
-## View Witness Statements
-
-`/api/contract/<cid>/witness`
-
-**Request Example**
+**Response Interface**
 
 ```ts
-interface goes here
+interface DepositDataResponse {
+  data : {
+    deposit : DepositData
+  }
+}
 ```
 
-**Response Example**
+## Lock Funds to a Contract
+
+**Request Format**
 
 ```ts
-interface goes here
+method   : 'POST'
+endpoint : '/api/deposit/:dpid/lock'
+headers  : { 'content-type' : 'application/json' }
+body     : JSON.stringify(lock_request)
+```
+
+**Request Body**
+
+```ts
+interface LockRequest {
+  covenant : CovenantData  // Covenant that locks the UTXO.
+}
+```
+
+**Response Interface**
+
+```ts
+interface FundDataResponse {
+  data : {
+    contract : ContractData
+    deposit  : DepositData
+  }
+}
+```
+
+## Close a Deposit
+
+**Request Format**
+
+```ts
+method   : 'POST'
+endpoint : '/api/deposit/:dpid/close'
+headers  : { 'content-type' : 'application/json' }
+body     : JSON.stringify(close_request)
+```
+
+**Request Body**
+
+```ts
+export interface CloseRequest {
+  pnonce : string  // The publice nonce used for signing.
+  psig   : string  // The partial signature for spending.
+  txfee  : number  // The transaction fee used in the tx.
+}
+```
+
+**Response Interface**
+
+```ts
+interface DepositDataResponse {
+  data : {
+    deposit : DepositData
+  }
+}
 ```

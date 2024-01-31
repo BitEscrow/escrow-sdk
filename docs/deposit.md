@@ -1,4 +1,4 @@
-# Deposits
+# Deposit Docs
 
 Work in progreess. Check back later!
 
@@ -12,13 +12,7 @@ Work in progreess. Check back later!
 
 **Interfaces**
 
-- [AccountRequest](#accountrequest)
-- [DepositAccount](#depositaccount)
-- [CovenantData](#covenantdata)
-- [RegisterRequest](#registerrequest)
-- [SpendingData]()
-- [DepositData](#depositdata)
-- [DepositStatus](#depositstatus)
+- [Deposit Interfaces](./interfaces/deposit.md)
 
 ## Requesting an Account
 
@@ -131,7 +125,6 @@ A registration request looks like this:
 interface RegisterRequest {
   covenant    ?: CovenantData  // Provide a covenant to lock the deposit
   deposit_pk   : string        // Public key of the depositor.
-  return_psig ?: string        // Provide a pre-authorization for account closure.
   sequence     : number        // Sequence value for the account.
   spend_xpub   : string        // Spending xpub for the account.
   utxo         : TxOutput      // The utxo being registered.
@@ -200,66 +193,12 @@ If a contract is canceled, and deposits are released, you can use this process t
 
 ## Closing a Deposit
 
+API Reference : [Close a Deposit](./api/deposit.md#close-a-deposit)
+
 If you have an open deposit, you can close it and return the funds to your registered xpub.
 
-To close a deposit, the user's device has to create a `SpendRequest`:
-
-#### SpendRequest
+To close a deposit, the user's device creates a `CloseRequest` and delivers it to the escrow server:
 
 ```ts
-interface SpendRequest {
-  feerate : number
-  pnonce  : string
-  psig    : string
-}
-```
-
-## Interfaces
-
-#### DepositData
-
-```ts
-interface DepositData {
-  agent_id     : string
-  agent_pk     : string
-  agent_pn     : string
-  block_hash   : string | null
-  block_height : number | null
-  block_time   : number | null
-  confirmed    : boolean
-  covenant     : CovenantData | null
-  created_at   : number
-  deposit_pk   : string
-  dpid         : string
-  expires_at   : number
-  return_psig  : string | null
-  scriptkey    : string
-  sequence     : number
-  settled      : boolean
-  settled_at   : number | null
-  spend_xpub   : string
-  spent        : boolean,
-  spent_at     : number | null
-  spent_txid   : string | null
-  status       : DepositStatus
-  txid         : string
-  updated_at   : number
-  value        : number
-  vout         : number
-}
-```
-
-#### DepositStatus
-
-```ts
-type DepositStatus = 
-  'reserved' | 
-  'pending'  | 
-  'stale'    | 
-  'open'     | 
-  'locked'   | 
-  'spent'    | 
-  'settled'  | 
-  'expired'  | 
-  'error'
+// Close demo code here.
 ```
