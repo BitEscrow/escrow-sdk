@@ -116,7 +116,7 @@ export class EscrowSigner {
   }
 
   account    = account_api(this)
-  credential = member_api(this)
+  membership = member_api(this)
   proposal   = proposal_api(this)
   request    = request_api(this)
   witness    = witness_api(this)
