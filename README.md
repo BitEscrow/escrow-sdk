@@ -95,7 +95,7 @@ interface DepositAccount {
 }
 ```
 
-The funder verifies the account information, then sends their funds to the address. This is the most critical step the protocol, as the transfer of funds commits to the xpub being used. Make sure that the xpub is correct!
+The funder verifies the account information, then sends their funds to the address. This is a critical step in the protocol, as the transfer of funds commits to the xpub being used. Make sure that the xpub is correct!
 
 Once the transaction is visible in the mempool, the funder can register the deposit on the escrow server, and commit the funds to a contract using a partially-signed [covenant](docs/deposit.md):
 

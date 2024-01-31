@@ -1,4 +1,3 @@
-import { Buff }             from '@cmdcode/buff'
 import { parse_extkey }     from '@cmdcode/crypto-tools/hd'
 import { EscrowSigner }     from '@/client/class/signer.js'
 import { get_deposit_ctx }  from '@/lib/deposit.js'
@@ -18,7 +17,7 @@ import {
   TxOutput
 } from '@/types/index.js'
 
-export function request_account_api (signer : EscrowSigner) {
+export function create_account_api (signer : EscrowSigner) {
   return (
     locktime : number,
     index   ?: number
@@ -30,8 +29,13 @@ export function request_account_api (signer : EscrowSigner) {
 }
 
 export function verify_account_api (signer : EscrowSigner) {
-  return (account : DepositAccount) : void => {
-    verify_account(account, signer)
+  return (account : DepositAccount) : boolean => {
+    try {
+      verify_account(account, signer)
+      return true
+    } catch (err) {
+      return false
+    }
   }
 }
 
@@ -85,20 +89,11 @@ export function commit_deposit_api (signer : EscrowSigner) {
   }
 }
 
-export function close_deposit_api (signer : EscrowSigner) {
+export function close_account_api (signer : EscrowSigner) {
   return (
-    deposit  : DepositData,
-    txfee    : number,
-    address ?: string
+    deposit : DepositData,
+    txfee   : number
   ) : string => {
-    // Unpack signer object.
-    const { txid } = deposit
-    if (address === undefined) {
-      // Compute an index value from the deposit txid.
-      const acct = Buff.hex(txid).slice(0, 4).num
-      // Generate refund address.
-      address = signer.get_account(acct).new_address()
-    }
     // Create the return transaction.
     return create_return_psig(deposit, signer._signer, txfee)
   }
@@ -106,10 +101,10 @@ export function close_deposit_api (signer : EscrowSigner) {
 
 export default function (signer : EscrowSigner) {
   return {
-    request_account : request_account_api(signer),
-    verify_account  : verify_account_api(signer),
-    close_account   : close_deposit_api(signer),
-    commit_utxo     : commit_utxo_api(signer),
-    commit_deposit  : commit_deposit_api(signer)
+    create : create_account_api(signer),
+    verify : verify_account_api(signer),
+    close  : close_account_api(signer),
+    commit_utxo    : commit_utxo_api(signer),
+    commit_deposit : commit_deposit_api(signer)
   }
 }

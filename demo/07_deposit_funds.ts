@@ -54,7 +54,7 @@ const signer    = signers[0]
 // Get the output data from the utxo.
 const utxo      = utxos[0].txspend
 // Request the funders device to sign a covenant.
-const covenant  = signer.deposit.commit_utxo(account, contract, utxo)
+const covenant  = signer.account.commit_utxo(account, contract, utxo)
 // Build our registration request to the server.
 const reg_req   = { covenant, deposit_pk, sequence, spend_xpub, utxo }
 // Deliver our registration request to the server.

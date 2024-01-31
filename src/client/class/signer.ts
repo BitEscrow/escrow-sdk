@@ -8,7 +8,7 @@ import {
   Wallet
 } from '@cmdcode/signer'
 
-import deposit_api  from '../api/depositor.js'
+import account_api  from '../api/account.js'
 import member_api   from '../api/member.js'
 import proposal_api from '../api/proposal.js'
 import request_api  from '../api/request.js'
@@ -94,7 +94,7 @@ export class EscrowSigner {
   constructor (config : SignerConfig) {
     this._client   = new EscrowClient(config)
     this._gen_idx  = config.idxgen ?? DEFAULT_IDXGEN
-    this._host_pub = config.host_pub
+    this._host_pub = config.host_pubkey
     this._signer   = config.signer
     this._wallet   = config.wallet
   }
@@ -115,8 +115,8 @@ export class EscrowSigner {
     return this._signer.pubkey
   }
 
-  deposit    = deposit_api(this)
-  membership = member_api(this)
+  account    = account_api(this)
+  credential = member_api(this)
   proposal   = proposal_api(this)
   request    = request_api(this)
   witness    = witness_api(this)

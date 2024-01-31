@@ -1,17 +1,16 @@
-# Proposals
+# Proposal Docs
 
 Work in progreess. Check back later!
 
 **Sections**
 
 1. [Proposal Overview](#proposal-overview)
-3. [Actions and Rules](#actions-and-rules)
-4. [Third-Party Arbitration](#third-party-arbitration)
-5. [Creating a Proposal](#creating-a-proposal)
-6. [Defining Roles](#defining-roles)
-7. [Join a Proposal](#join-a-proposal)
-8. [Endorsements](#endorsements)
-9. [Submit a Proposal](#submit-a-proposal)
+2. [Actions and Rules](#actions-and-rules)
+3. [Dispute and Resolution](#dispute-and-resolution)
+4. [Building a Proposal](#building-a-proposal)
+5. [Joining a Proposal](#join-a-proposal)
+6. [Endorsements](#endorsements)
+7. [Submit a Proposal](#submit-a-proposal)
 
 **Interfaces**
 
@@ -28,8 +27,8 @@ Below is a diagram of the proposal interface, plus a description for each term.
 interface ProposalData {
   content   ?: string           // Store any kind of text or json data.
   deadline  ?: number           // The max length of a published contract.
-  effective ?: number           // Set a specific date for activation.
   expires    : number           // The max length of an active contract.
+  effective ?: number           // Set a specific date for activation.
   feerate   ?: number           // Define a fee-rate to use for transactions.
   members    : MemberData[]     // Signing members of the contract.
   network    : Network          // Network (chain) of the contract.
@@ -53,17 +52,17 @@ Sets the maximum length (in seconds) for funding a contract before it expires. I
 
 A contract that is fully-funded can still expire if the funds are not confirmed. All required funds must be locked _and_ confirmed before the contract will activate.
 
-**Effective**  
-
-The effective activation date of the contract, as a UTC timestamp. This field implies a `deadline`, as all funds must be locked and confirmed _before_ the effective date is reached, or the contract is canceled.
-
-If contract funds are secured before the effective date, then the contract will delay activation until the date is reached.
-
 **Expires**  
 
 Sets the maximum length (in seconds) for an active contract to run before it expires. If an active contract reaches expiration, all funds locked to the contract are released and availabe for spending.
 
 Scheduled tasks can be used to guarantee that a contract settles before expiration.
+
+**Effective**  
+
+The effective activation date of the contract, as a UTC timestamp. This field implies a `deadline`, as all funds must be locked and confirmed _before_ the effective date is reached, or the contract is canceled.
+
+If contract funds are secured before the effective date, then the contract will delay activation until the date is reached.
 
 **Feerate**  
 
@@ -109,12 +108,12 @@ Defines a set of programs that are available to run within the CVM. Each entry s
 The following entry is an example definition of a program:
 
 ```ts
-[ 'endorse', 'close|resolve', '*', 2, buyer_pubkey, seller_pubkey ]
+[ 'endorse', 'close|resolve', 'payout|return', 2, buyer_pub, seller_pub ]
 ```
 
 These terms state that the `endorse` method can be used to `close` or `resolve` the contract, on any (`*`) spending path, using at least `2` signatures, from the `buyer_pubkey` and `seller_pubkey`.
 
-> Note: The terms `buyer_pubkey` and `seller_pubkey` would be replaced by the pubkeys themselves.
+> Note: The terms `buyer_pub` and `seller_pub` would be replaced by the pubkeys themselves.
 
 The regex format for actions and paths is intentionally limited: It accepts '|' for specifying multiple options, or a single '*' for specifying all options. No other patterns are allowed.
 
@@ -161,18 +160,46 @@ resolve : Settle the dispute on a given path.
 The logical rules for the CVM are designed to be simple:
 
 ```
-  - An open path can be locked, disputed, or closed.
-  - A locked path can be disputed or released.
-  - A disputed path can only be resolved.
-  - Closing a path will settle the contract.
-  - Resolving a dispute will settle the contract.
+ * An open path can be locked, disputed, or closed.
+ * A locked path can be disputed or released.
+ * A disputed path can only be resolved.
+ * Closing a path will settle the contract.
+ * Resolving a dispute will settle the contract.
 ```
 
 Limiting the rule-set of the virtual machine is a security feature. It prevents bugs, exploits and other edge-cases from creeping into the contract.
 
-## Third-Party Arbitration
+## Dispute and Resolution
 
-## Creating a Proposal
+If you would like to have a third-party in the contract that can make a decision during a dispute, _and only during a dispute_, then you can use the `dispute` and `resolve` actions.
+
+Members can be given the ability to `dispute` a path (which blocks it from use).  When a dispute is raised, a third-party with access to the `resolve` action can then settle the contract.
+
+```ts
+// Example of a two-party agreement with third party arbitration.
+programs : [
+  [ 'endorse', 'close|resolve', 'payout|return', 2, buyer_pub, seller_pub ],
+  [ 'endorse', 'dispute',       'payout|return', 1, buyer_pub, seller_pub ],
+  [ 'endorse', 'resolve',       'payout|return', 1, mediator_pub          ]
+]
+```
+
+The `resolve` action cannot be used unless there is an active `dispute` present. This prevents a third-party from closing a contract arbitrarily.
+
+## Building a Proposal
+
+Building a proposal is a basic three-step process:
+
+1. **Define a base template**  
+This should define the terms that apply to all members in the contract.
+
+2. **Define the roles**  
+This should define the terms that apply to each specifc role (buyer, seller, etc.). This includes `paths` and `programs` related to the role.
+
+3. **Invite others to join**  
+Once the base template and roles are defined, members can select a role to join, and their device will use the role template to complete the proposal.
+
+A basic proposal document can be created with the `create_proposal` method:
 
 ```ts
 import { create_proposal } from '@scrow/core/proposal'
@@ -186,19 +213,7 @@ const template = create_proposal({
 })
 ```
 
-## Defining Roles
-
-#### RolePolicy
-
-```ts
-interface RolePolicy {
-  limit    ?: number                // Membership limit.
-  paths    ?: [ string, number ][]  // Paths to include.
-  payment  ?: number                // Payment to include.
-  programs ?: ProgramTerms[]        // Programs to join/add.
-}
-
-```
+Similarly, a role template can be created with the `create_policy` method:
 
 ```ts
 import { create_policy } from '@scrow/core/policy'
@@ -227,9 +242,54 @@ const roles = {
 }
 ```
 
+There are a few additional options that you can define in a role template:
+
+#### RolePolicy
+
+```ts
+interface RolePolicy {
+  limit    ?: number                // Membership limit.
+  paths    ?: [ string, number ][]  // Paths to include.
+  payment  ?: number                // Payment to include.
+  programs ?: ProgramTerms[]        // Programs to join/add.
+}
+```
+
+With a proposal template and role templates defined, we can now solicit members to join our proposal, and their devices will complete the proposal based upon the role they choose.
+
 ## Join a Proposal
+
+To have a member join a proposal, you can solicit their device to `join`:
+
+```ts
+// Each member is an EscrowSigner object.
+const [ alice_signer, bob_signer, carol_signer ] = members
+
+// Start with our proposal template.
+let proposal = template
+
+// Each member will join as the provided role, 
+// and return an updated copy of the proposal.
+proposal = a_signer.proposal.join(proposal, roles.buyer)
+proposal = b_signer.proposal.join(proposal, roles.seller)
+proposal = c_signer.proposal.join(proposal, roles.agent)
+```
+
+Once all roles have been filled, the proposal will be complete.
 
 ## Endorsements
 
+An endorsement signals your approval of the current terms. To get an endorsement from a member, you can solicit their device:
+
+```ts
+const signatures = members.map(signer => {
+  // Collect an endorsement from each user's device.
+  return signer.proposal.endorse(proposal)
+})
+```
+
+Each endorsement contains the member's device pubkey and signature.
+
 ## Submit a Proposal
 
+See: [Creating a Contract](./contract.md#creating-a-contract)

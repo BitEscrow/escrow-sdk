@@ -4,38 +4,37 @@ Work in progreess. Check back later!
 
 **Sections**
 
-1. [Creating a Contract]()
-2. [Funding a Contract]()
-3. [Contract Activation]()
-4. [Virtual Machine (CVM)]()
-4. [Submitting Statements]()
-5. [Validating Execution]()
-6. [Sweeping Funds]()
+1. [Creating a Contract](#creating-a-contract)
+2. [Funding a Contract](#funding-a-contract)
+3. [Contract Activation](#contract-activation)
+4. [Virtual Machine (CVM)](#contract-virtual-machine-cvm)
+4. [Submitting Statements](#submitting-statements)
+5. [Contract Settlement](#contract-settlement)
+6. [Contract Expiration](#contract-expiration)
 
 **Interfaces**
 
-- [ContractRequest]
-- [ContractData]
-- [ContractStatus]
-- [WitnessTemplate]
-- [WitnessData]
-- [MachineState]
+- [ContractRequest]()
+- [ContractData]()
+- [ContractStatus]()
+- [WitnessTemplate]()
+- [WitnessData]()
+- [MachineState]()
 
 ## Creating a Contract
 
 ## Funding a Contract
 
-## Deadline for Collecting Funds
-
 ## Contract Activation
 
 ## Contract Virtual Machine (CVM)
 
-## Settling a Contract
+## Submitting Statements
 
-## Handling Disputes
+## Contract Settlement
 
-## Validating Execution
+* Validating execution
+* sweeping funds
 
 ## Contract Expiration
 

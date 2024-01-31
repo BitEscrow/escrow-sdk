@@ -12,7 +12,7 @@ export const template = create_proposal({
   title    : 'Basic two-party contract with third-party arbitration.',
   expires  : 14400,
   network  : network,
-  schedule : [[ 7200, 'close', 'draw' ]],
+  schedule : [[ 7200, 'close', '*' ]],
   value    : 15000,
 })
 
