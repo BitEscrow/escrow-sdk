@@ -214,19 +214,6 @@ interface SpendRequest {
 }
 ```
 
-Here is an example of closing a deposit.
-
-```ts
-// Request the funders device to sign a covenant.
-const covenant  = signer.account.commit_utxo(account, contract, utxo)
-// Build our registration request.
-const reg_req   = { covenant, deposit_pk, sequence, spend_xpub, utxo }
-// Deliver our registration request to the server.
-const res = await client.deposit.fund(reg_req)
-// Check the response is valid.
-if (!res.ok) throw new Error(res.error)
-```
-
 ## Interfaces
 
 #### DepositData
