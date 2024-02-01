@@ -1,14 +1,14 @@
 {
-  "members"   : [ "alice", "bob", "carol" ],
-  "pathnames" : [ "payout", "return" ],
-  "programs"  : [
+  "duration"   : 9999,
+  "members"    : [ "alice", "bob", "carol" ],
+  "pathnames"  : [ "payout", "return" ],
+  "programs"   : [
     [ "endorse", "dispute|lock",  "*", 1, "alice", "bob" ],
     [ "endorse", "close|resolve", "*", 2, "alice", "bob" ],
     [ "endorse", "resolve",       "*", 1, "carol" ]
   ],
-  "schedule" : [ [ 7200, "close", "payout|return" ] ],
-  "stamp"    : 9999,
-  "witness"  : [
+  "schedule"   : [ [ 7200, "close", "payout|return" ] ],
+  "statements" : [
     { "action": "lock", "method": "endorse", "path": "return", "signers": [ "alice" ] }
   ]
 }

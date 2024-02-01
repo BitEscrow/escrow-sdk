@@ -93,7 +93,8 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "demo": "./demo/run.sh",
-    "load": "tsx --tsconfig test/tsconfig.json",
+    "demo:vm": "yarn load demo/vm/eval.ts",
+    "load": "tsx --tsconfig ./test/tsconfig.json",
     "release": "yarn test && yarn build",
     "scratch": "yarn load test/scratch.ts",
     "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
