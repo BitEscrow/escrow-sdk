@@ -676,7 +676,7 @@ VERBOSE=true npm run test
 
 ### OpenAPI Specification
 
-There is an [OpenAPI 3.1](https://swagger.io/specification) specification file located at the root of this repo: [spec.yml](spec.yml)
+There is an [OpenAPI 3.1](https://swagger.io/specification) specification file located at the root of this repo, named [spec.yml](spec.yml).
 
 You can use this file to demo our API within `Postman`, `Insomnia`, or your API tool of choice.
 
