@@ -53,7 +53,7 @@ Comimg Soon:
   e. [Deposit Funds](#deposit-funds)  
   f. [Using the CVM](#contract-activation)  
   g. [Settle a Contract](#settle-a-contract)  
-3. [Development & Testing](#development--testing)
+3. [Development & Testing](#development--testing)  
   a. [Running the Main Demo](#running-the-main-demo)  
   b. [Using the Client API Demos](#using-the-client-api-demos)  
   c. [Using the CVM Eval Tool](#using-the-cvm-evaluation-tool)  
