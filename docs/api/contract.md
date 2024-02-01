@@ -4,10 +4,10 @@
 - [/api/contract/list/:pubkey](#list-contracts-by-pubkey)
 - [/api/contract/:cid](#read-a-contract-by-id)
 - [/api/contract/:cid/cancel](#cancel-a-contract)
-- [/api/contract/:cid/digest](#read-a-contract-digest-by-id)
+- [/api/contract/:cid/digest](#read-a-contract-digest)
 - [/api/contract/:cid/funds](#list-funds-in-a-contract)
 - [/api/contract/:cid/submit](#submit-a-witness-statement)
-- [/api/contract/:cid/vm](#read-a-contract-vm-state-by-id)
+- [/api/contract/:cid/vm](#read-a-contract-vm-state)
 - [/api/contract/:cid/witness](#list-statements-in-a-contract)
 
 ## Create a Contract
@@ -111,20 +111,20 @@ endpoint : '/api/contract/:cid/funds'
 **Response Interface**
 
 ```ts
-interface DepositListResponse {
+interface FundListResponse {
   data : {
-    deposits : DepositData[]
+    funds : DepositDigest[]
   }
 }
 ```
 
-## Read a Contract Digest By Id
+## Read a Contract Digest
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/contract/:cid/status'
+endpoint : '/api/contract/:cid/digest'
 ```
 
 **Response Interface**
@@ -166,7 +166,7 @@ interface ContractDataResponse {
 }
 ```
 
-## Read a Contract VM State By Id
+## Read a Contract VM State
 
 **Request Format**
 

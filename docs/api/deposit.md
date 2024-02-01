@@ -5,7 +5,7 @@
 - [/api/deposit/commit](#commit-to-a-contract)  
 - [/api/deposit/list/:pubkey](#list-deposits-by-pubkey)  
 - [/api/deposit/:dpid](#read-a-deposit-by-id)  
-- [/api/deposit/:dpid/digest](#read-a-deposit-digest-by-id)  
+- [/api/deposit/:dpid/digest](#read-a-deposit-digest)  
 - [/api/deposit/:dpid/lock](#lock-funds-to-a-contract)  
 - [/api/deposit/:dpid/close](#close-a-deposit)  
 
@@ -158,7 +158,7 @@ interface FundDataResponse {
 }
 ```
 
-## Read a Deposit Digest By Id
+## Read a Deposit Digest
 
 **Request Format**
 
