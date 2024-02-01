@@ -102,14 +102,3 @@ type DepositStatus =
   'expired'  | 
   'error'
 ```
-
-## TxOutput
-
-```ts
-interface TxOutput {
-  txid      : string,
-  vout      : number,
-  value     : number,
-  scriptkey : string
-}
-```

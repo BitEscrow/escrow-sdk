@@ -57,7 +57,7 @@ Register a utxo in the blockchain/mempool with a deposit account.
 Related interfaces:
 
 - [DepositData](../interfaces/deposit.md#depositdata)
-- [TxOutput](../interfaces/deposit.md#txoutput)
+- [TxOutput](../interfaces/oracle.md#txoutput)
 
 **Request Format**
 
@@ -99,7 +99,7 @@ Related interfaces:
 - [ContractData](../interfaces/contract.md#contractdata)
 - [CovenantData](../interfaces/deposit.md#covenantdata)
 - [DepositData](../interfaces/deposit.md#depositdata)
-- [TxOutput](../interfaces/deposit.md#txoutput)
+- [TxOutput](../interfaces/oracle.md#txoutput)
 
 **Request Format**
 
