@@ -14,8 +14,8 @@ depositor.account.verify(account)
 
 /** ========== [ Calculate Deposit Amount ] ========== **/
 
-// Unpack account data.
-const { address, deposit_pk, sequence, spend_xpub } = account
+// Unpack account address.
+const { address } = account
 // Compute a txfee from the feerate.
 const vin_fee   = contract.feerate * 65
 // Compute a total amount (in sats) with the txfee.
@@ -57,15 +57,13 @@ console.log('\nutxo:', utxos[0])
 /** ========== [ Create Deposit Covenant ] ========== **/
 
 // Choose our first signer as the funder.
-const signer    = signers[0]
+const signer     = signers[0]
 // Get the output data from the utxo.
-const utxo      = utxos[0].txspend
+const utxo       = utxos[0].txspend
 // Request the funders device to sign a covenant.
-const covenant  = signer.account.commit(account, contract, utxo)
-// Build our registration request to the server.
-const reg_req   = { covenant, deposit_pk, sequence, spend_xpub, utxo }
+const commit_req = signer.account.commit(account, contract, utxo)
 // Deliver our registration request to the server.
-const res = await client.deposit.commit(reg_req)
+const res = await client.deposit.commit(commit_req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 

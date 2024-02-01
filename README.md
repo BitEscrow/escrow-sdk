@@ -110,11 +110,11 @@ There is no specification placed on how to communicate the proposal between part
 
 > Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
 
-Once a proposal has been decided, any member can deliver it to the escrow server. The server will validate all terms and endorsements, then publish an open [contract](docs/contract.md) for review and funding.
+Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](docs/contract.md) for funding.
 
 ### Funding
 
-To fund a contract, each funder first requests a deposit [account](docs/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds into a contract, the funding party will first request a deposit [account](docs/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
@@ -130,9 +130,9 @@ interface DepositAccount {
 }
 ```
 
-The funder independently verifies the account information, then sends their funds to the account address.
+The funder independently verifies the account information, then sends their funds into the account address.
 
-Once the transaction is visible in the mempool, the funder commits the funds to a contract by pre-signing the contract's spending paths:
+Once the transaction is in the mempool, the funder can commit the funds to a contract by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms. The combination of these signatures form a [covenant](docs/deposit.md) with the contract.
 
 ```ts
 interface CovenantData {
@@ -145,15 +145,13 @@ interface CovenantData {
 }
 ```
 
-These signatures authorize the contract to spend the deposit, based on the contract terms. The combination of these signatures form a [covenant](docs/deposit.md) with the contract.
-
 Once a covenant is made, the deposit is locked in escrow. When enough funds have been locked and confirmed, the contract becomes active.
 
 ### Settlement
 
 The final round of the protocol is the `settlement`. This is the most exciting round, as members get to decide how the money shall be spent.
 
-Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started (with the `cid` as `head`):
+Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started (with the contract identifier as `head`):
 
 ```ts
 vm_state: {
@@ -162,49 +160,12 @@ vm_state: {
   head     : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
   output   : null,
   paths    : [ [ 'draw', 0 ], [ 'heads', 0 ], [ 'tails', 0 ] ],
-  programs : [
-    [
-      '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b',
-      'endorse',
-      'close',
-      'heads|tails|draw',
-      2,
-      'effe19ba82f5451739b1d3471dae675c476147bab74e6654f1aaba82e2d96d9f',
-      'f1b1d3a097db6acb76e9296e1e41db169a781813301b4853207ee3b6e39c72b9'
-    ],
-    [
-      'cf236c4e91678bddaaa482d41720f277bb7d2e4540a0fc47736b999a54d29e39',
-      'endorse',
-      'dispute',
-      'heads|tails',
-      1,
-      'effe19ba82f5451739b1d3471dae675c476147bab74e6654f1aaba82e2d96d9f',
-      'f1b1d3a097db6acb76e9296e1e41db169a781813301b4853207ee3b6e39c72b9'
-    ],
-    [
-      'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a',
-      'endorse',
-      'resolve',
-      'heads|tails|draw',
-      1,
-      'bbcd74c7c9a1a9d30ac3f2acbc55bae1ba2b5c76f93eb335f2a4478b61fed189'
-    ]
-  ],
   start : 1706511301,
   steps : 0,
   store : [
-    [
-      '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b',
-      '[]'
-    ],
-    [
-      'cf236c4e91678bddaaa482d41720f277bb7d2e4540a0fc47736b999a54d29e39',
-      '[]'
-    ],
-    [
-      'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a',
-      '[]'
-    ]
+    [ '054fef5ba39416260ea4b48e9c557ee7e45d780d04b28e094d110459b971b78b', '[]' ],
+    [ 'cf236c4e91678bddaaa482d41720f277bb7d2e4540a0fc47736b999a54d29e39', '[]' ],
+    [ 'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a', '[]' ]
   ],
   status  : 'init',
   tasks   : [ [ 7200, 'close', 'draw' ] ],
@@ -214,7 +175,7 @@ vm_state: {
 
 Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](docs/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
 
-Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`: 
+Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
 
 ```ts
 {
@@ -334,7 +295,7 @@ To run the demo, simply clone this repository, then run the following commands:
 
 ```sh
 npm install           # Install all package dependencies.
-npm run demo {chain}  # Run the demo using the selected chain.
+npm run demo {chain}  # Run the demo using the provided chain.
 ```
 
 > Note: The current chains available are `mutiny`, `signet`, and `testnet`. The default chain is `mutiny`.
