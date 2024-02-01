@@ -1,5 +1,9 @@
 # Witness API
 
+Reference guide for the BitEscrow Witness API.
+
+> Click on the links below to navigate:
+
 [`/api/witness/:wid`](#read-a-statement-by-id)  
 
 ## Read a Statement By Id

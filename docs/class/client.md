@@ -1,9 +1,13 @@
 # EscrowClient Class
 
-[ClientConfig](#clientconfig)  
-[EscrowClient](#escrowclient)  
+Reference guide for the EscrowClient API.
+
+- [ClientConfig](#clientconfig)  
+- [EscrowClient](#escrowclient)  
 
 ## ClientConfig
+
+Configuration infterface for the EscrowClient.
 
 ```ts
 interface ClientConfig {
@@ -14,6 +18,8 @@ interface ClientConfig {
 ```
 
 ## EscrowClient
+
+Class interface for the EscrowClient.
 
 ```ts
 class EscrowClient {

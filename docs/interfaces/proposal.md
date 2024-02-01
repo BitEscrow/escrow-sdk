@@ -1,5 +1,9 @@
 # Proposal Interfaces
 
+List of interfaces for the Proposal API.
+
+> Click on the links below to navigate:
+
 - [ProposalData](#proposaldata)  
 - [MemberData](#memberdata)  
 - [RolePolicy](#rolepolicy)  

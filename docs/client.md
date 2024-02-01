@@ -1,6 +1,8 @@
 # EscrowClient Docs
 
-The `EscrowClient` is a basic client for consuming our API. It is designed to be used for any tasks which do not require an identity or signature.
+The `EscrowClient` is a basic client for consuming our API. It has access to all endpoints offered by the escrow server.
+
+> The client does not include a signing device. For signing operations, see [EscrowSigner](./signer.md).
 
 **Sections**
 
@@ -14,7 +16,7 @@ The `EscrowClient` is a basic client for consuming our API. It is designed to be
 
 ## How to Use
 
-To create a client, simply specify a configuration, then call `new EscrowClient`:
+To create a client, simply specify a configuration, then call _new EscrowClient_:
 
 ```ts
 import { EscrowClient } from '@scrow/core/client'

@@ -1,9 +1,13 @@
 # EscrowSigner Class
 
-[SignerConfig](#signerconfig)  
-[EscrowSigner](#escrowsigner)  
+Reference guide for the EscrowSigner API.
+
+- [SignerConfig](#signerconfig)  
+- [EscrowSigner](#escrowsigner)  
 
 ## SignerConfig
+
+Configuration infterface for the EscrowSigner.
 
 ```ts
 interface SignerConfig extends ClientConfig {
@@ -23,6 +27,8 @@ interface SignerConfig extends ClientConfig {
 ```
 
 ## EscrowSigner
+
+Class interface for the EscrowSigner.
 
 ```ts
 class EscrowSigner {

@@ -1,25 +1,8 @@
-# Server Policy API
+## Server Interfaces
 
-## Get Server Policy
+List of interfaces for the Server API.
 
-**Request Format**
-
-```ts
-method   : 'GET'
-endpoint : '/api/policy'
-```
-
-**Response Interface**
-
-```ts
-interface ServerPolicyResponse {
-  data : {
-    policy : ServerPolicy
-  }
-}
-```
-
-#### ServerConfig Interface
+## ServerPolicy
 
 ```ts
 export interface ServerPolicy {

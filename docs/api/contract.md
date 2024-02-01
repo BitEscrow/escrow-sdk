@@ -1,5 +1,9 @@
 # Contract API
 
+Reference guide for the BitEscrow Contract API.
+
+> Click on the links below to navigate:
+
 - [/api/contract/create](#create-a-contract)
 - [/api/contract/list/:pubkey](#list-contracts-by-pubkey)
 - [/api/contract/:cid](#read-a-contract-by-id)
@@ -11,6 +15,13 @@
 - [/api/contract/:cid/witness](#list-statements-in-a-contract)
 
 ## Create a Contract
+
+Create a new contract on the escrow server.
+
+Related interfaces:
+
+- [ProposalData](../interfaces/proposal.md#proposaldata)
+- [ContractData](../interfaces/contract.md#contractdata)
 
 **Request Format**
 
@@ -42,6 +53,13 @@ interface ContractDataResponse {
 
 ## List Contracts By Pubkey
 
+Request a list of contracts that are tagged by a specific pubkey.
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+
+
 **Request Format**
 
 ```ts
@@ -62,6 +80,12 @@ interface ContractListResponse {
 
 ## Read a Contract By Id
 
+Fetch a contract from the server by its contract id (cid).
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+
 **Request Format**
 
 ```ts
@@ -80,6 +104,13 @@ interface ContractDataResponse {
 ```
 
 ## Cancel a Contract
+
+Request to cancel a contract (must be the moderator).
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+
 
 **Request Format**
 
@@ -101,6 +132,12 @@ interface ContractDataResponse {
 
 ## List Funds in a Contract
 
+Request a list of funds that are locked to a contract id (cid).
+
+Related interfaces:
+
+- [DepositDigest](../interfaces/deposit.md#depositdigest)
+
 **Request Format**
 
 ```ts
@@ -120,6 +157,12 @@ interface FundListResponse {
 
 ## Read a Contract Digest
 
+Fetch a more compact version of the contract (for polling).
+
+Related interfaces:
+
+- [ContractDigest](../interfaces/contract.md#contractdigest)
+
 **Request Format**
 
 ```ts
@@ -138,6 +181,13 @@ interface ContractDigestResponse {
 ```
 
 ## Submit a Witness Statement
+
+Submit a witness statement to the contract VM.
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+- [WitnessData](../interfaces/witness.md#witnessdata)
 
 **Request Format**
 
@@ -168,6 +218,11 @@ interface ContractDataResponse {
 
 ## Read a Contract VM State
 
+Fetch a contract's machine state via the contract id (cid).
+
+- [ContractStatus](../interfaces/contract.md#contractstatus)
+- [StateData](../interfaces/contract.md#statedata)
+
 **Request Format**
 
 ```ts
@@ -188,6 +243,12 @@ interface ContractVMStateResponse {
 ```
 
 ## List Statements in a Contract
+
+Request all recorded witness statements for a contract.
+
+Related interfaces:
+
+- [WitnessData](../interfaces/witness.md#witnessdata)
 
 **Request Format**
 

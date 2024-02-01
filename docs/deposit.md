@@ -1,6 +1,6 @@
 # Deposit Docs
 
-Work in progreess. Check back later!
+A deposit is a multi-signature account that holds a Bitcoin `utxo`. It is used for negotiating funds for a contract.
 
 **Sections**
 
@@ -32,8 +32,6 @@ const acct_req = signer.account.create(locktime)
 
 The account request from the signer will look like this:
 
-#### AccountRequest
-
 ```ts
 interface AccountRequest {
   deposit_pk : string  // The public key of the depositor.
@@ -55,8 +53,6 @@ const { account } = acct_res.data
 ```
 
 If the request is successful, the client will receive an account in response:
-
-#### DepositAccount
 
 ```ts
 interface DepositAccount {
@@ -119,8 +115,6 @@ Before we can spend our freshly deposited `utxo`, we have to register it with th
 
 A registration request looks like this:
 
-#### RegisterRequest
-
 ```ts
 interface RegisterRequest {
   covenant    ?: CovenantData  // Provide a covenant to lock the deposit
@@ -134,8 +128,6 @@ interface RegisterRequest {
 There are two ways to register a `utxo`: _with_ or _without_ a covenant. 
 
 A covenant is what locks your funds to a contract. It is a bundle of partial signatures that authroizes the spending paths in a contract.
-
-#### CovenantData
 
 ```ts
 interface CovenantData {

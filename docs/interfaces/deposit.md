@@ -1,9 +1,14 @@
 # Deposit Interfaces
 
-[DepositAccount](#depositaccount)  
-[CovenantData](#covenantdata)  
-[DepositData](#depositdata)  
-[DepositStatus](#depositstatus)  
+List of interfaces for the Deposit API.
+
+> Click on the links below to navigate:
+
+- [DepositAccount](#depositaccount)  
+- [CovenantData](#covenantdata)  
+- [DepositData](#depositdata)  
+- [DepositDigest](#depositdigest)  
+- [DepositStatus](#depositstatus)  
 
 ## DepositAccount
 
@@ -64,6 +69,25 @@ interface DepositData {
 }
 ```
 
+## DepositDigest
+
+```ts
+interface DepositDigest {
+  block_height : number | null
+  cid          : string | null
+  confirmed    : boolean
+  expires_at   : number | null
+  settled      : boolean
+  spent        : boolean
+  spent_txid   : string | null
+  status       : DepositStatus
+  updated_at   : number
+  txid         : string
+  value        : number
+  vout         : number
+}
+```
+
 ## DepositStatus
 
 ```ts
@@ -77,4 +101,15 @@ type DepositStatus =
   'settled'  | 
   'expired'  | 
   'error'
+```
+
+## TxOutput
+
+```ts
+interface TxOutput {
+  txid      : string,
+  vout      : number,
+  value     : number,
+  scriptkey : string
+}
 ```

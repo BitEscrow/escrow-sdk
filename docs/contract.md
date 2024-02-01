@@ -1,6 +1,6 @@
 # Contract Docs
 
-A contract is the final, executable version of a [proposal](proposal.md). It is hosted by the escrow server, and executed through the use of a virtual machine.
+A contract is the published version of a [proposal](proposal.md). It is hosted by the escrow server, and executed through the use of a virtual machine.
 
 **Sections**
 

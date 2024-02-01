@@ -1,6 +1,6 @@
 # Proposal Docs
 
-Work in progreess. Check back later!
+The proposal is a pre-cursor to creating a contract. It defines all the members the contract, and the complete terms for locking funds in escrow.
 
 **Sections**
 
@@ -19,8 +19,6 @@ Work in progreess. Check back later!
 ## Proposal Overview
 
 Below is a diagram of the proposal interface, plus a description for each term.
-
-#### ProposalData
 
 ```ts
 interface ProposalData {
@@ -47,13 +45,15 @@ This field is designed for storing any kind of text or structured data. Feel fre
 
 **Deadline**  
 
-Sets the maximum length (in seconds) for funding a contract before it expires. If there are funds locked to a contract when it expires, those funds are released and availabe for spending.
+Sets the maximum duration (in seconds) that a contract is availabe for funding before it expires. If there are funds locked to a contract when it expires, those funds are released and availabe for spending.
 
 A contract that is fully-funded can still expire if the funds are not confirmed. All required funds must be locked _and_ confirmed before the contract will activate.
 
 **Expires**  
 
-Sets the maximum length (in seconds) for an active contract to run before it expires. If an active contract reaches expiration, all funds locked to the contract are released and availabe for spending.
+> (will rename this field to "duration" in the future)
+
+Sets the maximum duration (in seconds) for an active contract to run before it expires. If an active contract reaches expiration, the contract is canceled, and all covenant locks are released.
 
 Scheduled tasks can be used to guarantee that a contract settles before expiration.
 

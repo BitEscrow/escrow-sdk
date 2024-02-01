@@ -1,5 +1,9 @@
 # Deposit API
 
+Reference guide for the BitEscrow Deposit API.
+
+> Click on the links below to navigate:
+
 - [/api/deposit/request](#request-a-deposit-account)  
 - [/api/deposit/register](#register-a-deposit)  
 - [/api/deposit/commit](#commit-to-a-contract)  
@@ -10,6 +14,12 @@
 - [/api/deposit/:dpid/close](#close-a-deposit)  
 
 ## Request a Deposit Account
+
+Request a new deposit account from the escrow server.
+
+Related interfaces:
+
+- [DepositAccount](../interfaces/deposit.md#depositaccount)
 
 **Request Format**
 
@@ -41,6 +51,13 @@ interface AccountDataResponse {
 ```
 
 ## Register a Deposit
+
+Register a utxo in the blockchain/mempool with a deposit account.
+
+Related interfaces:
+
+- [DepositData](../interfaces/deposit.md#depositdata)
+- [TxOutput](../interfaces/deposit.md#txoutput)
 
 **Request Format**
 
@@ -74,6 +91,15 @@ interface DepositDataResponse {
 ```
 
 ## Commit to a Contract
+
+Register and commit a utxo in the blockchain/mempool to a contract.
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+- [CovenantData](../interfaces/deposit.md#covenantdata)
+- [DepositData](../interfaces/deposit.md#depositdata)
+- [TxOutput](../interfaces/deposit.md#txoutput)
 
 **Request Format**
 
@@ -110,6 +136,12 @@ interface FundDataResponse {
 
 ## List Deposits By Pubkey
 
+Request a list of deposits that are tagged by a specific pubkey.
+
+Related interfaces:
+
+- [DepositData](../interfaces/deposit.md#depositdata)
+
 **Request Format**
 
 ```ts
@@ -129,6 +161,14 @@ interface DepositListResponse {
 ```
 
 ## Lock Funds to a Contract
+
+Lock an existing deposit account to a contract.
+
+Related interfaces:
+
+- [ContractData](../interfaces/contract.md#contractdata)
+- [CovenantData](../interfaces/deposit.md#covenantdata)
+- [DepositData](../interfaces/deposit.md#depositdata)
 
 **Request Format**
 
@@ -160,6 +200,12 @@ interface FundDataResponse {
 
 ## Read a Deposit Digest
 
+Fetch a more compact version of the deposit (for polling).
+
+Related interfaces:
+
+- [DepositDigest](../interfaces/deposit.md#depositdigest)
+
 **Request Format**
 
 ```ts
@@ -178,6 +224,12 @@ interface DepositDigestResponse {
 ```
 
 ## Close a Deposit
+
+Close a deposit account and return funds to the registered xpub.
+
+Related interfaces:
+
+- [DepositData](../interfaces/deposit.md#depositdata)
 
 **Request Format**
 

@@ -1,8 +1,13 @@
 # Contract Interfaces
 
-[ContractData](#contractdata)  
-[ContractStatus](#contractstatus)  
-[StateData](#statedata)  
+List of interfaces for the Contract API.
+
+> Click on the links below to navigate:
+
+- [ContractData](#contractdata)  
+- [ContractDigest](#contractdigest)  
+- [ContractStatus](#contractstatus)  
+- [StateData](#statedata)  
 
 ## ContractData
 
@@ -39,6 +44,26 @@ interface ContractData {
   updated_at  : number
   vm_state    : null | StateData
   vout_size   : number
+}
+
+```
+
+## ContractDigest
+
+```ts
+interface ContractDigest {
+  activated  : number | null
+  balance    : number
+  est_txsize : number
+  est_txfee  : number
+  pending    : number
+  settled    : boolean
+  spent      : boolean
+  spent_txid : string | null
+  status     : ContractStatus
+  total      : number
+  txin_count : number
+  updated_at : number
 }
 
 ```
