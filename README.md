@@ -58,6 +58,7 @@ Comimg Soon:
   b. [Using the Client API Demos](#using-the-client-api-demos)  
   c. [Using the CVM Eval Tool](#using-the-cvm-evaluation-tool)  
   d. [Using the Test Suite](#using-the-test-suite)  
+  e. [OpenAPI Specification](#openapi-specification)  
 4. [Questions & Issues](#questions--issues)
 5. [Contribution](#contribution)
 6. [Resources](#resources)
@@ -672,6 +673,12 @@ Example of running the current test suite in verbose mode:
 ```bash
 VERBOSE=true npm run test
 ```
+
+### OpenAPI Specification
+
+There is an [OpenAPI 3.1](https://swagger.io/specification) specification file located at the root of this repo: [spec.yml](spec.yml)
+
+You can use this file to demo our API within `Postman`, `Insomnia`, or your API tool of choice.
 
 Please stay tuned for more documentation and updates!
 
