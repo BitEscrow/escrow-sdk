@@ -5,6 +5,13 @@ import { signers }             from './02_create_signer.js'
 import { contract }            from './05_create_contract.js'
 import { account }             from './06_request_account.js'
 
+/** ========== [ Verify the Account ] ========== **/
+
+// Select the depositor from the signers.
+const depositor = signers[0]
+// Verify the deposit.
+depositor.account.verify(account)
+
 /** ========== [ Calculate Deposit Amount ] ========== **/
 
 // Unpack account data.
@@ -54,11 +61,11 @@ const signer    = signers[0]
 // Get the output data from the utxo.
 const utxo      = utxos[0].txspend
 // Request the funders device to sign a covenant.
-const covenant  = signer.account.commit_utxo(account, contract, utxo)
+const covenant  = signer.account.commit(account, contract, utxo)
 // Build our registration request to the server.
 const reg_req   = { covenant, deposit_pk, sequence, spend_xpub, utxo }
 // Deliver our registration request to the server.
-const res = await client.deposit.fund(reg_req)
+const res = await client.deposit.commit(reg_req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 

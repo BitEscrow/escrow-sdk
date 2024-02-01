@@ -2,7 +2,7 @@ import { z } from 'zod'
 import base  from './base.js'
 import tx    from './tx.js'
  
-const { bech32, hash, hex, nonce, num, psig, stamp, str } = base
+const { bech32, bool, hash, hex, nonce, num, psig, stamp, str } = base
 const { close_state, spend_state, txspend } = tx
 
 const confirmed = z.object({
@@ -52,16 +52,34 @@ const acct_req = z.object({
 const reg_req = z.object({
   covenant    : covenant.optional(),
   deposit_pk  : hash,
-  return_psig : hex.optional(),
   sequence    : num,
   spend_xpub  : str,
   utxo        : txspend
 })
 
-const spend_req = z.object({
-  feerate : num,
+const commit_req = reg_req.extend({ covenant : covenant.required() })
+
+const lock_req = z.object({ covenant })
+
+const close_req = z.object({
   pnonce  : nonce,
   psig    : hex,
+  txfee   : num
+})
+
+const digest = z.object({
+  block_height : num.nullable(),
+  cid          : hash.nullable(),
+  confirmed    : bool,
+  expires_at   : stamp.nullable(),
+  settled      : bool,
+  spent        : bool,
+  spent_txid   : hash.nullable(),
+  status,
+  updated_at   : stamp,
+  txid         : hash,
+  value        : num,
+  vout         : num
 })
 
 const data = z.object({
@@ -79,4 +97,4 @@ const data = z.object({
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state).and(txspend)
 
-export default { account, covenant, data, state, acct_req, reg_req, spend_req, status }
+export default { account, covenant, data, digest, state, acct_req, lock_req, reg_req, commit_req, close_req, status }

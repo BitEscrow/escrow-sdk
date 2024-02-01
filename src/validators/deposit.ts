@@ -6,8 +6,10 @@ import {
   DepositContext,
   DepositData,
   RegisterRequest,
-  SpendRequest,
-  TxOutput
+  CloseRequest,
+  TxOutput,
+  CommitRequest,
+  LockRequest
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -25,10 +27,22 @@ export function validate_register_req (
   schema.deposit.reg_req.parse(template)
 }
 
-export function validate_spend_req (
+export function validate_commit_req (
   template : unknown
-) : asserts template is SpendRequest {
-  schema.deposit.spend_req.parse(template)
+) : asserts template is CommitRequest {
+  schema.deposit.commit_req.parse(template)
+}
+
+export function validate_lock_req (
+  template : unknown
+) : asserts template is LockRequest {
+  schema.deposit.lock_req.parse(template)
+}
+
+export function validate_close_req (
+  template : unknown
+) : asserts template is CloseRequest {
+  schema.deposit.close_req.parse(template)
 }
 
 export function validate_deposit (

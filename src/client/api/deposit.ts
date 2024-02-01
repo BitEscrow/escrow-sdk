@@ -3,13 +3,13 @@ import { EscrowClient } from '../class/client.js'
 
 import {
   validate_account_req,
-  validate_covenant,
   validate_register_req,
-  validate_spend_req
+  validate_commit_req,
+  validate_close_req,
+  validate_lock_req
 } from '@/validators/index.js'
 
 import {
-  CovenantData,
   ApiResponse,
   AccountRequest,
   AccountDataResponse,
@@ -17,7 +17,10 @@ import {
   DepositListResponse,
   FundingDataResponse,
   RegisterRequest,
-  SpendRequest
+  CommitRequest,
+  CloseRequest,
+  LockRequest,
+  DepositDigestResponse
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -68,16 +71,14 @@ function register_deposit_api (client : EscrowClient) {
 /**
  * Fund a contract directly using a deposit template.
  */
-function register_funds_api (client : EscrowClient) {
+function commit_deposit_api (client : EscrowClient) {
   return async (
-    request : RegisterRequest
+    request : CommitRequest
   ) : Promise<ApiResponse<FundingDataResponse>> => {
-    // Assert that a covenant is defined.
-    assert.ok(request.covenant !== undefined, 'covenant is undefined')
     // Validate the request.
-    validate_register_req(request)
+    validate_commit_req(request)
     // Formulate the request url.
-    const url  = `${client.host}/api/deposit/register`
+    const url  = `${client.host}/api/deposit/commit`
     // Forulate the request body.
     const init = {
       method  : 'POST',
@@ -90,7 +91,7 @@ function register_funds_api (client : EscrowClient) {
 }
 
 /**
- * 
+ * Fetch a deposit from the server by Id.
  */
 function read_deposit_api (client : EscrowClient) {
   return async (
@@ -105,6 +106,22 @@ function read_deposit_api (client : EscrowClient) {
   }
 }
 
+/**
+ * Fetch a deposit's status from the server by Id.
+ */
+function read_deposit_digest_api (client : EscrowClient) {
+  return async (
+    dpid  : string
+  ) : Promise<ApiResponse<DepositDigestResponse>> => {
+    // Validate the deposit id.
+    assert.is_hash(dpid)
+    // Formulate the request.
+    const url = `${client.host}/api/deposit/${dpid}/digest`
+    // Return the response.
+    return client.fetcher<DepositDigestResponse>({ url })
+  }
+}
+
 function list_deposit_api (client : EscrowClient) {
   return async (
     pubkey : string,
@@ -116,29 +133,28 @@ function list_deposit_api (client : EscrowClient) {
     const url = `${client.host}/api/deposit/list/${pubkey}`
     // Define the request config.
     const init = {
-      method  : 'POST',
-      body    : token,
-      headers : { 'content-type' : 'text/plain' }
+      method  : 'GET',
+      headers : { 'Authorization' : 'Bearer ' + token }
     }
     // Return the response.
     return client.fetcher<DepositListResponse>({ url, init })
   }
 }
 
-function commit_funds_api (client : EscrowClient) {
+function lock_deposit_api (client : EscrowClient) {
   return async (
-    dpid     : string,
-    covenant : CovenantData
+    dpid    : string,
+    request : LockRequest
   ) : Promise<ApiResponse<FundingDataResponse>> => {
     // Validate the deposit id.
     assert.is_hash(dpid)
-    // Validate the covenant.
-    validate_covenant(covenant)
+    // Validate the request body.
+    validate_lock_req(request)
     // Create the request url.
-    const url    = `${client.host}/api/deposit/${dpid}/commit`
+    const url    = `${client.host}/api/deposit/${dpid}/lock`
     // Create the request object.
     const init   = {
-      body    : JSON.stringify(covenant),
+      body    : JSON.stringify(request),
       method  : 'POST',
       headers : { 'content-type' : 'application/json' }
     }
@@ -149,13 +165,18 @@ function commit_funds_api (client : EscrowClient) {
 
 function close_deposit_api (client : EscrowClient) {
   return async (
-    dpid : string,
-    req  : SpendRequest
+    dpid    : string,
+    request : CloseRequest
   ) : Promise<ApiResponse<DepositDataResponse>> => {
-    validate_spend_req(req)
+    // Validate the deposit id.
+    assert.is_hash(dpid)
+    // Validate the request body.
+    validate_close_req(request)
+    // Create the request url.
     const url  = `${client._host}/api/deposit/${dpid}/close`
+    // Create the request object.
     const init = {
-      body    : JSON.stringify(req),
+      body    : JSON.stringify(request),
       headers : { 'content-type': 'application/json' },
       method  : 'POST'
     }
@@ -165,12 +186,13 @@ function close_deposit_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    read     : read_deposit_api(client),
-    list     : list_deposit_api(client),
-    commit   : commit_funds_api(client),
-    fund     : register_funds_api(client),
-    register : register_deposit_api(client),
     request  : request_account_api(client),
+    register : register_deposit_api(client),
+    commit   : commit_deposit_api(client),
+    digest   : read_deposit_digest_api(client),
+    list     : list_deposit_api(client),
+    read     : read_deposit_api(client),
+    lock     : lock_deposit_api(client),
     close    : close_deposit_api(client)
   }
 }

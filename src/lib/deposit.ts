@@ -1,7 +1,6 @@
 import { parse_extkey }      from '@cmdcode/crypto-tools/hd'
 import { validate_deposit }  from '@/validators/deposit.js'
 import { get_return_script } from './return.js'
-import { RETURN_TX_VSIZE }   from '@/config.js'
 
 import {
   get_object_id,
@@ -27,7 +26,8 @@ import {
   OracleTxStatus,
   Network,
   AgentSession,
-  RegisterRequest
+  RegisterRequest,
+  CommitRequest
 } from '../types/index.js'
 
 /**
@@ -121,10 +121,10 @@ export function get_deposit_ctx (
 
 export function get_deposit_id (
   created_at : number,
-  request    : RegisterRequest,
+  request    : RegisterRequest | CommitRequest,
 ) {
-  const { covenant, return_psig, utxo, ...rest } = request
-  const preimg = { ...rest, ...utxo, created_at }
+  const { deposit_pk, sequence, spend_xpub, utxo } = request
+  const preimg = { created_at, deposit_pk, sequence, spend_xpub, utxo }
   return get_object_id(preimg).hex
 }
 
@@ -169,16 +169,14 @@ export function get_ext_pubkey (xpub : string) {
 }
 
 export function get_close_tx_template (
-  value   : number,
-  xpub    : string,
-  feerate : number
+  txfee : number,
+  value : number,
+  xpub  : string
 ) {
   // Parse the return pubkey.
   const return_pk = get_ext_pubkey(xpub)
   // Create locking script.
   const script  = [ 'OP_1', return_pk ]
-  // Calculate the transaction fee.
-  const txfee = Math.ceil(RETURN_TX_VSIZE * feerate)
   // Return a transaction using the provided params.
   return create_tx_template(script, value - txfee)
 }

@@ -647,6 +647,8 @@ This project uses the following scripts:
   test          : Runs the current test suite in `test/tape.ts`.
 ```
 
+## Running the Demo
+
 Example of running the demo on the mutiny chain (using npm):
 
 ```bash
@@ -654,6 +656,14 @@ npm run demo mutiny
 ```
 
 > The available test chains are mutiny, signet, and testnet.
+
+## Running the CVM Tool
+
+```
+
+```
+
+## Running the Test Suite
 
 Example of running the current test suite in verbose mode:
 

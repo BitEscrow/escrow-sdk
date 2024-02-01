@@ -14,10 +14,28 @@ import {
 import {
   ContractConfig,
   ContractData,
+  ContractStatus,
   PaymentEntry,
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
+
+const GET_INIT_CONTRACT = () => {
+  return {
+    activated   : null,
+    balance     : 0,
+    expires_at  : null,
+    pending     : 0,
+    settled     : false as const,
+    settled_at  : null,
+    spent       : false as const,
+    spent_at    : null,
+    spent_txid  : null,
+    status      : 'published' as ContractStatus, 
+    txin_count  : 0,
+    vm_state    : null
+  }
+}
 
 /**
  * Returns a new ContractData object.
@@ -43,34 +61,24 @@ export function create_contract (
   const txfee     = vout_size * feerate
   // Return a completed contract.
   return sort_record({
+    ...GET_INIT_CONTRACT(),
     ...session,
-    activated   : null,
     agent_fee   : agent_fee,
-    balance     : 0,
     cid         : cid,
     deadline    : get_deadline(terms, published),
     est_txfee   : txfee,
     est_txsize  : vout_size,
-    expires_at  : null,
     feerate     : feerate,
     moderator   : config.moderator ?? null,
     outputs     : outputs,
-    pending     : 0,
     prop_id     : prop_id,
     pubkeys     : signatures.map(e => e.slice(0, 64)),
     published   : published,
-    settled     : false,
-    settled_at  : null,
     signatures  : signatures,
-    spent       : false,
-    spent_at    : null,
-    spent_txid  : null,
-    status      : 'published',
     subtotal    : subtotal,
     terms       : terms,
     total       : subtotal + txfee,
     updated_at  : published,
-    vm_state    : null,
     vout_size   : vout_size
   })
 }

@@ -5,12 +5,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test</title>
-  <script src="../../dist/browser.js"></script>
+  <script src="../../dist/script.js"></script>
 </head>
 <body>
   <script>
     const { lib } = window.escrow_core
-    const prop = lib.parse.parse_proposal({
+    const prop = lib.proposal.create_proposal({
       title    : 'Basic two-party contract with third-party dispute resolution.',
       expires  : 14400,
       details  : 'n/a',

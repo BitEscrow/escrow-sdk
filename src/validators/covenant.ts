@@ -19,7 +19,7 @@ import {
   DepositData,
   MutexEntry,
   SignerAPI,
-  SpendRequest
+  CloseRequest
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -54,16 +54,16 @@ export function verify_covenant (
   check_deposit_psigs(entries, covenant.psigs)
 }
 
-export function verify_spend_req (
+export function verify_close (
   dp_agent : SignerAPI,
   deposit  : DepositData,
-  request  : SpendRequest
+  request  : CloseRequest
 ) {
   const { agent_pn, spend_xpub, value } = deposit
-  const { feerate, pnonce, psig } = request
+  const { pnonce, psig, txfee } = request
   check_deposit_agent(dp_agent, deposit)
   const pnonces = [ pnonce, agent_pn ]
-  const txhex   = get_close_tx_template(value, spend_xpub, feerate)
+  const txhex   = get_close_tx_template(txfee, value, spend_xpub)
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
   verify_mutex_psig(mutex, psig)
 }

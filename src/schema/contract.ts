@@ -4,7 +4,7 @@ import proposal from './proposal.js'
 import tx       from './tx.js'
 import vm       from './vm.js'
 
-const { hash, hex, label, nonce, num, payment, stamp } = base
+const { bool, hash, hex, label, nonce, num, payment, stamp } = base
 const { data : terms } = proposal
 const { close_state, spend_state } = tx
 
@@ -20,6 +20,21 @@ const output  = z.tuple([ label, hex ])
 const request = z.object({
   proposal   : terms,
   signatures : hex.array().default([])
+})
+
+const digest = z.object({
+  activated   : stamp.nullable(),
+  balance     : num,
+  est_txfee   : num,
+  est_txsize  : num,
+  pending     : num,
+  settled     : bool,
+  spent       : bool,
+  spent_txid  : hash.nullable(),
+  status,
+  total       : num,
+  txin_count  : num,
+  updated_at  : stamp
 })
 
 const data = z.object({
@@ -43,9 +58,10 @@ const data = z.object({
   subtotal    : num,
   terms,
   total       : num,
+  txin_count  : num,
   updated_at  : stamp,
   vm_state    : vm.data.nullable(),
   vout_size   : num
 }).and(agent).and(spend_state).and(close_state)
 
-export default { agent, data, output, request, status }
+export default { agent, data, digest, output, request, status }

@@ -21,6 +21,12 @@ export type DepositState  = DepositConfirmed | DepositUnconfirmed
 export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 export type DepositData   = AgentSession & DepositInfo & DepositState & SettleState & SpendState & TxOutput
 
+// export type FundData = DepositState & SettleState & SpendState & TxOutput & {
+//   sequence   : number
+//   status     : DepositStatus
+//   updated_at : number
+// }
+
 interface DepositConfirmed {
   confirmed    : true
   block_hash   : string
@@ -79,32 +85,26 @@ export interface DepositInfo {
   updated_at  : number
 }
 
+export interface DepositDigest {
+  block_height : number | null
+  cid          : string | null
+  confirmed    : boolean
+  expires_at   : number | null
+  settled      : boolean
+  spent        : boolean
+  spent_txid   : string | null
+  status       : DepositStatus
+  updated_at   : number
+  txid         : string
+  value        : number
+  vout         : number
+}
+
 export interface ReturnData {
   dpid   : string
   pnonce : string
   psig   : string
   txhex  : string
-}
-
-export interface AccountRequest {
-  deposit_pk : string
-  locktime  ?: number
-  spend_xpub : string
-}
-
-export interface RegisterRequest {
-  covenant    ?: CovenantData
-  deposit_pk   : string
-  return_psig ?: string
-  sequence     : number
-  spend_xpub   : string
-  utxo         : TxOutput
-}
-
-export interface SpendRequest {
-  feerate : number
-  pnonce  : string
-  psig    : string
 }
 
 export interface ExtendedKey {

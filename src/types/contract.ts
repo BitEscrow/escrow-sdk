@@ -53,12 +53,23 @@ export interface ContractBase {
   subtotal    : number
   terms       : ProposalData
   total       : number
+  txin_count  : number
   updated_at  : number
   vm_state    : null | StateData
   vout_size   : number
 }
 
-export type ContractRequest = {
-  proposal    : ProposalData
-  signatures ?: string[]
+export interface ContractDigest {
+  activated  : number | null
+  balance    : number
+  est_txsize : number
+  est_txfee  : number
+  pending    : number
+  settled    : boolean
+  spent      : boolean
+  spent_txid : string | null
+  status     : ContractStatus
+  total      : number
+  txin_count : number
+  updated_at : number
 }

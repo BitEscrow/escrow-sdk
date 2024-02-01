@@ -10,6 +10,7 @@ import {
 
 import {
   AccountRequest,
+  CloseRequest,
   ContractData,
   CovenantData,
   DepositAccount,
@@ -39,7 +40,7 @@ export function verify_account_api (signer : EscrowSigner) {
   }
 }
 
-export function commit_utxo_api (signer : EscrowSigner) {
+export function commit_funds_api (signer : EscrowSigner) {
   return (
     account  : DepositAccount,
     contract : ContractData,
@@ -62,7 +63,7 @@ export function commit_utxo_api (signer : EscrowSigner) {
   }
 }
 
-export function commit_deposit_api (signer : EscrowSigner) {
+export function lock_funds_api (signer : EscrowSigner) {
   return (
     contract : ContractData,
     deposit  : DepositData
@@ -93,9 +94,10 @@ export function close_account_api (signer : EscrowSigner) {
   return (
     deposit : DepositData,
     txfee   : number
-  ) : string => {
+  ) : CloseRequest => {
     // Create the return transaction.
-    return create_return_psig(deposit, signer._signer, txfee)
+    const [ pnonce, psig ] = create_return_psig(deposit, signer._signer, txfee)
+    return { pnonce, psig, txfee }
   }
 }
 
@@ -104,7 +106,7 @@ export default function (signer : EscrowSigner) {
     create : create_account_api(signer),
     verify : verify_account_api(signer),
     close  : close_account_api(signer),
-    commit_utxo    : commit_utxo_api(signer),
-    commit_deposit : commit_deposit_api(signer)
+    commit : commit_funds_api(signer),
+    lock   : lock_funds_api(signer)
   }
 }

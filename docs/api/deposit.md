@@ -5,6 +5,7 @@
 - [/api/deposit/commit](#commit-to-a-contract)  
 - [/api/deposit/list/:pubkey](#list-deposits-by-pubkey)  
 - [/api/deposit/:dpid](#read-a-deposit-by-id)  
+- [/api/deposit/:dpid/digest](#read-a-deposit-digest-by-id)  
 - [/api/deposit/:dpid/lock](#lock-funds-to-a-contract)  
 - [/api/deposit/:dpid/close](#close-a-deposit)  
 
@@ -127,25 +128,6 @@ interface DepositListResponse {
 }
 ```
 
-## Read a Deposit By Id
-
-**Request Format**
-
-```ts
-method   : 'GET'
-endpoint : '/api/deposit/:dpid'
-```
-
-**Response Interface**
-
-```ts
-interface DepositDataResponse {
-  data : {
-    deposit : DepositData
-  }
-}
-```
-
 ## Lock Funds to a Contract
 
 **Request Format**
@@ -172,6 +154,25 @@ interface FundDataResponse {
   data : {
     contract : ContractData
     deposit  : DepositData
+  }
+}
+```
+
+## Read a Deposit Digest By Id
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/deposit/:dpid/digest'
+```
+
+**Response Interface**
+
+```ts
+interface DepositDigestResponse {
+  data : {
+    deposit : DepositDigest
   }
 }
 ```

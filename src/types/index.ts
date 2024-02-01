@@ -1,4 +1,4 @@
-export * from './api.js'
+export * from './api/index.js'
 export * from './base.js'
 export * from './contract.js'
 export * from './deposit.js'

@@ -35,7 +35,7 @@ export default {
       minifyInternalExports: false
     },
     {
-      file: 'dist/browser.js',
+      file: 'dist/script.js',
       format: 'iife',
       name: 'escrow_core',
       plugins: [terser()],

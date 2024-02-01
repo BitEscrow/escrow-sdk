@@ -8,11 +8,13 @@ import {
   ApiResponse,
   ContractDataResponse,
   ContractListResponse,
-  DepositListResponse,
   WitnessListResponse,
   ProposalData,
-  WitnessData
-}  from '@/types/index.js'
+  WitnessData,
+  FundListResponse,
+  ContractDigestResponse,
+  ContractVMStateResponse
+} from '@/types/index.js'
 
 import * as assert from '@/assert.js'
 
@@ -65,6 +67,40 @@ function read_contract_api (client : EscrowClient) {
 }
 
 /**
+ * Return a list of committed deposits
+ * that are associated with the contract.
+ */
+function read_vm_state_api (client : EscrowClient) {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<ContractVMStateResponse>> => {
+    // Validate the contract id.
+    assert.is_hash(cid)
+    // Formulate the request.
+    const url = `${client.host}/api/contract/${cid}/vm`
+    // Return the response.
+    return client.fetcher<ContractVMStateResponse>({ url })
+  }
+}
+
+/**
+ * Return a list of committed deposits
+ * that are associated with the contract.
+ */
+function read_contract_digest_api (client : EscrowClient) {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<ContractDigestResponse>> => {
+    // Validate the contract id.
+    assert.is_hash(cid)
+    // Formulate the request.
+    const url = `${client.host}/api/contract/${cid}/digest`
+    // Return the response.
+    return client.fetcher<ContractDigestResponse>({ url })
+  }
+}
+
+/**
  * Return a list of contracts that 
  * are associated with a given pubkey.
  */
@@ -77,9 +113,8 @@ function list_contract_api (client : EscrowClient) {
     const url  = `${client.host}/api/contract/list/${pubkey}`
     // Define the request config.
     const init = {
-      method  : 'POST',
-      body    : token,
-      headers : { 'content-type' : 'text/plain' }
+      method  : 'GET',
+      headers : { 'Authorization' : 'Bearer ' + token }
     }
     // Return the response.
     return client.fetcher<ContractListResponse>({ url, init })
@@ -87,19 +122,19 @@ function list_contract_api (client : EscrowClient) {
 }
 
 /**
- * Return a list of committed deposits
- * that are associated with the contract.
+ * Return a list of committed funds
+ * that are locked to the contract.
  */
 function list_funds_api (client : EscrowClient) {
   return async (
     cid : string
-  ) : Promise<ApiResponse<DepositListResponse>> => {
+  ) : Promise<ApiResponse<FundListResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const url = `${client.host}/api/contract/${cid}/funds`
     // Return the response.
-    return client.fetcher<DepositListResponse>({ url })
+    return client.fetcher<FundListResponse>({ url })
   }
 }
 
@@ -123,21 +158,26 @@ function list_witness_api (client : EscrowClient) {
 /**
  * Cancel a contract that is not active.
  */
-// function cancel_contract_api (
-//   client : EscrowClient
-// ) {
-//   return async (
-//     cid    : string,
-//     signer : SignerAPI = client.signer
-//   ) : Promise<ContractDataResponse> => {
-//     // Validate the contract id.
-//     assert.is_hash(cid)
-//     // Formulate the request.
-//     const url    = `${client.host}/api/contract/${cid}/cancel`
-//     // Return the response.
-//     return client.fetcher<ContractDataResponse>({ url, signer })
-//   }
-// }
+function cancel_contract_api (
+  client : EscrowClient
+) {
+  return async (
+    cid   : string,
+    token : string
+  ) => {
+    // Validate the contract id.
+    assert.is_hash(cid)
+    // Formulate the request.
+    const url    = `${client.host}/api/contract/${cid}/cancel`
+    // Define the request config.
+    const init = {
+      method  : 'GET',
+      headers : { 'Authorization' : 'Bearer ' + token }
+    }
+    // Return the response.
+    return client.fetcher<ContractDataResponse>({ url, init })
+  }
+}
 
 /**
  * Submit a signed statement to the contract.
@@ -164,12 +204,14 @@ function submit_witness_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    // cancel  : cancel_contract_api(client),
+    cancel  : cancel_contract_api(client),
     create  : create_contract_api(client),
+    digest  : read_contract_digest_api(client),
     funds   : list_funds_api(client),
     list    : list_contract_api(client),
     read    : read_contract_api(client),
     submit  : submit_witness_api(client),
+    vmstate : read_vm_state_api(client),
     witness : list_witness_api(client)
   }
 }

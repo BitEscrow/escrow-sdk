@@ -85,7 +85,7 @@ export function create_return_psig (
   deposit : DepositData,
   signer  : SignerAPI,
   txfee   : number
-) : string {
+) : [ pnonce : string, psig : string ] {
   // Unpack the deposit object.
   const { agent_id, agent_pn, dpid, value, spend_xpub } = deposit
   // Parse the return pubkey from the xpub.
@@ -103,7 +103,7 @@ export function create_return_psig (
   // Create a partial signature using the musig context.
   const psig    = create_mutex_psig(mutex, signer)
   // Return the pnonce and psig.
-  return Buff.join([ pnonce, psig ]).hex
+  return [ pnonce, psig ]
 }
 
 /**

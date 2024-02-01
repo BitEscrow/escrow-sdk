@@ -17,7 +17,7 @@ export const template = create_proposal({
 })
 
 /**
- * Define our proposal roles.
+ * Define our role templates.
  */
 export const roles = {
   buyer : create_policy({
