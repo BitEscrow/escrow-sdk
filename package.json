@@ -91,7 +91,7 @@
     }
   },
   "scripts": {
-    "build": "./build.sh",
+    "build": "./scripts/build.sh",
     "demo": "./demo/run.sh",
     "load": "tsx --tsconfig test/tsconfig.json",
     "release": "yarn test && yarn build",

@@ -2,7 +2,9 @@
   "compilerOptions": {
     "baseUrl": "..",
     "paths": {
-      "@/*" : [ "src/*" ],
+      "@/demo/*"             : [ "demo/*"                   ],
+      "@/*"                  : [ "src/*"                    ],
+      "@/test/*"             : [ "test/*"                   ],
       "@scrow/test"          : [ "test/src/index.js"        ],
       "@scrow/core"          : [ "src/index.js"             ],
       "@scrow/core/assert"   : [ "src/assert.js"            ],

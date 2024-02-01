@@ -3,9 +3,9 @@ import { combine_psigs }   from '@cmdcode/musig2'
 import { Signer }          from '@cmdcode/signer'
 import { parse_extkey }    from '@cmdcode/crypto-tools/hd'
 import { decode_tx }       from '@scrow/tapscript/tx'
-import { get_deposit_ctx } from '../../src/lib/deposit.js'
-import { parse_txinput }   from '../../src/lib/tx.js'
-import { get_entry }       from '../../src/lib/util.js'
+import { get_deposit_ctx } from '@/lib/deposit.js'
+import { parse_txinput }   from '@/lib/tx.js'
+import { get_entry }       from '@/lib/util.js'
 
 import {
   TxData,

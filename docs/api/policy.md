@@ -41,7 +41,6 @@ export interface ServerPolicy {
   proposal : {
     ACTION_LIST      : string[]
     METHOD_LIST      : string[]
-    DEFAULT_NETWORK  : string
     DEFAULT_DEADLINE : number
     DEFAULT_EXPIRES  : number
     MIN_DEADLINE     : number

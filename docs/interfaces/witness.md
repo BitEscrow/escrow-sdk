@@ -1,7 +1,7 @@
 # Witness Interfaces
 
-[WitnessTemplate](#witnesstemplate)  
-[WitnessData](#witnessdata)  
+- [WitnessTemplate](#witnesstemplate)  
+- [WitnessData](#witnessdata)  
 
 ## WitnessTemplate
 

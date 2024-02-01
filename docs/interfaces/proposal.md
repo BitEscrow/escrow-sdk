@@ -1,8 +1,8 @@
 # Proposal Interfaces
 
-[ProposalData](#proposaldata)  
-[MemberData](#memberdata)  
-[RolePolicy](#rolepolicy)  
+- [ProposalData](#proposaldata)  
+- [MemberData](#memberdata)  
+- [RolePolicy](#rolepolicy)  
 
 ## ProposalData
 

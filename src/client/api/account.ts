@@ -11,10 +11,11 @@ import {
 import {
   AccountRequest,
   CloseRequest,
+  CommitRequest,
   ContractData,
-  CovenantData,
   DepositAccount,
   DepositData,
+  LockRequest,
   TxOutput
 } from '@/types/index.js'
 
@@ -45,7 +46,7 @@ export function commit_funds_api (signer : EscrowSigner) {
     account  : DepositAccount,
     contract : ContractData,
     utxo     : TxOutput
-  ) : CovenantData => {
+  ) : CommitRequest => {
     // Unpack the deposit object.
     const { agent_pk, sequence, spend_xpub } = account
     // Check if account xpub is valid.
@@ -59,7 +60,8 @@ export function commit_funds_api (signer : EscrowSigner) {
     // Get the context object for our deposit account.
     const ctx  = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
     // Create a covenant with the contract and deposit.
-    return create_covenant(ctx, contract, signer._signer, utxo)
+    const covenant   = create_covenant(ctx, contract, signer._signer, utxo)
+    return { covenant, deposit_pk, sequence, spend_xpub, utxo }
   }
 }
 
@@ -67,7 +69,7 @@ export function lock_funds_api (signer : EscrowSigner) {
   return (
     contract : ContractData,
     deposit  : DepositData
-  ) : CovenantData => {
+  ) : LockRequest => {
     // Unpack the deposit object.
     const { 
       agent_pk, sequence, txid, vout, 
@@ -86,7 +88,8 @@ export function lock_funds_api (signer : EscrowSigner) {
     // Define utxo object from deposit data.
     const utxo = { txid, vout, value, scriptkey }
     // Create a covenant with the contract and deposit.
-    return create_covenant(ctx, contract, signer._signer, utxo)
+    const covenant = create_covenant(ctx, contract, signer._signer, utxo)
+    return { covenant }
   }
 }
 
