@@ -108,9 +108,9 @@ If desired, a third-party can host the proposal. The protocol is designed for th
 
 There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
 
-> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
-
 Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](docs/contract.md) for funding.
+
+> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
 
 ### Funding
 
@@ -132,7 +132,9 @@ interface DepositAccount {
 
 The funder independently verifies the account information, then sends their funds into the account address.
 
-Once the transaction is in the mempool, the funder can commit the funds to a contract by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms. The combination of these signatures form a [covenant](docs/deposit.md) with the contract.
+Once the transaction is in the mempool, the funder can then commit the funds by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms.
+
+The combination of these signatures form a [covenant](docs/deposit.md) with the contract:
 
 ```ts
 interface CovenantData {
@@ -151,9 +153,10 @@ Once a covenant is made, the deposit is locked in escrow. When enough funds have
 
 The final round of the protocol is the `settlement`. This is the most exciting round, as members get to decide how the money shall be spent.
 
-Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started (with the contract identifier as `head`):
+Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started:
 
 ```ts
+// A new virtual machine, fresh from the womb.
 vm_state: {
   commits  : [],
   error    : null,
@@ -173,11 +176,14 @@ vm_state: {
 }
 ```
 
+> Note : The `head` of the hash-chain is initialized using the contract's identifier (cid).
+
 Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](docs/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
 
 Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
 
 ```ts
+// An example witness statement, endorsed with two signatures.
 {
   action  : 'close',
   args    : [],
@@ -396,7 +402,7 @@ const template = create_proposal({
 
 ```
 
-We have provided a tool for defining `roles` in a proposal in order to make the negotiation process easier:
+To make the negotiation process easier, we have a tool for defining intended `roles` within a proposal:
 
 ```ts
 // We can define roles that users can choose from. Each role policy 
@@ -432,7 +438,7 @@ const roles = {
 
 ```
 
-With defined roles, we can invite each `EscrowSigner` to join the proposal as a given role. Members can review each `policy`, and choose one for their device to use when joining the proposal.
+With defined roles, we can invite each `EscrowSigner` to join the proposal as a given role. Members can review the `policy`, and their device will use it to fill out the proposal:
 
 ```ts
 // Each member is an EscrowSigner object.
@@ -449,7 +455,9 @@ proposal = c_signer.proposal.join(proposal, roles.agent)
 
 Once the proposal is completed, any member can deliver it to the escrow server.
 
-Members can choose to sign the proposal in order to signal their endorsement:
+**Optional: Endorsing a Proposal**
+
+Members have the option to sign a complete proposal to signal their endorsement:
 
 ```ts
 const signatures = signers.map(mbr => {
@@ -458,7 +466,7 @@ const signatures = signers.map(mbr => {
 })
 ```
 
-Each endorsements provided to the server will tag the proposal with the signature pubkey. This allows a signing device to search for contract via pubkey.
+Each endorsement provided to the server will tag the proposal with the signer's pubkey. This allows a member to search for contracts via their pubkey.
 
 > Endorsing a proposal does not reveal which credential belongs to you.
 
@@ -612,7 +620,7 @@ This project uses the following scripts:
   test          : Runs the current test suite in `test/tape.ts`.
 ```
 
-## Running the Main Demo
+### Running the Main Demo
 
 The main demo is located in the [/demo](demo) directory, and serves as a great resource for how to use the client library.
 
@@ -629,7 +637,7 @@ No wallet or software required[*]. Simply follow the interactive prompts, and en
 
 > [*] Testnet faucet is currently broke. You may need your own testnet coins. 
 
-## Using the Client API Demos
+### Using the Client API Demos
 
 There is a suite of client API examples located in the [/demo/api](demo/api) directory.
 
@@ -641,7 +649,7 @@ npm run load demo/api/contract/read.ts
 
 More examples are being added. Work in progress!
 
-## Using the CVM Evaluation Tool
+### Using the CVM Evaluation Tool
 
 The CVM [eval](demo/vm/eval.ts) tool allows you to quickly evaluate a set of proposal terms and witness statements using a dummy virtual machine.
 
@@ -653,7 +661,7 @@ npm run demo:vm
 
 The tool and JSON file are located in the [/demo/vm](demo/vm) directory.
 
-## Using the Test Suite
+### Using the Test Suite
 
 The test suite is located in [test/src](test/src), and controlled by the [test/tape.ts](test/tape.ts) file. Feel free to add/remove test packages from the main test method.
 
