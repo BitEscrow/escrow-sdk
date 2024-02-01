@@ -1,8 +1,12 @@
 # Server Docs
 
+This documentation covers connecting to the BitEscrow server.
+
 ## Connecting to our Server
 
 BitEscrow currently provides an escrow server for the `signet`, `testnet`, and `mutiny` networks. Check out our list of client configurations below.
+
+For more information on setting up an EscrowClient, [click here](./client.md).
 
 ### Mutiny Configuration
 
