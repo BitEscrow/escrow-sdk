@@ -55,10 +55,11 @@ Comimg Soon:
   g. [Settle a Contract](#settle-a-contract)  
 3. [Development & Testing](#development--testing)  
   a. [Running the Main Demo](#running-the-main-demo)  
-  b. [Using the Client API Demos](#using-the-client-api-demos)  
-  c. [Using the CVM Eval Tool](#using-the-cvm-evaluation-tool)  
-  d. [Using the Test Suite](#using-the-test-suite)  
-  e. [OpenAPI Specification](#openapi-specification)  
+  b. [Running in Replit](#running-in-replit)  
+  c. [Using the Client API Demos](#using-the-client-api-demos)  
+  d. [Using the CVM Eval Tool](#using-the-cvm-evaluation-tool)  
+  e. [Using the Test Suite](#using-the-test-suite)  
+  f. [OpenAPI Specification](#openapi-specification)  
 4. [Questions & Issues](#questions--issues)
 5. [Contribution](#contribution)
 6. [Resources](#resources)
@@ -636,7 +637,17 @@ No wallet or software required[*]. Simply follow the interactive prompts, and en
 
 > The mutiny chain is the fastest of the three demos, with 30 second blocks.
 
-> [*] Testnet faucet is currently broke. You may need your own testnet coins. 
+> [*] Testnet faucet is currently broke. You may need your own testnet coins.
+
+### Running in Replit
+
+There is a replit clone of this repo that you can run in the browser:
+
+[https://replit.com/escrow-core](https://replit.com/@cscottdev/escrow-core)
+
+Clicking `Run` at the top of the replit should run the demo.
+
+Feel free to fork the replit and try out the developer tools!
 
 ### Using the Client API Demos
 
