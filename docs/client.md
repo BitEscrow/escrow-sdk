@@ -1,4 +1,4 @@
-# EscrowClient Docs
+# Client Docs
 
 The `EscrowClient` is a basic client for consuming our API. It has access to all endpoints offered by the escrow server.
 

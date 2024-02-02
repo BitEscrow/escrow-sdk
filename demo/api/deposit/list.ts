@@ -1,24 +1,16 @@
-import { Buff } from '@cmdcode/buff'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { depositor }    from '@scrow/demo/07_deposit_funds.js'
 
-import {
-  EscrowClient,
-  EscrowSigner
-} from '@scrow/core/client'
-
-import { config } from '../../00_demo_config.js'
-
-const seed   = Buff.str('alice')
-
-const client = new EscrowClient(config)
-const signer = EscrowSigner.create(config, seed)
-const token  = signer.request.deposits()
-
-// Request an account for the member to use.
-const res = await client.deposit.list(signer.pubkey, token)
-
+// Generate a request token.
+const req_token = depositor.request.deposit_list()
+// Deliver the request and token.
+const res = await client.deposit.list(depositor.pubkey, req_token)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
+// Unpack our response data.
+const deposits = res.data.deposits
 
-const { deposits } = res.data
-
+print_banner('deposit list')
 console.dir(deposits, { depth : null })
+console.log('\n')

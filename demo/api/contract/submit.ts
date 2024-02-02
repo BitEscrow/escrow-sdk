@@ -24,8 +24,10 @@ witness = b_signer.witness.endorse(active_contract, witness)
 print_banner('witness statement')
 console.dir(witness, { depth : null })
 
+// Define the contract id we will use.
+const cid = active_contract.cid
 // Submit the signed statement to the server.
-const res = await client.contract.submit(active_contract.cid, witness)
+const res = await client.contract.submit(cid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the contract from the response.

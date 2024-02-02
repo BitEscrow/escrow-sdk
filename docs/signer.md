@@ -1,4 +1,4 @@
-# EscrowSigner Docs
+# Signer Docs
 
 The `EscrowSigner` is used to represent you and other members in a contract. It manages your credentials, deposit accounts, proposal negotiation, and interactions with a contract.
 
