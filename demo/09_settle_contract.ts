@@ -22,7 +22,7 @@ const template = {
 // Define our contract as the active contract.
 const contract = active_contract
 // Initialize a variable for our witness data.
-let witness : WitnessData
+export let witness : WitnessData
 // Alice signs the initial statement.
 witness = a_signer.witness.sign(contract, template)
 // Bob endoreses the statement from Alice.
