@@ -60,4 +60,4 @@ fullpath="demo/$filepath"
 # Output the full path
 echo "Executing demo script '$filepath' on $NETWORK network ..."
 
-npm run load $fullpath $NETWORK
+DEMO_MODE=true npm run load $fullpath $NETWORK

@@ -2,6 +2,8 @@ import { print_banner }    from '@scrow/test'
 import { signers }         from './02_create_signer.js'
 import { roles, template } from './03_build_proposal.js'
 
+const DEMO_MODE = process.env.DEMO_MODE === 'true'
+
 // Unpack our list of signers.
 const [ a_signer, b_signer, c_signer ] = signers
 
@@ -23,5 +25,7 @@ const signatures = signers.map(mbr => {
  */
 export { proposal, signatures }
 
-print_banner('completed proposal')
-console.dir(proposal, { depth : null })
+if (DEMO_MODE) {
+  print_banner('completed proposal')
+  console.dir(proposal, { depth : null })
+}

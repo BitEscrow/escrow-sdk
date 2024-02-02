@@ -1,18 +1,24 @@
-import { print_banner } from '@scrow/test'
-import { poll, sleep }  from './00_demo_config.js'
-import { client }       from './01_create_client.js'
-import { cid }          from './07_deposit_funds.js'
+import { print_banner }    from '@scrow/test'
+import { config }          from './00_demo_config.js'
+import { client }          from './01_create_client.js'
+import { funded_contract } from './07_deposit_funds.js'
+import { sleep }           from './util.js'
+
+const DEMO_MODE = process.env.DEMO_MODE === 'true'
 
 // Unpack our polling config.
-const [ ival, retries ] = poll
+const [ ival, retries ] = config.poll
+// The contract id we will be polling
+const cid = funded_contract.cid
 
 // Fetch the current contract data.
 let res   = await client.contract.read(cid),
     tries = 1
 
-// Print our banner info to console.
-print_banner('awaiting on-chain confirmation of funds')
-console.log('depending on the network, this could take a while!\n')
+if (DEMO_MODE || config.network !== 'regtest') {
+  print_banner('awaiting confirmation of funds')
+  console.log('depending on the network, this could take a while!\n')
+}
 
 // While our response is ok, but the contract is not active (and we have tries):
 while (res.ok && res.data.contract.activated === null && tries < retries) {
@@ -39,5 +45,7 @@ if (res.data.contract.activated === null) {
  */
 export const active_contract = res.data.contract
 
-print_banner('active contract')
-console.dir(active_contract, { depth : null })
+if (DEMO_MODE) {
+  print_banner('active contract')
+  console.dir(active_contract, { depth : null })
+}

@@ -119,16 +119,18 @@ export class EscrowSigner {
   membership = member_api(this)
   proposal   = proposal_api(this)
   request    = request_api(this)
+
+  wallet     = {
+    has_account : (xpub : string) => {
+      return this._wallet.has_account(xpub)
+    },
+    get_account : (idx ?: number) => {
+      idx = idx ?? this._gen_idx()
+      return this._wallet.get_account(idx)
+    }
+  }
+
   witness    = witness_api(this)
-
-  has_account (xpub : string) {
-    return this._wallet.has_account(xpub)
-  }
-
-  get_account (idx ?: number) {
-    idx = idx ?? this._gen_idx()
-    return this._wallet.get_account(idx)
-  }
 
   save (password : string) {
     const pass    = Buff.str(password)

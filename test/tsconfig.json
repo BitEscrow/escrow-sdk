@@ -2,8 +2,8 @@
   "compilerOptions": {
     "baseUrl": "..",
     "paths": {
-      "@/demo/*"             : [ "demo/*"                   ],
       "@/*"                  : [ "src/*"                    ],
+      "@scrow/demo/*"        : [ "demo/*"                   ],
       "@/test/*"             : [ "test/*"                   ],
       "@scrow/test"          : [ "test/src/index.js"        ],
       "@scrow/core"          : [ "src/index.js"             ],

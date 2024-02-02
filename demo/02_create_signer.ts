@@ -1,6 +1,6 @@
-import { Buff }            from '@cmdcode/buff'
-import { EscrowSigner }    from '@scrow/core/client'
-import { config, members } from './00_demo_config.js'
+import { Buff }         from '@cmdcode/buff'
+import { EscrowSigner } from '@scrow/core/client'
+import { config }       from './00_demo_config.js'
 
 /**
  * Utility method for creating a list of
@@ -16,4 +16,4 @@ function create_signer (alias : string) {
 /**
  * Define our list of signers.
  */
-export const signers = members.map(e => create_signer(e))
+export const signers = config.members.map(e => create_signer(e))

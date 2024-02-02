@@ -2,6 +2,8 @@ import { print_banner } from '@scrow/test'
 import { client }       from './01_create_client.js'
 import { signers }      from './02_create_signer.js'
 
+const DEMO_MODE = process.env.DEMO_MODE === 'true'
+
 // Define our deposit locktime.
 const locktime  = 60 * 60  // 1 hour locktime
 // Define our funder for the deposit.
@@ -14,9 +16,11 @@ const acct_res = await client.deposit.request(acct_req)
 if (!acct_res.ok) throw new Error(acct_res.error)
 
 /**
- * Define our deposit account.
+ * Define our new deposit account.
  */
-export const { account } = acct_res.data
+export const new_account = acct_res.data.account
 
-print_banner('deposit account')
-console.dir(account, { depth : null })
+if (DEMO_MODE) {
+  print_banner('new account')
+  console.dir(new_account, { depth : null })
+}

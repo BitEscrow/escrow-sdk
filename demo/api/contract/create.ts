@@ -6,11 +6,9 @@ import { proposal, signatures } from '../../04_roles_and_endorse.js'
 const res = await client.contract.create(proposal, signatures)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
-
-/**
- * Define our published contract.
- */
-export const { contract } = res.data
+// Unpack our published contract.
+const new_contract = res.data.contract
 
 print_banner('new contract')
-console.dir(contract, { depth : null })
+console.dir(new_contract, { depth : null })
+console.log('\n')

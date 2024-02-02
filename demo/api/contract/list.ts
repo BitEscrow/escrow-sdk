@@ -1,24 +1,18 @@
-import { Buff } from '@cmdcode/buff'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
 
-import {
-  EscrowClient,
-  EscrowSigner
-} from '@scrow/core/client'
-
-import { config } from '../../00_demo_config.js'
-
-const seed   = Buff.str('alice')
-
-const client = new EscrowClient(config)
-const signer = EscrowSigner.create(config, seed)
-const token  = signer.request.contracts()
-
-// Request an account for the member to use.
-const res = await client.contract.list(signer.pubkey, token)
-
+// Select a signer to use.
+const signer = signers[0]
+// Generate a request token.
+const req_token = signer.request.contract_list()
+// Deliver the request and token.
+const res = await client.contract.list(signer.pubkey, req_token)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
+// Unpack our data payload.
+const contracts = res.data.contracts
 
-const { contracts } = res.data
-
+print_banner('contract list')
 console.dir(contracts, { depth : null })
+console.log('\n')

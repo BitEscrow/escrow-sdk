@@ -25,7 +25,7 @@ export function create_account_api (signer : EscrowSigner) {
     index   ?: number
   ) : AccountRequest => {
     const deposit_pk = signer.pubkey
-    const spend_xpub = signer.get_account(index).xpub
+    const spend_xpub = signer.wallet.get_account(index).xpub
     return { deposit_pk, locktime, spend_xpub }
   }
 }
@@ -50,7 +50,7 @@ export function commit_funds_api (signer : EscrowSigner) {
     // Unpack the deposit object.
     const { agent_pk, sequence, spend_xpub } = account
     // Check if account xpub is valid.
-    if (!signer.has_account(spend_xpub)) {
+    if (!signer.wallet.has_account(spend_xpub)) {
       throw new Error('account xpub is not recognized by master wallet')
     }
     // Define our pubkey as the deposit pubkey.
@@ -76,7 +76,7 @@ export function lock_funds_api (signer : EscrowSigner) {
       value, scriptkey, spend_xpub
     } = deposit
     // Check if account xpub is valid.
-    if (!signer.has_account(spend_xpub)) {
+    if (!signer.wallet.has_account(spend_xpub)) {
       throw new Error('account xpub is not recognized by master wallet')
     }
     // Define our pubkey as the deposit pubkey.

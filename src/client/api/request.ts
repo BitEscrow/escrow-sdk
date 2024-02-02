@@ -1,21 +1,33 @@
 import { EscrowSigner } from '@/client/class/signer.js'
 
-export function request_deposits_api (signer : EscrowSigner) {
+import * as assert from '@/assert.js'
+
+export function request_deposit_list_api (signer : EscrowSigner) {
   return () => {
     const pub  = signer.pubkey
     const host = signer.client.host
     const url  = `${host}/api/deposit/list/${pub}`
-    const content = 'POST' + url
+    const content = 'GET' + url
     return signer._signer.gen_token(content)
   }
 }
 
-export function request_contracts_api (signer : EscrowSigner) {
+export function request_contract_list_api (signer : EscrowSigner) {
   return () => {
     const pub  = signer.pubkey
     const host = signer.client.host
     const url  = `${host}/api/contract/list/${pub}`
-    const content = 'POST' + url
+    const content = 'GET' + url
+    return signer._signer.gen_token(content)
+  }
+}
+
+export function request_contract_cancel_api (signer : EscrowSigner) {
+  return (cid : string) => {
+    assert.is_hash(cid)
+    const host = signer.client.host
+    const url  = `${host}/api/contract/${cid}/cancel`
+    const content = 'GET' + url
     return signer._signer.gen_token(content)
   }
 }
@@ -33,8 +45,9 @@ export function sign_request_api (signer : EscrowSigner) {
 
 export default function (client : EscrowSigner) {
   return {
-    contracts : request_contracts_api(client),
-    deposits  : request_deposits_api(client),
-    get_token : sign_request_api(client)
+    contract_list   : request_contract_list_api(client),
+    contract_cancel : request_contract_cancel_api(client),
+    deposit_list    : request_deposit_list_api(client),
+    get_token       : sign_request_api(client)
   }
 }

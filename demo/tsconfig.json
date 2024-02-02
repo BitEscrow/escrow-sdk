@@ -3,6 +3,7 @@
     "baseUrl": "..",
     "paths": {
       "@/*"                  : [ "src/*"                    ],
+      "@scrow/demo/*"        : [ "demo/*"                   ],
       "@scrow/test"          : [ "test/src/index.js"        ],
       "@scrow/core"          : [ "src/index.js"             ],
       "@scrow/core/assert"   : [ "src/assert.js"            ],

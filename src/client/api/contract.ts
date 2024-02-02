@@ -77,7 +77,7 @@ function read_vm_state_api (client : EscrowClient) {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
-    const url = `${client.host}/api/contract/${cid}/vm`
+    const url = `${client.host}/api/contract/${cid}/vmstate`
     // Return the response.
     return client.fetcher<ContractVMStateResponse>({ url })
   }

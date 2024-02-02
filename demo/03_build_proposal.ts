@@ -1,4 +1,5 @@
-import { network } from './00_demo_config.js'
+import { config }  from './00_demo_config.js'
+import { signers } from './02_create_signer.js'
 
 import {
   create_policy,
@@ -6,14 +7,21 @@ import {
 } from '@scrow/core'
 
 /**
+ * Define an (optional) moderator for our proposal.
+ */
+
+export const moderator = signers[2]
+
+/**
  * Define our proposal template.
  */
 export const template = create_proposal({
-  title    : 'Basic two-party contract with third-party arbitration.',
-  expires  : 14400,
-  network  : network,
-  schedule : [[ 7200, 'close', '*' ]],
-  value    : 15000,
+  title     : 'Basic two-party contract with third-party arbitration.',
+  expires   : 14400,
+  moderator : moderator.pubkey,
+  network   : config.network,
+  schedule  : [[ 7200, 'close', '*' ]],
+  value     : 15000,
 })
 
 /**

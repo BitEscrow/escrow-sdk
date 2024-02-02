@@ -38,12 +38,12 @@ const poll_rates = {
   testnet : [ 60, 30 ]
 }
 
-export const network = process.argv.slice(2)[0] ?? 'signet'
+const network = process.argv.slice(2)[0] ?? 'signet'
 
-export const config  = configs[network as keyof typeof configs]
-export const faucet  = faucets[network as keyof typeof faucets]
-export const poll    = poll_rates[network as keyof typeof faucets]
-
-export const members = [ 'alice', 'bob', 'carol' ]
-
-export const sleep   = (ms : number) => new Promise(res => setTimeout(res, ms))
+export const config = {
+  network,
+  client  : configs[network as keyof typeof configs],
+  faucet  : faucets[network as keyof typeof faucets],
+  members : [ 'alice', 'bob', 'carol' ],
+  poll    : poll_rates[network as keyof typeof poll_rates]
+}

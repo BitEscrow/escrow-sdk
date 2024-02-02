@@ -12,7 +12,6 @@ export const sleep = (ms = 1000) => new Promise(res => setTimeout(res, ms))
  * Take a string label as input, and return an
  * escrow client that is configured for testing.
  */
-
 export function get_member (
   alias  : string,
   config : ClientConfig
@@ -34,10 +33,17 @@ export function get_member (
 }
 
 /**
- * Create a banner message in the console.
+ * Print a banner message in the console.
  */
 export function print_banner (msg : string) {
   console.log('\n' + '='.repeat(40))
   console.log(` ${msg} `)
   console.log('='.repeat(40) + '\n')
+}
+
+/**
+ * Print a deep data object in the console.
+ */
+export function print_data (data : unknown) {
+  console.dir(data, { depth : null })
 }
