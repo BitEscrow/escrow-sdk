@@ -8,11 +8,11 @@ import {
   Wallet
 } from '@cmdcode/signer'
 
-import account_api  from '../api/account.js'
-import member_api   from '../api/member.js'
-import proposal_api from '../api/proposal.js'
-import request_api  from '../api/request.js'
-import witness_api  from '../api/witness.js'
+import account_api   from '../api/account.js'
+import member_api    from '../api/member.js'
+import proposal_api  from '../api/proposal.js'
+import request_api   from '../api/request.js'
+import statement_api from '../api/statement.js'
 
 import {
   CredSignerAPI,
@@ -130,7 +130,7 @@ export class EscrowSigner {
     }
   }
 
-  witness    = witness_api(this)
+  witness    = statement_api(this)
 
   save (password : string) {
     const pass    = Buff.str(password)

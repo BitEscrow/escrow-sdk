@@ -5,7 +5,8 @@ import { Network }       from '@/types/index.js'
 import contract_api from '@/client/api/contract.js'
 import deposit_api  from '@/client/api/deposit.js'
 import oracle_api   from '@/client/api/oracle.js'
-import witness_api  from '@/client/api/wid.js'
+import server_api   from '@/client/api/server.js'
+import witness_api  from '@/client/api/witness.js'
 
 import {
   ClientConfig,
@@ -48,6 +49,7 @@ export class EscrowClient {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   oracle   = oracle_api(this)
+  server   = server_api(this)
   witness  = witness_api(this)
 
   toJSON() {

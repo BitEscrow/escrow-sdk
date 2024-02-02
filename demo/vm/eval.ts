@@ -1,5 +1,6 @@
-import { now }    from '@scrow/core/util'
-import { VMUtil } from '@scrow/test'
+import { now } from '@scrow/core/util'
+
+import { print_banner, VMUtil } from '@scrow/test'
 
 import vector from './vector.json' assert { type: 'json' }
 
@@ -16,5 +17,7 @@ const config   = VMUtil.parse_config({ activated, cid, pathnames, programs : pro
 const witness  = VMUtil.compile_witness(progs, statements)
 // Run VM with witness and final timestamp.
 const vm_state = VMUtil.run_vm(config, duration, witness)
-// Print results to console.
+
+print_banner('vm state')
 console.dir(vm_state, { depth: null })
+console.log('\n')

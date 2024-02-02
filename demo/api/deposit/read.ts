@@ -1,16 +1,14 @@
-import { EscrowClient } from '@scrow/core/client'
-import { config }       from '../../00_demo_config.js'
+import { print_banner }   from '@scrow/test'
+import { client }         from '@scrow/demo/01_create_client.js'
+import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'
 
-const dpid   = '798e5e4a51e60dea79690dcd3114f65fa510c539514e8f89d6a22beaed98473a'
-
-const client = new EscrowClient(config)
-
-// Request an account for the member to use.
-const res = await client.deposit.read(dpid)
-
+// Request to read a deposit via dpid.
+const res = await client.deposit.read(locked_deposit.dpid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
+// Unpack the data response
+const deposit = res.data.deposit
 
-const { deposit } = res.data
-
+print_banner('locked deposit')
 console.dir(deposit, { depth : null })
+console.log('\n')

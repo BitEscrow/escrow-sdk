@@ -28,12 +28,12 @@ const btc_total = amt_total / 100_000_000
 
 /** ========== [ Print Deposit Info ] ========== **/
 
-if (DEMO_MODE) {
+if (DEMO_MODE || config.network !== 'regtest') {
   print_banner('make a deposit')
   console.log('copy this address :', address)
   console.log('send this amount  :', `${amt_total} sats || ${btc_total} btc`)
   console.log('get funds here    :', config.faucet, '\n')
-} else if (config.network === 'regtest') {
+} else {
   print_banner('sending deposit')
   await fund_address(address, amt_total)
   await sleep(2000)
