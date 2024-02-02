@@ -659,7 +659,13 @@ Feel free to use `npm run load` to execute any of the example scripts:
 npm run load demo/api/contract/read.ts
 ```
 
-More examples are being added. Work in progress!
+You can also specify a chain to use at the end of the command:
+
+```bash
+npm run load demo/api/deposit/list.ts mutiny
+```
+
+If you run into any errors when using the demos, please consider filing an issue ticket!
 
 ### Using the CVM Evaluation Tool
 
