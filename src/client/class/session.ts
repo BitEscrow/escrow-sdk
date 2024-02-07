@@ -4,8 +4,8 @@ import { EventEmitter }        from './emitter.js'
 import { EscrowSigner }        from './signer.js'
 import { NostrStore }          from './store.js'
 
-import draft_member_api from '../lib/member.js'
-import draft_policy_api from '../lib/policy.js'
+import draft_member_api from '../api/draft/member.js'
+import draft_policy_api from '../api/draft/policy.js'
 
 import {
   find_program,
