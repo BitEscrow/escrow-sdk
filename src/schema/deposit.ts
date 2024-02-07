@@ -3,7 +3,18 @@ import base  from './base.js'
 import tx    from './tx.js'
  
 const { bech32, bool, hash, hex, nonce, num, psig, stamp, str } = base
-const { close_state, spend_state, txspend } = tx
+const { close_state, settle_data, spend_data, spend_state, txspend } = tx
+
+const locktime = z.union([ str, num ]).transform(e => Number(e))
+const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
+
+const deposit_data = z.object({
+  confirmed    : bool,
+  block_hash   : hash.nullable(),
+  block_height : num.nullable(),
+  block_time   : stamp.nullable(),
+  expires_at   : stamp.nullable()
+})
 
 const confirmed = z.object({
   confirmed    : z.literal(true),
@@ -21,9 +32,7 @@ const unconfirmed = z.object({
   expires_at   : z.null()
 })
 
-const locktime = z.union([ str, num ]).transform(e => Number(e))
-const state    = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
-const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
+const deposit_state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 
 const account = z.object({
   acct_id    : hash,
@@ -43,30 +52,6 @@ const covenant = z.object({
   psigs  : z.tuple([ str, psig ]).array()
 })
 
-const acct_req = z.object({
-  deposit_pk : hash,
-  locktime   : locktime.optional(),
-  spend_xpub : str
-})
-
-const reg_req = z.object({
-  covenant    : covenant.optional(),
-  deposit_pk  : hash,
-  sequence    : num,
-  spend_xpub  : str,
-  utxo        : txspend
-})
-
-const commit_req = reg_req.extend({ covenant : covenant.required() })
-
-const lock_req = z.object({ covenant })
-
-const close_req = z.object({
-  pnonce  : nonce,
-  psig    : hex,
-  txfee   : num
-})
-
 const digest = z.object({
   block_height : num.nullable(),
   cid          : hash.nullable(),
@@ -82,7 +67,7 @@ const digest = z.object({
   vout         : num
 })
 
-const data = z.object({
+const base_data = z.object({
   status,
   agent_id    : hash,
   agent_pk    : hash,
@@ -95,6 +80,19 @@ const data = z.object({
   sequence    : num,
   spend_xpub  : str,
   updated_at  : stamp
-}).and(state).and(spend_state).and(close_state).and(txspend)
+}).merge(txspend)
 
-export default { account, covenant, data, digest, state, acct_req, lock_req, reg_req, commit_req, close_req, status }
+const data  = base_data.and(deposit_state).and(spend_state).and(close_state)
+const shape = base_data.merge(deposit_data).merge(spend_data).merge(settle_data)
+
+export default {
+  account,
+  covenant,
+  data,
+  digest,
+  deposit_data,
+  deposit_state,
+  locktime,
+  shape,
+  status
+}

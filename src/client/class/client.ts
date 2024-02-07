@@ -2,11 +2,11 @@ import { resolve_json }  from '@/lib/oracle.js'
 import { parse_network } from '@/lib/parse.js'
 import { Network }       from '@/types/index.js'
 
-import contract_api from '@/client/api/contract.js'
-import deposit_api  from '@/client/api/deposit.js'
-import oracle_api   from '@/client/api/oracle.js'
-import server_api   from '@/client/api/server.js'
-import witness_api  from '@/client/api/witness.js'
+import contract_api from '@/client/api/client/contract.js'
+import deposit_api  from '@/client/api/client/deposit.js'
+import oracle_api   from '@/client/api/client/oracle.js'
+import server_api   from '@/client/api/client/server.js'
+import witness_api  from '@/client/api/client/witness.js'
 
 import {
   ClientConfig,

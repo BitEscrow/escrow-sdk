@@ -2,48 +2,13 @@ import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
 
 import {
-  AccountRequest,
   DepositContext,
   DepositData,
-  RegisterRequest,
-  CloseRequest,
-  TxOutput,
-  CommitRequest,
-  LockRequest
+  TxOutput
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
 import * as schema from '../schema/index.js'
-
-export function validate_account_req (
-  template : unknown
-) : asserts template is AccountRequest {
-  schema.deposit.acct_req.parse(template)
-}
-
-export function validate_register_req (
-  template : unknown
-) : asserts template is RegisterRequest {
-  schema.deposit.reg_req.parse(template)
-}
-
-export function validate_commit_req (
-  template : unknown
-) : asserts template is CommitRequest {
-  schema.deposit.commit_req.parse(template)
-}
-
-export function validate_lock_req (
-  template : unknown
-) : asserts template is LockRequest {
-  schema.deposit.lock_req.parse(template)
-}
-
-export function validate_close_req (
-  template : unknown
-) : asserts template is CloseRequest {
-  schema.deposit.close_req.parse(template)
-}
 
 export function validate_deposit (
   deposit : Record<string, any>

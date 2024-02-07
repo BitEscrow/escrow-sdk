@@ -25,8 +25,19 @@ const unsettled = z.object({
   settled_at   : z.null(),
 })
 
-const spend_state = z.discriminatedUnion('spent',     [ spent,     unspent     ])
-const close_state = z.discriminatedUnion('settled',   [ settled,   unsettled   ])
+const spend_data  = z.object({
+  spent       : z.boolean(),
+  spent_at    : stamp.nullable(),
+  spent_txid  : hash.nullable(),
+})
+
+const settle_data = z.object({
+  settled    : z.boolean(),
+  settled_at : stamp.nullable(),
+})
+
+const spend_state = z.discriminatedUnion('spent',   [ spent,   unspent   ])
+const close_state = z.discriminatedUnion('settled', [ settled, unsettled ])
 
 const txspend = z.object ({
   txid      : hash,
@@ -35,4 +46,4 @@ const txspend = z.object ({
   scriptkey : hex
 })
 
-export default { close_state, spend_state, txspend }
+export default { close_state, settle_data, spend_data, spend_state, txspend }

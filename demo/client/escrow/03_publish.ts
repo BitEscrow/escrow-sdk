@@ -1,4 +1,8 @@
-import { DraftSession } from '@scrow/core'
+import {
+  DraftSession,
+  EscrowContract
+} from '@scrow/core'
+
 import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
 
@@ -13,14 +17,8 @@ await draft.connect('wss://relay.damus.io', secret_id)
 // Validate the data is correct.
 draft.validate()
 
-const res = await client.contract.create(draft)
-//
-if (!res.ok) throw new Error(res.error)
-
-const new_contract = res.data.contract
-
-export const cid = new_contract.cid
+const contract = await EscrowContract.create(client, draft)
 
 print_banner('new contract')
-console.dir(new_contract, { depth : null })
+console.dir(contract.data, { depth : null })
 console.log('\n')

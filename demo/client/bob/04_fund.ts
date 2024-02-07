@@ -2,15 +2,14 @@ import { config }              from '@scrow/demo/00_demo_config.js'
 import { client }              from '@scrow/demo/01_create_client.js'
 import { print_banner, sleep } from '@scrow/test'
 import { fund_amt, signer }    from './00_config.js'
-import { cid }                 from '../escrow/03_publish.js'
 
 /** ========== [ Get latest Contract ] ========== **/
 
-const contract_res = await client.contract.read(cid)
+const contracts_res = await signer.fetch.contracts()
 
-if (!contract_res.ok) throw new Error(contract_res.error)
+if (!contracts_res.ok) throw new Error(contracts_res.error)
 
-const contract = contract_res.data.contract
+const contract = contracts_res.data.contracts[0]
 
 /** ========== [ Get Deposit Accout ] ========== **/
 

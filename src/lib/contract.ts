@@ -71,7 +71,7 @@ export function create_contract (
     est_txfee   : txfee,
     est_txsize  : vout_size,
     feerate     : feerate,
-    members     : members,
+    members     : members ?? [],
     moderator   : config.moderator ?? null,
     outputs     : outputs,
     prop_id     : prop_id,

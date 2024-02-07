@@ -1,16 +1,14 @@
-import { EscrowSigner } from '@scrow/core'
-import { Buff }         from '@cmdcode/buff'
+import { EscrowContract } from '@scrow/core'
 
-const seed = Buff.str('alice').digest
+import { client } from '@scrow/demo/01_create_client.js'
 
-console.log('seed:', seed.hex)
+const cid = 'b1587959853f7071bf4d69b940c85bdfa30d99ccccf19c1304fb44610961fb94'
 
-const signer = EscrowSigner.create({}, seed)
+const contract = new EscrowContract(cid, client)
 
-const backup = signer.save('test')
+contract.on('ready', () => {
+  console.log('contract is ready')
+})
 
-console.log('backup:', backup)
 
-const signer2 = EscrowSigner.load({}, 'test', backup)
-
-console.log('is restored:', signer.pubkey === signer2.pubkey)
+console.dir(await contract.data, { depth : null })

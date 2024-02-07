@@ -1,5 +1,5 @@
 
-import { EscrowClient } from '../class/client.js'
+import { EscrowClient } from '../../class/client.js'
 
 import {
   validate_account_req,
@@ -20,7 +20,8 @@ import {
   CommitRequest,
   CloseRequest,
   LockRequest,
-  DepositDigestResponse
+  DepositDigestResponse,
+  DepositStatusResponse
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -122,6 +123,22 @@ function read_deposit_digest_api (client : EscrowClient) {
   }
 }
 
+/**
+ * Fetch a deposit's status from the server by Id.
+ */
+function read_deposit_status_api (client : EscrowClient) {
+  return async (
+    dpid  : string
+  ) : Promise<ApiResponse<DepositStatusResponse>> => {
+    // Validate the deposit id.
+    assert.is_hash(dpid)
+    // Formulate the request.
+    const url = `${client.host}/api/deposit/${dpid}/status`
+    // Return the response.
+    return client.fetcher<DepositStatusResponse>({ url })
+  }
+}
+
 function list_deposit_api (client : EscrowClient) {
   return async (
     pubkey : string,
@@ -190,6 +207,7 @@ export default function (client : EscrowClient) {
     register : register_deposit_api(client),
     commit   : commit_deposit_api(client),
     digest   : read_deposit_digest_api(client),
+    status   : read_deposit_status_api(client),
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     lock     : lock_deposit_api(client),

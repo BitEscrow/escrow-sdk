@@ -13,7 +13,8 @@ import {
   FundListResponse,
   ContractDigestResponse,
   ContractVMStateResponse,
-  DraftData
+  DraftData,
+  ContractStatusResponse
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -97,6 +98,23 @@ function read_contract_digest_api (client : EscrowClient) {
     const url = `${client.host}/api/contract/${cid}/digest`
     // Return the response.
     return client.fetcher<ContractDigestResponse>({ url })
+  }
+}
+
+/**
+ * Return a list of committed deposits
+ * that are associated with the contract.
+ */
+function read_contract_status_api (client : EscrowClient) {
+  return async (
+    cid : string
+  ) : Promise<ApiResponse<ContractStatusResponse>> => {
+    // Validate the contract id.
+    assert.is_hash(cid)
+    // Formulate the request.
+    const url = `${client.host}/api/contract/${cid}/status`
+    // Return the response.
+    return client.fetcher<ContractStatusResponse>({ url })
   }
 }
 
@@ -210,6 +228,7 @@ export default function (client : EscrowClient) {
     funds   : list_funds_api(client),
     list    : list_contract_api(client),
     read    : read_contract_api(client),
+    status  : read_contract_status_api(client),
     submit  : submit_witness_api(client),
     vmstate : read_vm_state_api(client),
     witness : list_witness_api(client)

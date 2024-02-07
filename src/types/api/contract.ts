@@ -1,4 +1,5 @@
 import { DepositDigest } from '../deposit.js'
+import { RecordStatus }  from './index.js'
 import { ProposalData }  from '../proposal.js'
 import { WitnessData }   from '../program.js'
 import { StateData }     from '../vm.js'
@@ -28,6 +29,10 @@ export interface ContractListResponse {
 
 export interface ContractDigestResponse {
   contract : ContractDigest
+}
+
+export interface ContractStatusResponse {
+  contract : RecordStatus<ContractStatus>
 }
 
 export interface ContractVMStateResponse {

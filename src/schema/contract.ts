@@ -6,8 +6,7 @@ import tx       from './tx.js'
 import vm       from './vm.js'
 
 const { bool, hash, hex, label, nonce, num, payment, stamp } = base
-const { data : terms } = proposal
-const { close_state, spend_state } = tx
+const { close_state, settle_data, spend_data, spend_state }  = tx
 
 const agent = z.object({
   agent_id : hash,
@@ -17,12 +16,6 @@ const agent = z.object({
 
 const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
-
-const request = z.object({
-  members    : draft.members.default([]),
-  proposal   : terms,
-  signatures : hex.array().default([])
-})
 
 const digest = z.object({
   activated   : stamp.nullable(),
@@ -39,7 +32,7 @@ const digest = z.object({
   updated_at  : stamp
 })
 
-const data = z.object({
+const base_data = z.object({
   activated   : stamp.nullable(),
   agent_fee   : payment,
   balance     : num,
@@ -59,12 +52,15 @@ const data = z.object({
   signatures  : hex.array(),
   status,
   subtotal    : num,
-  terms,
+  terms       : proposal.data,
   total       : num,
   txin_count  : num,
   updated_at  : stamp,
   vm_state    : vm.data.nullable(),
   vout_size   : num
-}).and(agent).and(spend_state).and(close_state)
+}).merge(agent)
 
-export default { agent, data, digest, output, request, status }
+const data  = base_data.and(spend_state).and(close_state)
+const shape = base_data.merge(settle_data).merge(spend_data)
+
+export default { agent, data, digest, output, shape, status }

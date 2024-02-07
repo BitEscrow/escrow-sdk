@@ -8,12 +8,13 @@ import {
   Wallet
 } from '@cmdcode/signer'
 
-import account_api   from '../api/account.js'
-import member_api    from '../api/member.js'
-import draft_api     from '../api/draft.js'
-import request_api   from '../api/request.js'
-import statement_api from '../api/statement.js'
-import wallet_api    from '../api/wallet.js'
+import account_api   from '../api/signer/account.js'
+import fetch_api     from '../api/signer/fetch.js'
+import member_api    from '../api/signer/member.js'
+import draft_api     from '../api/signer/draft.js'
+import request_api   from '../api/signer/request.js'
+import statement_api from '../api/signer/statement.js'
+import wallet_api    from '../api/signer/wallet.js'
 
 import {
   CredentialAPI,
@@ -119,6 +120,7 @@ export class EscrowSigner {
   account    = account_api(this)
   credential = member_api(this)
   draft      = draft_api(this)
+  fetch      = fetch_api(this)
   request    = request_api(this)
   wallet     = wallet_api(this)
   witness    = statement_api(this)

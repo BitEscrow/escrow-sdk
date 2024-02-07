@@ -1,4 +1,4 @@
-import { EscrowClient } from '../class/client.js'
+import { EscrowClient } from '../../class/client.js'
 
 import {
   ServerKeysResponse,
