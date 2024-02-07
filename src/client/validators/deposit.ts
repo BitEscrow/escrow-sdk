@@ -26,7 +26,7 @@ export function verify_account (
 
   assert.ok(host_pub !== undefined,           'host pubkey is not set on device')
   assert.ok(pubkey   === deposit_pk,          'deposit pubkey does not match device')
-  assert.ok(signer.has_account(spend_xpub),   'account xpub is not recognized by master wallet')
+  assert.ok(signer.wallet.has(spend_xpub),    'account xpub is not recognized by master wallet')
 
   const return_pk = parse_extkey(spend_xpub).pubkey
   const context   = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)

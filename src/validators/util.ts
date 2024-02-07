@@ -1,5 +1,3 @@
-import { VALID_ACTIONS } from '@/config.js'
-
 export function check_regex (
   labels : string[],
   regex  : string
@@ -26,13 +24,5 @@ export function check_expires (
 ) {
   if (timestamp >= expires) {
     throw new Error(`time is expired:  ${String(timestamp)} >= ${expires}`)
-  }
-}
-
-export function check_valid_action (
-  action : string
-) {
-  if (!VALID_ACTIONS.includes(action)) {
-    throw new Error('invalid action: ' + action)
   }
 }

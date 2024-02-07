@@ -10,12 +10,13 @@ import {
 
 import account_api   from '../api/account.js'
 import member_api    from '../api/member.js'
-import proposal_api  from '../api/proposal.js'
+import draft_api     from '../api/draft.js'
 import request_api   from '../api/request.js'
 import statement_api from '../api/statement.js'
+import wallet_api    from '../api/wallet.js'
 
 import {
-  CredSignerAPI,
+  CredentialAPI,
   Network,
   WalletAPI
 } from '@/types/index.js'
@@ -88,7 +89,7 @@ export class EscrowSigner {
   readonly _client    : EscrowClient
   readonly _host_pub ?: string
   readonly _gen_idx   : () => number
-  readonly _signer    : CredSignerAPI
+  readonly _signer    : CredentialAPI
   readonly _wallet    : WalletAPI
 
   constructor (config : SignerConfig) {
@@ -116,20 +117,10 @@ export class EscrowSigner {
   }
 
   account    = account_api(this)
-  membership = member_api(this)
-  proposal   = proposal_api(this)
+  credential = member_api(this)
+  draft      = draft_api(this)
   request    = request_api(this)
-
-  wallet     = {
-    has_account : (xpub : string) => {
-      return this._wallet.has_account(xpub)
-    },
-    get_account : (idx ?: number) => {
-      idx = idx ?? this._gen_idx()
-      return this._wallet.get_account(idx)
-    }
-  }
-
+  wallet     = wallet_api(this)
   witness    = statement_api(this)
 
   save (password : string) {

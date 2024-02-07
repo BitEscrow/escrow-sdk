@@ -1,5 +1,4 @@
 import { Literal, Network } from './base.js'
-import { MemberData }       from './member.js'
 
 export type PaymentEntry = [
   value   : number,
@@ -25,22 +24,19 @@ export type ScheduleTerms = [
   path   : string
 ]
 
-export interface ProposalTemplate extends Omit <
- Partial<ProposalData>, 'network'
-> {
-  title   : string,
-  expires : number,
-  network : string,
-  value   : number
+export interface ProposalTemplate extends Omit<Partial<ProposalData>, 'network'> {
+  duration : number,
+  network ?: string,
+  title    : string,
+  value    : number
 }
 
 export interface ProposalData {
   content   ?: string
   deadline  ?: number
+  duration   : number
   effective ?: number
-  expires    : number
   feerate   ?: number
-  members    : MemberData[]
   moderator ?: string
   network    : Network
   paths      : PathEntry[]

@@ -50,6 +50,16 @@ const record  = z.record(literal.array())
 const tags    = literal.array()
 const prevout = z.object({ value, script })
 
+const note    = z.object({
+  content    : str,
+  created_at : stamp,
+  id         : hash,
+  kind       : num,
+  pubkey     : hash,
+  sig        : nonce,
+  tags       : z.array(str.array())
+})
+
 export default {
   address,
   base64,
@@ -66,6 +76,7 @@ export default {
   label,
   network,
   nonce,
+  note,
   num,
   paypath,
   payment,

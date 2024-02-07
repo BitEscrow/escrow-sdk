@@ -1,41 +1,43 @@
-import { Buff }   from '@cmdcode/buff'
 import { Wallet } from '@cmdcode/signer'
 
 import {
-  add_member_data,
-  has_member_data,
   rem_member_data,
-  update_member_data
+  upsert_member_data
 } from './member.js'
 
 import {
-  compare_arr,
-  find_program_idx
+  find_program_idx,
+  get_object_id
 } from '../lib/util.js'
 
 import {
+  DraftData,
   MemberData,
-  ProgramTerms,
-  ProposalData
+  ProposalData,
+  RolePolicy,
+  RoleTemplate
 } from '@/types/index.js'
 
-import { RolePolicy } from '../types/index.js'
+import * as assert from '@/assert.js'
 
 const GET_DEFAULT_POLICY = () => {
   return {
-    limit    : 1,
-    paths    : [],
-    programs : []
+    min_slots : 1,
+    max_slots : 1,
+    paths     : [],
+    programs  : []
   }
 }
 
 export function create_policy (
-  policy : RolePolicy
+  template : RoleTemplate
 ) : RolePolicy {
-  return { ...GET_DEFAULT_POLICY(), ...policy }
+  const pol = { ...GET_DEFAULT_POLICY(), ...template }
+  const id  = get_object_id(pol).hex
+  return { ...pol, id }
 }
 
-export function get_role_data (
+export function get_enrollment (
   member   : MemberData,
   proposal : ProposalData
 ) {
@@ -49,79 +51,113 @@ export function get_role_data (
     .reduce((p, n) => p + n[0], 0)
   const programs = proposal.programs
     .filter(e => e.includes(pub))
-    .map(e => e.slice(0, 3) as ProgramTerms)
   return { paths, payment, programs }
 }
 
-export function check_role_data (
-  member   : MemberData,
-  role     : RolePolicy,
-  proposal : ProposalData
+export function tabulate_enrollment (
+  members : MemberData[],
+  roles   : RolePolicy[],
 ) {
-  const { paths, payment, programs } = get_role_data(member, proposal)
-  const pol = Buff.json(role).digest.hex
-
-  if (member.pol !== pol) {
-    throw new Error('policy hash does not match membership')
+  const scores = new Map(roles.map(e => [ e.id, 0 ]))
+  for (const pol of roles) {
+    const tab = scores.get(pol.id)
+    assert.exists(tab)
+    for (const mbr of members) {
+      if (mbr.pol === pol.id) {
+        scores.set(pol.id, tab + 1)
+      }
+    } 
   }
-
-  if (role.paths !== undefined && !compare_arr(paths, role.paths)) {
-    throw new Error('enrolled paths do not match role template')
-  }
-
-  if (role.payment !== undefined && role.payment > 0 && payment !== role.payment) {
-    throw new Error('enrolled payments do not match role template')
-  }
-
-  if (role.programs !== undefined && !compare_arr(programs, role.programs)) {
-    throw new Error('enrolled programs do not match role template')
-  }
+  return scores
 }
 
-export function is_member (
-  mship    : MemberData,
-  proposal : ProposalData
+export function has_full_enrollment (
+  members : MemberData[],
+  roles   : RolePolicy[]
 ) {
-  return proposal.members.some(e => {
+  const scores = tabulate_enrollment(members, roles)
+  return roles.every(e => {
+    const { id, min_slots, max_slots } = e
+    const score = scores.get(id)
+    return (
+      score !== undefined && 
+      score >= min_slots  && 
+      score <= max_slots
+    )
+  })
+}
+
+export function has_policy (
+  pol_id : string,
+  roles  : RolePolicy[]
+) {
+  const exists = roles.find(e => e.id === pol_id)
+  return exists !== undefined
+}
+
+export function is_enrolled (
+  members  : MemberData[],
+  mship    : MemberData,
+) {
+  return members.some(e => {
     return e.pub === mship.pub && e.pol !== undefined
   })
 }
 
-export function add_membership (
-  mship    : MemberData,
-  role     : RolePolicy,
-  proposal : ProposalData
+export function add_enrollment (
+  membership : MemberData,
+  policy     : RolePolicy,
+  session    : DraftData
 ) {
-  const { pub, xpub } = mship
+  let roles = session.roles,
+      sdata = session
+
+  if (!has_policy(policy.id, roles)) {
+    roles = [ ...session.roles, policy ]
+    sdata = { ...session, roles }
+  }
+
+  return join_role(membership, policy, sdata)
+}
+
+export function join_role (
+  membership : MemberData,
+  policy     : RolePolicy,
+  session    : DraftData
+) : DraftData {
+  const { pub, xpub } = membership
+
+  const updated = rem_enrollment(membership, session)
+
+  const { members, roles, proposal } = updated
   const { network, paths, payments, programs } = proposal
 
-  if (is_member(mship, proposal)) {
-    throw new Error('previous role exists for membership')
+  if (!has_policy(policy.id, roles)) {
+    throw new Error('policy does not exist')
   }
 
   const wallet = new Wallet(xpub)
-  const pol    = Buff.json(role).digest.hex
-  const rolls  = proposal.members.filter(e => e.pol === pol)
-  const limit  = role.limit ?? 1
+  const rolls  = members.filter(e => e.pol === policy.id)
+  const limit  = policy.max_slots
   
   if (rolls.length >= limit) {
-    throw new Error('positions for this role have been filled')
+    throw new Error('no slots remaining for role')
   }
 
-  if (role.paths !== undefined) {
-    for (const [ label, amt ] of role.paths) {
+  if (policy.paths !== undefined) {
+    for (const [ label, amt ] of policy.paths) {
       const addr = wallet.new_address({ network })
       paths.push([ label, amt, addr ])
     }
   }
 
-  if (role.payment !== undefined && role.payment > 0) {
+  if (policy.payment !== undefined && policy.payment > 0) {
     const pay_addr = wallet.new_address({ network })
-    payments.push([ role.payment, pay_addr ])
+    payments.push([ policy.payment, pay_addr ])
   }
 
-  if (role.programs !== undefined) {
-    for (const terms of role.programs) {
+  if (policy.programs !== undefined) {
+    for (const terms of policy.programs) {
       const idx = find_program_idx(programs, terms)
       if (idx === null) {
         programs.push([ ...terms, pub ])
@@ -131,22 +167,21 @@ export function add_membership (
     }
   }
 
-  const mdata   = { ...mship, pol }
-  const members = (has_member_data(proposal.members, mdata))
-    ? update_member_data(proposal.members, mdata)
-    : add_member_data(proposal.members, mdata)
+  const mship = { ...membership, pol : policy.id }
+  const tmpl  = { ...proposal, paths, payments, programs }
+  const mbrs  = upsert_member_data(members, mship)
 
-  return { ...proposal, members, paths, payments, programs }
+  return { ...session, members : mbrs, proposal : tmpl }
 }
 
-export function rem_membership (
-  mship    : MemberData,
-  proposal : ProposalData,
-  leave = true
-) : ProposalData {
-  const { pub, xpub } = mship
+export function rem_enrollment (
+  membership : MemberData,
+  session    : DraftData
+) : DraftData {
+  const { pub, xpub }         = membership
+  const { members, proposal } = session
 
-  const wallet = new Wallet(xpub)
+  const wallet   = new Wallet(xpub)
 
   const paths    = proposal.paths
     .filter(e => !wallet.has_address(e[2], proposal.paths.length))
@@ -159,10 +194,8 @@ export function rem_membership (
     if (idx !== -1) e.splice(idx, 1)
   })
 
-  const member  = { ...mship, pol : undefined }
-  const members = (leave)
-    ? rem_member_data(proposal.members, member)
-    : update_member_data(proposal.members, member)
-
-  return { ...proposal, members, paths, payments, programs }
+  const tmpl  = { ...proposal, paths, payments, programs }
+  const mbrs  = rem_member_data(members, membership)
+  
+  return { ...session, members : mbrs, proposal : tmpl }
 }

@@ -21,7 +21,9 @@ import {
   ProgramTerms,
   ProgramData,
   SignerAPI,
-  ProposalTemplate
+  ProposalTemplate,
+  DraftData,
+  DraftTemplate
 } from '@/types/index.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -29,6 +31,7 @@ type PathTotal = [ path: string, total : number ]
 const GET_DEFAULT_PROP = () => {
   return {
     content  : '',
+    network  : 'signet',
     members  : [],
     paths    : [],
     payments : [],
@@ -38,7 +41,15 @@ const GET_DEFAULT_PROP = () => {
   }
 }
 
-export function create_proposal(template : ProposalTemplate) {
+export function create_draft (
+  template : DraftTemplate
+) : DraftData {
+  const { members = [], proposal, roles = [], signatures = [] } = template
+  const prop = create_proposal(proposal)
+  return { members, proposal: prop, roles, signatures }
+}
+
+export function create_proposal (template : ProposalTemplate) {
   // Create a proposal object.
   return parse_proposal({ ...GET_DEFAULT_PROP(), ...template })
 }

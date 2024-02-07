@@ -1,7 +1,7 @@
 import { ProposalData } from '@scrow/core'
 import { CoreSigner }   from '../types.js'
 
-const NETWORK  = 'regtest'
+const NETWORK = 'regtest'
 
 export async function get_proposal (
   members : CoreSigner[]
@@ -10,8 +10,7 @@ export async function get_proposal (
   return {
     title    : 'Basic two-party contract with third-party dispute resolution.',
     content  : 'n/a',
-    expires  : 14400,
-    members  : [],
+    duration : 14400,
     network  : NETWORK,
     paths    : [
       [ 'payout', 90000, await bob.core.new_address   ],

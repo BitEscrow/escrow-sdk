@@ -1,4 +1,5 @@
 import { AgentSession } from './covenant.js'
+import { MemberData }   from './draft.js'
 import { StateData }    from './vm.js'
 
 import {
@@ -42,6 +43,7 @@ export interface ContractBase {
   est_txsize  : number
   expires_at  : null | number
   feerate     : number
+  members     : MemberData[]
   moderator   : string | null
   outputs     : SpendTemplate[]
   pending     : number

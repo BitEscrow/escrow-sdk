@@ -24,10 +24,9 @@ Below is a diagram of the proposal interface, plus a description for each term.
 interface ProposalData {
   content   ?: string           // Store any kind of text or json data.
   deadline  ?: number           // The max length of a published contract.
-  expires    : number           // The max length of an active contract.
+  duration   : number           // The max length of an active contract.
   effective ?: number           // Set a specific date for activation.
   feerate   ?: number           // Define a fee-rate to use for transactions.
-  members    : MemberData[]     // Signing members of the contract.
   network    : Network          // Network (chain) of the contract.
   paths      : PathEntry[]      // Conditional payments in the contract.
   payments   : PaymentEntry[]   // Unconditional payments in the contract.

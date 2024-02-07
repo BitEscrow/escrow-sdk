@@ -1,14 +1,14 @@
-import { Wallet }         from '@cmdcode/signer'
-import { EscrowSigner }   from '@/client/class/signer.js'
-import { ProposalData }   from '@/types/index.js'
+import { Wallet }       from '@cmdcode/signer'
+import { EscrowSigner } from '@/client/class/signer.js'
+import { MemberData }   from '@/types/index.js'
+import { Membership }   from '@/client/types.js'
 
 import {
   gen_membership,
   get_membership,
+  has_credential,
   has_membership,
-} from '../../lib/member.js'
-
-import { Membership } from '../types.js'
+} from '@/lib/member.js'
 
 export function gen_membership_api (client : EscrowSigner) {
   return (index ?: number) => {
@@ -20,20 +20,28 @@ export function gen_membership_api (client : EscrowSigner) {
 export function has_membership_api (
   client : EscrowSigner
 ) {
-  return (proposal : ProposalData) => {
-    return has_membership(proposal.members, client._signer)
+  return (members : MemberData[]) => {
+    return has_membership(members, client._signer)
+  }
+}
+
+export function is_claimable_api (
+  client : EscrowSigner
+) {
+  return (cred : MemberData) => {
+    return has_credential(cred, client._signer)
   }
 }
 
 export function claim_membership_api (
   client : EscrowSigner
 ) {
-  return (proposal : ProposalData) : Membership => {
-    if (!has_membership(proposal.members, client._signer)) {
+  return (members : MemberData[]) : Membership => {
+    if (!has_membership(members, client._signer)) {
       throw new Error('not a member of the proposal')
     }
-    const mship = get_membership(proposal.members, client._signer)
-    // TODO: validate membership
+    const mship = get_membership(members, client._signer)
+
     return {
       data   : mship,
       signer : client._signer.get_id(mship.id),
@@ -44,8 +52,9 @@ export function claim_membership_api (
 
 export default function (client : EscrowSigner) {
   return {
-      claim    : claim_membership_api(client),
-      exists   : has_membership_api(client),
-      generate : gen_membership_api(client)
+    claimable : is_claimable_api(client),
+    claim     : claim_membership_api(client),
+    exists    : has_membership_api(client),
+    generate  : gen_membership_api(client),
   }
 }

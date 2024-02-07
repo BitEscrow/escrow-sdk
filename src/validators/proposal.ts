@@ -1,5 +1,10 @@
-import { parse_program, parse_proposal } from '../lib/parse.js'
-import { now }            from '../lib/util.js'
+import { check_program_config } from './program.js'
+import { now }                  from '../lib/util.js'
+
+import {
+  parse_program,
+  parse_proposal
+} from '../lib/parse.js'
 
 import {
   MIN_DEADLINE,
@@ -19,13 +24,11 @@ import {
 import {
   check_expires,
   check_regex,
-  check_valid_action
 } from './util.js'
 
 import { ProposalData } from '../types/index.js'
 
 import * as assert from '../assert.js'
-import { check_program_config } from './program.js'
 
 export function validate_proposal (
   proposal : unknown
@@ -67,13 +70,6 @@ function check_payments (proposal : ProposalData) {
   }
 }
 
-/**
- * CHECK MEMBERSHIPS
- * - check signatures on memberships
- * - validate member roles (need policy array)
- * 
- */
-
 function check_programs (
   proposal : ProposalData
 ) {
@@ -89,33 +85,33 @@ function check_programs (
 }
 
 function check_schedule (proposal : ProposalData) {
-  const { expires, paths, schedule } = proposal
-  const names = get_path_names(paths)
+  const { duration, paths, schedule } = proposal
+  const path_names = get_path_names(paths)
   schedule.forEach(task => {
-    const [ timer, action, regex ] = task
-    check_expires(timer, expires)
-    check_valid_action(action)
-    check_regex(names, regex)
+    const [ timer, actions, paths ] = task
+    check_expires(timer, duration)
+    check_regex(VALID_ACTIONS, actions)
+    check_regex(path_names, paths)
   })
 }
 
 function check_stamps (proposal : ProposalData) {
-  const { deadline = MIN_DEADLINE, effective, expires } = proposal
+  const { deadline = MIN_DEADLINE, effective, duration } = proposal
   const current = now()
 
-  if (expires < MIN_EXPIRY) {
-    throw new Error(`The specified expiration window is below the minimum allowed: ${expires} < ${MIN_EXPIRY}`)
+  if (duration < MIN_EXPIRY) {
+    throw new Error(`The specified expiration window is below the minimum allowed: ${duration} < ${MIN_EXPIRY}`)
   }
 
-  if (expires > MAX_EXPIRY) {
-    throw new Error(`The specified expiration window is above the maximum allowed: ${expires} > ${MAX_EXPIRY}`)
+  if (duration > MAX_EXPIRY) {
+    throw new Error(`The specified expiration window is above the maximum allowed: ${duration} > ${MAX_EXPIRY}`)
   }
 
   if (deadline < MIN_DEADLINE) {
     throw new Error(`The specified deadline is below the minimum allowed: ${deadline} < ${MIN_DEADLINE}`)
   }
 
-  if (deadline > (expires - MIN_WINDOW)) {
+  if (deadline > (duration - MIN_WINDOW)) {
     throw new Error(`The delta between deadline and expiration does not meet the minimum execution window.`)
   }
 

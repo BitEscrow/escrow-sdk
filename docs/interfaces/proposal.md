@@ -45,9 +45,18 @@ interface MemberData {
 
 ```ts
 interface RolePolicy {
-  limit    ?: number                // Membership limit.
-  paths    ?: [ string, number ][]  // Paths to include.
-  payment  ?: number                // Payment to include.
-  programs ?: ProgramTerms[]        // Programs to join/add.
+  title      : string
+  min_slots ?: number
+  max_slots ?: number
+  paths     ?: [ string, number ][]  // Paths to include.
+  payment   ?: number                // Payment to include.
+  programs  ?: ProgramTerms[]        // Programs to join/add.
 }
+
+type ProgramTerms = [
+  method  : string
+  actions : string
+  paths   : string
+  thold   : number
+]
 ```

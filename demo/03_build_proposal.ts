@@ -15,9 +15,9 @@ export const moderator = signers[2]
 /**
  * Define our proposal template.
  */
-export const template = create_proposal({
+export const proposal = create_proposal({
   title     : 'Basic two-party contract with third-party arbitration.',
-  expires   : 14400,
+  duration  : 14400,
   moderator : moderator.pubkey,
   network   : config.network,
   schedule  : [[ 7200, 'close', '*' ]],
@@ -27,8 +27,9 @@ export const template = create_proposal({
 /**
  * Define our role templates.
  */
-export const roles = {
+export const role = {
   buyer : create_policy({
+    title : 'buyer',
     paths : [
       [ 'heads', 10000 ],
       [ 'draw',  5000  ]
@@ -39,6 +40,7 @@ export const roles = {
     ]
   }),
   seller : create_policy({
+    title : 'seller',
     paths : [
       [ 'tails', 10000 ],
       [ 'draw',  5000  ]
@@ -49,6 +51,7 @@ export const roles = {
     ]
   }),
   agent : create_policy({
+    title : 'agent',
     payment  : 5000,
     programs : [
       [ 'endorse', 'resolve', 'heads|tails|draw', 1 ]

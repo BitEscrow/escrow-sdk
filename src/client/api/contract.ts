@@ -9,11 +9,11 @@ import {
   ContractDataResponse,
   ContractListResponse,
   WitnessListResponse,
-  ProposalData,
   WitnessData,
   FundListResponse,
   ContractDigestResponse,
-  ContractVMStateResponse
+  ContractVMStateResponse,
+  DraftData
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
@@ -25,9 +25,9 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    proposal    : ProposalData,
-    signatures ?: string[]
+    session : Partial<DraftData>
   ) : Promise<ApiResponse<ContractDataResponse>> => {
+    const { members, proposal, signatures } = session
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
@@ -41,7 +41,7 @@ function create_contract_api (
     const url  = `${client.host}/api/contract/create`
     // Formulate the request body.
     const init = {
-      body    : JSON.stringify({ proposal, signatures }),
+      body    : JSON.stringify({ members, proposal, signatures }),
       method  : 'POST',
       headers : { 'content-type' : 'application/json' }
     }

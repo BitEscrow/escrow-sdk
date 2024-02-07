@@ -25,10 +25,10 @@ export interface SignerAPI {
   sign      : SignDevice
 }
 
-export interface CredSignerAPI extends SignerAPI {
+export interface CredentialAPI extends SignerAPI {
   backup    : (password : Bytes) => Bytes
   has_id    : (id : Bytes, pubkey : Bytes) => boolean
-  get_id    : (id : Bytes) => CredSignerAPI
+  get_id    : (id : Bytes) => CredentialAPI
   gen_cred  : (idx : number, xpub : string) => CredentialData
   gen_token : (content : string) => string
   hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff

@@ -1,5 +1,6 @@
 import { z }    from 'zod'
 import base     from './base.js'
+import draft    from './draft.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
 import vm       from './vm.js'
@@ -18,6 +19,7 @@ const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 
 const output  = z.tuple([ label, hex ])
 
 const request = z.object({
+  members    : draft.members.default([]),
   proposal   : terms,
   signatures : hex.array().default([])
 })
@@ -48,6 +50,7 @@ const data = z.object({
   expires_at  : stamp.nullable(),
   feerate     : num,
   outputs     : output.array(),
+  members     : draft.members,
   moderator   : hash.nullable(),
   pending     : num,
   prop_id     : hash,

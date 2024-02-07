@@ -87,7 +87,7 @@ export default async function (client : CoreClient, tape : Test) {
       const cid       = get_contract_id(prop_id, published, outputs)
       const session   = create_session(agent.signer, cid)
       const ct_config = { agent_fee, cid, feerate, outputs, published, session }
-      const contract  = create_contract(ct_config, proposal)
+      const contract  = create_contract(ct_config, [], proposal)
 
       if (VERBOSE) {
         console.log(banner('contract'))

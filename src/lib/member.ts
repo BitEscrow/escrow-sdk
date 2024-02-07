@@ -3,7 +3,7 @@ import { verify_sig }  from '@cmdcode/crypto-tools/signer'
 
 import {
   MemberData,
-  CredSignerAPI,
+  CredentialAPI,
   WalletAPI
 } from '@/types/index.js'
 
@@ -13,7 +13,7 @@ import {
  */
 export function gen_membership (
   index  : number,
-  signer : CredSignerAPI,
+  signer : CredentialAPI,
   wallet : WalletAPI,
 ) : MemberData {
   return signer.gen_cred(index, wallet.xpub)
@@ -21,7 +21,7 @@ export function gen_membership (
 
 export function has_membership (
   members : MemberData[],
-  signer  : CredSignerAPI
+  signer  : CredentialAPI
 ) {
   const entry = members.find(e => signer.has_id(e.id, e.pub))
   return entry !== undefined
@@ -29,7 +29,7 @@ export function has_membership (
 
 export function get_membership (
   members : MemberData[],
-  signer  : CredSignerAPI
+  signer  : CredentialAPI
 ) {
   const entry = members.find(e => signer.has_id(e.id, e.pub))
 
@@ -38,6 +38,13 @@ export function get_membership (
   }
 
   return entry
+}
+
+export function has_credential (
+  cred   : MemberData,
+  signer : CredentialAPI
+) {
+  return signer.has_id(cred.id, cred.pub)
 }
 
 export function has_member_data (
@@ -57,15 +64,14 @@ export function add_member_data (
   if (members.some(e => e.pub === mship.pub)) {
     throw new Error('member data already exists')
   }
-
   return [ ...members, mship ]
 }
 
-export function update_member_data (
+export function upsert_member_data (
   members : MemberData[],
   mship   : MemberData,
 ) {
-  const mbrs = members.filter(e => e.pub === mship.pub)
+  const mbrs = members.filter(e => e.pub !== mship.pub)
   return [ ...mbrs, mship ]
 }
 
@@ -81,7 +87,7 @@ export function rem_member_data (
 
 export function create_endorsement (
   record_id : Bytes,
-  signer    : CredSignerAPI
+  signer    : CredentialAPI
 ) {
   const pub = signer.pubkey
   const sig = signer.sign(record_id)

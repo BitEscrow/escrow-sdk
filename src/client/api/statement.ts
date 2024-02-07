@@ -22,11 +22,11 @@ export function can_sign_api (signer : EscrowSigner) {
     const { action, path, method } = template
     const terms = contract.terms
 
-    if (!signer.membership.exists(terms)) {
+    if (!signer.credential.exists(contract.members)) {
       return false
     }
 
-    const cred  = signer.membership.claim(terms)
+    const cred  = signer.credential.claim(contract.members)
     const query = { action, path, method, includes: [ cred.data.pub ] }
     const prog  = find_program(query, terms.programs)
     return prog !== undefined
@@ -39,7 +39,7 @@ export function sign_witness_api (signer : EscrowSigner) {
     template : WitnessTemplate
   ) => {
     const terms = contract.terms
-    const cred  = signer.membership.claim(terms)
+    const cred  = signer.credential.claim(contract.members)
       let wdat  = create_witness(terms.programs, cred.data.pub, template)
     validate_witness(contract, wdat)
     return sign_witness(cred.signer, wdat)
@@ -51,8 +51,7 @@ export function endorse_witness_api (signer : EscrowSigner) {
     contract : ContractData,
     witness  : WitnessData
   ) => {
-    const terms = contract.terms
-    const cred  = signer.membership.claim(terms)
+    const cred = signer.credential.claim(contract.members)
     validate_witness(contract, witness)
     return sign_witness(cred.signer, witness)
   }

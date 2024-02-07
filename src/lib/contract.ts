@@ -15,6 +15,7 @@ import {
   ContractConfig,
   ContractData,
   ContractStatus,
+  MemberData,
   PaymentEntry,
   ProposalData,
   SpendTemplate
@@ -42,6 +43,7 @@ const GET_INIT_CONTRACT = () => {
  */
 export function create_contract (
   config     : ContractConfig,
+  members    : MemberData[],
   terms      : ProposalData,
   signatures : string[] = []
 ) : ContractData {
@@ -69,6 +71,7 @@ export function create_contract (
     est_txfee   : txfee,
     est_txsize  : vout_size,
     feerate     : feerate,
+    members     : members,
     moderator   : config.moderator ?? null,
     outputs     : outputs,
     prop_id     : prop_id,
@@ -113,9 +116,9 @@ export function activate_contract (
   // Unpack contract object.
   const { cid, terms } = contract
   // Unpack terms object.
-  const { expires, paths, programs, schedule } = terms
+  const { duration, paths, programs, schedule } = terms
   // Define a hard expiration date.
-  const expires_at = activated + expires
+  const expires_at = activated + duration
   // Collect the path names.
   const pathnames = get_path_names(paths)
   // Initialize the virtual machine.
