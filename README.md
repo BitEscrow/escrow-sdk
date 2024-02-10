@@ -396,7 +396,7 @@ import { create_proposal } from '@scrow/core'
 // a helper method to ensure we have the correct format.
 const template = create_proposal({
   title    : 'Basic two-party contract with third-party arbitration.',
-  expires  : 14400,
+  duration  : 14400,
   network  : 'signet',
   schedule : [[ 7200, 'close', 'draw' ]],
   value    : 15000,
