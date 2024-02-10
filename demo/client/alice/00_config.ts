@@ -11,7 +11,7 @@ import { config } from '@scrow/demo/00_demo_config.js'
 
 /** ========== [ USER CONFIG ] ========== **/
 
-const SECRET_PASS  : string = 'test_draft2'
+const SECRET_PASS  : string = 'test_draft3'
 
 const USER_ALIAS   : string = 'alice'
 
@@ -36,6 +36,7 @@ const WIT_STATEMENT : WitnessTemplate = {
 
 /** ========== [ MAIN EXPORT ] ========== **/
 
+export const alias     = USER_ALIAS
 // Compute secret id for nostr session.
 export const secret_id = Buff.str(SECRET_PASS).digest.hex
 // Derive signing device from the user alias.

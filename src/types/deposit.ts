@@ -87,7 +87,6 @@ export interface DepositInfo {
 
 export interface DepositDigest {
   block_height : number | null
-  cid          : string | null
   confirmed    : boolean
   expires_at   : number | null
   settled      : boolean

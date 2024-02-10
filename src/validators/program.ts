@@ -30,19 +30,21 @@ export function check_program_config (
 
   switch (method) {
     case 'endorse':
-      check_sign_config(params)
+      check_endorse_params(params)
       break
     default:
       throw new Error('Invalid method: ' + method)
   }
 }
 
-function check_sign_config (params : Literal[]) {
-  const [ thold, ...pubkeys ] = params
-  if (typeof thold !== 'number' || thold > pubkeys.length) {
-    throw new Error('invalid threshold value: ' + String(thold))
-  }
-  pubkeys.forEach(e => assert.valid_pubkey(e))
+function check_endorse_params (params : Literal[]) {
+  const [ threshold, ...pubkeys ] = params
+  const thold = Number(threshold)
+  const pubs  = pubkeys.map(e => String(e))
+  assert.ok(typeof thold === 'number', 'invalid threshold value: ' + String(thold))
+  assert.ok(thold > 0,                 'threshold must be greater than zero')
+  assert.ok(thold <= pubs.length,      'threshold must not exceed pubkey count')
+  pubs.forEach(e => assert.valid_pubkey(e))
 }
 
 export function validate_witness (

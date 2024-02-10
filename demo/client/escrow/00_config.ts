@@ -13,7 +13,7 @@ import { config } from '@scrow/demo/00_demo_config.js'
 
 /** ========== [ USER CONFIG ] ========== **/
 
-const SECRET_PASS   : string = 'test_draft2'
+const SECRET_PASS   : string = 'test_draft3'
 
 const USER_ALIAS    : string = 'carol'
 
@@ -32,8 +32,6 @@ const PROP_TEMPLATE : ProposalTemplate = {
   value     : 15000,
 }
 
-const FUND_AMOUNT   : number = 15_000
-
 const WIT_STATEMENT : WitnessTemplate = {
   action : 'resolve',
   method : 'endorse',
@@ -42,6 +40,7 @@ const WIT_STATEMENT : WitnessTemplate = {
 
 /** ========== [ MAIN EXPORT ] ========== **/
 
+export const alias     = USER_ALIAS
 // Compute draft id for nostr store.
 export const secret_id = Buff.str(SECRET_PASS).digest.hex
 // Derive signing device from the user alias.
@@ -54,7 +53,5 @@ export const template = create_proposal({
 })
 // Define a role policy for yourself.
 export const policy = create_policy(ROLE_POLICY)
-// Export the fudns amount.
-export const fund_amt = FUND_AMOUNT
 //
 export const wit_tmpl = WIT_STATEMENT

@@ -9,7 +9,8 @@ import {
 
 import {
   validate_draft,
-  validate_slots_full
+  verify_draft,
+  verify_slots_full
 } from '@/validators/policy.js'
 
 import {
@@ -47,7 +48,8 @@ export function leave_draft_api (signer : EscrowSigner) {
 export function endorse_draft_api (client : EscrowSigner) {
   return (draft : DraftData) => {
     validate_draft(draft)
-    validate_slots_full(draft.members, draft.roles)
+    verify_draft(draft)
+    verify_slots_full(draft.members, draft.roles)
     const prop = parse_proposal(draft.proposal)
     const sig  = endorse_proposal(prop, client._signer)
     const sigs = [ ...draft.signatures, sig ]

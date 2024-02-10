@@ -89,7 +89,7 @@ export function now () {
   return Math.floor(Date.now() / 1000)
 }
 
-export function delay (ms ?: number) {
+export function sleep (ms ?: number) {
   return new Promise(res => setTimeout(res, ms ?? 1000))
 }
 
@@ -174,6 +174,12 @@ export function get_object_id <T extends object> (
   return sha256(Buff.json(ent))
 }
 
+export function compare (a : unknown, b : unknown) {
+  const a_str = stringify(a)
+  const b_str = stringify(b)
+  return a_str === b_str
+}
+
 export function compare_arr (
   arr1 : Literal[][],
   arr2 : Literal[][]
@@ -181,6 +187,15 @@ export function compare_arr (
   const a1 = arr1.map(e => JSON.stringify(e)).sort()
   const a2 = arr2.map(e => JSON.stringify(e)).sort()
   return JSON.stringify(a1) === JSON.stringify(a2)
+}
+
+export function get_diff_arr <T> (prev : T, curr : T) {
+  if (!Array.isArray(prev) || !Array.isArray(curr)) {
+    throw new Error('both values must be an array')
+  }
+  const a1 = prev.map(e => stringify(e))
+  const a2 = curr.map(e => stringify(e))
+  return prev.filter((_e, idx) => a1[idx] !== a2[idx]) as T
 }
 
 export function find_program_idx (

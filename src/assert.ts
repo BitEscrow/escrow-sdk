@@ -1,6 +1,7 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 
 import * as util from './lib/util.js'
+import { Point } from '@cmdcode/crypto-tools'
 
 export function ok (
   value    : unknown,
@@ -49,9 +50,10 @@ export function min_value (
   }
 }
 
-export function valid_pubkey (pubkey : unknown) {
+export function valid_pubkey (pubkey : string) {
   try {
-    size(pubkey as Bytes, 32)
+    is_hash(pubkey)
+    Point.from_x(pubkey)
   }
   catch {
     throw new Error('Invalid pubkey: ' + String(pubkey))

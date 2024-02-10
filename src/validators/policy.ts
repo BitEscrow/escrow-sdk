@@ -1,5 +1,3 @@
-import { validate_proposal } from './proposal.js'
-
 import {
   get_enrollment,
   tabulate_enrollment
@@ -19,8 +17,21 @@ import {
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
+import * as schema from '@/schema/index.js'
+
+export function validate_draft (
+  draft : unknown
+) : asserts draft is DraftData {
+  schema.draft.session.parse(draft)
+}
 
 export function validate_policy (
+  policy : unknown
+) : asserts policy is RolePolicy {
+  schema.draft.policy.parse(policy)
+}
+
+export function verify_policy (
   policy : RolePolicy
 ) {
   // add schema check here.
@@ -33,7 +44,7 @@ export function validate_policy (
   assert.ok (hash.hex === id,       'policy hash does not match id'          )
 }
 
-export function validate_enrollment (
+export function verify_enrollment (
   member   : MemberData,
   policy   : RolePolicy,
   proposal : ProposalData
@@ -63,7 +74,7 @@ export function validate_enrollment (
   }
 }
 
-export function validate_slots (
+export function verify_slots (
   members : MemberData[],
   roles   : RolePolicy[]
 ) {
@@ -76,7 +87,7 @@ export function validate_slots (
   })
 }
 
-export function validate_slots_full (
+export function verify_slots_full (
   members : MemberData[],
   roles   : RolePolicy[]
 ) {
@@ -89,17 +100,16 @@ export function validate_slots_full (
   })
 }
 
-export function validate_draft (
+export function verify_draft (
   draft : DraftData
 ) {
   const { members, proposal, roles } = draft
-  validate_slots(members, roles)
-  validate_proposal(proposal)
+  verify_slots(members, roles)
   for (const mbr of members) {
     assert.ok(mbr.pol !== undefined, 'member is not enrolled: ' + mbr.pub)
     const pol = roles.find(e => e.id === mbr.pol)
     assert.ok(pol !== undefined, 'policy does not exist: ' + mbr.pol)
-    validate_enrollment(mbr, pol, proposal)
+    verify_enrollment(mbr, pol, proposal)
   }
 }
 

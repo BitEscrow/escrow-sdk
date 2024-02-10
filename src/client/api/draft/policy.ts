@@ -1,4 +1,4 @@
-import { DraftSession }        from '@/client/class/session.js'
+import { DraftSession }        from '@/client/class/draft.js'
 import { tabulate_enrollment } from '@/lib/policy.js'
 import { RolePolicy }          from '@/types/index.js'
 
@@ -24,16 +24,14 @@ function add_policy_api (draft : DraftSession) {
     const pol = draft.roles.find(e => e.id === policy.id)
     if (pol !== undefined) return
     const roles = [ ...draft.roles, policy ]
-    return draft.commit({ roles })
+    return draft._store.patch({ roles })
   }
 }
 
 function rem_policy_api (draft : DraftSession) {
   return (pol_id : string) => {
-    const pol = draft.roles.find(e => e.id === pol_id)
-    if (pol === undefined) return
     const roles = draft.roles.filter(e => e.id !== pol_id)
-    return draft.commit({ roles })
+    return draft._store.post({ ...draft.data, roles })
   }
 }
 
@@ -65,11 +63,11 @@ function full_slots_api (draft : DraftSession) {
 
 export default function (draft : DraftSession) {
   return { 
-    has_policy : has_policy_api(draft),
-    get_policy : get_policy_api(draft),
-    add_policy : add_policy_api(draft),
-    rem_policy : rem_policy_api(draft),
-    list_open  : open_slots_api(draft),
-    list_full  : full_slots_api(draft)
+    has : has_policy_api(draft),
+    get : get_policy_api(draft),
+    add : add_policy_api(draft),
+    rem : rem_policy_api(draft),
+    list_open : open_slots_api(draft),
+    list_full : full_slots_api(draft)
   }
 }

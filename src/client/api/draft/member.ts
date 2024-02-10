@@ -1,86 +1,44 @@
-import { DraftSession } from '@/client/class/session.js'
+import { DraftSession } from '@/client/class/draft.js'
+import { MemberData }   from '@/types/index.js'
 
-import {
-  get_membership,
-  has_membership
-} from '@/lib/member.js'
-
-import {
-  add_enrollment,
-  join_role,
-  rem_enrollment
-} from '@/lib/policy.js'
-
-import { RolePolicy } from '@/types/index.js'
-
-function membership_exists_api (draft : DraftSession) {
-  return () => {
-    const signer  = draft.signer
-    const members = draft.members
-    return signer.credential.exists(members)
+function has_member_api (draft : DraftSession) {
+  return (pubkey : string) => {
+    const mship = draft.members.find(e => e.pub === pubkey)
+    return mship !== undefined
   }
 }
 
-function claim_membership_api (draft : DraftSession) {
-  return () => {
-    const signer  = draft.signer
-    const members = draft.members
-    return signer.credential.claim(members)
-  }
-}
-
-function create_membership_api (draft : DraftSession) {
-  return (
-    policy : RolePolicy,
-    index ?: number
-  ) => {
-      let session = draft.data
-    const members = draft.data.members
-    const signer  = draft.signer
-    const mship   = (has_membership(members, signer._signer))
-      ? get_membership(members, signer._signer)
-      : signer.credential.generate(index)
-    session = add_enrollment(mship, policy, draft.data)
-    return draft._commit(session)
-  }
-}
-
-function join_proposal_api (draft : DraftSession) {
-  return (
-    policy : RolePolicy,
-    index ?: number
-  ) => {
-      let session = draft.data
-    const members = draft.data.members
-    const signer  = draft.signer
-    const mship   = (has_membership(members, signer._signer))
-      ? get_membership(members, signer._signer)
-      : signer.credential.generate(index)
-    session = join_role(mship, policy, draft.data)
-    return draft._commit(session)
-  }
-}
-
-function leave_proposal_api (draft : DraftSession) {
-  return () => {
-    const members = draft.data.members
-    const signer  = draft.signer   
-    if (has_membership(members, signer._signer)) {
-      const cred    = signer.credential.claim(members)
-      const session = rem_enrollment(cred.data, draft.data)
-      return draft._commit(session)
-    } else {
-      return
+function get_member_api (draft : DraftSession) {
+  return (pubkey : string) => {
+    const mship = draft.members.find(e => e.pub === pubkey)
+    if (mship === undefined) {
+      throw new Error('membership does not exist: ' + pubkey)
     }
+    return mship
+  }
+}
+
+function add_member_api (draft : DraftSession) {
+  return (mship : MemberData) => {
+    const curr = draft.members.find(e => e.pub === mship.pub)
+    if (curr !== undefined) return
+    const members = [ ...draft.members, mship ]
+    return draft._store.patch({ members })
+  }
+}
+
+function rem_member_api (draft : DraftSession) {
+  return (pubkey : string) => {
+    const members = draft.members.filter(e => e.pub !== pubkey)
+    return draft._store.post({ ...draft.data, members })
   }
 }
 
 export default function (draft : DraftSession) {
-  return {
-    claim  : claim_membership_api(draft),
-    create : create_membership_api(draft),
-    exists : membership_exists_api(draft),
-    join   : join_proposal_api(draft),
-    leave  : leave_proposal_api(draft)
+  return { 
+    has : has_member_api(draft),
+    get : get_member_api(draft),
+    add : add_member_api(draft),
+    rem : rem_member_api(draft),
   }
 }

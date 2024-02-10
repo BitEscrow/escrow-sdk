@@ -32,27 +32,28 @@ export interface FetchConfig {
 export interface EventMessage {
   body     : any
   envelope : SignedNote
+  hash     : string
   subject  : string
 }
 
 export interface SocketConfig {
   connect_retries : number
   connect_timeout : number
+  receipt_delay   : number
   receipt_timeout : number
-  filter  : Record<string, any>
-  kind    : number
-  tags    : string[][]
-  selfsub : boolean
-  silent  : boolean
-  verbose : boolean
+  default_filter  : Record<string, any>
+  default_kind    : number
+  default_tags    : string[][]
+  selfsub         : boolean
+  silent          : boolean
+  verbose         : boolean
 }
 
 export interface StoreConfig<T> extends SocketConfig {
   buffer_timer  : number
   commit_timer  : number
   refresh_ival  : number
-  store_parser  : (store : unknown) => Promise<T | null>
-  store_timeout : number
+  parser       ?: (data : unknown) => Promise<T>
 }
 
 export interface SessionConfig {
