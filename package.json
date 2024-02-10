@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -30,8 +30,8 @@
       "types": "./dist/assert.d.ts"
     },
     "./client": {
-      "import": "./dist/lib/client.js",
-      "types": "./dist/lib/client.d.ts"
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
     },
     "./contract": {
       "import": "./dist/lib/contract.js",
