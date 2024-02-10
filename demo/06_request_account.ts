@@ -7,9 +7,9 @@ const DEMO_MODE = process.env.DEMO_MODE === 'true'
 // Define our deposit locktime.
 const locktime  = 60 * 60  // 1 hour locktime
 // Define our funder for the deposit.
-const depositor = signers[0]
+const buyer = signers[0]
 // Get an account request from the funder device.
-const acct_req  = depositor.account.create(locktime)
+const acct_req  = buyer.account.create(locktime)
 // Submit the account request to the server
 const acct_res = await client.deposit.request(acct_req)
 // Check the response is valid.

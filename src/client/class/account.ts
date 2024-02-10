@@ -180,7 +180,7 @@ export class EscrowAccount extends EventEmitter <{
     }
   }
 
-  async fetch() {
+  async fetch () {
     return this._fetch()
   }
 
