@@ -29,6 +29,10 @@
       "import": "./dist/assert.js",
       "types": "./dist/assert.d.ts"
     },
+    "./client": {
+      "import": "./dist/lib/client.js",
+      "types": "./dist/lib/client.d.ts"
+    },
     "./contract": {
       "import": "./dist/lib/contract.js",
       "types": "./dist/lib/contract.d.ts"

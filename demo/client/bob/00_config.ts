@@ -15,18 +15,6 @@ const SECRET_PASS   : string = 'test_draft3'
 
 const USER_ALIAS    : string = 'bob'
 
-const ROLE_POLICY   : RoleTemplate = {
-  title : 'seller',
-  paths : [
-    [ 'payout', 10000  ]
-  ],
-  payment : 2000,
-  programs : [
-    [ 'endorse', 'close',   '*', 2 ],
-    [ 'endorse', 'dispute', '*', 1 ]
-  ]
-}
-
 const FUND_AMOUNT   : number = 15_000
 
 const WIT_STATEMENT : WitnessTemplate = {
