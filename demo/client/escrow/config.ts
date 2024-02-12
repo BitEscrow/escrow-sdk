@@ -1,37 +1,29 @@
-import { Buff } from '@cmdcode/buff'
-
 import {
   EscrowSigner,
-  RoleTemplate,
-  WitnessTemplate,
-  create_policy,
+  WitnessTemplate
 } from '@scrow/core'
 
 import { config } from '@scrow/demo/00_demo_config.js'
 
 /** ========== [ USER CONFIG ] ========== **/
 
-const SECRET_PASS   : string = 'test_draft3'
+const USER_ALIAS    : string = 'carol'
+const USER_ROLE     : string = 'escrow'
 
-const USER_ALIAS    : string = 'bob'
-
-const FUND_AMOUNT   : number = 15_000
+const FUND_AMOUNT   : number = 0
 
 const WIT_STATEMENT : WitnessTemplate = {
-  action : 'close',
+  action : 'resolve',
   method : 'endorse',
-  path   : 'payout'
+  path   : 'return'
 }
 
 /** ========== [ MAIN EXPORT ] ========== **/
 
 export const alias     = USER_ALIAS
-// Compute secret id for nostr session.
-export const secret_id = Buff.str(SECRET_PASS).digest.hex
+export const role      = USER_ROLE
 // Derive signing device from the user alias.
 export const signer    = EscrowSigner.import(config).from_phrase(USER_ALIAS)
-// Define a role policy for yourself.
-export const policy    = create_policy(ROLE_POLICY)
 // Export the funding amount.
 export const fund_amt  = FUND_AMOUNT
 // Export the witness template.

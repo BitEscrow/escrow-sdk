@@ -29,36 +29,47 @@ export interface FetchConfig {
   token  ?: string
 }
 
-export interface EventMessage {
-  body     : any
+export interface EventMessage <T = any> {
+  body     : T
   envelope : SignedNote
   hash     : string
   subject  : string
 }
 
+export type EventFilter = {
+  ids     ?: string[]
+  authors ?: string[]
+  kinds   ?: number[]
+  since   ?: number
+  until   ?: number
+  limit   ?: number
+} & { [ key : string ] : string[] | undefined }
+
 export interface SocketConfig {
   connect_retries : number
   connect_timeout : number
-  receipt_delay   : number
+  echo_timeout    : number
   receipt_timeout : number
-  default_filter  : Record<string, any>
-  default_kind    : number
-  default_tags    : string[][]
+  filter          : EventFilter
+  kind            : number
+  tags            : string[][]
   selfsub         : boolean
-  silent          : boolean
+  debug           : boolean
   verbose         : boolean
 }
 
 export interface StoreConfig<T> extends SocketConfig {
   buffer_timer  : number
-  commit_timer  : number
   refresh_ival  : number
+  update_timer  : number
   parser       ?: (data : unknown) => Promise<T>
 }
 
 export interface SessionConfig {
   socket_config ?: Partial<SocketConfig>
   store_config  ?: Partial<StoreConfig<DraftData>>
+  debug          : boolean
+  verbose        : boolean
 }
 
 export interface Membership {

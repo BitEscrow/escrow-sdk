@@ -19,7 +19,8 @@ session = c_signer.draft.join(role.agent, session)
 
 // For each member, collect an endorsement signature.
 signers.map(mbr => {
-  session = mbr.draft.endorse(session)
+  const sig = mbr.draft.endorse(session)
+  session.signatures.push(sig)
 })
 
 /**

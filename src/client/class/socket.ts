@@ -10,12 +10,10 @@ import {
   SignerAPI
 } from '@scrow/core'
 
-import {
-  sleep,
-  stringify
-} from '@/lib/util.js'
+import { sleep, stringify } from '@/lib/util.js'
 
 import {
+  EventFilter,
   EventMessage,
   SocketConfig
 } from '../types.js'
@@ -34,79 +32,74 @@ export const SOCKET_DEFAULTS = () : SocketConfig => {
   return {
     connect_retries : 10,
     connect_timeout : 500,
-    receipt_delay   : 1000,
+    echo_timeout    : 4000,
     receipt_timeout : 4000,
-    default_filter  : { since : now() },
-    default_kind    : 30000,  // Default event type.
-    default_tags    : [],     // Global tags for events.
+    filter          : { since : now() } as EventFilter,
+    kind            : 20000,  // Default event type.
+    tags            : [],     // Global tags for events.
     selfsub         : false,  // React to self-published events.
-    silent          : false,  // Silence noisy output.
+    debug           : false,  // Silence noisy output.
     verbose         : false,  // Show verbose log output.
   }
 }
 
 export class NostrSocket extends EventEmitter <{
-  'close'   : string | undefined,
-  'echo'    : string
-  'eose'    : string,
-  'error'   : Error,
-  'event'   : EventMessage,
-  'notice'  : string,
-  'ready'   : NostrSocket,
-  'reject'  : [ reason : string, envelope : unknown ],
-  'receipt' : [ id : string, ok : boolean, reason : string ]
+  'cancel'    : [ id : string, socket : NostrSocket, reason : string ]
+  'close'     : NostrSocket
+  'echo'      : string
+  'error'     : Error
+  'event'     : EventMessage
+  'notice'    : string
+  'ready'     : NostrSocket
+  'reject'    : [ reason : string, envelope : unknown ]
+  'receipt'   : [ id : string, ok : boolean, reason : string ]
+  'subscribe' : [ id : string, socket : NostrSocket ]
 }> {
 
-  readonly _filter : Record<string, any>
   readonly _opt    : SocketConfig
   readonly _signer : SignerAPI
   readonly _tags   : string[][]
 
-  _relay?  : string
-  _secret? : Buff
-  _socket? : WebSocket
-  _subbed  : boolean
-  _sub_id  : string
+  _filter   : EventFilter
+  _relay?   : string
+  _secret?  : Buff
+  _socket?  : WebSocket
+  _sub_id   : string | null
+  _topic_id : string | null
 
-  constructor(
+  constructor (
     signer   : SignerAPI,
     options ?: Partial<SocketConfig>
   ) {
     // Init the config object.
     const config = { ...SOCKET_DEFAULTS(), ...options }
     // Init the filter object.
-    const filter = {
-      kinds : [ config.default_kind ],
-      ...config.default_filter
-    }
-    // Init class attributes.
+    const filter = { kinds : [], ...config.filter }
+    filter.kinds.push(config.kind)
+    // Init parent class and attributes.
     super()
-    this._filter  = filter
-    this._opt     = config
-    this._signer  = signer
-    this._subbed  = false
-    this._sub_id  = Buff.random(32).hex
-    this._tags    = [ ...config.default_tags ]
-  }
-
-  get channel_id () {
-    return this.secret.digest.hex
+    this._opt      = config
+    this._signer   = signer
+    this._filter   = filter as EventFilter
+    this._sub_id   = null
+    this._tags     = [ ...config.tags ]
+    this._topic_id = null
   }
 
   get filter () {
     return this._filter
   }
 
-  get is_ready () {
-    return (this.is_connected && this.is_subscribed)
-  }
-
   get is_connected () {
     return this.socket.readyState === 1
   }
 
+  get is_ready () {
+    return (this.is_connected && this.is_subscribed)
+  }
+
   get is_subscribed () {
-    return this._subbed
+    return this._sub_id !== null
   }
 
   get opt () {
@@ -138,23 +131,145 @@ export class NostrSocket extends EventEmitter <{
     return this._socket
   }
 
+  get sub_id () {
+    if (this._sub_id === null) {
+      throw new Error('there is no active subscription')
+    }
+    return this._sub_id
+  }
+
   get tags () {
     return this._tags
   }
 
-  debug (...s : unknown[]) {
-    return (this.opt.verbose) ? console.log(...s) : null
+  get topic_id () {
+    if (this._topic_id === null) {
+      throw new Error('there is no active connection')
+    }
+    return this._topic_id
   }
 
-  info (...s : unknown[]) {
-    return (this.opt.silent)  ? null : console.log(...s)
+  log = {
+    debug : (...s : unknown[]) => {
+      return (this.opt.debug) ? console.log('[socket]', ...s) : null
+    },
+    info  : (...s : unknown[]) => {
+      return (this.opt.verbose) ? console.log('[socket]', ...s) : null
+    }
   }
 
-  async subscribe () {
-    /** Send a subscription message to the socket peer. */
-    const subscription = ['REQ', this._sub_id, this.filter]
-    this.socket.send(JSON.stringify(subscription))
-    this.debug('sub filter:', this.filter)
+  _err_handler (err : unknown) {
+    const error = (err instanceof Error)
+      ? err
+      : new Error(String(err))
+    this.log.debug('error:', err)
+    this.emit('error', error)
+  }
+
+  async _evt_handler (event : unknown) {
+    const envelope = await parse_note(event)
+
+    if (envelope === null) {
+      this.log.debug('invalid format:', event)
+      this.emit('reject', [ 'invalid format', event ])
+      return
+    }
+
+    const { content, created_at, id, pubkey, sig } = envelope
+    this.log.info('event id       :', id)
+    this.log.info('event date     :', new Date(created_at * 1000))
+
+    if (!verify_sig(sig, id, pubkey)) {
+      this.log.debug('bad signature:', event)
+      this.emit('reject', [ 'bad signature', event ])
+      return
+    }
+
+    // If the event is from ourselves, 
+    if (pubkey === this.pubkey) {
+      this.emit('echo', id)
+      if (!this.opt.selfsub) return
+    }
+
+    let message : [ string, string, any ]
+
+    try {
+      const arr = decrypt_content(content, this.secret)
+      message = JSON.parse(arr)
+    } catch (err) {
+      this.log.debug('invalid content:', content)
+      this.emit('reject', [ 'invalid content', event ])
+      return
+    }
+
+    const [ subject, hash, body ] = message
+    const { content: _, ...rest } = envelope
+
+    this.log.debug('recv message  :', message)
+    this.log.debug('recv envelope :', rest)
+
+    // Build the data payload.
+    const data : EventMessage = { body, envelope, hash, subject }
+
+    // Emit the event to our subscribed functions.
+    this.emit('event', data)
+  }
+
+  _msg_handler (msg : any) {
+    try {
+      const payload = msg['data']
+      const [ type, ...rest ] = JSON.parse(payload)
+      switch (type) {
+        case 'EOSE':
+          const [ sub_id ] = rest
+          this._sub_id = sub_id
+          this.log.info('sub active     :', sub_id)
+          this.emit('subscribe', [ sub_id, this ])
+          break
+        case 'EVENT':
+          const [ event_id, event ] = rest
+          this.log.info('event sub      :', event_id)
+          this._evt_handler(event)
+          break
+        case 'OK':
+          const [ id, ok, ok_reason ] = rest
+          this.log.info('event receipt  :', id, ok ? 'ok' : ok_reason)
+          this.emit('receipt', rest)
+          break
+        case 'CLOSED':
+          const [ sid, reason ] = rest
+          this.log.info('sub canceled:', sid, reason)
+          if (sid === this.sub_id) {
+            this._sub_id = null
+            this.emit('cancel', [ sid, this, reason ])
+          }
+          break
+        case 'NOTICE':
+          const [ msg ] = rest
+          this.log.info('server notice:', msg)
+          this.emit('notice', msg)
+          break
+        default:
+          this.log.debug('unknown payload:', type, type.length)
+        }
+      } catch (err) {
+        this._err_handler(err)
+      }
+  }
+
+  async _open_handler (_event : unknown) {
+    /** Handle the socket open event. */
+    this.log.info('socket pubkey  :', this.pubkey)
+    this.log.info('connected to   :', this._relay)
+    this.subscribe()
+  }
+
+  async cancel () {
+    const sub_id  = this.sub_id
+    const sub_req = [ 'CLOSE', sub_id ]
+    this._sub_id  = null
+    this.log.info('cancelling sub :', sub_id)
+    this.socket.send(JSON.stringify(sub_req))
   }
 
   async connect (
@@ -177,25 +292,19 @@ export class NostrSocket extends EventEmitter <{
       throw new Error('Must provide a shared secret!')
     }
 
-    const chid = this.channel_id
-
     if (address !== undefined || this.socket.readyState > 1) {
       this._socket = new WebSocket(this.relay)
-
       // Setup our main socket event listeners.
       this.socket.addEventListener('error',   (event) => this._err_handler(event))
       this.socket.addEventListener('open',    (event) => this._open_handler(event))
       this.socket.addEventListener('message', (event) => this._msg_handler(event))
-
-      // Configure our event tags and filter.
-      this.tags.push([ 'd', chid ])
-      this.filter['#d'] = [ chid ]
     }
 
     if (this.is_ready) return
 
     // Return a promise that includes a timeout.
     const { connect_retries, connect_timeout } = this.opt
+    const timeout = 'failed to connect'
     return new Promise((res, rej) => {
       let count = 0, retries = connect_retries
       let interval = setInterval(async () => {
@@ -203,120 +312,148 @@ export class NostrSocket extends EventEmitter <{
           res(clearInterval(interval))
           this.emit('ready', this)
         } else if (count > retries) {
-          this.info('failed to connect')
-          rej(clearInterval(interval))
+          rej(timeout)
         } else { count++ }
       }, connect_timeout)
+    }).catch(err => { throw new Error(err) })
+  }
+
+  close () {
+    this.socket.close()
+    this._sub_id = null
+    this.emit('close', this)
+  }
+
+  delete (event_id : string) {
+    /** Send a data message to the relay. */
+    const event = {
+      content    : '',
+      created_at : now(),
+      kind       : 5,
+      tags       : [['e', event_id ]],
+      pubkey     : this.pubkey
+    }
+    const signed = this.sign(event)
+    return this.publish(signed)
+  }
+
+  async on_cancel (sub_id : string) {
+    const duration = this.opt.receipt_timeout
+    const timeout  = 'cancel receipt timed out'
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(timeout), duration)
+      this.within('cancel', ([ id ]) => {
+        if (id === sub_id) {
+          this.log.info('confirmed cancel: ' + sub_id)
+          clearTimeout(timer)
+          res(id)
+        }
+      }, duration)
+    }).catch(err => { throw new Error(err) })
+  }
+
+  async on_echo (event_id : string) {
+    const duration = this.opt.echo_timeout
+    const timeout  = 'echo listener timed out'
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(timeout), duration)
+      this.within('echo', async (id) => {
+        if (id === event_id) {
+          this.log.info('confirmed echo: ' + event_id)
+          clearTimeout(timer)
+          res(event_id)
+        }
+      }, duration)
+    }).catch(err => { throw new Error(err) })
+  }
+
+  on_event <T> (
+    subject : string,
+    handler : (msg : EventMessage<T>) => void | Promise<void>
+  ) {
+    this.on('event', msg => {
+      if (msg.subject === subject) {
+        handler(msg)
+      }
     })
   }
 
-  _err_handler (err : unknown) {
-    const error = (err instanceof Error)
-      ? err
-      : new Error(String(err))
-    this.debug('error:', err)
-    this.emit('error', error)
+  async on_receipt (event_id : string) {
+    const duration = this.opt.receipt_timeout
+    const timeout  = 'message receipt timed out'
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(timeout), duration)
+      this.within('receipt', ([ id, ok, reason ]) => {
+        if (id === event_id) {
+          this.log.debug('receipt confirmed: ' + event_id)
+          clearTimeout(timer)
+          return (ok) ? res(id) : rej(reason)
+        }
+      }, duration)
+    }).catch(err => { throw new Error(err) })
   }
 
-  _msg_handler (msg : any) {
-    const payload = msg['data']
-    const [ type, ...rest ] = JSON.parse(payload)
+  async on_sub (sub_id : string) {
+    const duration = this.opt.receipt_timeout
+    const timeout  = 'subscription receipt timed out'
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(timeout), duration)
+      this.within('subscribe', ([ id ]) => {
+        if (id === sub_id) {
+          this.log.debug('sub confirmed: ' + sub_id)
+          clearTimeout(timer)
+          res(id)
+        }
+      }, duration)
+    }).catch(err => { throw new Error(err) })
+  }
 
-    switch (type) {
-      case 'EOSE':
-        const [ sub_id ] = rest
-        this._subbed = true
-        this.info('subscription id :', sub_id)
-        this.emit('eose', sub_id)
-        return
+  publish (
+    event : SignedNote
+  ) {
+    const { content, ...rest } = event
+
+    this.log.info('event publish  :', rest.id)
+    this.log.debug('send message  :', content)
+    this.log.debug('send envelope :', rest)
+
+    if (!this.is_connected) {
+      throw new Error('not connected')
+    }
+
+    this.socket.send(JSON.stringify([ 'EVENT', event ]))
+  }
+
+  async send (
+    subject   : string,
+    body      : unknown,
+    envelope ?: Partial<SignedEvent>
+  ) {
+    /** Send a data message to the relay. */
+    const { kind, tags = [] } = envelope ?? {}
+    const preimg  = stringify(body)
+    const hash    = Buff.str(preimg).digest.hex
+    const content = JSON.stringify([ subject, hash, body ])
     
-      case 'EVENT':
-        const [ event_id, event ] = rest
-        this.debug('inbound event:', event_id)
-        this._evt_handler(event)
-        return
-
-      case 'OK':
-        this.debug('inbound receipt:', rest)
-        this.emit('receipt', rest)
-        return
-
-      case 'CLOSED':
-        const [ sid, reason ] = rest
-        this.debug('sub canceled:', sid, reason)
-        this.emit('close', reason)
-        return
-
-      case 'NOTICE':
-        const [ msg ] = rest
-        this.debug('server notice:', msg)
-        this.emit('notice', msg)
-        return
-
-      default:
-        this.debug('unknown payload type:', type, type.length)
-        return
-    }
-  }
-
-  async _open_handler (_event : unknown) {
-    /** Handle the socket open event. */
-    this.info('socket pubkey   :', this.pubkey)
-    this.info('connected to    :', this._relay)
-    this.subscribe()
-  }
-
-  async _evt_handler (event : unknown) {
-    const envelope = await parse_note(event)
-
-    if (envelope === null) {
-      this.debug('invalid format:', event)
-      this.emit('reject', [ 'invalid format', event ])
-      return
+    const event = {
+      content    : encrypt_content(content, this.secret),
+      created_at : now(),
+      kind       : kind || this.opt.kind,
+      tags       : [...this.tags, ...tags, [ 'd', this.topic_id ] ],
+      pubkey     : this.pubkey
     }
 
-    const { content, id, pubkey, sig } = envelope
-
-    if (!verify_sig(sig, id, pubkey)) {
-      this.debug('bad signature:', event)
-      this.emit('reject', [ 'bad signature', event ])
-      return
-    }
-
-    // If the event is from ourselves, 
-    if (pubkey === this.pubkey) {
-      this.emit('echo', id)
-      if (!this.opt.selfsub) return
-    }
-
-    let message : [ string, string, any ]
-
-    try {
-      const arr = decrypt_content(content, this.secret)
-      message = JSON.parse(arr)
-    } catch (err) {
-      this.debug('invalid content:', content)
-      this.emit('reject', [ 'invalid content', event ])
-      return
-    }
-
-    const [ subject, hash, body ] = message
-    const { content: _, ...rest } = envelope
-
-    this.debug('recv message  :', message)
-    this.debug('recv envelope :', rest)
-
-    // Build the data payload.
-    const data : EventMessage = { body, envelope, hash, subject }
-
-    // Emit the event to our subscribed functions.
-    this.emit('event', data)
+    // Sign our message.
+    const signed  = this.sign(event)
+    // Create a receipt promise.
+    const receipt = this.on_receipt(signed.id)
+    // Publish the signed event.
+    this.publish(signed)
+    // Return the promises.
+    return Promise.all([ receipt, sleep(1000) ])
   }
 
   sign (event : Partial<SignedEvent>) {
-    /** Create a has and signature for our 
-     *  event, then return it with the event.
-     * */
     const preimg = JSON.stringify([
       0,
       event['pubkey'],
@@ -333,96 +470,26 @@ export class NostrSocket extends EventEmitter <{
     return event as SignedEvent
   }
 
-  on_event (
-    subject : string,
-    handler : (msg : EventMessage) => void | Promise<void>
-  ) {
-    this.on('event', msg => {
-      if (msg.subject === subject) {
-        handler(msg)
-      }
-    })
+  async subscribe (filter ?: EventFilter) {
+    /** Send a subscription message to the socket peer. */
+    filter = { ...this.filter, ...filter }
+    const sub_id   = this._sub_id ?? Buff.random(32).hex
+    const topic_id = this.secret.digest.hex
+    const sub_opt  = { ...filter, '#d' : [ topic_id ]} 
+    const sub_req  = [ 'REQ', sub_id, sub_opt ]
+    this._filter   = sub_opt as unknown as EventFilter
+    this._topic_id = topic_id
+    const receipt  = this.on_sub(sub_id)
+    this.log.info('activating sub : ' + sub_id)
+    this.socket.send(JSON.stringify(sub_req))
+    this.log.debug('sub filter:', sub_opt)
+    return receipt
   }
 
-  delete (id : string) {
-    /** Send a data message to the relay. */
-    const event = {
-      content    : '',
-      created_at : now(),
-      kind       : 5,
-      tags       : [['e', id ]],
-      pubkey     : this.pubkey
-    }
-    const signed = this.sign(event)
-    return this.publish(signed)
-  }
-
-  send (
-    subject   : string,
-    body      : unknown,
-    envelope ?: Partial<SignedEvent>
-  ) {
-    /** Send a data message to the relay. */
-    const { kind, tags = [] } = envelope ?? {}
-    const preimg  = stringify(body)
-    const hash    = Buff.str(preimg).digest.hex
-    const content = JSON.stringify([ subject, hash, body ])
-    
-    const event = {
-      content    : encrypt_content(content, this.secret),
-      created_at : now(),
-      kind       : kind || this.opt.default_kind,
-      tags       : [...this.tags, ...tags ],
-      pubkey     : this.pubkey
-    }
-
-    // Sign our message.
-    const signed = this.sign(event)
-    
-    const { receipt_delay, receipt_timeout } = this.opt
-    // Return a receipt wrapped in a promise.
-    return new Promise((res, rej) => {
-      const duration = receipt_delay + receipt_timeout
-      const timeout  = new Error('message delivery timed out')
-      const timer    = setTimeout(() => rej(timeout), duration)
-      this.within('receipt', ([ id, ok, reason ]) => {
-        if (id === signed.id) {
-          if (!ok) {
-            clearTimeout(timer)
-            rej(reason)
-          }
-        }
-      }, duration)
-      this.within('echo', async (evt_id) => {
-        if (evt_id === signed.id) {
-          clearTimeout(timer)
-          await sleep(receipt_delay)
-          res(signed)
-        }
-      }, duration)
-      this.publish(signed)
-    })
-  }
-
-  publish (
-    event : SignedNote
-  ) {
-    const { content, ...rest } = event
-
-    this.debug('send message  :', content)
-    this.debug('send envelope :', rest)
-
-    if (!this.is_connected) {
-      throw new Error('not connected')
-    }
-
-    this.socket.send(JSON.stringify([ 'EVENT', event ]))
-  }
-
-  close (reason ?: string) {
-    this.socket.close()
-    this._subbed = false
-    this.emit('close', reason)
+  async update (filter : EventFilter) {
+    this.cancel()
+    this._filter = filter
+    return this.subscribe()
   }
 }
 

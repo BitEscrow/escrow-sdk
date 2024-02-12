@@ -51,9 +51,7 @@ export function endorse_draft_api (client : EscrowSigner) {
     verify_draft(draft)
     verify_slots_full(draft.members, draft.roles)
     const prop = parse_proposal(draft.proposal)
-    const sig  = endorse_proposal(prop, client._signer)
-    const sigs = [ ...draft.signatures, sig ]
-    return { ...draft, signatures : sigs }
+    return endorse_proposal(prop, client._signer)
   }
 }
 

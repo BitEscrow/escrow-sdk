@@ -171,7 +171,7 @@ export function join_role (
   const tmpl  = { ...proposal, paths, payments, programs }
   const mbrs  = upsert_member_data(members, mship)
 
-  return { ...session, members : mbrs, proposal : tmpl }
+  return { ...session, members : mbrs, proposal : tmpl, signatures : [] }
 }
 
 export function rem_enrollment (
@@ -197,5 +197,5 @@ export function rem_enrollment (
   const tmpl  = { ...proposal, paths, payments, programs }
   const mbrs  = rem_member_data(members, membership)
   
-  return { ...session, members : mbrs, proposal : tmpl }
+  return { ...session, members : mbrs, proposal : tmpl, signatures : [] }
 }

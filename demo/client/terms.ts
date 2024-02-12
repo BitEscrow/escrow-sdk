@@ -1,7 +1,14 @@
-import { EscrowSigner, ProposalTemplate, RoleTemplate, create_policy, create_proposal } from "@/index.js"
-import { Buff } from "@cmdcode/buff"
-import { config } from "../00_demo_config.js"
-import { create_draft } from "@/lib/proposal.js"
+import { Buff }         from '@cmdcode/buff'
+import { create_draft } from '@/lib/proposal.js'
+import { config }       from '../00_demo_config.js'
+
+import {
+  EscrowSigner,
+  ProposalTemplate,
+  RoleTemplate,
+  create_policy,
+  create_proposal
+} from '@scrow/core'
 
 const AGENT_ALIAS   : string = 'carol'
 const SECRET_PASS   : string = 'test_draft4'
@@ -29,7 +36,7 @@ const PROP_ROLES   : RoleTemplate[] = [
     paths : [
       [ 'payout', 10000  ]
     ],
-    payment : 2000,
+    payment : 3000,
     programs : [
       [ 'endorse', 'close',   '*', 2 ],
       [ 'endorse', 'dispute', '*', 1 ]
@@ -37,17 +44,27 @@ const PROP_ROLES   : RoleTemplate[] = [
   },
 ]
 
+export const AGENT_ROLE = create_policy({
+  title    : 'agent',
+  payment  : 2000,
+  programs : [
+    [ 'endorse', 'resolve', '*', 1 ]
+  ]
+})
+
 export const alias     = AGENT_ALIAS
 // Compute draft id for nostr store.
 export const secret_id = Buff.str(SECRET_PASS).digest.hex
 // Derive signing device from the user alias.
 export const signer    = EscrowSigner.import(config).from_phrase(AGENT_ALIAS)
 //
-export const draft = create_draft({
+const base_draft = create_draft({
   proposal : create_proposal({
     ...PROP_TEMPLATE,
     network   : config.network,
-    moderator : signer.pubkey
+    moderator : signer.pubkey,
   }),
   roles : PROP_ROLES.map(e => create_policy(e))
 })
+
+export const agent_draft = signer.draft.join(AGENT_ROLE, base_draft)
