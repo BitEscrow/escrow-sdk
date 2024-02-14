@@ -136,8 +136,6 @@ export class EscrowAccount extends EventEmitter <{
     const addr   = this.data.address
     const oracle = this.client.oracle
     const utxos  = await oracle.get_address_utxos(addr)
-    console.log('existing:', this._payments)
-    console.log('incoming:', utxos)
     if (!compare(this._payments, utxos)) {
       this._update(utxos)
     } else {

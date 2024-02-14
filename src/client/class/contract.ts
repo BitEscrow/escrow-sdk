@@ -190,8 +190,6 @@ export class EscrowContract extends EventEmitter <{
     throw new Error('polling timed out')
   }
 
-  moderator = {}
-
   toJSON () {
     return this.data
   }

@@ -1,8 +1,16 @@
-import { now, sleep }              from '@/lib/util.js'
+import { now, sleep }       from '@/lib/util.js'
 import { validate_deposit } from '@/validators/deposit.js'
-import { DepositData, DepositStatus }      from '@/types/index.js'
 import { EscrowClient }     from './client.js'
 import { EventEmitter }     from './emitter.js'
+
+import {
+  ContractData,
+  DepositAccount,
+  DepositData,
+  DepositStatus,
+  TxOutput
+} from '@/types/index.js'
+import { EscrowSigner } from './signer.js'
 
 interface EscrowDepositConfig {
   refresh_ival : number
@@ -16,8 +24,33 @@ const DEFAULT_CONFIG : EscrowDepositConfig = {
 
 export class EscrowDeposit extends EventEmitter <{
   'error'  : unknown
+  'fetch'  : EscrowDeposit
   'update' : EscrowDeposit
 }> {
+
+  static async create (
+    client  : EscrowClient,
+    account : DepositAccount,
+    utxo    : TxOutput,
+    config ?: Partial<EscrowDepositConfig>
+  ) {
+    const req = { ...account, utxo }
+    const res = await client.deposit.register(req)
+    if (!res.ok) throw new Error(res.error)
+    const dat = res.data.deposit
+    return new EscrowDeposit(client, dat, config)
+  }
+
+  static async fetch (
+    client  : EscrowClient,
+    dpid    : string,
+    config ?: Partial<EscrowDepositConfig>
+  ) {
+    const res = await client.deposit.read(dpid)
+    if (!res.ok) throw new Error(res.error)
+    const dat = res.data.deposit
+    return new EscrowDeposit(client, dat, config)
+  }
 
   readonly _client : EscrowClient
   readonly _opt    : EscrowDepositConfig
@@ -78,16 +111,19 @@ export class EscrowDeposit extends EventEmitter <{
   async _fetch () {
     try {
       if (this.is_stale) {
-        const { status } = await this._status()
-        if (status !== this.status) {
-          await this._update()
+        const res = await this._status()
+        if (res.status !== this.status) {
+          const data = await this._digest()
+          this._update(data)
         } else {
           this._updated = now()
         }
       }
+      this.emit('fetch', this)
     } catch (err) {
       this.emit('error', err)
     }
+    return this
   }
 
   async _read () {
@@ -106,9 +142,8 @@ export class EscrowDeposit extends EventEmitter <{
     return res.data.deposit
   }
 
-  async _update () {
+  _update (data : DepositData) {
     try {
-      const data    = await this._digest()
       this._data    = data 
       this._updated = now()
       this.emit('update', this)
@@ -117,13 +152,19 @@ export class EscrowDeposit extends EventEmitter <{
     }
   }
 
-  async close () {
-
+  async close (
+    signer : EscrowSigner,
+    txfee  : number
+  ) {
+    const api = this.client.deposit
+    const req = signer.account.close(this.data, txfee)
+    const res = await api.close(this.dpid, req)
+    if (!res.ok) throw new Error(res.error)
+    return this._fetch()
   }
 
   async fetch () {
-    await this._fetch()
-    return this
+    return this._fetch()
   }
 
   async poll (
@@ -131,21 +172,26 @@ export class EscrowDeposit extends EventEmitter <{
     interval : number,
     retries  : number
   ) {
-    return new Promise(async (res) => {
-      for (let i = 0; i < retries; i++) {
-        await this.fetch()
-        if (this.status === status) {
-          res(this)
-        }
-        await sleep(interval * 1000)
+    for (let i = 0; i < retries; i++) {
+      await this.fetch()
+      if (this.status === status) {
+        return this
       }
-    })
+      await sleep(interval * 1000)
+    }
+    throw new Error('polling timed out')
   }
 
-  async lock () {
-
+  async lock (
+    contract : ContractData,
+    signer   : EscrowSigner
+  ) {
+    const api = this.client.deposit
+    const req = signer.account.lock(contract, this.data)
+    const res = await api.lock(this.dpid, req)
+    if (!res.ok) throw new Error(res.error)
+    return this._fetch()
   }
-   
 
   toJSON () {
     return this.data
