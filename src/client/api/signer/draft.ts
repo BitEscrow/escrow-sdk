@@ -18,6 +18,7 @@ import {
   MemberData,
   RolePolicy
 } from '@/types/index.js'
+import { verify_proposal } from '@/validators/proposal.js'
 
 export function is_member_api (signer : EscrowSigner) {
   return (members : MemberData[]) => {
@@ -50,6 +51,7 @@ export function endorse_draft_api (client : EscrowSigner) {
     validate_draft(draft)
     verify_draft(draft)
     verify_slots_full(draft.members, draft.roles)
+    verify_proposal(draft.proposal)
     const prop = parse_proposal(draft.proposal)
     return endorse_proposal(prop, client._signer)
   }

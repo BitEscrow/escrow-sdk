@@ -17,9 +17,9 @@ const template = {
 // Initialize a variable for our witness data.
 let witness : WitnessData
 // Alice signs the initial statement.
-witness = a_signer.statement.sign(active_contract, template)
+witness = a_signer.witness.sign(active_contract, template)
 // Bob endoreses the statement from Alice.
-witness = b_signer.statement.endorse(active_contract, witness)
+witness = b_signer.witness.endorse(active_contract, witness)
 
 print_banner('witness statement')
 console.dir(witness, { depth : null })

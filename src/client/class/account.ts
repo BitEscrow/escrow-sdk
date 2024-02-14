@@ -139,7 +139,6 @@ export class EscrowAccount extends EventEmitter <{
     console.log('existing:', this._payments)
     console.log('incoming:', utxos)
     if (!compare(this._payments, utxos)) {
-      console.log('updating...')
       this._update(utxos)
     } else {
       this._updated = now()

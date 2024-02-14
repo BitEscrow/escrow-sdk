@@ -148,9 +148,9 @@ export function stringify (content : any) : string {
     case 'string':
       return content
     case 'bigint':
-      return content.toString()
+      return String(content)
     case 'number':
-      return content.toString()
+      return String(content)
     case 'boolean':
       return String(content)
     case 'undefined':

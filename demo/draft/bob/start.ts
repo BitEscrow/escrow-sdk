@@ -17,8 +17,8 @@ import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 
 // Create a draft session
 const session = new DraftSession(signer, {
-  socket_config : { verbose : false, debug : false },
-  store_config  : { verbose : true,  debug : false },
+  socket_config : { verbose : true, debug : false },
+  store_config  : { verbose : true, debug : false },
   verbose : true
 })
 // Create an account object.
@@ -27,6 +27,7 @@ const account = new EscrowAccount(client)
 // When the session is ready:
 session.on('ready', async () => {
   console.log('session ready')
+  console.dir(session.data)
   // If we are not a member:
   if (!session.is_member) {
     // Grab the policy from the roles list.
@@ -45,6 +46,7 @@ session.on('error', console.log)
 // Each time the session updates:
 session.on('update', async () => {
   console.log('session update')
+  console.log('draft:', session.data)
   console.log('is full:', session.is_full)
   // If all roles have been assigned:
   if (session.is_full) {

@@ -1,7 +1,7 @@
 import { Buff }         from '@cmdcode/buff'
 import { stringify }    from '@/lib/util.js'
-import { SignerAPI }    from '@/types/index.js'
 import { EventEmitter } from './emitter.js'
+import { NostrSub }     from './sub.js'
 
 import {
   NostrSocket,
@@ -33,6 +33,7 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   'commit' : string
   'error'  : Error
   'ready'  : NostrStore<T>
+  'reject' : EventMessage<T>
   'update' : NostrStore<T>
 }> {
 
@@ -40,15 +41,17 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   readonly _parser : (data : unknown) => Promise<T>
 
   _buffer    ?: ReturnType<typeof setTimeout>
-  _commit_id  : string | null
-  _data       : T      | null
+  _commit_id  : string   | null
+  _data       : T        | null
   _init       : boolean
-  _prev       : T      | null
+  _outbox    ?: ReturnType<typeof setTimeout>
+  _prev       : T        | null
   _socket     : NostrSocket
-  _updated    : number | null
+  _sub        : NostrSub | null
+  _updated    : number   | null
 
-  constructor(
-    signer  : SignerAPI,
+  constructor (
+    socket  : NostrSocket,
     config ?: Partial<StoreConfig<T>>
   ) {
     const opt = { ...DEFAULT_OPT, ...config, selfsub : true, }
@@ -61,22 +64,24 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
     this._prev       = null
     this._commit_id  = null
     this._updated    = null
-
-    // Configure our underlying emitter object.
-    this._socket     = new NostrSocket(signer, opt)
+    this._socket     = socket
+    this._sub        = socket.subscribe({
+      envelope : { kind  : 30000 },
+      filter   : { limit : 1 },
+      selfsub  : true
+    })
 
     this._socket.on('error', (err) => this.emit('error', err))
 
-    // Our main event handler.
-    this._socket.on_event<T>('post', async (msg) => {
+    this.sub.on('message', (msg : EventMessage<T>) => {
       try {
-        if (!this._filter(msg) || !this._validate(msg.body)) {
-          this.log.info(' msg bounced    :', msg.envelope.id)
+        if (!this._msg_filter(msg) || !this._validate(msg.body)) {
+          this._bounce_handler(msg)
         } else {
           this._msg_handler(msg)
         }
       } catch (err) {
-        return this._err_handler(err as Error)
+        this._err_handler(err)
       }
     })
   }
@@ -95,12 +100,8 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
     return this._data
   }
 
-  get is_init () {
-    return this._init
-  }
-
   get is_ready () {
-    return this._socket.is_ready
+    return this._init
   }
 
   get is_stale () {
@@ -130,6 +131,13 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
     return Buff.str(body).digest.hex
   }
 
+  get sub () {
+    if (this._sub === null) {
+      throw new Error('store not subscribed')
+    }
+    return this._sub
+  }
+
   get updated_at () {
     if (this._updated === null) {
       throw new Error('store not initialized')
@@ -146,8 +154,31 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
     }
   }
 
-  _filter (msg : EventMessage) {
-    const { body, envelope, hash } = msg
+  _bounce_handler (msg : EventMessage<T>) {
+    this.log.info(' msg bounced    :', msg.envelope.id)
+    this.emit('reject', msg)
+  }
+
+  async _err_handler (err : unknown) {
+    this._socket._err_handler(err)
+  }
+
+  _initialize (data : T) {
+    this._updated = now()
+    this._prev    = this._data ?? data
+    this._data    = data
+    this._init    = true
+    this._socket.subs.delete(this.sub.id)
+    this._socket.on('connect', () => {
+      this._send('post', data)
+    })
+    this._socket.on('ready', () => {
+      this.emit('ready', this)
+    })
+  }
+
+  _msg_filter (msg : EventMessage) {
+    const { body, envelope } = msg
     if (body === null || body === undefined) {
       return false 
     }
@@ -157,65 +188,60 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
         return false
       }
     }
-    if (this.is_init) {
-      const id = this._commit_id
-      if (id === envelope.id || hash === this.store_id) {
-        return false
-      }
-    }
     return true
-  }
-
-  async _commit (data : T, updated = now()) {
-    if (!this.is_init || updated > this.updated_at) {
-      clearTimeout(this._buffer)
-      if (this._socket.is_subscribed) {
-        this._buffer = setTimeout(() => {
-          this._socket.cancel()
-          this._update(data)
-        }, this.opt.buffer_timer)
-      } else {
-        this._update(data)
-      }
-    }
-    this._updated = updated
-  }
-
-  async _err_handler (err : unknown) {
-    this._socket._err_handler(err)
   }
 
   async _msg_handler (msg : EventMessage) {
     const { body, envelope } = msg
-    // Validate incoming data.
-    const json   = JSON.parse(body, json_decoder)
+    const cat = envelope.created_at
+    try {
+      if (!this.is_ready || cat > this.updated_at) {
+        this._updated = cat
+        clearTimeout(this._buffer)
+        this._buffer = setTimeout(() => {
+          this.sub.cancel()
+          this._msg_update(body, cat)
+        }, this.opt.buffer_timer)
+      }
+    } catch (err) {
+      this._err_handler(err)
+    }
+  }
+
+  async _msg_update (data : unknown, created_at : number) {
+    const json = (typeof data === 'string')
+      ? JSON.parse(data, json_decoder)
+      : data
     const parsed = await this._parser(json)
-    this._commit(parsed, envelope.created_at)
+    this._update(parsed, created_at)
   }
 
   async _send (method : string, data : unknown) {
-    const parsed   = await this._parser(data)
-    this.log.info(' store method   :', method)
-    this.log.info(' store data     :', parsed)
-    const encoded  = JSON.stringify(parsed, json_encoder)
-    return this._socket.send(method, encoded)
+    clearTimeout(this._outbox)
+    this._outbox = setTimeout(async () => {
+      const parsed  = await this._parser(data)
+      const encoded = JSON.stringify(parsed, json_encoder)
+      this.log.info(' store method   :', method)
+      this.log.info(' store data     :', parsed)
+      this.sub.send(method, encoded)
+    }, this.opt.buffer_timer)
   }
 
-  _update (data : T) {
-    this._prev = this._data ?? data
-    this._data = data
-    if (!this.is_init) {
+  _update (data : T, updated = now()) {
+    this._updated = updated
+    this._prev    = this._data ?? data
+    this._data    = data
+    if (!this.is_ready) {
       // Set init to true.
       this._init = true
       // Emit ready message.
       this.emit('ready', this)
     } else {
+      this.emit('update', this)
       this._send('post', data)
     }
     // Print debug message to console.
     this.log.debug('update data:', this.data)
-    // Emit update message.
-    this.emit('update', this)
   }
 
   async _validate (data : T) {
@@ -228,39 +254,18 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   }
 
   async connect (address : string, secret : string) {
-    const receipt = this.on_update()
-    await this._socket.connect(address, secret)
-    return receipt
-  }
-
-  async commit (id : string, data : Partial<T>) {
-    const parsed = await this._parser(data)
-    this._commit({ ...this.data, ...parsed })
-    this.log.info(' create commit  :', id)
-    this.emit('commit', id)
+    this._socket.connect(address, secret)
+    await this.sub.when_ready()
     return this
   }
 
   async init (address : string, secret : string, store : T) {
-    this._update(store)
-    this._updated = now()
+    // Initialize the store
+    this._initialize(store)
+    // Wait for a connection to the relay.
     await this._socket.connect(address, secret)
+    // Return the store object.
     return this
-  }
-
-  async on_commit (commit_id : string) {
-    const duration = this.opt.update_timer
-    const timeout  = 'store update timed out'
-    return new Promise((res, rej) => {
-      const timer = setTimeout(() => rej(timeout), duration)
-      this.within('commit', (id) => {
-        if (id === commit_id) {
-          this.log.info(' confirm commit  :', commit_id)
-          clearTimeout(timer)
-          res(this)
-        }
-      }, duration)
-    }).catch(err => { throw new Error(err) })
   }
 
   async on_update () {
@@ -278,9 +283,7 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   async refresh () {
     // If the data is stale, resub to the relay.
     if (this.is_stale) {
-      const receipt = this.on_update()
-      await this._socket.subscribe()
-      await receipt
+      this.sub.update()
     }
     return this.data
   }

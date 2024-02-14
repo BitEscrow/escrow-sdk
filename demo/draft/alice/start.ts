@@ -17,14 +17,19 @@ import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 
 // Create a draft session
 const session = new DraftSession(signer, {
-  socket_config : { verbose : false },
-  store_config  : { verbose : false }
+  socket_config : { verbose : true, debug : false },
+  store_config  : { verbose : true, debug : false },
+  verbose : true
 })
 // Create an account object.
 const account = new EscrowAccount(client)
 
+session.on('reject', console.log)
+
+session.on('error', console.log)
+
 // When the session is ready:
-session.on('ready', async () => {
+session.on('ready', () => {
   console.log('updated at :', new Date(session.updated_at * 1000))
   console.log('init data  :')
   console.dir(session.data)
@@ -35,7 +40,7 @@ session.on('ready', async () => {
     const policy = session.get_role(role)
     // Join the session as the buyer.
     console.log('joining the session...')
-    await session.join(policy.id)
+    session.join(policy.id)
     // Print to console.
     console.log(`${alias} joined the draft as role ${policy.title}`)
   }
@@ -55,7 +60,7 @@ session.on('update', async () => {
       await session.endorse()
       console.log(`${alias} endorsed the draft`)
     } else if (session.signatures.length === 2) {
-      console.log('publishing the contract...')
+      // console.log('publishing the contract...')
       try {
         session.publish(client)
       } catch (err) {
@@ -96,7 +101,9 @@ function fund_contract (contract : ContractData) {
   // When the account performs a fetch (for utxos):
   account.on('fetch', () => {
     // Print message to console.
-    console.log('checking the oracle for new payments...')
+    if (!account.is_funded) {
+      console.log('checking the oracle for new payments...')
+    }
   })
 
   // When the account updates:
@@ -117,8 +124,11 @@ function fund_contract (contract : ContractData) {
 
 function settle_contract (contract : EscrowContract) {
 
+  contract.on('fetch', () => {
+    console.log('contract status:', contract.status)
+  })
+
   contract.on('update', async () => {
-    console.log('status:', contract.status)
     if (contract.status === 'active') {
       console.log('sending statement to the vm...')
       await contract.vm.sign(signer, wit_tmpl)

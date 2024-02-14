@@ -1,4 +1,3 @@
-import { Buff }            from '@cmdcode/buff'
 import { verify_proposal } from '@/validators/proposal.js'
 import { EventEmitter }    from './emitter.js'
 import { EscrowSigner }    from './signer.js'
@@ -6,6 +5,7 @@ import { NostrStore }      from './store.js'
 import { EscrowContract }  from './contract.js'
 import { EscrowClient }    from './client.js'
 import { NostrSocket }     from './socket.js'
+import { NostrSub }        from './sub.js'
 
 import {
   EventMessage,
@@ -26,7 +26,8 @@ import {
 
 import {
   get_object_id,
-  is_hash
+  is_hash,
+  now
 } from '@/lib/util.js'
 
 import {
@@ -50,10 +51,11 @@ import {
 import * as assert from '@/assert.js'
 
 export class DraftSession extends EventEmitter <{
+  'commit'     : string
   'endorse'    : string
   'error'      : Error
-  'join'       : DraftSession
-  'leave'      : DraftSession
+  'join'       : MemberData
+  'leave'      : MemberData
   'members'    : MemberData[]
   'proposal'   : ProposalData
   'ready'      : DraftSession
@@ -68,26 +70,45 @@ export class DraftSession extends EventEmitter <{
   readonly _signer : EscrowSigner
   readonly _socket : NostrSocket
   readonly _store  : NostrStore<DraftData>
+  readonly _sub    : NostrSub
+
+  _init : boolean
 
   constructor (
     signer   : EscrowSigner, 
     options ?: Partial<SessionConfig>
   ) {
     const { socket_config, store_config, ...opt } = options ?? {}
-    const socket_opt = { ...socket_config, selfsub : true,  }
-    const store_opt  = { ...store_config }
+    const socket_opt = { ...socket_config }
+    const store_opt  = { ...store_config  }
 
     super()
 
     this._opt    = { debug : false, verbose : false, ...opt }
     this._signer = signer
     this._socket = new NostrSocket(signer._signer, socket_opt)
-    this._store  = new NostrStore(signer._signer, store_opt)
+    this._store  = new NostrStore(this._socket, store_opt)
+    this._sub    = this._socket.subscribe({ selfsub : true })
+    this._init   = false
+
     this._socket.on('error', (err)   => { this.emit('error', err)  })
     this._store.on('error',  (err)   => { this.emit('error', err)  })
-    this._store.on('ready',  ()      => { this.emit('ready', this) })
 
-    this._socket.on('event', (msg) => {
+    this._store.on('ready', () => {
+      if (!this.is_ready && this.sub.is_ready) {
+        this._init = true
+        this.emit('ready', this)
+      }
+    })
+
+    this.sub.on('ready', () => {
+      if (!this.is_ready && this._store.is_ready) {
+        this._init = true
+        this.emit('ready', this)
+      }
+    })
+
+    this.sub.on('message', (msg) => {
       switch (msg.subject) {
         case 'endorse':
           return this._endorse_handler(msg)
@@ -99,16 +120,6 @@ export class DraftSession extends EventEmitter <{
           if (!is_hash(msg.body)) return
           this.emit('publish', msg.body)
           break
-      }
-    })
-
-    this._store.on('update', (draft) => {
-      try {
-        validate_draft(draft.data)
-        verify_draft(draft.data)
-        this.emit('update', this)
-      } catch (err) {
-        this._store._err_handler(err)
       }
     })
   }
@@ -141,7 +152,7 @@ export class DraftSession extends EventEmitter <{
     const sig = this.signatures.find(e => {
       return e.slice(0, 64) === this.pubkey
     })
-    return (sig !== undefined && verify_endorsement(this.prop_id, sig, true))
+    return (sig !== undefined)
   }
 
   get is_full () {
@@ -168,7 +179,7 @@ export class DraftSession extends EventEmitter <{
   }
 
   get is_ready () {
-    return this._store.is_ready
+    return this._init
   }
 
   get is_valid () {
@@ -192,6 +203,10 @@ export class DraftSession extends EventEmitter <{
     return this._signer
   }
 
+  get sub () {
+    return this._sub
+  }
+
   get updated_at () {
     return this._store.updated_at
   }
@@ -205,8 +220,16 @@ export class DraftSession extends EventEmitter <{
     }
   }
 
+  _endorse (sig : string, created_at ?: number) {
+    const signatures = [ ...this.signatures, sig ]
+    const session    = { ...this.data, signatures }
+    this._update(session, created_at)
+    this.emit('endorse', sig)
+  }
+
   _endorse_handler (msg : EventMessage<string>) {
       let err : string | undefined
+    const cat = msg.envelope.created_at
     const pid = get_proposal_id(this.proposal)
     const sig = msg.body
     const pub = sig.slice(0, 64)
@@ -216,17 +239,29 @@ export class DraftSession extends EventEmitter <{
       err = 'invalid signature from pub: ' + pub
     }
     if (typeof err === 'string') {
-      this.log.info('endorse rejected :', pub)
+      this.log.info('sig rejected   :', pub)
       this.log.debug(err)
       this.emit('reject', [ 'endorse', pub, err ])
       return
     }
-    const commit_id  = Buff.str(sig).digest.hex
-    const signatures = [ ...this.signatures, sig ]
-    this._store.commit(commit_id, { signatures })
+    this._endorse(sig, cat)
+    this.log.info('recv endorse  :', pub)
+  }
+
+  _join (
+    mship       : MemberData, 
+    policy      : RolePolicy,
+    created_at ?: number
+  ) {
+    const new_draft = join_role(mship, policy, this.data)
+    this._update(new_draft, created_at)
+    this.log.info('member joined :', mship.pub)
+    this.log.info('role joined   :', policy.id)
+    this.emit('join', mship)
   }
 
   _join_handler (msg : EventMessage<MemberData>) {
+    const cat   = msg.envelope.created_at
     const mship = msg.body
     if (mship.pol === undefined || !this.has_policy(mship.pol)) {
       const err = 'invalid policy id: ' + mship.pol
@@ -235,20 +270,29 @@ export class DraftSession extends EventEmitter <{
       this.emit('reject', [ 'join', mship.pub, err ])
       return
     }
-    const policy    = this.get_policy(mship.pol)
-    const new_draft = join_role(mship, policy, this.data)
-    const commit_id = get_object_id(mship).hex
-    this.log.info('member joined :', mship.pub)
-    this.log.info('role joined   :', policy.id)
-    this._store.commit(commit_id, new_draft)
+    const pol = this.get_policy(mship.pol)
+    this._join(mship, pol, cat)
+  }
+
+  _leave (mship : MemberData, created_at ?: number) {
+    const session = rem_enrollment(mship, this.data)
+    this._update(session, created_at)
+    this.log.info('member left   :', mship.pub)
+    this.emit('leave', mship)
   }
 
   _leave_handler (msg : EventMessage<MemberData>) {
-    const mship     = msg.body
-    const session   = rem_enrollment(mship, this.data)
-    const commit_id = get_object_id(mship).hex
-    this.log.info('member left :', mship.pub)
-    this._store.commit(commit_id, session)
+    const mship = msg.body
+    const cat   = msg.envelope.created_at
+    this._leave(mship, cat)
+    this.log.info('member left   :', mship.pub)
+  }
+
+  _update (data : DraftData, created_at = now()) {
+    validate_draft(data)
+    verify_draft(data)
+    this._store._update(data, created_at)
+    this.emit('update', this)
   }
 
   async connect (address : string, secret : string) {
@@ -262,13 +306,11 @@ export class DraftSession extends EventEmitter <{
   endorse () {
     assert.ok(!this.is_endorsed, 'endorsement already exists')
     verify_proposal(this.proposal)
-    const signer    = this.signer
-    const signature = signer.draft.endorse(this.data)
-    const commit_id = Buff.str(signature).digest.hex
-    const receipt   = this._store.on_commit(commit_id)
-    this._socket.send('endorse', signature)
-    this.log.info('signer endorsed:', signer.pubkey)
-    return receipt
+    const signer = this.signer
+    const sig    = signer.draft.endorse(this.data)
+    this._endorse(sig)
+    this.sub.send('endorse', sig)
+    this.log.info('send endorse  :', signer.pubkey)
   }
 
   get_policy (pol_id : string) {
@@ -300,11 +342,10 @@ export class DraftSession extends EventEmitter <{
     secret  : string,
     store   : DraftData
   ) {
-    await Promise.all([
-      this._socket.connect(address, secret),
-      this._store.init(address, secret, store)
+    return Promise.all([
+      this._store.init(address, secret, store),
+      this.sub.when_ready()
     ])
-    return this
   }
 
   join (policy_id : string, index ?: number) {
@@ -313,11 +354,11 @@ export class DraftSession extends EventEmitter <{
     const mship   = (has_membership(session.members, signer._signer))
       ? get_membership(session.members, signer._signer)
       : signer.credential.generate(index)
+    const pol = this.get_policy(policy_id)
     mship.pol = policy_id
-    const commit_id = get_object_id(mship).hex
-    const receipt   = this._store.on_commit(commit_id)
-    this._socket.send('join', mship)
-    return receipt
+    this._join(mship, pol)
+    this.sub.send('join', mship)
+    this.log.info('send join     :', mship.pub)
   }
 
   leave () {
@@ -327,8 +368,9 @@ export class DraftSession extends EventEmitter <{
       const cred      = signer.credential.claim(members)
       const mship     = cred.data
       const commit_id = get_object_id(mship).hex
-      const receipt   = this._store.on_commit(commit_id)
-      this._socket.send('leave', mship)
+      const receipt   = this.when_commit(commit_id)
+      this.log.info('send commit   :', commit_id)
+      this.sub.send('leave', mship)
       return receipt
     }
     return
@@ -337,7 +379,7 @@ export class DraftSession extends EventEmitter <{
   async publish (client : EscrowClient) {
     verify_proposal(this.data.proposal)
     const contract = await EscrowContract.create(client, this.data)
-    this._socket.send('publish', contract.cid)
+    this.sub.send('publish', contract.cid)
     return contract
   }
 
@@ -352,5 +394,20 @@ export class DraftSession extends EventEmitter <{
   verify () {
     validate_draft(this.data)
     verify_draft(this.data)
+  }
+
+  async when_commit (commit_id : string) {
+    const duration = 10_000
+    const timeout  = 'commit timed out'
+    return new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(timeout), duration)
+      this.within('commit', (id) => {
+        if (id === commit_id) {
+          this.log.info('conf commit   :', commit_id)
+          clearTimeout(timer)
+          res(this)
+        }
+      }, duration)
+    }).catch(err => { throw new Error(err) })
   }
 }

@@ -4,9 +4,10 @@ import {
   CredentialAPI,
   DraftData,
   MemberData,
-  SignedNote,
+  SignedEvent,
   WalletAPI,
 } from '@/types/index.js'
+import { NostrSocket } from './index.js'
 
 export interface ClientConfig {
   fetcher  ?: typeof fetch
@@ -31,7 +32,7 @@ export interface FetchConfig {
 
 export interface EventMessage <T = any> {
   body     : T
-  envelope : SignedNote
+  envelope : SignedEvent
   hash     : string
   subject  : string
 }
@@ -63,6 +64,14 @@ export interface StoreConfig<T> extends SocketConfig {
   refresh_ival  : number
   update_timer  : number
   parser       ?: (data : unknown) => Promise<T>
+  socket       ?: NostrSocket
+}
+
+export interface SubscribeConfig {
+  envelope ?: Partial<SignedEvent>
+  filter    : Record<string, any>
+  selfsub  ?: boolean
+  sub_id    : string
 }
 
 export interface SessionConfig {
