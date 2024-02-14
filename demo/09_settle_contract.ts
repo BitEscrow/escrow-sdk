@@ -56,15 +56,19 @@ if (!settled_contract.spent) {
 
 /** ========== [ Review Transaction ] ========== **/
 
+const txid = settled_contract.spent_txid
+
 if (DEMO_MODE) {
   print_banner('final transaction')
   console.log('waiting a few seconds for tx to propagate the pool...\n')
   await sleep(5000)
 
   // Fetch the settlement tx from the oracle.
-  const txdata = await client.oracle.get_txdata(settled_contract.spent_txid)
+  const txdata = await client.oracle.get_txdata(txid)
   // Print the transaction data to console.
   console.dir(txdata, { depth : null })
 
   print_banner('demo complete!')
+  console.log('view your transaction here:')
+  console.log(`\n${client._oracle}/tx/${txid}\n`)
 }
