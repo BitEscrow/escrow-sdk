@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MVP Demo Page</title>
+<style>
+    body { font-family: Arial, sans-serif; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    #tabs { list-style-type: none; padding: 0; }
+    #tabs li { display: inline; margin-right: 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- Session ID Input and Buttons -->
+<div id="controls">
+    <input type="text" id="relay_addr" placeholder="Enter Relay URL" value="wss://relay.damus.io">
+    <input type="text" id="session_id" placeholder="Enter Session ID" value="test">
+    <button onclick="fn.join_session()">Join Session</button>
+    <button onclick="fn.create_session()">Create Session</button>
+</div>
+
+<!-- Tabs -->
+<ul id="tabs">
+    <li onclick="switchTab('members')">Members</li>
+    <li onclick="switchTab('roles')">Roles</li>
+    <li onclick="switchTab('terms')">Terms</li>
+    <li onclick="switchTab('signatures')">Signatures</li>
+</ul>
+
+<!-- Tab Contents -->
+<div id="members" class="tab-content">
+    <h2>Members</h2>
+    <ul></ul>
+</div>
+
+<div id="roles" class="tab-content">
+    <h2>Roles</h2>
+    <!-- Populate with data accordingly -->
+    <ul></ul>
+</div>
+
+<div id="terms" class="tab-content">
+    <h2>Terms</h2>
+    <pre></pre>
+</div>
+
+<div id="signatures" class="tab-content">
+    <h2>Signatures</h2>
+    <ul></ul>
+</div>
+
+<div id="seats">
+  <h2>Seats Available</h2>
+  <ul></ul>
+</div>
+
+<div id="console">
+  <h4>Console</h2>
+  <div id="terminal"></div>
+</div>
+
+<script type="module">
+  import { lib, DraftSession, EscrowClient, EscrowSigner } from '../../dist/module.mjs'
+
+  const config = {
+    host    : '',
+    network : 'regtest',
+    oracle  : ''
+  }
+
+  const signer = EscrowSigner.generate(config)
+
+  const template = lib.proposal.create_draft({
+    proposal : {
+      title     : 'Basic two-party contract with third-party arbitration.',
+      duration  : 14400,
+      network   : 'regtest',
+      schedule  : [[ 7200, 'close|resolve', '*' ]],
+      value     : 15000,
+    },
+    roles    : [
+      {
+        title : 'buyer',
+        paths : [
+          [ 'return', 10000  ]
+        ],
+        programs : [
+          [ 'endorse', 'close',   '*', 2 ],
+          [ 'endorse', 'dispute', '*', 1 ]
+        ]
+      },
+      {
+        title : 'seller',
+        paths : [
+          [ 'payout', 10000  ]
+        ],
+        payment : 5000,
+        programs : [
+          [ 'endorse', 'close',   '*', 2 ],
+          [ 'endorse', 'dispute', '*', 1 ]
+        ]
+      },
+    ]
+  })
+
+  const client = new EscrowClient({
+    hostname : 'http://localhost:3000',
+    oracle   : 'http://172.21.0.3:3300',
+    network  : 'regtest'
+  })
+
+  const session = new DraftSession(signer, {
+    socket_config : { verbose : true, debug : true },
+    store_config  : { verbose : true, debug : true },
+    verbose : true
+  })
+
+  window.session = session
+
+  session.on('ready', () => {
+    console.log(session.data)
+  })
+
+  window.fn = {}
+
+  window.fn.create_session = () => {
+    const addr = document.querySelector('#relay_addr').value
+    const ssid = document.querySelector('#session_id').value
+    session.init(addr, ssid, template)
+  }
+
+  window.fn.join_session = () => {
+    const addr = document.querySelector('#relay_addr').value
+    const ssid = document.querySelector('#session_id').value
+    session.connect(addr, ssid)
+  }
+
+  function create_refresh_btn () {
+    const div = document.querySelector('#controls')
+    const btn = document.createElement('button')
+    btn.textContent = 'refresh'
+    btn.onclick     = () => { session.refresh() }
+    div.appendChild(btn)
+  }
+
+  function create_endorse_btn () {
+    const div = document.querySelector('#controls')
+    const btn = document.createElement('button')
+    btn.textContent = 'endorse'
+    btn.onclick     = () => { session.endorse() }
+    div.appendChild(btn)
+  }
+
+  function create_publish_btn () {
+    const div = document.querySelector('#controls')
+    const btn = document.createElement('button')
+    btn.textContent = 'publish'
+    btn.onclick     = () => { session.publish(client) }
+    div.appendChild(btn)
+  }
+
+  function display_member (member) {
+    const ul  = document.querySelector('#members ul')
+    const li  = document.createElement('li')
+    const pre = document.createElement('pre')
+    pre.textContent = JSON.stringify(member, null, 2)
+    li.appendChild(pre)
+    ul.appendChild(li)
+  }
+
+  function display_role (policy) {
+    const ul  = document.querySelector('#roles ul')
+    const li  = document.createElement('li')
+    const pre = document.createElement('pre')
+    pre.textContent = JSON.stringify(policy, null, 2)
+    li.appendChild(pre)
+    ul.appendChild(li)
+  }
+
+  function display_sig (sig) {
+    const ul  = document.querySelector('#signatures ul')
+    const li  = document.createElement('li')
+    const pre = document.createElement('pre')
+    pre.textContent = sig
+    li.appendChild(pre)
+    ul.appendChild(li)
+  }
+
+  function display_seats () {
+    const ul = document.querySelector('#seats ul')
+    session.roles.forEach(policy => {
+      const role_cont = document.createElement('li')
+      const role_name = document.createElement('span')
+      const join_btn  = document.createElement('button')
+
+      role_name.textContent = policy.title + ' '
+      join_btn.textContent  = 'join'
+      join_btn.onclick      = () => {
+        session.join(policy.id)
+      }
+      role_cont.appendChild(role_name)
+      role_cont.appendChild(join_btn)
+      ul.appendChild(role_cont)
+    })
+  }
+
+  function display_terms () {
+    const pre = document.querySelector('#terms pre')
+    pre.textContent = JSON.stringify(session.proposal, null, 2)
+  }
+
+  function display_logs (msgs) {
+    const div = document.querySelector('#terminal')
+    msgs.forEach(msg => {
+      const line = document.createElement('pre')
+      line.textContent = msg
+      div.appendChild(line)
+    })
+  }
+
+  session.on('ready', () => {
+    session.members.forEach(e => display_member(e))
+    session.roles.forEach(e => display_role(e))
+    session.signatures.forEach(e => display_sig(e))
+    create_refresh_btn()
+    display_terms()
+    display_seats()
+    console.log(window.session)
+  })
+
+  session.on('endorse', (sig) => {
+    display_sig(sig)
+  })
+
+  session.on('info', (msgs) => {
+    display_logs(msgs)
+  })
+
+  session.on('join', (mship) => {
+    display_member(mship)
+  })
+
+  session.on('full', () => {
+    create_endorse_btn()
+  })
+
+  session.on('approved', () => {
+    create_publish_btn()
+  })
+
+</script>
+
+<script>
+  function switchTab(tabId) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active')
+    })
+
+    // Show the selected tab
+    document.getElementById(tabId).classList.add('active')
+  }
+
+  // Initially open the first tab
+  switchTab('terms')
+</script>
+
+</body>
+</html>

@@ -31,6 +31,7 @@ import {
 } from '@/lib/util.js'
 
 import {
+  create_draft,
   find_program,
   get_proposal_id
 } from '@/lib/proposal.js'
@@ -42,6 +43,7 @@ import {
 
 import {
   DraftData,
+  DraftTemplate,
   MemberData,
   ProgramQuery,
   ProposalData,
@@ -51,9 +53,13 @@ import {
 import * as assert from '@/assert.js'
 
 export class DraftSession extends EventEmitter <{
+  'approved'   : DraftSession
   'commit'     : string
+  'debug'      : unknown[]
   'endorse'    : string
   'error'      : Error
+  'full'       : DraftSession
+  'info'       : unknown[]
   'join'       : MemberData
   'leave'      : MemberData
   'members'    : MemberData[]
@@ -72,7 +78,9 @@ export class DraftSession extends EventEmitter <{
   readonly _store  : NostrStore<DraftData>
   readonly _sub    : NostrSub
 
-  _init : boolean
+  _agreed : boolean
+  _full   : boolean
+  _init   : boolean
 
   constructor (
     signer   : EscrowSigner, 
@@ -88,7 +96,9 @@ export class DraftSession extends EventEmitter <{
     this._signer = signer
     this._socket = new NostrSocket(signer._signer, socket_opt)
     this._store  = new NostrStore(this._socket, store_opt)
-    this._sub    = this._socket.subscribe({ selfsub : true })
+    this._sub    = this._socket.subscribe({ selfsub : false })
+    this._agreed = false
+    this._full   = false
     this._init   = false
 
     this._socket.on('error', (err)   => { this.emit('error', err)  })
@@ -122,6 +132,14 @@ export class DraftSession extends EventEmitter <{
           break
       }
     })
+  }
+
+  get is_approved () {
+    return (
+      this.is_full &&
+      this.signatures.length >= this.members.length &&
+      this.signatures.every(sig => verify_endorsement(this.prop_id, sig))
+    )
   }
 
   get data () {
@@ -213,10 +231,16 @@ export class DraftSession extends EventEmitter <{
 
   log = {
     debug : (...s : unknown[]) => {
-      return (this.opt.debug) ? console.log('[session]', ...s) : null
+      if (this.opt.debug) {
+        console.log('[session]', ...s)
+        this.emit('debug', s)
+      }
     },
     info  : (...s : unknown[]) => {
-      return (this.opt.verbose)  ? console.log('[session]', ...s) : null
+      if (this.opt.verbose) {
+        console.log('[session]', ...s)
+        this.emit('info', s)
+      }
     }
   }
 
@@ -292,6 +316,14 @@ export class DraftSession extends EventEmitter <{
     validate_draft(data)
     verify_draft(data)
     this._store._update(data, created_at)
+    if (this.is_full && !this._agreed) {
+      this.emit('full', this)
+    }
+    if (this.is_approved && !this._agreed) {
+      this.emit('approved', this)
+    }
+    this._agreed = this.is_approved
+    this._full   = this.is_full
     this.emit('update', this)
   }
 
@@ -338,10 +370,13 @@ export class DraftSession extends EventEmitter <{
   }
 
   async init (
-    address : string, 
-    secret  : string,
-    store   : DraftData
+    address  : string, 
+    secret   : string,
+    template : DraftTemplate | DraftData
   ) {
+    const store = create_draft(template)
+    validate_draft(store)
+    verify_draft(store)
     return Promise.all([
       this._store.init(address, secret, store),
       this.sub.when_ready()
@@ -381,6 +416,10 @@ export class DraftSession extends EventEmitter <{
     const contract = await EscrowContract.create(client, this.data)
     this.sub.send('publish', contract.cid)
     return contract
+  }
+
+  async refresh () {
+    return this._store.refresh()
   }
 
   toJSON () {

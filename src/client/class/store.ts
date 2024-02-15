@@ -281,11 +281,9 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   }
 
   async refresh () {
-    // If the data is stale, resub to the relay.
-    if (this.is_stale) {
-      this.sub.update()
-    }
-    return this.data
+    const receipt = this.sub.when_ready()
+    this.sub.update()
+    return receipt
   }
 
   keys () {

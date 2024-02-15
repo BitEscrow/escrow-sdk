@@ -58,7 +58,7 @@ export function create_contract (
   // Calculate the subtotal.
   const subtotal  = terms.value + agent_fee[0]
   // Calculate the vout size of the tx output.
-  const vout_size = outputs[0][1].length / 2
+  const vout_size = get_max_vout_size(outputs)
   // Calculate the transaction fee.
   const txfee     = vout_size * feerate
   // Return a completed contract.
@@ -145,6 +145,16 @@ function get_deadline (
     // Return published date, plus deadline.
     return published + (deadline ?? DEFAULT_DEADLINE)
   }
+}
+
+/**
+ * Get the size (in bytes) of the largest tx template.
+ */
+export function get_max_vout_size (
+  outputs : SpendTemplate[]
+) {
+  const lens = outputs.map(e => e[1].length)
+  return Math.max(...lens) / 2
 }
 
 /**
