@@ -54,10 +54,18 @@ session.on('update', async () => {
     console.log('is endorsed:', session.is_endorsed)
     if (!session.is_endorsed) {
       // Endorse the draft.
-      await session.endorse()
+      session.endorse()
       console.log(`${alias} endorsed the draft`)
     }
   }
+})
+
+session.on('full', () => {
+  console.log('all roles have been filled')
+})
+
+session.on('approved', () => {
+  console.log('draft has enough signatures')
 })
 
 /** ========== [ Account Deposit ] ========== **/

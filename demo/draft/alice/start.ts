@@ -57,7 +57,7 @@ session.on('update', async () => {
     // If we have not yet endorsed the draft:
     if (!session.is_endorsed) {
       // Endorse the draft.
-      await session.endorse()
+      session.endorse()
       console.log(`${alias} endorsed the draft`)
     } else if (session.signatures.length === 2) {
       // console.log('publishing the contract...')
@@ -68,6 +68,14 @@ session.on('update', async () => {
       }
     }
   }
+})
+
+session.on('full', () => {
+  console.log('all roles have been filled')
+})
+
+session.on('approved', () => {
+  console.log('draft has enough signatures')
 })
 
 session.on('error', console.log)
