@@ -51,6 +51,7 @@ export interface SocketConfig {
   connect_timeout : number
   echo_timeout    : number
   receipt_timeout : number
+  send_delta      : number
   filter          : EventFilter
   kind            : number
   tags            : string[][]

@@ -39,6 +39,7 @@ export const SOCKET_DEFAULTS = () : SocketConfig => {
     connect_retries : 10,
     connect_timeout : 500,
     echo_timeout    : 4000,
+    send_delta      : 1000,
     receipt_timeout : 4000,
     filter          : { since : now() } as EventFilter,
     kind            : 20000,  // Default event type.
@@ -289,7 +290,7 @@ export class NostrSocket extends EventEmitter <{
       const req = [ 'EVENT', event ]
       this.socket.send(JSON.stringify(req))
       await sleep(delay)
-      delay += 500
+      delay += this.opt.send_delta
     })
     return Promise.all(prom)
   }
@@ -302,7 +303,7 @@ export class NostrSocket extends EventEmitter <{
       const req = [ 'REQ', sub_id, sub.filter ]
       this.socket.send(JSON.stringify(req))
       await sleep(delay)
-      delay += 500
+      delay += this.opt.send_delta
     })
     return Promise.all(prom)
   }
