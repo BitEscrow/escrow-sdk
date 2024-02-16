@@ -329,6 +329,7 @@ export class DraftSession extends EventEmitter <{
 
   async connect (address : string, secret : string) {
     await Promise.all([
+      this.sub.when_ready(),
       this._socket.connect(address, secret),
       this._store.connect(address, secret)
     ])

@@ -113,13 +113,9 @@
     verbose : true
   })
 
-  window.session = session
-
-  session.on('ready', () => {
-    console.log(session.data)
-  })
-
-  window.fn = {}
+  window.draft    = { approved : false, full : false }
+  window.session  = session
+  window.fn       = {}
 
   window.fn.create_session = () => {
     const addr = document.querySelector('#relay_addr').value
@@ -224,6 +220,11 @@
     display_terms()
     display_seats()
     console.log(window.session)
+    console.log(session.data)
+  })
+
+  session.on('update', () => {
+    display_terms()
   })
 
   session.on('endorse', (sig) => {
@@ -239,11 +240,17 @@
   })
 
   session.on('full', () => {
-    create_endorse_btn()
+    if (!window.draft.full) {
+      create_endorse_btn()
+      window.draft.full = true
+    }
   })
 
   session.on('approved', () => {
-    create_publish_btn()
+    if (!window.draft.approved) {
+      create_publish_btn()
+      window.draft.approved = true
+    }
   })
 
 </script>
