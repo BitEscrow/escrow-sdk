@@ -1,4 +1,4 @@
-# Client Docs
+# Client Guide
 
 The `EscrowClient` is a basic client for consuming our API. It has access to all endpoints offered by the escrow server.
 
@@ -13,6 +13,9 @@ The `EscrowClient` is a basic client for consuming our API. It has access to all
 **Interfaces**
 
 - [EscrowClient](./class/client.md)
+
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
 ## How to Use
 

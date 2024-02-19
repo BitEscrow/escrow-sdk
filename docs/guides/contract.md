@@ -15,6 +15,9 @@ A contract is the published version of a [proposal](proposal.md). It is hosted b
 - [Contract API Routes](./api/contract.md)
 - [Contract Interfaces](./interfaces/contract.md)
 
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
 ## Creating a Contract
 
 Before creating a contract, you will need a completed [proposal](proposal.md#building-a-proposal) document, and (optional) signatures of endorsement.

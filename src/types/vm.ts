@@ -45,18 +45,18 @@ export enum PathState {
 }
 
 export interface StateData {
-  commits  : CommitEntry[]
-  error    : string | null
-  head     : string
-  output   : string | null
-  paths    : StateEntry[]
-  programs : ProgramEntry[]
-  steps    : number
-  start    : number
-  status   : PathStatus
-  store    : StoreEntry[]
-  tasks    : TaskEntry[]
-  updated  : number
+  commits  : CommitEntry[]   // List of commits to the VM.
+  error    : string | null   // Error output of the VM.
+  head     : string          // Current head of the commit-chain.
+  output   : string | null   // Standard output of the VM.
+  paths    : StateEntry[]    // List of spend paths and their current state.
+  programs : ProgramEntry[]  // List of programs available in the VM.
+  steps    : number          // Counter of state updates to the VM.
+  start    : number          // Timestamp for when the VM was initialized.
+  status   : PathStatus      // Current status of the VM.
+  store    : StoreEntry[]    // Data store for each program in the VM.
+  tasks    : TaskEntry[]     // List of upcoming tasks within the VM.
+  updated  : number          // Timestamp for when the VM was last updated.
 }
 
 export interface MachineConfig {

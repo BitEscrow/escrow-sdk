@@ -12,8 +12,18 @@ import {
   SpendState
 } from './tx.js'
 
-export type ContractStatus = 'published' | 'funded' | 'secured' | 'pending'  | 'active'  |
-                             'closed'    | 'spent'  | 'settled' | 'canceled' | 'expired' | 'error'
+export type ContractStatus = 
+  'published' |  // Contract is published and awaiting funds. 
+  'funded'    |  // Contract is funded and awaiting confirmation.
+  'secured'   |  // Contract funds are confirmed and awaiting activation.
+  'pending'   |  // Contract is in the process of being activated.
+  'active'    |  // Contract is active and CVM is running.
+  'closed'    |  // Contract is closed and awaiting settlement.
+  'spent'     |  // Contract is settled and awaiting confirmation.
+  'settled'   |  // Contract is settled and confirmed on-chain.
+  'canceled'  |  // Published contract is canceled and funds are released.
+  'expired'   |  // Active contract has expired and funds are released.
+  'error'        // Something went wrong, may require manual intervention.
 
 export type ContractData = AgentSession & ContractBase & SettleState & SpendState
 

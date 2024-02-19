@@ -2,6 +2,9 @@
 
 This documentation covers connecting to the BitEscrow server.
 
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
 ## Connecting to our Server
 
 BitEscrow currently provides an escrow server for the `signet`, `testnet`, and `mutiny` networks. Check out our list of client configurations below.

@@ -1,14 +1,15 @@
 # Deposit Interfaces
 
-List of interfaces for the Deposit API.
-
-> Click on the links below to navigate:
+List of interfaces for the Deposit API. Click on the links below to navigate:
 
 - [DepositAccount](#depositaccount)  
 - [CovenantData](#covenantdata)  
 - [DepositData](#depositdata)  
 - [DepositDigest](#depositdigest)  
 - [DepositStatus](#depositstatus)  
+
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
 ## DepositAccount
 

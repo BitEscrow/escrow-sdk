@@ -1,8 +1,6 @@
 # Deposit API
 
-Reference guide for the BitEscrow Deposit API.
-
-> Click on the links below to navigate:
+Reference guide for the BitEscrow Deposit API. Click on the links below to navigate:
 
 - [/api/deposit/request](#request-a-deposit-account)  
 - [/api/deposit/register](#register-a-deposit)  
@@ -12,6 +10,9 @@ Reference guide for the BitEscrow Deposit API.
 - [/api/deposit/:dpid/digest](#read-a-deposit-digest)  
 - [/api/deposit/:dpid/lock](#lock-funds-to-a-contract)  
 - [/api/deposit/:dpid/close](#close-a-deposit)  
+
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
 ## Request a Deposit Account
 

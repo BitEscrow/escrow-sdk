@@ -1,8 +1,6 @@
 # Contract API
 
-Reference guide for the BitEscrow Contract API.
-
-> Click on the links below to navigate:
+Reference guide for the BitEscrow Contract API. Click on the links below to navigate:
 
 - [/api/contract/create](#create-a-contract)
 - [/api/contract/list/:pubkey](#list-contracts-by-pubkey)
@@ -14,9 +12,16 @@ Reference guide for the BitEscrow Contract API.
 - [/api/contract/:cid/vm](#read-a-contract-vm-state)
 - [/api/contract/:cid/witness](#list-statements-in-a-contract)
 
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
 ## Create a Contract
 
 Create a new contract on the escrow server.
+
+API Demo:
+
+- [/demo/api/contract/create](../../demo/api/contract/create.ts)
 
 Related interfaces:
 
@@ -55,10 +60,13 @@ interface ContractDataResponse {
 
 Request a list of contracts that are tagged by a specific pubkey.
 
+API Demo:
+
+- [/demo/api/contract/list](../../demo/api/contract/list.ts)
+
 Related interfaces:
 
 - [ContractData](../interfaces/contract.md#contractdata)
-
 
 **Request Format**
 
@@ -81,6 +89,10 @@ interface ContractListResponse {
 ## Read a Contract By Id
 
 Fetch a contract from the server by its contract id (cid).
+
+API Demo:
+
+- [/demo/api/contract/read](../../demo/api/contract/read.ts)
 
 Related interfaces:
 
@@ -107,10 +119,13 @@ interface ContractDataResponse {
 
 Request to cancel a contract (must be the moderator).
 
+API Demo:
+
+- [/demo/api/contract/cancel](../../demo/api/contract/cancel.ts)
+
 Related interfaces:
 
 - [ContractData](../interfaces/contract.md#contractdata)
-
 
 **Request Format**
 
@@ -133,6 +148,10 @@ interface ContractDataResponse {
 ## List Funds in a Contract
 
 Request a list of funds that are locked to a contract id (cid).
+
+API Demo:
+
+- [/demo/api/contract/funds](../../demo/api/contract/funds.ts)
 
 Related interfaces:
 
@@ -159,6 +178,10 @@ interface FundListResponse {
 
 Fetch a more compact version of the contract (for polling).
 
+API Demo:
+
+- [/demo/api/contract/digest](../../demo/api/contract/digest.ts)
+
 Related interfaces:
 
 - [ContractDigest](../interfaces/contract.md#contractdigest)
@@ -183,6 +206,10 @@ interface ContractDigestResponse {
 ## Submit a Witness Statement
 
 Submit a witness statement to the contract VM.
+
+API Demo:
+
+- [/demo/api/contract/submit](../../demo/api/contract/submit.ts)
 
 Related interfaces:
 
@@ -220,6 +247,12 @@ interface ContractDataResponse {
 
 Fetch a contract's machine state via the contract id (cid).
 
+API Demo:
+
+- [/demo/api/contract/vmstate](../../demo/api/contract/vmstate.ts)
+
+Related Interfaces:
+
 - [ContractStatus](../interfaces/contract.md#contractstatus)
 - [StateData](../interfaces/contract.md#statedata)
 
@@ -245,6 +278,10 @@ interface ContractVMStateResponse {
 ## List Statements in a Contract
 
 Request all recorded witness statements for a contract.
+
+API Demo:
+
+- [/demo/api/contract/witness](../../demo/api/contract/witness.ts)
 
 Related interfaces:
 

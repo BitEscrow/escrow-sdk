@@ -1,12 +1,13 @@
 # Server API
 
-Reference guide for the BitEscrow Server API.
-
-> Click on the links below to navigate:
+Reference guide for the BitEscrow Server API. Click on the links below to navigate:
 
 - [/api/server/keys](#get-server-keys)
 - [/api/server/policy](#get-server-policy)
 - [/api/server/status](#get-server-status)
+
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
 ## Get Server Keys
 

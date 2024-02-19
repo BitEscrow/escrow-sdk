@@ -14,6 +14,9 @@ The `EscrowSigner` is used to represent you and other members in a contract. It 
 
 - [EscrowSigner](./class/signer.md)
 
+> Notice any mistakes, or something missing? Please let us know!  
+> You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
 ## Generate a Signer
 
 The fastest way to setup a new `EscrowSigner` is to generate one randomly:
