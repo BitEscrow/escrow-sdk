@@ -9,7 +9,7 @@ import {
 } from '@scrow/core/witness'
 
 import {
-  schema,
+  Schema,
   MachineConfig,
   ProgramTerms,
   SignerAPI,
@@ -45,7 +45,7 @@ export function resolve_aliases (
   programs : (string | number)[][]
 ) : ProgramTerms[] {
   const mbrs  = aliases.map(e => get_signer(e))
-  const progs = schema.proposal.terms.array().parse(programs)
+  const progs = Schema.proposal.terms.array().parse(programs)
   for (let i = 0; i < progs.length; i++) {
     const terms = progs[i]
     for (let j = 0; j < terms.length; j++) {
@@ -61,7 +61,7 @@ export function resolve_aliases (
 }
 
 export function parse_config (config : unknown) : MachineConfig {
-  return schema.vm.config.parse(config)
+  return Schema.vm.config.parse(config)
 }
 
 export function compile_witness (
