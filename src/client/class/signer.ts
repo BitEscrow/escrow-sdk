@@ -1,6 +1,6 @@
-import { Buff, Bytes }    from '@cmdcode/buff'
-import { EscrowClient }   from './client.js'
-import { SignerConfig }   from '../types.js'
+import { Buff, Bytes }  from '@cmdcode/buff'
+import { EscrowClient } from './client.js'
+import { SignerConfig } from '../types.js'
 
 import {
   Seed,

@@ -13,7 +13,7 @@ A contract is the published version of a [proposal](proposal.md). It is hosted b
 **Resources**
 
 - [Contract API Routes](./api/contract.md)
-- [Contract Interfaces](./interfaces/contract.md)
+- [Contract Interfaces](./data/contract.md)
 
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
@@ -33,13 +33,13 @@ if (!res.ok) throw new Error(res.error)
 const { contract } = res.data
 ```
 
-If there are no errors with your submission, you will receive a [ContractData](../docs/interfaces/contract.md#contractdata) object in response.
+If there are no errors with your submission, you will receive a [ContractData](../docs/data/contract.md#contractdata) object in response.
 
 ## Funding a Contract
 
 Once a contract is published, it is open to funding from [depositors](deposit.md#depositing-funds).
 
-The [ContractData](../docs/interfaces/contract.md#contractdata) interface has three fields for tracking funding: `balance`, `pending`, and `total`.
+The [ContractData](../docs/data/contract.md#contractdata) interface has three fields for tracking funding: `balance`, `pending`, and `total`.
 
 **Pending**: Funds are locked to the contract, but not confirmed on-chain.  
 **Balance**: Funds are locked to the contract, and confirmed on-chain.  
@@ -57,11 +57,11 @@ If there is an `effective` date set in the contract, then activation will be del
 
 ## Using the Virtual Machine (CVM)
 
-Once a contract is activated, a virtual machine within the contract is initialized, called the [CVM](./interfaces/contract.md#statedata).
+Once a contract is activated, a virtual machine within the contract is initialized, called the [CVM](./data/contract.md#statedata).
 
-The CVM is initialized based upon the `terms` of the contract (and original [proposal](./interfaces/proposal.md#proposaldata)).
+The CVM is initialized based upon the `terms` of the contract (and original [proposal](./data/proposal.md#proposaldata)).
 
-Members of the contract can interact with the CVM by providing signed statements, called a [witness](./interfaces/witness.md):
+Members of the contract can interact with the CVM by providing signed statements, called a [witness](./data/witness.md):
 
 ```ts
 // Start with a witness template.
@@ -93,7 +93,7 @@ Members can check the `commit` history and `head` to verify that all updates to 
 
 Each time the CVM is updated, it checks the closing conditions of the contract, and evaluates if a condition has been met.
 
-If a closing condition is satisfied, the CVM will return the associated spending `path` as output. The escrow server will then complete the [covenant](./interfaces/deposit.md#covenantdata) for each locked deposit, and broadcast a final settlement transaction.
+If a closing condition is satisfied, the CVM will return the associated spending `path` as output. The escrow server will then complete the [covenant](./data/deposit.md#covenantdata) for each locked deposit, and broadcast a final settlement transaction.
 
 When this happens, the `spent` boolean on the contract will be set, and the `spent_txid` field will record the on-chain txid of the settlement transaction.
 

@@ -8,29 +8,31 @@
 </head>
 <body>
   <script type="module">
-    import { lib } from '../../dist/module.mjs'
-    const prop = lib.proposal.create_proposal({
-      title    : 'Basic two-party contract with third-party dispute resolution.',
-      expires  : 14400,
-      details  : 'n/a',
-      network  : 'regtest',
-      paths: [
-        [ 'payout', 90000, 'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc'   ],
-        [ 'return', 90000, 'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc' ]
-      ],
-      payments : [
-        [ 10000,  'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc' ]
-      ],
-      programs : [
-        [ "dispute",       "*", "proof", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
-        [ "resolve",       "*", "proof", 1, "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" ],
-        [ "close|resolve", "*", "proof", 2, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" ]
-      ],
-      schedule: [
-        [ 7200, 'close', 'payout|return' ]
-      ],
-      value   : 100000,
-      version : 1
+    import { Lib } from '../../dist/module.mjs'
+    const prop = Lib.proposal.create_draft({
+      proposal : {
+        title    : 'Basic two-party contract with third-party dispute resolution.',
+        duration : 14400,
+        details  : 'n/a',
+        network  : 'regtest',
+        paths: [
+          [ 'payout', 90000, 'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc'   ],
+          [ 'return', 90000, 'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc' ]
+        ],
+        payments : [
+          [ 10000,  'bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc' ]
+        ],
+        programs : [
+          [ "dispute",       "*", "proof", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
+          [ "resolve",       "*", "proof", 1, "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" ],
+          [ "close|resolve", "*", "proof", 2, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" ]
+        ],
+        schedule: [
+          [ 7200, 'close', 'payout|return' ]
+        ],
+        value   : 100000,
+        version : 1
+      }
     })
     console.log('proposal:', prop)
   </script>

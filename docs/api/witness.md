@@ -25,3 +25,7 @@ interface WitnessDataResponse {
   }
 }
 ```
+
+**Related Interfaces:**
+
+- [WitnessData](../data/witness.md#witnessdata)

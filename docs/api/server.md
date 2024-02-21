@@ -34,9 +34,9 @@ interface ServerKeyResponse {
 
 Fetch the policy and terms configuration of the escrow server.
 
-Related interfaces:
+**Related Interfaces:**
 
-- [ServerPolicy](../interfaces/server.md#serverpolicy)
+- [ServerPolicy](../data/server.md#serverpolicy)
 
 **Request Format**
 

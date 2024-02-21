@@ -14,7 +14,7 @@ The proposal is a pre-cursor to creating a contract. It defines all the members 
 
 **Interfaces**
 
-- [Proposal Interfaces](./interfaces/proposal.md)
+- [Proposal Interfaces](./data/proposal.md)
 
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)

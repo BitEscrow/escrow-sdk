@@ -12,7 +12,7 @@ A deposit is a multi-signature account that holds a Bitcoin `utxo`. It is used f
 
 **Interfaces**
 
-- [Deposit Interfaces](./interfaces/deposit.md)
+- [Deposit Interfaces](./data/deposit.md)
 
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)

@@ -16,7 +16,7 @@ const [ a_signer, b_signer ] = signers
 const template = {
   action : 'close',
   method : 'endorse',
-  path   : 'tails'
+  path   : 'return'
 }
 
 // Define our contract as the active contract.
@@ -72,3 +72,5 @@ if (DEMO_MODE) {
   console.log('view your transaction here:')
   console.log(`\n${client._oracle}/tx/${txid}\n`)
 }
+
+await sleep(2000)

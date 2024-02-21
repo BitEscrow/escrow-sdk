@@ -51,4 +51,4 @@ The Oracle API is based on the electrum API specification, so any electrum-based
 
 To see a recommended list of oracles to use, [click here.](./servers.md)
 
-To see a complete list of interfaces for the Oracle API, [click here](./interfaces/oracle.md).
+To see a complete list of interfaces for the Oracle API, [click here](./data/oracle.md).

@@ -20,8 +20,9 @@ export const proposal = create_proposal({
   duration  : 14400,
   moderator : moderator.pubkey,
   network   : config.network,
+  paths     : [[ 'return', 10000, config.return ]],
   schedule  : [[ 7200, 'close', '*' ]],
-  value     : 15000,
+  value     : 10000,
 })
 
 /**
@@ -35,8 +36,8 @@ export const role = {
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+      [ 'endorse', 'close',   '*', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
   }),
   seller : create_policy({
@@ -46,15 +47,14 @@ export const role = {
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+      [ 'endorse', 'close',   '*', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
   }),
   agent : create_policy({
     title : 'agent',
-    payment  : 5000,
     programs : [
-      [ 'endorse', 'resolve', 'heads|tails|draw', 1 ]
+      [ 'endorse', 'resolve', '*', 1 ]
     ]
   })
 }

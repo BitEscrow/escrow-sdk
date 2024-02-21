@@ -10,7 +10,7 @@ function create_signer (alias : string) {
   // Simple hash of a string. For testing only.
   const seed = Buff.str(alias).digest
   // Return an escrow signer.
-  return EscrowSigner.create(config, seed)
+  return EscrowSigner.create(config.client, seed)
 }
 
 /**

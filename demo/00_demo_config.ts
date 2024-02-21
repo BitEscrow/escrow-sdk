@@ -31,6 +31,13 @@ const faucets = {
   testnet : 'https://bitcoinfaucet.uo1.net'
 }
 
+const returns = {
+  mutiny  : 'tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v',
+  regtest : 'bcrt1qvjnqnzuyt7je5rhrc0gpjlrm2zagjjq5c9fwkp',
+  signet  : '',
+  testnet : ''
+}
+
 const poll_rates = {
   mutiny  : [ 10, 6  ],
   regtest : [ 10, 6  ],
@@ -45,5 +52,6 @@ export const config = {
   client  : configs[network as keyof typeof configs],
   faucet  : faucets[network as keyof typeof faucets],
   members : [ 'alice', 'bob', 'carol' ],
-  poll    : poll_rates[network as keyof typeof poll_rates]
+  poll    : poll_rates[network as keyof typeof poll_rates],
+  return  : returns[network as keyof typeof returns]
 }
