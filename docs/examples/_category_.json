@@ -1,0 +1,8 @@
+{
+  "label": "Example Data",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Example data for BitEscrow API interfaces."
+  }
+}
