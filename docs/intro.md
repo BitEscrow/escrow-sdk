@@ -14,15 +14,6 @@ Key Features:
 
   * __Designed to be robust.__ Deposits are reusable when a contract cancels or expires. Credentials are recoverable via your xpub. Refunds are secured upfront and broadcast automatically on expiration.
 
-## Index
-
-1. [Protocol Overview](#protocol-overview)  
-2. [Negotiation](#negotiation)  
-3. [Funding](#funding)  
-4. [Settlement](#settlement)  
-5. [Protocol Flow Examples](#protocol-flow-examples)  
-6. [Security Model](#security-model)  
-
 ## Protocol Overview
 
 The escrow protocol involves collaboration between three parties:
