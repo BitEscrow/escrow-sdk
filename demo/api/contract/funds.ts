@@ -1,3 +1,11 @@
+/**
+ * Contract API Demo for endpoint:
+ * /api/contract/:cid/funds
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/contract/funds
+ */
+
 import { print_banner }    from '@scrow/test'
 import { client }          from '@scrow/demo/01_create_client.js'
 import { funded_contract } from '@scrow/demo/07_deposit_funds.js'

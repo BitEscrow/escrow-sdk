@@ -1,3 +1,11 @@
+/**
+ * Contract API Demo for endpoint:
+ * /api/contract/:cid/witness
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/contract/witness
+ */
+
 import { print_banner }     from '@scrow/test'
 import { client }           from '@scrow/demo/01_create_client.js'
 import { settled_contract } from '@scrow/demo/09_settle_contract.js'

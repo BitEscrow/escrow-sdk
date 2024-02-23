@@ -1,3 +1,11 @@
+/**
+ * Contract API Demo for endpoint:
+ * /api/contract/:cid/vmstate
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/contract/vmstate
+ */
+
 import { print_banner }    from '@scrow/test'
 import { client }          from '@scrow/demo/01_create_client.js'
 import { active_contract } from '@scrow/demo/08_check_contract.js'

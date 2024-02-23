@@ -1,3 +1,11 @@
+/**
+ * Contract API Demo for endpoint:
+ * /api/contract/:cid/list
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/contract/list
+ */
+
 import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
 import { signers }      from '@scrow/demo/02_create_signer.js'

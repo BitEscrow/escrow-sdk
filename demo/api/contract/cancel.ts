@@ -1,6 +1,14 @@
+/**
+ * Contract API Demo for endpoint:
+ * /api/contract/:cid/cancel
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/contract/cancel
+ */
+
 import { print_banner }        from '@scrow/test'
 import { client }              from '@scrow/demo/01_create_client.js'
-import { moderator as signer } from '@scrow/demo/03_build_proposal.js'
+import { moderator as signer } from '@scrow/demo/03_create_draft.js'
 import { new_contract }        from '@scrow/demo/05_create_contract.js'
 
 // Define the contract id we will cancel.
