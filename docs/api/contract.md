@@ -68,7 +68,7 @@ if (!res.ok) throw new Error(res.error)
 const new_contract = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/create.ts) using the shell command:  
 > `yarn load demo/api/contract/create`
 
 **Example Response**
@@ -120,7 +120,7 @@ if (!res.ok) throw new Error(res.error)
 const contracts = res.data.contracts
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/list.ts) using the shell command:  
 > `yarn load demo/api/contract/list`
 
 **Example Response**
@@ -168,7 +168,7 @@ if (!res.ok) throw new Error(res.error)
 const contract = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/read.ts) using the shell command:  
 > `yarn load demo/api/contract/read`
 
 **Example Response**
@@ -220,7 +220,7 @@ if (!res.ok) throw new Error(res.error)
 const canceled_contract = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/cancel.ts) using the shell command:  
 > `yarn load demo/api/contract/cancel`
 
 **Example Response**
@@ -268,7 +268,7 @@ if (!res.ok) throw new Error(res.error)
 const contract = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/digest.ts) using the shell command:  
 > `yarn load demo/api/contract/digest`
 
 **Example Response**
@@ -319,7 +319,7 @@ if (!res.ok) throw new Error(res.error)
 const status = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/status.ts) using the shell command:  
 > `yarn load demo/api/contract/status`
 
 **Example Response**
@@ -392,7 +392,7 @@ if (!res.ok) throw new Error(res.error)
 const updated_contract = res.data.contract
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/submit.ts) using the shell command:  
 > `yarn load demo/api/contract/submit`
 
 **Example Response**
@@ -443,7 +443,7 @@ if (!res.ok) throw new Error(res.error)
 const vm_state = res.data.vm_state
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/vmstate.ts) using the shell command:  
 > `yarn load demo/api/contract/vmstate`
 
 **Example Response**
@@ -492,7 +492,7 @@ if (!res.ok) throw new Error(res.error)
 const statements = res.data.statements
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using the shell command:  
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/witness.ts) using the shell command:  
 > `yarn load demo/api/contract/witness`
 
 **Example Response**
