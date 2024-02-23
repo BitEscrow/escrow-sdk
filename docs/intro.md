@@ -26,7 +26,7 @@ The protocol is split into three phases: _negotiation_, _funding_, and _settleme
 
 ### Negotiation
 
-The first step is to negotiate and agree on a [proposal](docs/proposal.md) document. This is a human-readable document which contains all of the terms of the contract.
+The first step is to negotiate and agree on a [proposal](wiki/proposal.md) document. This is a human-readable document which contains all of the terms of the contract.
 
 It is written in JSON format, and designed for collaboration (much like a PSBT):
 
@@ -59,13 +59,13 @@ If desired, a third-party can host the proposal. The protocol is designed for th
 
 There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
 
-Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](docs/contract.md) for funding.
+Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](wiki/contract.md) for funding.
 
 > Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
 
 ### Funding
 
-To deposit funds into a contract, the funding party will first request a deposit [account](docs/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds into a contract, the funding party will first request a deposit [account](wiki/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
@@ -85,7 +85,7 @@ The funder independently verifies the account information, then sends their fund
 
 Once the transaction is in the mempool, the funder can then commit the funds by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms.
 
-The combination of these signatures form a [covenant](docs/deposit.md) with the contract:
+The combination of these signatures form a [covenant](wiki/deposit.md) with the contract:
 
 ```ts
 interface CovenantData {
@@ -129,7 +129,7 @@ vm_state: {
 
 > Note : The `head` of the hash-chain is initialized using the contract's identifier (cid).
 
-Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](docs/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
+Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](wiki/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
 
 Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
 
