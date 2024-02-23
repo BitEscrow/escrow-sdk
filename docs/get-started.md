@@ -170,7 +170,7 @@ Each endorsement provided to the server will tag the proposal with the signer's 
 
 > Endorsing a proposal does not reveal which credential belongs to you.
 
-For more information on building a `proposal`, [click here](wiki/proposal.md).
+For more information on building a `proposal`, [click here](wiki/draft.md).
 
 ### Create a Contract
 
@@ -248,7 +248,7 @@ const { contract, deposit } = res.data
 
 Once all required funds are deposited and confirmed, the contract virtual machine (CVM) will activate.
 
-Members of the contract can interact with the CVM by providing signed statements, called a [witness](./interfaces/witness.md):
+Members of the contract can interact with the CVM by providing signed statements, called a [witness](data/witness.md):
 
 ```ts
 // Start with a witness template.

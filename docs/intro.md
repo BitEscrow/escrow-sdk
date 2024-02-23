@@ -26,7 +26,7 @@ The protocol is split into three phases: _negotiation_, _funding_, and _settleme
 
 ### Negotiation
 
-The first step is to negotiate and agree on a [proposal](wiki/proposal.md) document. This is a human-readable document which contains all of the terms of the contract.
+The first step is to negotiate and agree on a [proposal](wiki/draft.md) document. This is a human-readable document which contains all of the terms of the contract.
 
 It is written in JSON format, and designed for collaboration (much like a PSBT):
 
