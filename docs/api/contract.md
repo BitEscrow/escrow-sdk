@@ -80,6 +80,8 @@ const new_contract = res.data.contract
 - [ProposalData](../data/draft.md#proposaldata)
 - [ContractData](../data/contract.md#contractdata)
 
+---
+
 ## List Contracts By Pubkey
 
 Request a list of contracts that are tagged by a specific pubkey.
@@ -131,6 +133,8 @@ const contracts = res.data.contracts
 
 - [ContractData](../data/contract.md#contractdata)
 
+---
+
 ## Read a Contract By Id
 
 Fetch a contract from the server by its contract id (cid).
@@ -178,6 +182,8 @@ const contract = res.data.contract
 **Related Interfaces**
 
 - [ContractData](../data/contract.md#contractdata)
+
+---
 
 ## Cancel a Contract
 
@@ -231,6 +237,8 @@ const canceled_contract = res.data.contract
 
 - [ContractData](../data/contract.md#contractdata)
 
+---
+
 ## Read a Contract Digest
 
 Fetch a more compact version of the contract (for polling).
@@ -278,6 +286,8 @@ const contract = res.data.contract
 **Related Interfaces:**
 
 - [ContractDigest](../data/contract.md#contractdigest)
+
+---
 
 ## Read a Contract Status
 
@@ -329,6 +339,8 @@ const status = res.data.contract
 **Related Interfaces**
 
 - [ContractStatus](../data/contract.md#contractstatus)
+
+---
 
 ## Submit a Witness Statement
 
@@ -404,6 +416,8 @@ const updated_contract = res.data.contract
 - [ContractData](../data/contract.md#contractdata)
 - [WitnessData](../data/witness.md#witnessdata)
 
+---
+
 ## Read a Contract VM State
 
 Fetch a contract's machine state via the contract id (cid).
@@ -454,6 +468,8 @@ const vm_state = res.data.vm_state
 
 - [ContractStatus](../data/contract.md#contractstatus)
 - [StateData](../data/contract.md#statedata)
+
+---
 
 ## List Statements in a Contract
 
