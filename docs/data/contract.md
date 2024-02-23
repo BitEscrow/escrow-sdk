@@ -2,13 +2,16 @@
 
 List of interfaces for the Contract API. Click on the links below to navigate:
 
-- [ContractData](#contractdata)  
-- [ContractDigest](#contractdigest)  
-- [ContractStatus](#contractstatus)  
-- [StateData](#statedata)  
+- [ContractData](#contractdata)
+- [ContractDigest](#contractdigest)
+- [ContractStatus](#contractstatus)
+- [StateData](#statedata)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## ContractData
 

@@ -1,14 +1,17 @@
 # EscrowClient
 
-Reference guide for the EscrowClient class API.
+Reference guide for the `EscrowClient` class API.
 
-- [ClientConfig](#clientconfig)  
-- [EscrowClient](#escrowclient)  
+- [EscrowClient Config](#escrowclient-config)
+- [EscrowClient Class](#escrowclient-class)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
-## ClientConfig
+---
+
+## EscrowClient Config
 
 Configuration infterface for the EscrowClient.
 
@@ -20,7 +23,7 @@ interface ClientConfig {
 }
 ```
 
-## EscrowClient
+## EscrowClient Class
 
 Class interface for the EscrowClient.
 

@@ -1,14 +1,17 @@
-# EscrowSigner Class
+# EscrowSigner
 
-Reference guide for the EscrowSigner API.
+Reference guide for the `EscrowSigner` API.
 
-- [SignerConfig](#signerconfig)  
-- [EscrowSigner](#escrowsigner)  
+- [EscrowSigner Config](#escrowsigner-config)
+- [EscrowSigner Class](#escrowsigner-class)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
-## SignerConfig
+---
+
+## EscrowSigner Config
 
 Configuration infterface for the EscrowSigner.
 
@@ -29,7 +32,7 @@ interface SignerConfig extends ClientConfig {
 }
 ```
 
-## EscrowSigner
+## EscrowSigner Class
 
 Class interface for the EscrowSigner.
 

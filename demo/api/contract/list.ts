@@ -5,9 +5,9 @@ import { signers }      from '@scrow/demo/02_create_signer.js'
 // Select a signer to use.
 const signer = signers[0]
 // Generate a request token.
-const req_token = signer.request.contract_list()
+const req = signer.request.contract_list()
 // Deliver the request and token.
-const res = await client.contract.list(signer.pubkey, req_token)
+const res = await client.contract.list(signer.pubkey, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.

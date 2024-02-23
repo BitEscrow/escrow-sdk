@@ -11,13 +11,14 @@ import {
   validate_draft,
   verify_draft,
   verify_slots_full
-} from '@/validators/policy.js'
+} from '@/validators/draft.js'
 
 import {
   DraftData,
   MemberData,
   RolePolicy
 } from '@/types/index.js'
+
 import { verify_proposal } from '@/validators/proposal.js'
 
 export function is_member_api (signer : EscrowSigner) {

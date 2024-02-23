@@ -2,11 +2,14 @@
 
 List of interfaces for the Witness API. Click on the links below to navigate:
 
-- [WitnessTemplate](#witnesstemplate)  
-- [WitnessData](#witnessdata)  
+- [WitnessTemplate](#witnesstemplate)
+- [WitnessData](#witnessdata)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## WitnessTemplate
 

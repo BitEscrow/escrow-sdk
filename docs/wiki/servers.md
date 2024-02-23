@@ -1,9 +1,12 @@
-# Server Docs
+# Server Wiki
 
 This documentation covers connecting to the BitEscrow server.
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## Connecting to our Server
 

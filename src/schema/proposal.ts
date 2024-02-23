@@ -32,6 +32,13 @@ const data  = z.object({
   version    : num
 })
 
+const template = data.partial().extend({
+  duration : num,
+  network  : network,
+  title    : str,
+  value    : num
+})
+
 export default {
   data,
   paths,
@@ -39,5 +46,6 @@ export default {
   programs,
   schedule,
   task,
+  template,
   terms
 }

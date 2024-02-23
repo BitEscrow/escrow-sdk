@@ -2,22 +2,27 @@
 
 Reference guide for the BitEscrow Deposit API. Click on the links below to navigate:
 
-- [/api/deposit/request](#request-a-deposit-account)
-- [/api/deposit/register](#register-a-deposit)
-- [/api/deposit/commit](#commit-to-a-contract)
-- [/api/deposit/list/:pubkey](#list-deposits-by-pubkey)
-- [/api/deposit/:dpid](#read-a-deposit-by-id)
-- [/api/deposit/:dpid/digest](#read-a-deposit-digest)
-- [/api/deposit/:dpid/lock](#lock-funds-to-a-contract)
-- [/api/deposit/:dpid/status](#read-a-deposit-status)
-- [/api/deposit/:dpid/close](#close-a-deposit)
+| Endpoint | Description |
+|----------|-------------|
+| [/api/deposit/request](#request-a-deposit-account) | Request a new deposit address from the escrow server. |
+| [/api/deposit/register](#register-a-deposit) | Register a utxo sent to a deposit address. |
+| [/api/deposit/commit](#commit-to-a-contract) | Register and commit a utxo to a published contract. |
+| [/api/deposit/list/:pubkey](#list-deposits-by-pubkey) | Request a list of deposits indexed by your pubkey. |
+| [/api/deposit/:dpid](#read-a-deposit-by-id) | Fetch a deposit from the server by id (dpid). |
+| [/api/deposit/:dpid/digest](#read-a-deposit-digest) | Fetch a more compact form of a deposit (for polling). |
+| [/api/deposit/:dpid/lock](#lock-funds-to-a-contract) | Commit funds in an open deposit to a contract. |
+| [/api/deposit/:dpid/status](#read-a-deposit-status) | Fetch a deposit's current status. |
+| [/api/deposit/:dpid/close](#close-a-deposit) | Close an account and return funds to the registered xpub. |
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
+---
+
 ## Request a Deposit Account
 
-Request a new deposit account from the escrow server.
+Request a new deposit address from the escrow server.
 
 **Request Format**
 
@@ -48,13 +53,15 @@ interface AccountDataResponse {
 }
 ```
 
-****Related Interfaces:****
+**Related Interfaces:**
 
 - [DepositAccount](../data/deposit.md#depositaccount)
 
+---
+
 ## Register a Deposit
 
-Register a utxo in the blockchain/mempool with a deposit account.
+Register a utxo sent to a deposit address.
 
 **Request Format**
 
@@ -92,9 +99,11 @@ interface DepositDataResponse {
 - [DepositData](../data/deposit.md#depositdata)
 - [TxOutput](../data/oracle.md#txoutput)
 
+---
+
 ## Commit to a Contract
 
-Register and commit a utxo in the blockchain/mempool to a contract.
+Register and commit a utxo to a published contract.
 
 **Request Format**
 
@@ -136,9 +145,11 @@ interface FundDataResponse {
 - [DepositData](../data/deposit.md#depositdata)
 - [TxOutput](../data/oracle.md#txoutput)
 
+---
+
 ## List Deposits By Pubkey
 
-Request a list of deposits that are tagged by a specific pubkey.
+Request a list of deposits indexed by your pubkey.
 
 **Request Format**
 
@@ -162,9 +173,38 @@ interface DepositListResponse {
 
 - [DepositData](../data/deposit.md#depositdata)
 
+---
+
+## Read a Deposit By Id
+
+Fetch a deposit from the server by id (dpid).
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/deposit/:dpid'
+```
+
+**Response Interface**
+
+```ts
+interface DepositDataResponse {
+  data : {
+    deposit : DepositData
+  }
+}
+```
+
+**Related Interfaces:**
+
+- [DepositData](../data/deposit.md#depositdata)
+
+---
+
 ## Lock Funds to a Contract
 
-Lock an existing deposit account to a contract.
+Commit funds in an open deposit to a contract.
 
 **Request Format**
 
@@ -200,9 +240,11 @@ interface FundDataResponse {
 - [CovenantData](../data/deposit.md#covenantdata)
 - [DepositData](../data/deposit.md#depositdata)
 
+---
+
 ## Read a Deposit Status
 
-Fetch a contract's current status via the contract id (cid).
+Fetch a deposit's current status.
 
 **Request Format**
 
@@ -224,13 +266,15 @@ export interface DepositStatusResponse {
 }
 ```
 
-Related Interfaces:
+**Related Interfaces:**
 
 - [DepositStatus](../data/deposit.md#depositstatus)
 
+---
+
 ## Read a Deposit Digest
 
-Fetch a more compact version of the deposit (for polling).
+Fetch a more compact form of a deposit (for polling).
 
 **Request Format**
 
@@ -253,9 +297,11 @@ interface DepositDigestResponse {
 
 - [DepositDigest](../data/deposit.md#depositdigest)
 
+---
+
 ## Close a Deposit
 
-Close a deposit account and return funds to the registered xpub.
+Close an account and return funds to the registered xpub.
 
 **Request Format**
 

@@ -1,4 +1,4 @@
-# Deposit Docs
+# Deposit Wiki
 
 A deposit is a multi-signature account that holds a Bitcoin `utxo`. It is used for negotiating funds for a contract.
 
@@ -12,10 +12,13 @@ A deposit is a multi-signature account that holds a Bitcoin `utxo`. It is used f
 
 **Interfaces**
 
-- [Deposit Interfaces](./data/deposit.md)
+- [Deposit Interfaces](../data/deposit.md)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## Requesting an Account
 
@@ -188,7 +191,7 @@ If a contract is canceled, and deposits are released, you can use this process t
 
 ## Closing a Deposit
 
-API Reference : [Close a Deposit](./api/deposit.md#close-a-deposit)
+API Reference : [Close a Deposit](../api/deposit.md#close-a-deposit)
 
 If you have an open deposit, you can close it and return the funds to your registered xpub.
 

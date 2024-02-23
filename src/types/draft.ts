@@ -32,6 +32,7 @@ export interface DraftTemplate {
   proposal    : ProposalTemplate | ProposalData
   roles      ?: RolePolicy[]
   signatures ?: string[]
+  terms      ?: string[]
 }
 
 export interface DraftData {
@@ -39,4 +40,5 @@ export interface DraftData {
   proposal   : ProposalData
   roles      : RolePolicy[]
   signatures : string[]
+  terms      : string[]
 }

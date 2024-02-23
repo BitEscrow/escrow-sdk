@@ -2,14 +2,17 @@
 
 List of interfaces for the Deposit API. Click on the links below to navigate:
 
-- [DepositAccount](#depositaccount)  
-- [CovenantData](#covenantdata)  
-- [DepositData](#depositdata)  
-- [DepositDigest](#depositdigest)  
-- [DepositStatus](#depositstatus)  
+- [DepositAccount](#depositaccount)
+- [CovenantData](#covenantdata)
+- [DepositData](#depositdata)
+- [DepositDigest](#depositdigest)
+- [DepositStatus](#depositstatus)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## DepositAccount
 
@@ -31,8 +34,9 @@ interface DepositAccount {
 
 ```ts
 interface CovenantData {
-  cid    : string
-  pnonce : string
+  cid    : string  // Id of the contract you are signing for.
+  pnonce : string  // Public nonce of the signer.
+  // List of labeled partial signatures for the covenant.
   psigs  : [ label : string, psig : string ][]
 }
 ```

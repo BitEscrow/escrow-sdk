@@ -21,6 +21,7 @@ export interface SignerAPI {
   id        : string
   pubkey    : string
   gen_nonce : (data : Bytes) => Buff
+  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
   musign    : MusignDevice
   sign      : SignDevice
 }

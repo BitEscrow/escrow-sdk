@@ -10,6 +10,7 @@ import {
 
 import {
   DraftData,
+  DraftTemplate,
   MemberData,
   ProgramTerms,
   ProposalData,
@@ -18,6 +19,12 @@ import {
 
 import * as assert from '@/assert.js'
 import * as schema from '@/schema/index.js'
+
+export function validate_draft_template (
+  draft : unknown
+) : asserts draft is DraftTemplate {
+  void schema.draft.template.parse(draft)
+}
 
 export function validate_draft (
   draft : unknown

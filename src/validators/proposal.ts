@@ -26,9 +26,19 @@ import {
   check_regex,
 } from './util.js'
 
-import { ProposalData } from '../types/index.js'
+import {
+  ProposalData,
+  ProposalTemplate
+} from '../types/index.js'
 
 import * as assert from '../assert.js'
+import * as schema from '../schema/index.js'
+
+export function validate_prop_template (
+  proposal : unknown
+) : asserts proposal is ProposalTemplate {
+  void schema.proposal.template.parse(proposal)
+}
 
 export function validate_proposal (
   proposal : unknown

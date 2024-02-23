@@ -1,12 +1,15 @@
 # EscrowAccount
 
-Reference guide for the EscrowAccount class API.
+Reference guide for the `EscrowAccount` class API.
 
-- [EscrowAccountConfig](#escrowaccount-config)  
-- [EscrowAccount](#escrowaccount-class)  
+- [EscrowAccount Config](#escrowaccount-config)
+- [EscrowAccount Class](#escrowaccount-class)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## EscrowAccount Config
 

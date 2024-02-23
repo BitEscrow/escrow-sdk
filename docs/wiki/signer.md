@@ -1,4 +1,4 @@
-# Signer Docs
+# Signer Wiki
 
 The `EscrowSigner` is used to represent you and other members in a contract. It manages your credentials, deposit accounts, proposal negotiation, and interactions with a contract.
 
@@ -7,15 +7,18 @@ The `EscrowSigner` is used to represent you and other members in a contract. It 
 1. [Generate a Signer](#generate-a-signer)
 2. [Importing a Seed](#importing-a-seed)
 3. [Backup and Restore](#backup-and-restore)
-4. [Using an Extention or App](#using-an-extention-or-app)  
-5. [Using an Offline Device](#using-an-offline-device)  
+4. [Using an Extention or App](#using-an-extention-or-app)
+5. [Using an Offline Device](#using-an-offline-device)
 
 **Interfaces**
 
-- [EscrowSigner](./class/signer.md)
+- [EscrowSigner](../class/signer.md)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## Generate a Signer
 

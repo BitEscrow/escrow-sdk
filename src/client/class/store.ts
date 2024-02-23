@@ -223,7 +223,7 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
       const encoded = JSON.stringify(parsed, json_encoder)
       this.log.info(' store method   :', method)
       this.log.info(' store data     :', parsed)
-      this.sub.send(method, encoded)
+      this.sub.send(method, encoded, undefined, true)
     }, this.opt.buffer_timer)
   }
 

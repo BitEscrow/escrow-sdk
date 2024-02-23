@@ -1,9 +1,9 @@
 import { print_banner } from '@scrow/test'
-import { client }       from '../../01_create_client.js'
-import { session }      from '../../04_roles_and_endorse.js'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { draft }        from '@scrow/demo/04_finish_draft.js'
 
 // Deliver proposal and endorsements to server.
-const res = await client.contract.create(session)
+const res = await client.contract.create(draft)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.

@@ -168,28 +168,30 @@ export class NostrSocket extends EventEmitter <{
   }
 
   async _event_handler (payload : string[]) {
-    const [ sub_id, event ] = payload
+    const [ sub_id, json ] = payload
 
-    const envelope = await parse_note(event)
-    const sub      = this.get_sub(sub_id)
+    const event = await parse_note(json)
+    const sub   = this.get_sub(sub_id)
 
-    if (envelope === null) {
-      this.log.debug('invalid format:', event)
-      this.emit('reject', [ 'invalid format', event ])
+    if (event === null) {
+      this.log.debug('invalid event:', json)
+      this.emit('reject', [ 'invalid event', json ])
       return
     }
 
-    const { content, created_at, id, pubkey, sig } = envelope
+    const { content, created_at, id, pubkey, sig } = event
 
     this.log.info('event sub      :', sub_id)
     this.log.info('event id       :', id)
     this.log.info('event date     :', new Date(created_at * 1000))
 
     if (!verify_sig(sig, id, pubkey)) {
-      this.log.debug('bad signature:', event)
-      this.emit('reject', [ 'bad signature', event ])
+      this.log.debug('bad signature:', json)
+      this.emit('reject', [ 'bad signature', json ])
       return
     }
+
+    sub.emit('event', event)
 
     // If the event is from ourselves, 
     if (pubkey === this.pubkey) {
@@ -197,28 +199,30 @@ export class NostrSocket extends EventEmitter <{
       if (!sub.is_echo) return
     }
 
-    let message : [ string, string, any ]
+    if (content.includes('?iv=') && this._secret !== undefined) {
+      let message : [ string, string, any ]
 
-    try {
-      const arr = decrypt_content(content, this.secret)
-      message = JSON.parse(arr)
-    } catch (err) {
-      this.log.debug('invalid content:', content)
-      this.emit('reject', [ 'invalid content', event ])
-      return
+      try {
+        const arr = decrypt_content(content, this.secret)
+        message = JSON.parse(arr)
+      } catch (err) {
+        this.log.debug('invalid content:', content)
+        this.emit('reject', [ 'invalid content', event ])
+        return
+      }
+
+      const [ subject, hash, body ]     = message
+      const { content: _, ...rest } = event
+
+      this.log.debug('recv message  :', message)
+      this.log.debug('recv envelope :', rest)
+
+      // Build the data payload.
+      const msg : EventMessage = { body, envelope : event, hash, subject }
+
+      // Emit the event to our subscribed functions.
+      sub.emit('message', msg)
     }
-
-    const [ subject, hash, body ] = message
-    const { content: _, ...rest } = envelope
-
-    this.log.debug('recv message  :', message)
-    this.log.debug('recv envelope :', rest)
-
-    // Build the data payload.
-    const msg : EventMessage = { body, envelope, hash, subject }
-
-    // Emit the event to our subscribed functions.
-    sub.emit('message', msg)
   }
 
   _msg_handler (msg : any) {
@@ -299,7 +303,9 @@ export class NostrSocket extends EventEmitter <{
     let delay  = 0 
     const arr  = subs ?? [ ...this.subs ]
     const prom = arr.map(async ([ sub_id, sub ]) => {
-      sub.filter['#d'] = [ this.topic_id ]
+      if (this._secret !== undefined) {
+        sub.filter['#d'] = [ this.topic_id ]
+      }
       const req = [ 'REQ', sub_id, sub.filter ]
       this.socket.send(JSON.stringify(req))
       await sleep(delay)
@@ -317,6 +323,10 @@ export class NostrSocket extends EventEmitter <{
     }
   }
 
+  can_recover (event : SignedEvent) {
+    return event.tags.find(e => e[0] === 'rec') !== undefined
+  }
+
   async connect (address ?: string, secret  ?: string) {
     if (address !== undefined) {
       this._relay = address
@@ -331,9 +341,9 @@ export class NostrSocket extends EventEmitter <{
       throw new Error('Must provide a valid relay address!')
     }
 
-    if (!this._secret) {
-      throw new Error('Must provide a shared secret!')
-    }
+    // if (!this._secret) {
+    //   throw new Error('Must provide a shared secret!')
+    // }
 
     if (address !== undefined || this.socket.readyState > 1) {
       this._socket = new WebSocket(this.relay)
@@ -422,10 +432,33 @@ export class NostrSocket extends EventEmitter <{
     }
   }
 
+  async query (
+    address : string,
+    filter  : EventFilter
+  ) {
+    const events : SignedEvent[] = []
+    const sub = this.subscribe({ filter })
+    sub.on('event', (event) => void events.push(event))
+    sub.on('ready', (sub) => sub.cancel())
+    this.connect(address)
+    await sub.when_ready()
+    return events
+  }
+
+  recover (event : SignedEvent) {
+    const reckey = event.tags.find(e => e[0] === 'rec')
+    if (reckey === undefined) throw new Error('recovery key not found')
+    const preimg = event.content + String(event.created_at)
+    const rec_id = Buff.str(preimg).digest.hex
+    const cipher = this._signer.hmac('256', rec_id).hex
+    return decrypt_content(reckey[1], cipher)
+  }
+
   send (
     subject   : string,
     body      : unknown,
-    envelope ?: Partial<SignedEvent>
+    envelope ?: Partial<SignedEvent>,
+    recovery  = false
   ) {
     /** Send a data message to the relay. */
     const { kind, tags = [] } = envelope ?? {}
@@ -434,11 +467,24 @@ export class NostrSocket extends EventEmitter <{
     const content = JSON.stringify([ subject, hash, body ])
     
     const event = {
-      content    : encrypt_content(content, this.secret),
+      content    : content,
       created_at : now(),
       kind       : kind || this.opt.kind,
-      tags       : [...this.tags, ...tags, [ 'd', this.topic_id ] ],
+      tags       : [ ...this.tags, ...tags ],
       pubkey     : this.pubkey
+    }
+
+    if (this._secret !== undefined) {
+      event.content = encrypt_content(content, this.secret)
+      event.tags.push([ 'd', this.topic_id ])
+    }
+
+    if (recovery && this._secret !== undefined) {
+      const preimg = event.content + String(event.created_at)
+      const rec_id = Buff.str(preimg).digest.hex
+      const cipher = this._signer.hmac('256', rec_id).hex
+      const recstr = encrypt_content(this.secret.hex, cipher)
+      event.tags.push([ 'rec', recstr ])
     }
 
     // Sign our message.
@@ -452,19 +498,8 @@ export class NostrSocket extends EventEmitter <{
   }
 
   sign (event : Partial<SignedEvent>) {
-    const preimg = JSON.stringify([
-      0,
-      event['pubkey'],
-      event['created_at'],
-      event['kind'],
-      event['tags'],
-      event['content'],
-    ])
-
-    // Append event ID and signature
-    event.id  = Buff.str(preimg).digest.hex
+    event.id  = get_event_id(event)
     event.sig = this._signer.sign(event.id)
-
     return event as SignedEvent
   }
 
@@ -514,7 +549,7 @@ export class NostrSocket extends EventEmitter <{
           res(event_id)
         }
       }, duration)
-    }).catch(err => { throw new Error(err) })
+    }).catch(err => { throw err })
   }
 
   async when_receipt (event_id : string) {
@@ -549,6 +584,18 @@ export class NostrSocket extends EventEmitter <{
 
 }
 
+function get_event_id (event : Partial<SignedEvent>) {
+  const preimg = JSON.stringify([
+    0,
+    event['pubkey'],
+    event['created_at'],
+    event['kind'],
+    event['tags'],
+    event['content'],
+  ])
+  return Buff.str(preimg).digest.hex
+}
+
 async function parse_note (
   note : unknown
 ) : Promise<SignedEvent | null> {
@@ -559,22 +606,22 @@ async function parse_note (
     : null
 }
 
-function encrypt_content (
+export function encrypt_content (
   content : string,
   secret  : Bytes
 ) {
   const bytes   = Buff.str(content) 
   const vector  = Buff.random(16)
   const encoded = encrypt_cbc(bytes, secret, vector)
-  return Buff.join([ vector, encoded ]).b64url
+  return encoded.b64url + '?iv=' + vector.b64url
 }
 
-function decrypt_content (
+export function decrypt_content (
   content : string, 
   secret  : Bytes
 ) {
-  const bytes   = Buff.b64url(content)
-  const vector  = bytes.subarray(0, 16)
-  const data    = bytes.subarray(16)
+  const [ enc, iv ] = content.split('?iv=')
+  const data   = Buff.b64url(enc)
+  const vector = Buff.b64url(iv)
   return decrypt_cbc(data, secret, vector).str
 }

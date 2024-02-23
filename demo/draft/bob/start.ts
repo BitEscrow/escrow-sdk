@@ -8,8 +8,9 @@ import {
 import { client }              from '@scrow/demo/01_create_client.js'
 import { config }              from '@scrow/demo/00_demo_config.js'
 import { print_banner }        from '@scrow/test'
-import { fund_address, sleep } from '@scrow/demo/util.js'
 import { secret_id }           from '../terms.js'
+
+import { fund_regtest_address, sleep } from '@scrow/demo/util.js'
 
 import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 
@@ -83,7 +84,7 @@ function fund_contract (contract : ContractData) {
     } else {
       // Use the automated payment for regtest testing.
       print_banner('sending deposit')
-      await fund_address(account.data.address, fund_amt)
+      await fund_regtest_address(account.data.address, fund_amt)
       await sleep(2000)
     }
 

@@ -44,7 +44,7 @@ export type EventFilter = {
   since   ?: number
   until   ?: number
   limit   ?: number
-} & { [ key : string ] : string[] | undefined }
+} & { [ key : string ] : any | undefined }
 
 export interface SocketConfig {
   connect_retries : number

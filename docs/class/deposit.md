@@ -1,12 +1,15 @@
 # EscrowDeposit
 
-Reference guide for the EscrowDeposit class API.
+Reference guide for the `EscrowDeposit` class API.
 
-- [EscrowDepositConfig](#escrowdeposit-config)  
-- [EscrowDeposit](#escrowdeposit-class)  
+- [EscrowDeposit Config](#escrowdeposit-config)
+- [EscrowDeposit Class](#escrowdeposit-class)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## EscrowDeposit Config
 

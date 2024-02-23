@@ -25,6 +25,7 @@ import {
   DraftData,
   DraftTemplate
 } from '@/types/index.js'
+
 import { create_policy } from './policy.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -45,16 +46,15 @@ const GET_DEFAULT_PROP = () => {
 export function create_draft (
   template : DraftTemplate
 ) : DraftData {
-  let { members = [], proposal, roles = [], signatures = [] } = template
-  const terms    = create_proposal(proposal)
+  let { members = [], proposal, roles = [], signatures = [], terms = [] } = template
+  const prop     = create_proposal(proposal)
   const policies = roles.map(e => {
     return (e.id === undefined) ? create_policy(e) : e
   })
-  return { members, proposal : terms, roles : policies, signatures }
+  return { members, proposal : prop, roles : policies, signatures, terms }
 }
 
 export function create_proposal (template : ProposalTemplate) {
-  // Create a proposal object.
   return parse_proposal({ ...GET_DEFAULT_PROP(), ...template })
 }
 

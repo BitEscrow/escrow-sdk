@@ -8,6 +8,7 @@ import { NostrSocket }     from './socket.js'
 import { NostrSub }        from './sub.js'
 
 import {
+  EventFilter,
   EventMessage,
   SessionConfig
 } from '../types.js'
@@ -39,7 +40,7 @@ import {
 import {
   validate_draft,
   verify_draft
-} from '@/validators/policy.js'
+} from '@/validators/draft.js'
 
 import {
   DraftData,
@@ -51,6 +52,7 @@ import {
 } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
+import * as schema from '@/schema/index.js'
 
 export class DraftSession extends EventEmitter <{
   'approved'   : DraftSession
@@ -68,10 +70,11 @@ export class DraftSession extends EventEmitter <{
   'reject'     : [ method : string, pub : string, reason :string ]
   'roles'      : RolePolicy[]
   'signatures' : string[]
+  'terms'      : Partial<ProposalData>
   'update'     : DraftSession
   'publish'    : string
 }> {
-  
+
   readonly _opt    : SessionConfig
   readonly _signer : EscrowSigner
   readonly _socket : NostrSocket
@@ -130,6 +133,8 @@ export class DraftSession extends EventEmitter <{
           if (!is_hash(msg.body)) return
           this.emit('publish', msg.body)
           break
+        case 'terms':
+          return this._terms_handler(msg)
       }
     })
   }
@@ -225,6 +230,10 @@ export class DraftSession extends EventEmitter <{
     return this._sub
   }
 
+  get terms () {
+    return this.data.terms
+  }
+
   get updated_at () {
     return this._store.updated_at
   }
@@ -312,6 +321,38 @@ export class DraftSession extends EventEmitter <{
     this.log.info('member left   :', mship.pub)
   }
 
+  _terms_handler (msg : EventMessage<Partial<ProposalData>>) {
+    const terms = msg.body
+    const cat   = msg.envelope.created_at
+    const pub   = msg.envelope.pubkey
+    if (!this.check_terms(terms)) {
+      const err = 'terms rejected: ' + terms.toString()
+      this.log.info('terms rejected :', terms)
+      this.log.debug(err)
+      this.emit('reject', [ 'terms', pub, err ])
+      return
+    }
+    this._update_terms(terms, cat)
+    this.log.info('terms updated :', terms)
+  }
+
+  _update_terms (terms : Partial<ProposalData>, created_at ?: number) {
+    const { paths, payments, programs, schedule, ...rest } = this.proposal
+
+    const proposal = {
+      ...this.proposal,
+      ...rest, 
+      paths    : [ ...paths,    ...terms.paths    ?? [] ],
+      payments : [ ...payments, ...terms.payments ?? [] ],
+      programs : [ ...programs, ...terms.programs ?? [] ],
+      schedule : [ ...schedule, ...terms.schedule ?? [] ],
+    }
+
+    const session = { ...this.data, proposal }
+    this._update(session, created_at)
+    this.emit('terms', terms)
+  }
+
   _update (data : DraftData, created_at = now()) {
     validate_draft(data)
     verify_draft(data)
@@ -325,6 +366,17 @@ export class DraftSession extends EventEmitter <{
     this._agreed = this.is_approved
     this._full   = this.is_full
     this.emit('update', this)
+  }
+
+  check_terms (terms : Partial<ProposalData>) {
+    const parser = schema.proposal.data.partial()
+    const parsed = parser.safeParse(terms)
+    if (!parsed.success) return false
+    for (const key of Object.keys(terms)) {
+      const term = key as keyof ProposalData
+      if (!this.has_term(term)) return false
+    }
+    return true
   }
 
   async connect (address : string, secret : string) {
@@ -348,26 +400,41 @@ export class DraftSession extends EventEmitter <{
 
   get_policy (pol_id : string) {
     const pol = this.roles.find(e => e.id === pol_id)
-    if (pol === undefined) throw new Error('policy does not exist')
+    if (pol === undefined) throw new Error('policy does not exist: ' + pol_id)
     return pol
   }
 
   get_program (query : ProgramQuery) {
-    return find_program(query, this.proposal.programs)
+    const program = find_program(query, this.proposal.programs)
+    if (program === undefined) throw new Error('program does not exist')
+    return program
   }
 
   get_role (title : string) {
     const pol = this.roles.find(e => e.title === title)
-    if (pol === undefined) throw new Error('policy does not exist')
+    if (pol === undefined) throw new Error('role does not exist')
     return pol
+  }
+
+  get_term <K extends keyof ProposalData> (key : K) {
+    if (!this.terms.includes(key)) throw new Error('term is not negotiable: ' + key)
+    return this.proposal[key]
   }
 
   has_policy (pol_id : string) {
     return this.roles.find(e => e.id === pol_id) !== undefined
   }
 
+  has_program (query : ProgramQuery) {
+    return find_program(query, this.proposal.programs) !== undefined
+  }
+
   has_role (title : string) {
     return this.roles.find(e => e.title === title) !== undefined
+  }
+
+  has_term <K extends keyof ProposalData> (key : K) {
+   return this.terms.includes(key)
   }
 
   async init (
@@ -412,6 +479,26 @@ export class DraftSession extends EventEmitter <{
     return
   }
 
+  async list (address : string) {
+    const filter : EventFilter = {
+      authors : [ this._store.pubkey   ],
+      kinds   : [ this._store.opt.kind ],
+      until   : now()
+    }
+    let sessions : { id : string, updated_at : number }[] = []
+    const socket = new NostrSocket(this._signer._signer)
+    const events = await socket.query(address, filter)
+    socket.close()
+    events.filter(e => socket.can_recover(e)).forEach(e => {
+      const updated_at = e.created_at
+      try {
+        const id = socket.recover(e)
+        sessions.push({ id, updated_at })
+      } catch { return }
+    })
+    return sessions
+  }
+
   async publish (client : EscrowClient) {
     verify_proposal(this.data.proposal)
     const contract = await EscrowContract.create(client, this.data)
@@ -421,6 +508,15 @@ export class DraftSession extends EventEmitter <{
 
   async refresh () {
     return this._store.refresh()
+  }
+
+  update_terms (terms : Partial<ProposalData>) {
+    if (!this.check_terms(terms)) {
+      throw new Error('invalid terms: ' + terms.toString())
+    }
+    this._update_terms(terms)
+    this.sub.send('terms', terms)
+    this.log.info('send terms     :', terms)
   }
 
   toJSON () {

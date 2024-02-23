@@ -2,8 +2,13 @@
 
 List of interfaces for the Server API.
 
+- [ServerPolicy](#serverpolicy)
+
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## ServerPolicy
 

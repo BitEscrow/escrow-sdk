@@ -11,6 +11,7 @@ import { SignedEvent } from '@/types/index.js'
 
 export class NostrSub extends EventEmitter <{
   'cancel'  : NostrSub
+  'event'   : SignedEvent
   'message' : EventMessage
   'ready'   : NostrSub
 }> {
@@ -74,10 +75,11 @@ export class NostrSub extends EventEmitter <{
   send <T> (
     subject   : string, 
     body      : T, 
-    envelope ?: Partial<SignedEvent>
+    envelope ?: Partial<SignedEvent>,
+    recovery ?: boolean
   ) {
     envelope = { ...this.envelope, ...envelope }
-    return this._socket.send(subject, body, envelope)
+    return this._socket.send(subject, body, envelope, recovery)
   }
 
   async update (filter ?: EventFilter) {

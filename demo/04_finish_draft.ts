@@ -1,7 +1,7 @@
 import { print_banner }   from '@scrow/test'
 import { create_draft }   from '@/lib/proposal.js'
 import { signers }        from './02_create_signer.js'
-import { proposal, role } from './03_build_proposal.js'
+import { proposal, role } from './03_create_draft.js'
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true'
 
@@ -26,7 +26,7 @@ signers.map(mbr => {
 /**
  * Define our final proposal and endorsements.
  */
-export { session }
+export const draft = session
 
 if (DEMO_MODE) {
   print_banner('final draft')

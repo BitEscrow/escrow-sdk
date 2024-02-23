@@ -1,12 +1,15 @@
 # EscrowContract
 
-Reference guide for the EscrowContract class API.
+Reference guide for the `EscrowContract` class API.
 
-- [EscrowContractConfig](#escrowcontract-config)  
-- [EscrowContract](#escrowcontract-class)  
+- [EscrowContract Config](#escrowcontract-config)
+- [EscrowContract Class](#escrowcontract-class)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## EscrowContract Config
 

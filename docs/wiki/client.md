@@ -1,8 +1,6 @@
-# Client Guide
+# Client Wiki
 
 The `EscrowClient` is a basic client for consuming our API. It has access to all endpoints offered by the escrow server.
-
-> The client does not include a signing device. For signing operations, see [EscrowSigner](./signer.md).
 
 **Sections**
 
@@ -12,10 +10,15 @@ The `EscrowClient` is a basic client for consuming our API. It has access to all
 
 **Interfaces**
 
-- [EscrowClient](./class/client.md)
+- [EscrowClient](../class/client.md)
+
+---
+> The client does not include a signing device. For signing operations, see [EscrowSigner](./signer.md).
 
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## How to Use
 
@@ -51,4 +54,4 @@ The Oracle API is based on the electrum API specification, so any electrum-based
 
 To see a recommended list of oracles to use, [click here.](./servers.md)
 
-To see a complete list of interfaces for the Oracle API, [click here](./data/oracle.md).
+To see a complete list of interfaces for the Oracle API, [click here](../data/oracle.md).

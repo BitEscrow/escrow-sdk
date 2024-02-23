@@ -2,16 +2,21 @@
 
 Reference guide for the BitEscrow Server API. Click on the links below to navigate:
 
-- [/api/server/keys](#get-server-keys)
-- [/api/server/policy](#get-server-policy)
-- [/api/server/status](#get-server-status)
+| Endpoint | Description |
+|----------|-------------|
+| [/api/server/keys](#get-server-keys) | Fetch the latest server pubkeys in rotaion. |
+| [/api/server/policy](#get-server-policy) | Fetch the policies and terms of the escrow server. |
+| [/api/server/status](#get-server-status) | Fetch the current status of the server. |
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
 
+---
+
 ## Get Server Keys
 
-Fetch a list of the latest BitEscrow signing pubkeys in rotaion.
+Fetch the latest server pubkeys in rotaion.
 
 **Request Format**
 
@@ -30,9 +35,11 @@ interface ServerKeyResponse {
 }
 ```
 
+---
+
 ## Get Server Policy
 
-Fetch the policy and terms configuration of the escrow server.
+Fetch the policies and terms of the escrow server.
 
 **Related Interfaces:**
 
@@ -55,9 +62,11 @@ interface ServerPolicyResponse {
 }
 ```
 
+---
+
 ## Get Server Status
 
-Fetch the current status information of the server.
+Fetch the current status of the server.
 
 **Request Format**
 

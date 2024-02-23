@@ -1,6 +1,6 @@
-# Proposal Docs
+# Draft Wiki
 
-The proposal is a pre-cursor to creating a contract. It defines all the members the contract, and the complete terms for locking funds in escrow.
+The proposal draft is a pre-cursor to publishing a contract. The draft defines all the members the contract, and the complete terms for locking funds in escrow.
 
 **Sections**
 
@@ -14,10 +14,13 @@ The proposal is a pre-cursor to creating a contract. It defines all the members 
 
 **Interfaces**
 
-- [Proposal Interfaces](./data/proposal.md)
+- [Proposal Interfaces](../data/draft.md)
 
+---
 > Notice any mistakes, or something missing? Please let us know!  
 > You can submit an issue here: [Submit Issue](https://github.com/BitEscrow/escrow-core/issues/new/choose)
+
+---
 
 ## Proposal Overview
 
