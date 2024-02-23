@@ -1,6 +1,6 @@
 /**
  * Contract API Demo for endpoint:
- * /api/contract/:cid/read
+ * /api/contract/:cid
  * 
  * You can run this demo using the shell command:
  * yarn load demo/api/contract/read

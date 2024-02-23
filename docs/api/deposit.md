@@ -53,6 +53,33 @@ interface AccountDataResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { client }  from '@scrow/demo/01_create_client.js'
+import { signers } from '@scrow/demo/02_create_signer.js'
+
+// Define our funder for the deposit.
+export const depositor = signers[0]
+// Define our deposit locktime.
+const locktime  = 60 * 60  // 1 hour locktime
+// Get an account request from the funder device.
+const acct_req  = depositor.account.create(locktime)
+// Submit the account request to the server
+const acct_res = await client.deposit.request(acct_req)
+// Check the response is valid.
+if (!acct_res.ok) throw new Error(acct_res.error)
+// Unpack our data response.
+const new_account = acct_res.data.account
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/request.ts) using the shell command:  
+> `yarn load demo/api/deposit/request`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_account.md)
+
 **Related Interfaces:**
 
 - [DepositAccount](../data/deposit.md#depositaccount)
@@ -76,11 +103,11 @@ body     : JSON.stringify(register_request)
 
 ```ts
 interface RegisterRequest {
-  deposit_pk  : string        // Public key of the funder making the deposit.
-  return_psig : string        // Pre-authorization for returning the deposit.
-  sequence    : number        // Locktime converted into a sequence value.
-  spend_xpub  : string        // The extended key used for returning funds.
-  utxo        : TxOutput      // The unspent output to register as a deposit.
+  deposit_pk  : string    // Public key of the funder making the deposit.
+  return_psig : string    // Pre-authorization for returning the deposit.
+  sequence    : number    // Locktime converted into a sequence value.
+  spend_xpub  : string    // The extended key used for returning funds.
+  utxo        : TxOutput  // The unspent output to register as a deposit.
 }
 ```
 
@@ -93,6 +120,38 @@ interface DepositDataResponse {
   }
 }
 ```
+
+**Example Request**
+
+```ts
+import { config }       from '@scrow/demo/00_demo_config.js'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { new_account }  from '@scrow/demo/06_request_account.js'
+
+// Unpack account details.
+const { address, deposit_pk, sequence, spend_xpub } = new_account
+// Define our polling interval and retries.
+const [ ival, retries ] = config.poll
+// Poll for utxos from the account address.
+const utxos = await client.oracle.poll_address(address, ival, retries, true)
+// Get the output data from the utxo.
+const utxo  = utxos[0].txspend
+// Create a registration request.
+const req = { deposit_pk, sequence, spend_xpub, utxo }
+// Deliver our registration request to the server.
+const res = await client.deposit.register(reg_req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our data object.
+const open_deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/register.ts) using the shell command:  
+> `yarn load demo/api/deposit/register`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_data.md)
 
 **Related Interfaces:**
 
@@ -138,6 +197,37 @@ interface FundDataResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { config }       from '@scrow/demo/00_demo_config.js'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { new_contract } from '@scrow/demo/05_create_contract.js'
+import { new_account }  from '@scrow/demo/06_request_account.js'
+
+// Define our polling interval and retries.
+const [ ival, retries ] = config.poll
+// Poll for utxos from the account address.
+const utxos = await client.oracle.poll_address(address, ival, retries, true)
+// Get the output data from the utxo.
+const utxo  = utxos[0].txspend
+// Generate a commit request from the depositor.
+const req = depositor.account.commit(new_account, new_contract, utxo)
+// Deliver our commit request to the server.
+const res = await client.deposit.commit(req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our data object.
+const locked_deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/commit.ts) using the shell command:  
+> `yarn load demo/api/deposit/commit`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_commit.md)
+
 **Related Interfaces:**
 
 - [ContractData](../data/contract.md#contractdata)
@@ -169,6 +259,31 @@ interface DepositListResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { client }  from '@scrow/demo/01_create_client.js'
+import { signers } from '@scrow/demo/02_create_signer.js'
+
+// Define our funder for the deposit.
+const depositor = signers[0]
+// Generate a request token.
+const req = depositor.request.deposit_list()
+// Deliver the request and token.
+const res = await client.deposit.list(depositor.pubkey, req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our response data.
+const deposits = res.data.deposits
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/list.ts) using the shell command:  
+> `yarn load demo/api/deposit/list`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_list.md)
+
 **Related Interfaces:**
 
 - [DepositData](../data/deposit.md#depositdata)
@@ -195,6 +310,29 @@ interface DepositDataResponse {
   }
 }
 ```
+
+**Example Request**
+
+```ts
+import { client }         from '@scrow/demo/01_create_client.js'
+import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'
+
+// Define the deposit id we will use.
+const dpid = locked_deposit.dpid
+// Request to read a deposit via dpid.
+const res = await client.deposit.read(dpid)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack the data response
+const deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/read.ts) using the shell command:  
+> `yarn load demo/api/deposit/read`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_data.md)
 
 **Related Interfaces:**
 
@@ -234,6 +372,35 @@ interface FundDataResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { client }       from '@scrow/demo/01_create_client.js'
+import { new_contract } from '@scrow/demo/05_create_contract.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
+import { open_deposit } from '@scrow/demo/api/deposit/register.js'
+
+// Define our funder for the deposit.
+const depositor = signers[0]
+// Define the dpid for the deposit we are using.
+const dpid = open_deposit.dpid
+// Generate a lock request from the depositor.
+const req = depositor.account.lock(new_contract, open_deposit)
+// Deliver the request and token.
+const res = await client.deposit.lock(dpid, req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our response data.
+const { contract, deposit } = res.data
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/lock.ts) using the shell command:  
+> `yarn load demo/api/deposit/lock`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_commit.md)
+
 **Related Interfaces:**
 
 - [ContractData](../data/contract.md#contractdata)
@@ -266,6 +433,29 @@ export interface DepositStatusResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { client }         from '@scrow/demo/01_create_client.js'
+import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'
+
+// Define the deposit id we will use.
+const dpid = locked_deposit.dpid
+// Request to read a deposit via dpid.
+const res = await client.deposit.status(dpid)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack the data response
+const deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/status.ts) using the shell command:  
+> `yarn load demo/api/deposit/status`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_status.md)
+
 **Related Interfaces:**
 
 - [DepositStatus](../data/deposit.md#depositstatus)
@@ -293,6 +483,28 @@ interface DepositDigestResponse {
 }
 ```
 
+**Example Request**
+
+```ts
+import { client }         from '@scrow/demo/01_create_client.js'
+import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'
+
+// Define the deposit id we will use.
+const dpid = locked_deposit.dpid
+// Request to read a deposit via dpid.
+const res = await client.deposit.digest(dpid)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack the data response
+const deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/digest.ts) using the shell command:  
+> `yarn load demo/api/deposit/digest`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_digest.md)
 **Related Interfaces:**
 
 - [DepositDigest](../data/deposit.md#depositdigest)
@@ -331,6 +543,36 @@ interface DepositDataResponse {
   }
 }
 ```
+
+**Example Request**
+
+```ts
+import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
+import { open_deposit } from '@scrow/demo/api/deposit/register.js'
+
+// Define our funder for the deposit.
+const depositor = signers[0]
+// Define the dpid for the deposit we are using.
+const dpid = open_deposit.dpid
+// Define a txfee for the close transaction.
+const txfee = 1000
+// Generate a lock request from the depositor.
+const close_req = depositor.account.close(open_deposit, txfee)
+// Deliver the request and token.
+const res = await client.deposit.close(dpid, close_req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our response data.
+const closed_deposit = res.data.deposit
+```
+
+> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/close.ts) using the shell command:  
+> `yarn load demo/api/deposit/close`
+
+**Example Response**
+
+- [JSON Data](../examples/deposit_closed.md)
 
 **Related Interfaces:**
 

@@ -9,9 +9,10 @@ import {
   get_address_utxos
 } from '@/lib/oracle.js'
 
-import { OracleQuery } from '@/types/index.js'
+import { OracleQuery, OracleSpendData } from '@/types/index.js'
 
 import * as assert from '@/assert.js'
+import { sleep } from '@/lib/util.js'
 
 function broadcast_tx_api (client : EscrowClient) {
   return async (txhex : string) => {
@@ -53,6 +54,32 @@ function get_addr_utxos_api (client : EscrowClient) {
   }
 }
 
+function poll_address_api (client : EscrowClient) {
+  return async (
+    address  : string,
+    interval : number,
+    retries  : number,
+    verbose  = false
+  ) => {
+    let tries = 0,
+        utxos : OracleSpendData[] = []
+    for (let i = 0; i < retries; i++) {
+      if (utxos.length > 0) {
+        return utxos
+      } else {
+        utxos = await get_address_utxos(client._oracle, address)
+        tries += 1
+        if (verbose) {
+          const msg = `[${tries}/${retries}] checking address in ${interval} seconds...`
+          console.log(msg)
+        }
+        await sleep(interval * 1000)
+      }
+    }
+    throw new Error('polling timed out')
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
     broadcast_tx      : broadcast_tx_api(client),
@@ -60,6 +87,7 @@ export default function (client : EscrowClient) {
     fee_target        : get_fee_target_api(client),
     get_txdata        : get_txdata_api(client),
     get_utxo          : get_utxo_api(client),
-    get_address_utxos : get_addr_utxos_api(client)
+    get_address_utxos : get_addr_utxos_api(client),
+    poll_address      : poll_address_api(client)
   }
 }

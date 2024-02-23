@@ -1,15 +1,25 @@
+/**
+ * Deposit API Demo for endpoint:
+ * /api/deposit/:dpid/lock
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/deposit/lock
+ */
+
 import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
 import { new_contract } from '@scrow/demo/05_create_contract.js'
-import { depositor }    from './request.js'
-import { open_deposit } from './register.js'
+import { open_deposit } from '@scrow/demo/api/deposit/register.js'
 
+// Define our funder for the deposit.
+const depositor = signers[0]
 // Define the dpid for the deposit we are using.
 const dpid = open_deposit.dpid
 // Generate a lock request from the depositor.
-const lock_req = depositor.account.lock(new_contract, open_deposit)
+const req = depositor.account.lock(new_contract, open_deposit)
 // Deliver the request and token.
-const res = await client.deposit.lock(dpid, lock_req)
+const res = await client.deposit.lock(dpid, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our response data.

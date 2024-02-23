@@ -1,3 +1,11 @@
+/**
+ * Deposit API Demo for endpoint:
+ * /api/deposit/:dpid
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/api/deposit/read
+ */
+
 import { print_banner }   from '@scrow/test'
 import { client }         from '@scrow/demo/01_create_client.js'
 import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'

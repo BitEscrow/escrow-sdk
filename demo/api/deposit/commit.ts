@@ -1,14 +1,16 @@
 /**
  * Deposit API Demo for endpoint:
- * /api/deposit/:dpid/register
+ * /api/deposit/:dpid/commit
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/deposit/register
+ * yarn load demo/api/deposit/commit
  */
 
 import { print_banner } from '@scrow/test'
 import { config }       from '@scrow/demo/00_demo_config.js'
 import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
+import { new_contract } from '@scrow/demo/05_create_contract.js'
 import { new_account }  from '@scrow/demo/06_request_account.js'
 
 import {
@@ -18,11 +20,11 @@ import {
 } from '@scrow/demo/util.js'
 
 // Unpack account details.
-const { address, deposit_pk, sequence, spend_xpub } = new_account
+const { address } = new_account
 // Define how much sats we want to deposit
-const amt_total = 20_000
+const amt_total   = 20_000
 // Also compute a total amount in bitcoin.
-const btc_total = amt_total / 100_000_000
+const btc_total   = amt_total / 100_000_000
 
 /** ========== [ Print Deposit Info ] ========== **/
 
@@ -53,16 +55,18 @@ print_banner('address utxos')
 console.log('utxos:', utxos)
 
 // Get the output data from the utxo.
-const utxo = utxos[0].txspend
-// Create a registration request.
-const req = { deposit_pk, sequence, spend_xpub, utxo }
-// Deliver our registration request to the server.
-const res = await client.deposit.register(req)
+const utxo    = utxos[0].txspend
+// Define our funder for the deposit.
+const depositor = signers[0]
+// Generate a commit request from the depositor.
+const req = depositor.account.commit(new_account, new_contract, utxo)
+// Deliver our commit request to the server.
+const res = await client.deposit.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
-export const open_deposit = res.data.deposit
+const locked_deposit = res.data.deposit
 
 print_banner('open deposit')
-console.dir(open_deposit, { depth: null })
+console.dir(locked_deposit, { depth: null })
 console.log('\n')

@@ -8,7 +8,6 @@ export function request_deposit_list_api (signer : EscrowSigner) {
     const host = signer.client.host
     const url  = `${host}/api/deposit/list/${pub}`
     const content = 'GET' + url
-    console.log('preimg:', content)
     return signer._signer.gen_token(content)
   }
 }
