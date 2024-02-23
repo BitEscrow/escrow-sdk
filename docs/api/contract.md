@@ -56,8 +56,6 @@ interface ContractDataResponse {
 
 **Example Request**
 
-> You can run this demo using `npm run demo/api/contract/create` using our live [replit instance]().
-
 ```ts
 import { client } from '@scrow/demo/01_create_client.js'
 import { draft }  from '@scrow/demo/04_finish_draft.js'
@@ -69,6 +67,9 @@ if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.
 const new_contract = res.data.contract
 ```
+
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/create`
 
 **Example Response**
 
@@ -119,6 +120,9 @@ if (!res.ok) throw new Error(res.error)
 const contracts = res.data.contracts
 ```
 
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/list`
+
 **Example Response**
 
 - [JSON Data](../examples/contract_list.md)
@@ -163,6 +167,9 @@ if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
 const contract = res.data.contract
 ```
+
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/read`
 
 **Example Response**
 
@@ -213,6 +220,9 @@ if (!res.ok) throw new Error(res.error)
 const canceled_contract = res.data.contract
 ```
 
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/cancel`
+
 **Example Response**
 
 - [JSON Data](../examples/contract_canceled.md)
@@ -257,6 +267,9 @@ if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
 const contract = res.data.contract
 ```
+
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/digest`
 
 **Example Response**
 
@@ -305,6 +318,9 @@ if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
 const status = res.data.contract
 ```
+
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/status`
 
 **Example Response**
 
@@ -376,6 +392,9 @@ if (!res.ok) throw new Error(res.error)
 const updated_contract = res.data.contract
 ```
 
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/submit`
+
 **Example Response**
 
 - [JSON Data](../examples/contract_active.md)
@@ -424,6 +443,9 @@ if (!res.ok) throw new Error(res.error)
 const vm_state = res.data.vm_state
 ```
 
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/vmstate`
+
 **Example Response**
 
 - [JSON Data](../examples/contract_vm.md)
@@ -469,6 +491,9 @@ if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
 const statements = res.data.statements
 ```
+
+> You can run this in our live [replit instance](https://replit.com/@cscottdev/escrow-core) using:  
+> `yarn load demo/api/contract/witness`
 
 **Example Response**
 
