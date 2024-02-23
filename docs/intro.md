@@ -1,6 +1,6 @@
 # Introduction
 
-A private, non-custodial protocol for using Bitcoin in a covenant-based smart contract.
+BitEscrow is a private, non-custodial protocol for using Bitcoin in a covenant-based smart contract.
 
 Key Features:
 
