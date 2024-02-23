@@ -11,8 +11,8 @@ export async function fund_regtest_address (
     spawn   : false,
     verbose : false
   })
-  console.log('funding address :', address)
-  console.log('sending amount  :', amount)
+  console.log('\nfunding address :', address)
+  console.log('sending amount  :', amount, '\n')
   return daemon.run(async client => {
     await CoreUtil.fund_address(client, 'faucet', address, amount, true)
     await daemon.shutdown()
@@ -23,8 +23,8 @@ export async function fund_mutiny_address (
   address : string,
   amount  : number
 ) {
-  console.log('funding address :', address)
-  console.log('sending amount  :', amount)
+  console.log('\nfunding address :', address)
+  console.log('sending amount  :', amount, '\n')
   const url = 'https://faucet.mutinynet.com/api/onchain'
   const opt = {
     body    : JSON.stringify({ address,  sats : amount }),
