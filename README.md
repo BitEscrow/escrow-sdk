@@ -2,7 +2,9 @@
 
 # escrow-core
 
-A private, non-custodial protocol for using Bitcoin in a covenant-based smart contract.
+A private, non-custodial protocol for using Bitcoin in a smart contract.
+
+> If you are looking to use the BitEscrow API, check out our [Developer Documentation](https://bitescrow.dev) resources and [Replit Container](https://replit.com/@cscottdev/escrow-core).
 
 Key Features:
 
@@ -23,19 +25,14 @@ Package Features:
   * Run-time schema validation (using zod).
   * E2E demo and test suite for signet, testnet, and mutiny.
 
-In Progress:
-
- * Better documentation and code comments.
- * Live demos for all API endpoints.
- * Tools for building and testing proposals.
- * A dedicated replit container for this repo.
-
 Comimg Soon:
   
-  * Nostr note support for all primary interfaces.
-  * Return receipts on witness submission.
-  * Field to add raw tx `templates` to a proposal.
-  * New `hashlock` and `webhook` programs for vm.
+  * Full nostr integration for the API.
+  * Return receipts on all submissions.
+  * Add raw tx `templates` to a proposal.
+  * New programs for virtual machine.
+
+---
 
 ## Index
 
@@ -43,7 +40,7 @@ Comimg Soon:
   a. [Negotiation](#negotiation)  
   b. [Funding](#funding)  
   c. [Settlement](#settlement)  
-  d. [Protocol Flow Examples](#protocol-flow-examples)  
+  d. [Protocol Flow](#protocol-flow)  
   e. [Security Model](#security-model)  
 2. [How to Use](#how-to-use)  
   a. [Create a Client](#create-a-client)  
@@ -65,19 +62,23 @@ Comimg Soon:
 6. [Resources](#resources)
 7. [Footnote](#footnote)
 
+---
+
 ## Protocol Overview
 
-The escrow protocol involves collaboration between three parties:
+The complete protocol involves three rounds of communication, split between three parties:
 
-`Members` : The participating members of the contract.  
-`Funders` : Those funding the contract (whom may be members).  
-`Server ` : The escrow server hosting the contract (BitEscrow API).
+`Members`  : Those participating within the contract.
+`Funders`  : Those depositing funds into the contract.
+`Provider` : The server hosting the contract (BitEscrow API).
 
-The protocol is split into three phases: _negotiation_, _funding_, and _settlement_. Each phase represents a round of communication in the protocol.
+The three rounds of communication are _negotiation_, _funding_, and _settlement_.
+
+---
 
 ### Negotiation
 
-The first step is to negotiate and agree on a [proposal](docs/proposal.md) document. This is a human-readable document which contains all of the terms of the contract.
+The first step is to negotiate and agree on a [proposal](data/draft.md#proposaldata) document. This is a human-readable document which contains all of the initial terms of the contract.
 
 It is written in JSON format, and designed for collaboration (much like a PSBT):
 
@@ -93,9 +94,9 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
   ],
   payments : [[ 10000, 'bcrt1qxemag7t72rlrhl2ezsnsprmunmnzc35nmaph6v' ]],
   programs : [
-    [ 'endorse', 'dispute', 'payout', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
-    [ 'endorse', 'resolve',      '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
-    [ 'endorse', 'close|resolve','*', 2, 
+    [ 'endorse', 'dispute',       '*', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
+    [ 'endorse', 'resolve',       '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
+    [ 'endorse', 'close|resolve', '*', 2, 
       '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
       '4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10'
     ]
@@ -106,25 +107,25 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
 }
 ```
 
-If desired, a third-party can host the proposal. The protocol is designed for third-parties to help with negotiation, and offer their own services, such as arbitration.
+You can share this document peer-to-peer, or use a third-party for collaboration. The protocol is designed for third-party platforms to assist with negotiation and offer their own services (such as arbitration).
 
-There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
-
-Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](docs/contract.md) for funding.
+Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](wiki/contract.md) for funding.
 
 > Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
 
+---
+
 ### Funding
 
-To deposit funds into a contract, the funding party will first request a deposit [account](docs/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds into a contract, each funder requests a [Deposit Account](data/deposit.md#depositaccount) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
   acct_id    : string  // Hash identifer for the account record.
   acct_sig   : string  // Signature for the account record.
   address    : string  // On-chain address for receiving funds.
-  agent_id   : string  // Identifier of the server agent.
-  agent_pk   : string  // Public key of the server agent.
+  agent_id   : string  // Identifier of the deposit agent.
+  agent_pk   : string  // Public key of the deposit agent.
   created_at : number  // Account creation timestamp (in seconds).
   deposit_pk : string  // Public key of the funder making the deposit.
   sequence   : number  // Locktime converted into a sequence value.
@@ -132,39 +133,36 @@ interface DepositAccount {
 }
 ```
 
-The funder independently verifies the account information, then sends their funds into the account address.
+The funder independently verifies the account information, then sends their funds into the account address. Once the transaction is available in the mempool, the funder can register their deposit with the server.
 
-Once the transaction is in the mempool, the funder can then commit the funds by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms.
-
-The combination of these signatures form a [covenant](docs/deposit.md) with the contract:
+To lock funds to a contract, the funder produces a batch of signatures, one for each spending path in the contract. These signatures authorize the contract to spend the deposit based on the contract terms. The combination of these signatures form a [Covenant](data/deposit.md#covenantdata) with the contract.
 
 ```ts
 interface CovenantData {
-  cid    : string  // id of the contract.
-  pnonce : string  // public nonce (used for musig).
-  psigs  : [
-    path : string, // name of path in the contract.
-    psig : string  // partial signature (used for musig).
-  ][]
+  cid    : string  // Id of the contract you are signing for.
+  pnonce : string  // Public nonce of the signer.
+  // List of labeled partial signatures for the covenant.
+  psigs  : [ label : string, psig : string ][]
 }
 ```
 
-Once a covenant is made, the deposit is locked in escrow. When enough funds have been locked and confirmed, the contract becomes active.
+Once a covenant is made, the funds are locked to the contract. When enough funds have been confirmed, the contract becomes active.
+
+---
 
 ### Settlement
 
 The final round of the protocol is the `settlement`. This is the most exciting round, as members get to decide how the money shall be spent.
 
-Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started:
+Each contract comes with a tiny virtual machine called a CVM. When the contract activates, this machine is initialized with the terms of the proposal:
 
 ```ts
-// A new virtual machine, fresh from the womb.
 vm_state: {
   commits  : [],
   error    : null,
   head     : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
   output   : null,
-  paths    : [ [ 'draw', 0 ], [ 'heads', 0 ], [ 'tails', 0 ] ],
+  paths    : [ [ 'payout', 0 ], [ 'return', 0 ] ],
   start : 1706511301,
   steps : 0,
   store : [
@@ -173,14 +171,14 @@ vm_state: {
     [ 'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a', '[]' ]
   ],
   status  : 'init',
-  tasks   : [ [ 7200, 'close', 'draw' ] ],
+  tasks   : [ [ 7200, 'close', 'payout|return' ] ],
   updated : 1706511301
 }
 ```
 
-> Note : The `head` of the hash-chain is initialized using the contract's identifier (cid).
+A git-style hash chain is also created, starting with the contract's identifier (cid).
 
-Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](docs/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
+Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](data/witness.md#witnessdata). Members use these statements to instruct the CVM to perform a basic set of operations.
 
 Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
 
@@ -224,50 +222,54 @@ vm_state: {
 }
 ```
 
-Once the CVM has settled on a spending path, the server will complete the related signatute for each deposit, then close the contract with a final settlement transaction.
+Once the CVM has evaluated a spending path, the server will complete the signatutes for the selected path, then settle the contract with a final transaction. Each member runs their own execution of the CVM and verifies that the contract settled correctly.
 
-The proposal, covenants, statements, and commit history all combine to create an auditable proof of execution for the contract. This proof covers how the contract must execute in any scenario, with zero ambiguity.
+---
 
-Every contract settled on mainnet will be backed by a valid proof of execution in order to maintain our reputation as an escrow server.
+### Protocol Flow
 
-### Protocol Flow Examples
+To demonstrate the flow of the protocol through various paths and outcomes, we'll walk through a sales agreement between three parties: **Alice** (the *buyer*), **Bob** (the *seller*), and **Carol** (third-party *arbitrator*).
 
-> **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
+**Negotiation and Funding**
 
-  1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
-  2. Alice submits the proposal to the agent and receives a contract.
-  3. Alice deposits her funds with the contract agent, along with a covenant.
-  4. Once the deposit is confirmed on-chain, the contract becomes active.
-  
-  **Happy Path: Settle on Payout**  
+1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
+2. Alice submits the proposal to the agent and receives a contract.
+3. Alice deposits her funds with the contract agent, along with a covenant.
+4. Once the deposit is confirmed on-chain, the contract becomes active.
 
-  5a. Alice receives her widget and forgets about Bob.  
-  6a. The contract schedule closes automatically on 'payout'.  
-  7a. Bob gets the funds, Alice can verify the CVM execution.  
+**Settle on Payout (happy path)**  
 
-  **Neutral Path: Settle on Refund**  
+5. Alice receives her widget and forgets about Bob.  
+6. The contract schedule closes automatically on 'payout'.  
+7. Bob gets the funds, Alice can verify the CVM execution.  
 
-  5b. Alice doesn't like her widget.  
-  6b. Alice and Bob both agree to sign the 'refund' path.  
-  7b. Alice gets a partial refund, Bob still keeps his fees.  
+**Settle on Refund (neutral path)**  
 
-  **Unhappy Path: Dispute Settlement**  
+5. Alice doesn't like her widget.  
+6. Alice and Bob both agree to sign the 'refund' path.  
+7. Alice gets a partial refund, Bob still keeps his fees.  
 
-  5c. Alice didn't get the right widget, and disputes the payout.  
-  6c. Carol steps in, and decides on the 'refund' path.  
-  7c. Alice gets a partial refund, Bob still keeps his fees.  
+**Settle a Dispute (unhappy path)**  
 
-  **Ugly Path: Contract Expires**  
+5. Alice didn't get the right widget, and disputes the payout.  
+6. Carol steps in, and decides on the 'refund' path.  
+7. Alice gets a partial refund, Bob still keeps his fees.  
 
-  5d. Alice claims she didn't get a widget, and disputes the payout.  
-  6d. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
-  7d. The contract expires, all deposits are released.  
+**Contract Expires (ugly path)**  
 
-  **Worst Path: Deposits Expire**  
+5. Alice claims she didn't get a widget, and disputes the payout.  
+6. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
+7. The contract expires, all deposits are released.  
 
-  5e. Everything above happens, except the last part.  
-  6e. The entire escrow platform goes down in flames.  
-  7e. The timelock on deposits expire, Alice can spend via the refund path.  
+**Deposits Expire (ugliest path)**  
+
+5. Everything above happens, except the last part.  
+6. The entire escrow platform goes down in flames.  
+7. The timelock on deposits expire, Alice can spend via the refund path.
+
+Even in a worst-case scenario, deposits are recoverable by the time-locked refund path.
+
+---
 
 ### Security Model
 
@@ -295,9 +297,11 @@ Some challenges with the current model:
 
 In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin.
 
+---
+
 ## How to Use
 
-Below is a step-by-step guide on how to use the protocol in an example scenario. This guide includes a live demo that you can run on your own machine, with no special software required.
+Below is a step-by-step guide on how to `negotiate`, `fund`, and `settle` a contract in an example scenario. This guide includes a live demo that you can run on your own machine, with no special software required.
 
 To run the demo, simply clone this repository, then run the following commands:
 
@@ -306,16 +310,18 @@ npm install           # Install all package dependencies.
 npm run demo {chain}  # Run the demo using the provided chain.
 ```
 
-> Note: The current chains available are `mutiny`, `signet`, and `testnet`. The default chain is `mutiny`.
+The current chains available are `mutiny`, `signet`, and `testnet`. The default chain is `mutiny`.
 
-Read more info about the demo [here](demo/README.md).
+You can read more info about the demo [here](demo/README.md).
 
 ### Create a Client
 
-The `EscrowClient` is a basic client for consuming our API. It is designed to be used for any tasks which do not require an identity or signature.
+The `EscrowClient` is a basic client for consuming our API. It is designed for tasks which do not require providing an identity or signature.
+
+Configuring a client requires specifying a `network`, a provider `hostname`, plus an `oracle` server for checking the blockchain.
 
 ```ts
-import { EscrowClient } from '@scrow/core/client'
+import { EscrowClient } from '@scrow/core'
 
 const client_config = {
   // The URL to our escrow server.
@@ -330,13 +336,13 @@ const client_config = {
 const client = new EscrowClient(client_config)
 ```
 
-For more info on the `EscrowClient` class, [click here](docs/client.md).
+For more detailed information on the `EscrowClient` class, check out the [EscrowClient Wiki](docs/client.md).
 
 ### Create a Signer
 
-The `EscrowSigner` is used to setup deposits and interact with a contract.
+The `EscrowSigner` represents a member or depositor of a contract. It's used for negotiating a proposal, managing deposits and interacting with a contract's CVM.
 
-The fastest way to setup a new signer is to generate one randomly:
+For development, the fastest way to setup a new signer is to generate one randomly:
 
 ```ts
 import { EscrowSigner } from '@scrow/core/client'
@@ -345,7 +351,7 @@ import { EscrowSigner } from '@scrow/core/client'
 const signer = EscrowSigner.generate(client_config, xpub)
 ```
 
-You can import your own key-pair using a raw seed or BIP39 seed words:
+For production, you may wish to import a key-pair using a raw seed or BIP39 seed words:
 
 ```ts
 // Create an EscrowSigner using a raw seed.
@@ -357,120 +363,111 @@ const signer = EscrowSigner
   .from_words(seed_words, optional_password)
 ```
 
-The `EscrowSigner` is designed to plug into a more basic `SignerAPI` and `WalletAPI`, which can be hosted outside the browser:
+The `EscrowSigner` is built for insecure environments. All addresses are derived from the xpub, and all signed transactions are verified before deposit. The signing key has no direct access to funds, and can be tossed from memory once the contract and covenant are in place. All credentials generated by the signer can be independently recovered by the xpub.
 
-```ts
-import { Signer, Wallet } from '@cmdcode/signer'
-import { EscrowSigner }   from '@scrow/core/client'
+However, the recovery process does require taking the xpub out of cold-storage, which may be inconvenient to the user.
 
-// These can be provided externally through
-// the browser's global window object.
-const signer_api = new Signer({ seed : 'your seed' })
-const wallet_api = new Wallet('your_xpub')
+For a better user experience, the `EscrowScigner` includes a password-protected backup and restore option for secure storage in a browser environment. There is also a more basic `SignerAPI` and `WalletAPI` which can be hosted outside the browser (in an extension or external app).
 
-const signer_config = {
-  ...client_config,
-  signer : signer_api,
-  wallet : wallet_api
-}
-
-const signer = new EscrowSigner(signer_config)
-```
-
-The `EscrowSigner` is built for insecure environments. All addresses are derived from the xpub, and all signed transactions are verified before deposit. The signing key has no direct access to funds.
-
-The signing key is also disposable, and can be tossed from memory once the contract and covenant are in place. All credentials generated by the signer are independently recoverable by the xpub.
-
-For more info on the `EscrowSigner` class, [click here](docs/signer.md).
+For more info on the `EscrowSigner` class, check out the [EscrowSigner Wiki](docs/signer.md).
 
 ### Build a Proposal
 
 The proposal is a simple JSON document, and it can be built any number of ways.
 
-You can use the `create_proposal` tool to create a basic template:
-
 ```ts
-import { create_proposal } from '@scrow/core'
-
-// We start with a basic template, and pass it through 
-// a helper method to ensure we have the correct format.
-const template = create_proposal({
-  title    : 'Basic two-party contract with third-party arbitration.',
+const proposal = {
+  title     : 'Basic two-party contract with third-party arbitration.',
   duration  : 14400,
-  network  : 'signet',
-  schedule : [[ 7200, 'close', 'draw' ]],
-  value    : 15000,
-})
-
+  network   : 'mutiny',
+  schedule  : [[ 7200, 'close', '*' ]],
+  value     : 10000,
+}
 ```
 
-To make the negotiation process easier, we have a tool for defining intended `roles` within a proposal:
+To make the negotiation process easier, you can define intended `roles` within a proposal:
 
 ```ts
-// We can define roles that users can choose from. Each role policy 
-// instructs a member's device on how to complete the proposal.
-const roles = {
-  buyer : create_policy({
+const roles = [
+  {
+    title : 'buyer',
     paths : [
       [ 'heads', 10000 ],
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+      [ 'endorse', 'close',   '*', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
-  }),
-  seller : create_policy({
+  },
+  {
+    title : 'seller',
     paths : [
       [ 'tails', 10000 ],
       [ 'draw',  5000  ]
     ],
     programs : [
-      [ 'endorse', 'close',   'heads|tails|draw', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails',      1 ]
+      [ 'endorse', 'close',   '*', 2 ],
+      [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
-  }),
-  agent : create_policy({
-    payment  : 5000,
+  },
+  {
+    title : 'agent',
     programs : [
-      [ 'endorse', 'resolve', 'heads|tails|draw', 1 ]
+      [ 'endorse', 'resolve', '*', 1 ]
     ]
-  })
-}
-
+  }
+]
 ```
 
-With defined roles, we can invite each `EscrowSigner` to join the proposal as a given role. Members can review the `policy`, and their device will use it to fill out the proposal:
+### Negotiate a Proposal
+
+In order to handle negotiation between parties, we have developed a [DraftData](./docs/data/draft.md) document which users can use to share and collaborate.
 
 ```ts
-// Each member is an EscrowSigner object.
+interface DraftData {
+  // Signed approvals from each member, to signal readiness.
+  approvals  : string[]    
+  // A list of active members of the proposal, and their credentials.  
+  members    : MemberData[]  
+  // The main proposal document being negotiated.
+  proposal   : ProposalData  
+  // List of roles defined for the proposal, and their requirements.
+  roles      : RolePolicy[]  
+  // Non-member endorsements of the proposal, used for indexing.
+  signatures : string[]      
+  // A list of terms in the proposal which are negotiable.
+  terms      : string[]      
+}
+```
+
+This document defines `members` and `roles` within the proposal, which `terms` are negotiable, and collects `approvals` from each member.
+
+```ts
+import { create_draft }    from '@scrow/core/proposal'
+import { signers }         from './02_create_signer.js'
+import { proposal, roles } from './03_create_draft.js'
+
+// Unpack our list of signers.
 const [ a_signer, b_signer, c_signer ] = signers
 
-// Use our template from earlier.
-let proposal = template
+// Define our negotiation session.
+export let draft = create_draft({ proposal, roles })
 
-// Call each signer to join the proposal as a given role.
-proposal = a_signer.proposal.join(proposal, roles.buyer)
-proposal = b_signer.proposal.join(proposal, roles.seller)
-proposal = c_signer.proposal.join(proposal, roles.agent)
-```
+// For each member, add their info to the proposal.
+draft = a_signer.draft.join(draft.roles[0], draft)
+draft = b_signer.draft.join(draft.roles[1], draft)
+draft = c_signer.draft.join(draft.roles[2], draft)
 
-Once the proposal is completed, any member can deliver it to the escrow server.
-
-**Optional: Endorsing a Proposal**
-
-Members have the option to sign a complete proposal to signal their endorsement:
-
-```ts
-const signatures = signers.map(mbr => {
-  // Collect an endorsement from the user's signer.
-  return mbr.proposal.endorse(proposal)
+// For each member, collect an approval and (optional) endorsement.
+signers.map(mbr => {
+  const approve = mbr.draft.approve(draft)
+  const endorse = mbr.draft.endorse(draft)
+  draft.approvals.push(approve)
+  draft.signatures.push(endorse)
 })
 ```
-
-Each endorsement provided to the server will tag the proposal with the signer's pubkey. This allows a member to search for contracts via their pubkey.
-
-> Endorsing a proposal does not reveal which credential belongs to you.
+Each endorsement provided to the server will tag the proposal with the signer's pubkey. This allows an `EscrowSigner` to search for contracts via their main pubkey. Endorsing a proposal does not reveal which credential belongs to you.
 
 For more information on building a `proposal`, [click here](docs/proposal.md).
 

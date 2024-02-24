@@ -96,10 +96,17 @@ interface DraftTemplate {
 
 ```ts
 interface DraftData {
-  members    : MemberData[]
-  proposal   : ProposalData
-  roles      : RolePolicy[]
-  signatures : string[]
-  terms      : string[]
+  // Signed approvals from each member, to signal readiness.
+  approvals  : string[]    
+  // A list of active members of the proposal, and their credentials.  
+  members    : MemberData[]  
+  // The main proposal document being negotiated.
+  proposal   : ProposalData  
+  // List of roles defined for the proposal, and their requirements.
+  roles      : RolePolicy[]  
+  // Non-member endorsements of the proposal, used for indexing.
+  signatures : string[]      
+  // A list of terms in the proposal which are negotiable.
+  terms      : string[]      
 }
 ```

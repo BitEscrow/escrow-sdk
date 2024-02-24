@@ -1,7 +1,7 @@
-import { print_banner }   from '@scrow/test'
-import { create_draft }   from '@/lib/proposal.js'
-import { signers }        from './02_create_signer.js'
-import { proposal, role } from './03_create_draft.js'
+import { print_banner }    from '@scrow/test'
+import { create_draft }    from '@/lib/proposal.js'
+import { signers }         from './02_create_signer.js'
+import { proposal, roles } from './03_create_draft.js'
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true'
 
@@ -9,26 +9,22 @@ const DEMO_MODE = process.env.DEMO_MODE === 'true'
 const [ a_signer, b_signer, c_signer ] = signers
 
 // Define our negotiation session.
-const roles   = Object.values(role)
-  let session = create_draft({ proposal, roles })
+export let draft = create_draft({ proposal, roles })
 
 // For each member, add their info to the proposal.
-session = a_signer.draft.join(role.buyer, session)
-session = b_signer.draft.join(role.seller, session)
-session = c_signer.draft.join(role.agent, session)
+draft = a_signer.draft.join(draft.roles[0], draft)
+draft = b_signer.draft.join(draft.roles[1], draft)
+draft = c_signer.draft.join(draft.roles[2], draft)
 
 // For each member, collect an endorsement signature.
 signers.map(mbr => {
-  const sig = mbr.draft.endorse(session)
-  session.signatures.push(sig)
+  const approve = mbr.draft.approve(draft)
+  const endorse = mbr.draft.endorse(draft)
+  draft.approvals.push(approve)
+  draft.signatures.push(endorse)
 })
-
-/**
- * Define our final proposal and endorsements.
- */
-export const draft = session
 
 if (DEMO_MODE) {
   print_banner('final draft')
-  console.dir(session, { depth : null })
+  console.dir(draft, { depth : null })
 }

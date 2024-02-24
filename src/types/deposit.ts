@@ -17,6 +17,7 @@ import {
   TxData
 } from '@scrow/tapscript'
 
+export type AccountStatus = 'init' | 'reserved' | 'funded' | 'registered'
 export type DepositState  = DepositConfirmed | DepositUnconfirmed
 export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 export type DepositData   = AgentSession & DepositInfo & DepositState & SettleState & SpendState & TxOutput

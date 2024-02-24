@@ -1,10 +1,6 @@
+import { ProposalTemplate, RoleTemplate } from '@/index.js'
 import { config }  from './00_demo_config.js'
 import { signers } from './02_create_signer.js'
-
-import {
-  create_policy,
-  create_proposal
-} from '@scrow/core'
 
 /**
  * Define an (optional) moderator for our proposal.
@@ -15,7 +11,7 @@ export const moderator = signers[2]
 /**
  * Define our proposal template.
  */
-export const proposal = create_proposal({
+export const proposal : ProposalTemplate = {
   title     : 'Basic two-party contract with third-party arbitration.',
   duration  : 14400,
   moderator : moderator.pubkey,
@@ -23,13 +19,13 @@ export const proposal = create_proposal({
   paths     : [[ 'return', 10000, config.return ]],
   schedule  : [[ 7200, 'close', '*' ]],
   value     : 10000,
-})
+}
 
 /**
  * Define our role templates.
  */
-export const role = {
-  buyer : create_policy({
+export const roles : RoleTemplate[] = [
+  {
     title : 'buyer',
     paths : [
       [ 'heads', 10000 ],
@@ -39,8 +35,8 @@ export const role = {
       [ 'endorse', 'close',   '*', 2 ],
       [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
-  }),
-  seller : create_policy({
+  },
+  {
     title : 'seller',
     paths : [
       [ 'tails', 10000 ],
@@ -50,11 +46,11 @@ export const role = {
       [ 'endorse', 'close',   '*', 2 ],
       [ 'endorse', 'dispute', 'heads|tails', 1 ]
     ]
-  }),
-  agent : create_policy({
+  },
+  {
     title : 'agent',
     programs : [
       [ 'endorse', 'resolve', '*', 1 ]
     ]
-  })
-}
+  }
+]

@@ -24,6 +24,7 @@ const DEFAULT_CONFIG : EscrowContractConfig = {
 export class EscrowContract extends EventEmitter <{
   'error'  : unknown
   'fetch'  : EscrowContract
+  'status' : ContractStatus
   'update' : EscrowContract
 }> {
 
@@ -127,8 +128,8 @@ export class EscrowContract extends EventEmitter <{
         } else {
           this._updated = now()
         }
+        this.emit('fetch', this)
       }
-      this.emit('fetch', this)
     } catch (err) {
       this.emit('error', err)
     }
@@ -152,9 +153,12 @@ export class EscrowContract extends EventEmitter <{
   }
 
   _update (data : ContractData) {
+    const changed = (data.status !== this.status)
     try {
+
       this._data    = data 
       this._updated = now()
+      if (changed) this.emit('status', data.status)
       this.emit('update', this)
     } catch (err) {
       this.emit('error', err)
@@ -166,8 +170,8 @@ export class EscrowContract extends EventEmitter <{
     const tkn = signer.request.contract_cancel(this.cid)
     const res = await api.cancel(this.cid, tkn)
     if (!res.ok) throw new Error(res.error)
-    const ct  = res.data.contract
-    this._update(ct)
+    const contract = res.data.contract
+    this._update(contract)
     return this
   }
 

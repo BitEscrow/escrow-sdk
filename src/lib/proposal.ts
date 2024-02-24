@@ -46,12 +46,17 @@ const GET_DEFAULT_PROP = () => {
 export function create_draft (
   template : DraftTemplate
 ) : DraftData {
-  let { members = [], proposal, roles = [], signatures = [], terms = [] } = template
+  let {
+    proposal, 
+    approvals  = [],
+    members    = [],
+    roles      = [],
+    signatures = [],
+    terms      = [] 
+  } = template
   const prop     = create_proposal(proposal)
-  const policies = roles.map(e => {
-    return (e.id === undefined) ? create_policy(e) : e
-  })
-  return { members, proposal : prop, roles : policies, signatures, terms }
+  const policies = roles.map(e => create_policy(e))
+  return { approvals, members, proposal : prop, roles : policies, signatures, terms }
 }
 
 export function create_proposal (template : ProposalTemplate) {

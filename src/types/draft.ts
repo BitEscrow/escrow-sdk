@@ -28,14 +28,16 @@ export interface RolePolicy {
 }
 
 export interface DraftTemplate {
+  approvals  ?: string[]
   members    ?: MemberData[],
   proposal    : ProposalTemplate | ProposalData
-  roles      ?: RolePolicy[]
+  roles      ?: Array<RolePolicy | RoleTemplate>
   signatures ?: string[]
   terms      ?: string[]
 }
 
 export interface DraftData {
+  approvals  : string[]
   members    : MemberData[]
   proposal   : ProposalData
   roles      : RolePolicy[]

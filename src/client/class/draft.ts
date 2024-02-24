@@ -55,8 +55,9 @@ import * as assert from '@/assert.js'
 import * as schema from '@/schema/index.js'
 
 export class DraftSession extends EventEmitter <{
-  'approved'   : DraftSession
+  'approve'    : string
   'commit'     : string
+  'confirmed'  : DraftSession
   'debug'      : unknown[]
   'endorse'    : string
   'error'      : Error
@@ -72,7 +73,7 @@ export class DraftSession extends EventEmitter <{
   'signatures' : string[]
   'terms'      : Partial<ProposalData>
   'update'     : DraftSession
-  'publish'    : string
+  'published'  : string
 }> {
 
   readonly _opt    : SessionConfig
@@ -123,6 +124,8 @@ export class DraftSession extends EventEmitter <{
 
     this.sub.on('message', (msg) => {
       switch (msg.subject) {
+        case 'approve':
+          return this._approve_handler(msg)
         case 'endorse':
           return this._endorse_handler(msg)
         case 'join':
@@ -131,7 +134,7 @@ export class DraftSession extends EventEmitter <{
           return this._leave_handler(msg)
         case 'publish':
           if (!is_hash(msg.body)) return
-          this.emit('publish', msg.body)
+          this.emit('published', msg.body)
           break
         case 'terms':
           return this._terms_handler(msg)
@@ -139,12 +142,25 @@ export class DraftSession extends EventEmitter <{
     })
   }
 
+  get approvals () {
+    return this.data.approvals
+  }
+
   get is_approved () {
-    return (
-      this.is_full &&
-      this.signatures.length >= this.members.length &&
-      this.signatures.every(sig => verify_endorsement(this.prop_id, sig))
-    )
+    const mship = this.membership.data
+    const sig   = this.approvals.find(e => {
+      return e.slice(0, 64) === mship.pub
+    })
+    return (sig !== undefined)
+  }
+
+  get is_confirmed () {
+    const pubkeys = this.members.map(e => e.pub)
+    return this.is_full && this.approvals.every(e => {
+      const included = pubkeys.includes(e.slice(0 ,64))
+      const verified = verify_endorsement(this.prop_id, e)
+      return included && verified
+    })
   }
 
   get data () {
@@ -191,6 +207,13 @@ export class DraftSession extends EventEmitter <{
       return this.signer.credential.claimable(e)
     })
     return idx !== -1 ? idx : null
+  }
+
+  get membership () {
+    if (!this.is_member) {
+      throw new Error('signer is not a member of the draft')
+    }
+    return this.signer.credential.claim(this.members)
   }
 
   get is_moderated () {
@@ -251,6 +274,36 @@ export class DraftSession extends EventEmitter <{
         this.emit('info', s)
       }
     }
+  }
+
+  _approve (sig : string, created_at ?: number) {
+    const approvals = [ ...this.approvals, sig ]
+    const session   = { ...this.data, approvals }
+    this._update(session, created_at)
+    this.emit('approve', sig)
+  }
+
+  _approve_handler (msg : EventMessage<string>) {
+      let err : string | undefined
+    const cat = msg.envelope.created_at
+    const pid = get_proposal_id(this.proposal)
+    const sig = msg.body
+    const pub = sig.slice(0, 64)
+    if (this.approvals.includes(sig)) {
+      err = 'duplicate approval from pub: ' + pub
+    } else if (!this.check_member(pub)) {
+      err = 'pubkey is not a member: ' + pub
+    } else if (!verify_endorsement(pid, sig)) {
+      err = 'invalid approval from pub: ' + pub
+    }
+    if (typeof err === 'string') {
+      this.log.info('approval rejected :', pub)
+      this.log.debug(err)
+      this.emit('reject', [ 'approve', pub, err ])
+      return
+    }
+    this._approve(sig, cat)
+    this.log.info('recv approve :', pub)
   }
 
   _endorse (sig : string, created_at ?: number) {
@@ -361,11 +414,22 @@ export class DraftSession extends EventEmitter <{
       this.emit('full', this)
     }
     if (this.is_approved && !this._agreed) {
-      this.emit('approved', this)
+      this.emit('confirmed', this)
     }
     this._agreed = this.is_approved
     this._full   = this.is_full
     this.emit('update', this)
+  }
+
+  approve () {
+    const sig = this.signer.draft.approve(this.data)
+    this._approve(sig)
+    this.sub.send('approve', sig)
+    this.log.info('send approve  :', this.signer.pubkey)
+  }
+
+  check_member (pubkey : string) {
+    return this.members.find(e => e.pub === pubkey) !== undefined
   }
 
   check_terms (terms : Partial<ProposalData>) {

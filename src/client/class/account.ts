@@ -8,10 +8,11 @@ import { compare, now, sleep } from '@/lib/util.js'
 
 import {
   AccountRequest,
+  AccountStatus,
   CommitRequest,
   ContractData,
   DepositAccount,
-  DepositDataResponse,
+  DepositData,
   FundingDataResponse,
   OracleSpendData,
   RegisterRequest,
@@ -30,35 +31,41 @@ const DEFAULT_CONFIG : EscrowAccountConfig = {
 
 export class EscrowAccount extends EventEmitter <{
   'commit'   : FundingDataResponse
-  'error'    : unknown
   'fetch'    : EscrowAccount
-  'payment'  : EscrowAccount
-  'ready'    : EscrowAccount
-  'register' : DepositDataResponse
-  'reserved' : EscrowAccount
-  'update'   : EscrowAccount
+  'payment'  : TxOutput
+  'register' : DepositData
+  'reserved' : DepositAccount
 }> {
 
   readonly _client : EscrowClient
+  readonly _signer : EscrowSigner
   readonly _opt    : EscrowAccountConfig
   
   _data     : DepositAccount | null
-  _init     : boolean
+  _deposit  : DepositData    | null
   _payments : OracleSpendData[]
+  _status   : AccountStatus
   _updated  : number         | null
 
   constructor (
     client  : EscrowClient,
+    signer  : EscrowSigner,
     config ?: Partial<EscrowAccountConfig>
   ) {
     const opt = { ...DEFAULT_CONFIG, ...config }
     super()
     this._client   = client
+    this._signer   = signer
     this._opt      = opt
-    this._data  = null
-    this._init     = false
+    this._data     = null
+    this._deposit  = null
     this._payments = []
+    this._status   = 'init'
     this._updated  = null
+  }
+
+  get address () {
+    return this.data.address
   }
 
   get id () {
@@ -76,8 +83,19 @@ export class EscrowAccount extends EventEmitter <{
     return this._data
   }
 
+  get deposit () {
+    if (this._deposit === null) {
+      throw new Error('deposit account not registered')
+    }
+    return this._deposit
+  }
+
   get is_funded () {
     return this._payments.length > 0
+  }
+
+  get is_registered () {
+    return this._deposit !== null
   }
 
   get is_ready () {
@@ -96,33 +114,42 @@ export class EscrowAccount extends EventEmitter <{
     return this._payments
   }
 
-  get req () {
+  get request () {
     const { deposit_pk, sequence, spend_xpub } = this.data
     return { deposit_pk, sequence, spend_xpub }
   }
 
+  get signer () {
+    return this._signer
+  }
+
+  get status () : AccountStatus {
+    if (this.is_registered) return 'registered'
+    if (this.is_funded)     return 'funded'
+    if (this.is_reserved)   return 'reserved'
+    return 'init'
+  }
+
   get updated_at () {
     if (this._updated === null) {
-      throw new Error('account not initialized')
+      throw new Error('account is not initialized')
     }
     return this._updated
   }
 
   get utxo () {
     if (!this.is_funded) {
-      throw new Error('utxo is not defined')
+      throw new Error('deposit account is not funded')
     }
     return this.payments[0].txspend
   }
 
-  async _request (req : AccountRequest) {
-    if (this._data === null) {
-      const res = await this._client.deposit.request(req)
-      if (!res.ok) throw new Error(res.error)
-      this._data = res.data.account
-      this.emit('reserved', this)
-    }
-    return this.data
+  async _reserve (req : AccountRequest) {
+    const res = await this._client.deposit.request(req)
+    if (!res.ok) throw new Error(res.error)
+    this._data = res.data.account
+    this.emit('reserved', res.data.account)
+    return res.data.account
   }
 
   async _commit (req : CommitRequest) {
@@ -137,7 +164,8 @@ export class EscrowAccount extends EventEmitter <{
     const oracle = this.client.oracle
     const utxos  = await oracle.get_address_utxos(addr)
     if (!compare(this._payments, utxos)) {
-      this._update(utxos)
+      this._payments = utxos
+      this.emit('payment', this.utxo)
     } else {
       this._updated = now()
     }
@@ -148,28 +176,18 @@ export class EscrowAccount extends EventEmitter <{
   async _register (req : RegisterRequest) {
     const res = await this.client.deposit.register(req)
     if (!res.ok) throw new Error(res.error)
-    this.emit('register', res.data)
-    return res.data
-  }
-
-  _update (utxos : OracleSpendData[]) {
-    this._payments = utxos 
-    if (!this.is_ready) {
-      this._init = true
-      this.emit('ready', this)
-    }
-    this.emit('update', this)
-    this._updated = now()
+    this._deposit = res.data.deposit
+    this.emit('register', res.data.deposit)
+    return res.data.deposit
   }
 
   async commit (
     contract : ContractData,
-    signer   : EscrowSigner,
     utxo    ?: TxOutput
   ) {
     utxo = utxo ?? this.utxo
     const acct = this.data
-    const req  = signer.account.commit(acct, contract, utxo)
+    const req  = this.signer.account.commit(acct, contract, utxo)
     const res  = await this._commit(req)
     return {
       contract : new EscrowContract(this.client, res.contract),
@@ -183,38 +201,38 @@ export class EscrowAccount extends EventEmitter <{
 
   async register (utxo ?: TxOutput) {
     utxo = utxo ?? this.utxo
-    const req = { ...this.req, utxo }
-    const res = await this.client.deposit.register(req)
-    if (!res.ok) throw new Error(res.error)
-    const dep = res.data.deposit
-    return new EscrowDeposit(this.client, dep)
+    const req = { ...this.request, utxo }
+    const res = await this._register(req)
+    return new EscrowDeposit(this.client, res)
   }
 
-  async request (
-    signer   : EscrowSigner,
+  async reserve (
     locktime : number,
     index   ?: number
   ) {
-    const req = signer.account.create(locktime, index)
-    const res = await this._request(req)
-    this.verify(signer)
+    const req = this.signer.account.create(locktime, index)
+    const res = await this._reserve(req)
+    this.verify()
     return res
   }
 
-  async poll (interval : number, retries : number) {
+  async poll (
+    interval : number, 
+    retries  : number
+  ) {
     for (let i = 0; i < retries; i++) {
       if (this.is_funded) {
-        return this.utxo
+        return this
       } else {
         await this.fetch()
       }
       await sleep(interval * 1000)
     }
-    return this.utxo
+    throw new Error('polling timed out')
   }
 
-  verify (signer : EscrowSigner) {
-    return signer.account.verify(this.data)
+  verify () {
+    return this.signer.account.verify(this.data)
   }
 
   toJSON () {

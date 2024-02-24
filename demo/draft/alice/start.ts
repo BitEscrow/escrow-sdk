@@ -11,8 +11,8 @@ import { print_banner }           from '@scrow/test'
 import { agent_draft, secret_id } from '../terms.js'
 
 import {
+  fund_mutiny_address,
   fund_regtest_address,
-  sleep
 } from '@scrow/demo/util.js'
 
 import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
@@ -26,7 +26,7 @@ const session = new DraftSession(signer, {
   verbose : true
 })
 // Create an account object.
-const account = new EscrowAccount(client)
+const account = new EscrowAccount(client, signer)
 
 session.on('reject', console.log)
 
@@ -54,16 +54,14 @@ session.on('ready', () => {
 session.on('update', async () => {
   console.log('draft updated')
   console.log('draft:', session.data)
-  console.log('is full:', session.is_full)
   // If all roles have been assigned:
   if (session.is_full) {
-    console.log('is endorsed:', session.is_endorsed)
     // If we have not yet endorsed the draft:
-    if (!session.is_endorsed) {
+    if (!session.is_approved) {
       // Endorse the draft.
-      session.endorse()
-      console.log(`${alias} endorsed the draft`)
-    } else if (session.signatures.length === 2) {
+      session.approve()
+      console.log(`${alias} approved the draft`)
+    } else if (session.is_confirmed) {
       // console.log('publishing the contract...')
       try {
         session.publish(client)
@@ -78,7 +76,7 @@ session.on('full', () => {
   console.log('all roles have been filled')
 })
 
-session.on('approved', () => {
+session.on('confirmed', () => {
   console.log('draft has enough signatures')
 })
 
@@ -89,18 +87,19 @@ session.on('error', console.log)
 function fund_contract (contract : ContractData) {
 // When an account is received from the server:
   account.on('reserved', async () => {
-    // If we are not on regtest:
-    if (config.network !== 'regtest') {
-      // Make a deposit to the specified address:
+
+    switch (config.network) {
+      case 'mutiny':
+      fund_mutiny_address(account.address, fund_amt)
+      break
+    case 'regtest':
+      fund_regtest_address(account.address, fund_amt)
+      break
+    default:
       print_banner('make a deposit')
-      console.log('copy this address :', account.data.address)
+      console.log('copy this address :', account.address)
       console.log('send this amount  :', `${fund_amt} sats`)
-      console.log('get funds here    :', config.faucet, '\n')
-    } else {
-      // Use the automated payment for regtest testing.
-      print_banner('sending deposit')
-      await fund_regtest_address(account.data.address, fund_amt)
-      await sleep(2000)
+      console.log('get funds here    :', config.faucet, '\n')   
     }
 
     // Define our polling config.
@@ -112,24 +111,18 @@ function fund_contract (contract : ContractData) {
 
   // When the account performs a fetch (for utxos):
   account.on('fetch', () => {
-    // Print message to console.
-    if (!account.is_funded) {
-      console.log('checking the oracle for new payments...')
-    }
+    console.log('checking the oracle for new payments...')
   })
 
   // When the account updates:
-  account.on('update', async () => {
-    // If the account is funded:
-    if (account.is_funded) {
-      // Commit the deposit to the contract.
-      console.log('locking deposit...')
-      account.commit(contract, signer)
-    }
+  account.on('payment', async () => {
+    // Commit the deposit to the contract.
+    console.log('locking deposit...')
+    account.commit(contract)
   })
 
   console.log('fetching account...')
-  return account.request(signer, 14400)
+  return account.reserve(14400)
 }
 
 /** ========== [ Contract Settlement ] ========== **/
@@ -160,7 +153,7 @@ function settle_contract (contract : EscrowContract) {
 
 /** ========== [ Flow Control ] ========== **/
 
-session.on('publish', async (cid) => {
+session.on('published', async (cid) => {
   console.log('draft published as cid:', cid)
 
   const contract = await EscrowContract.fetch(client, cid)

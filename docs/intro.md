@@ -1,8 +1,8 @@
 # Introduction
 
-BitEscrow is a private, non-custodial protocol for using Bitcoin in a covenant-based smart contract.
+BitEscrow is a protocol for privately depositing Bitcoin into a non-custodial, covenant-based smart contract.
 
-Key Features:
+Key Features Include:
 
   * __100% private.__ All on-chain transactions appear as single-key spends. Participation is done through randomly generated credentials. Only requires a signing key (hot), and wallet xpub (cold) to participate.
 
@@ -16,17 +16,17 @@ Key Features:
 
 ## Protocol Overview
 
-The escrow protocol involves collaboration between three parties:
+The complete protocol involves three rounds of communication, split between three parties:
 
-`Members` : The participating members of the contract.  
-`Funders` : Those funding the contract (whom may be members).  
-`Server ` : The escrow server hosting the contract (BitEscrow API).
+`Members`  : Those participating within the contract.
+`Funders`  : Those depositing funds into the contract.
+`Provider` : The server hosting the contract (BitEscrow API).
 
-The protocol is split into three phases: _negotiation_, _funding_, and _settlement_. Each phase represents a round of communication in the protocol.
+The three rounds of communication are _negotiation_, _funding_, and _settlement_.
 
 ### Negotiation
 
-The first step is to negotiate and agree on a [proposal](wiki/draft.md) document. This is a human-readable document which contains all of the terms of the contract.
+The first step is to negotiate and agree on a [proposal](data/draft.md#proposaldata) document. This is a human-readable document which contains all of the initial terms of the contract.
 
 It is written in JSON format, and designed for collaboration (much like a PSBT):
 
@@ -42,9 +42,9 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
   ],
   payments : [[ 10000, 'bcrt1qxemag7t72rlrhl2ezsnsprmunmnzc35nmaph6v' ]],
   programs : [
-    [ 'endorse', 'dispute', 'payout', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
-    [ 'endorse', 'resolve',      '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
-    [ 'endorse', 'close|resolve','*', 2, 
+    [ 'endorse', 'dispute',       '*', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
+    [ 'endorse', 'resolve',       '*', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
+    [ 'endorse', 'close|resolve', '*', 2, 
       '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
       '4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10'
     ]
@@ -55,9 +55,7 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
 }
 ```
 
-If desired, a third-party can host the proposal. The protocol is designed for third-parties to help with negotiation, and offer their own services, such as arbitration.
-
-There is no specification placed on how to communicate the proposal between parties. There are many great protocols available, so feel free to use your favorite one!
+You can share this document peer-to-peer, or use a third-party for collaboration. The protocol is designed for third-party platforms to assist with negotiation and offer their own services (such as arbitration).
 
 Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](wiki/contract.md) for funding.
 
@@ -65,15 +63,15 @@ Once the terms have been decided, any member can deliver the final proposal to t
 
 ### Funding
 
-To deposit funds into a contract, the funding party will first request a deposit [account](wiki/deposit.md) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds into a contract, each funder requests a [Deposit Account](data/deposit.md#depositaccount) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
 
 ```ts
 interface DepositAccount {
   acct_id    : string  // Hash identifer for the account record.
   acct_sig   : string  // Signature for the account record.
   address    : string  // On-chain address for receiving funds.
-  agent_id   : string  // Identifier of the server agent.
-  agent_pk   : string  // Public key of the server agent.
+  agent_id   : string  // Identifier of the deposit agent.
+  agent_pk   : string  // Public key of the deposit agent.
   created_at : number  // Account creation timestamp (in seconds).
   deposit_pk : string  // Public key of the funder making the deposit.
   sequence   : number  // Locktime converted into a sequence value.
@@ -81,39 +79,34 @@ interface DepositAccount {
 }
 ```
 
-The funder independently verifies the account information, then sends their funds into the account address.
+The funder independently verifies the account information, then sends their funds into the account address. Once the transaction is available in the mempool, the funder can register their deposit with the server.
 
-Once the transaction is in the mempool, the funder can then commit the funds by signing the contract's spending paths. These signatures authorize the contract to spend the deposit based on the contract terms.
-
-The combination of these signatures form a [covenant](wiki/deposit.md) with the contract:
+To lock funds to a contract, the funder produces a batch of signatures, one for each spending path in the contract. These signatures authorize the contract to spend the deposit based on the contract terms. The combination of these signatures form a [Covenant](data/deposit.md#covenantdata) with the contract.
 
 ```ts
 interface CovenantData {
-  cid    : string  // id of the contract.
-  pnonce : string  // public nonce (used for musig).
-  psigs  : [
-    path : string, // name of path in the contract.
-    psig : string  // partial signature (used for musig).
-  ][]
+  cid    : string  // Id of the contract you are signing for.
+  pnonce : string  // Public nonce of the signer.
+  // List of labeled partial signatures for the covenant.
+  psigs  : [ label : string, psig : string ][]
 }
 ```
 
-Once a covenant is made, the deposit is locked in escrow. When enough funds have been locked and confirmed, the contract becomes active.
+Once a covenant is made, the funds are locked to the contract. When enough funds have been confirmed, the contract becomes active.
 
 ### Settlement
 
 The final round of the protocol is the `settlement`. This is the most exciting round, as members get to decide how the money shall be spent.
 
-Each contract comes with a tiny virtual machine, called the CVM. When the contract becomes active, the CVM is initialized using the terms specified in the proposal, and a hash-chain is started:
+Each contract comes with a tiny virtual machine called a CVM. When the contract activates, this machine is initialized with the terms of the proposal:
 
 ```ts
-// A new virtual machine, fresh from the womb.
 vm_state: {
   commits  : [],
   error    : null,
   head     : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
   output   : null,
-  paths    : [ [ 'draw', 0 ], [ 'heads', 0 ], [ 'tails', 0 ] ],
+  paths    : [ [ 'payout', 0 ], [ 'return', 0 ] ],
   start : 1706511301,
   steps : 0,
   store : [
@@ -122,14 +115,14 @@ vm_state: {
     [ 'e7862cbeb981d295639af3e91661fc96e0f97b429e9ff2985d20a654667d167a', '[]' ]
   ],
   status  : 'init',
-  tasks   : [ [ 7200, 'close', 'draw' ] ],
+  tasks   : [ [ 7200, 'close', 'payout|return' ] ],
   updated : 1706511301
 }
 ```
 
-> Note : The `head` of the hash-chain is initialized using the contract's identifier (cid).
+A git-style hash chain is also created, starting with the contract's identifier (cid).
 
-Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](wiki/contract.md). Members use these statements to instruct the CVM to perform a basic set of operations.
+Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](data/witness.md#witnessdata). Members use these statements to instruct the CVM to perform a basic set of operations.
 
 Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
 
@@ -173,50 +166,50 @@ vm_state: {
 }
 ```
 
-Once the CVM has settled on a spending path, the server will complete the related signatute for each deposit, then close the contract with a final settlement transaction.
+Once the CVM has evaluated a spending path, the server will complete the signatutes for the selected path, then settle the contract with a final transaction. Each member runs their own execution of the CVM and verifies that the contract settled correctly.
 
-The proposal, covenants, statements, and commit history all combine to create an auditable proof of execution for the contract. This proof covers how the contract must execute in any scenario, with zero ambiguity.
+### Protocol Flow
 
-Every contract settled on mainnet will be backed by a valid proof of execution in order to maintain our reputation as an escrow server.
+To demonstrate the flow of the protocol through various paths and outcomes, we'll walk through a sales agreement between three parties: **Alice** (the *buyer*), **Bob** (the *seller*), and **Carol** (third-party *arbitrator*).
 
-### Protocol Flow Examples
+**Negotiation and Funding**
 
-> **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
+1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
+2. Alice submits the proposal to the agent and receives a contract.
+3. Alice deposits her funds with the contract agent, along with a covenant.
+4. Once the deposit is confirmed on-chain, the contract becomes active.
 
-  1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
-  2. Alice submits the proposal to the agent and receives a contract.
-  3. Alice deposits her funds with the contract agent, along with a covenant.
-  4. Once the deposit is confirmed on-chain, the contract becomes active.
-  
-  **Happy Path: Settle on Payout**  
+**Settle on Payout (happy path)**  
 
-  5a. Alice receives her widget and forgets about Bob.  
-  6a. The contract schedule closes automatically on 'payout'.  
-  7a. Bob gets the funds, Alice can verify the CVM execution.  
+5. Alice receives her widget and forgets about Bob.  
+6. The contract schedule closes automatically on 'payout'.  
+7. Bob gets the funds, Alice can verify the CVM execution.  
 
-  **Neutral Path: Settle on Refund**  
+**Settle on Refund (neutral path)**  
 
-  5b. Alice doesn't like her widget.  
-  6b. Alice and Bob both agree to sign the 'refund' path.  
-  7b. Alice gets a partial refund, Bob still keeps his fees.  
+5. Alice doesn't like her widget.  
+6. Alice and Bob both agree to sign the 'refund' path.  
+7. Alice gets a partial refund, Bob still keeps his fees.  
 
-  **Unhappy Path: Dispute Settlement**  
+**Settle a Dispute (unhappy path)**  
 
-  5c. Alice didn't get the right widget, and disputes the payout.  
-  6c. Carol steps in, and decides on the 'refund' path.  
-  7c. Alice gets a partial refund, Bob still keeps his fees.  
+5. Alice didn't get the right widget, and disputes the payout.  
+6. Carol steps in, and decides on the 'refund' path.  
+7. Alice gets a partial refund, Bob still keeps his fees.  
 
-  **Ugly Path: Contract Expires**  
+**Contract Expires (ugly path)**  
 
-  5d. Alice claims she didn't get a widget, and disputes the payout.  
-  6d. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
-  7d. The contract expires, all deposits are released.  
+5. Alice claims she didn't get a widget, and disputes the payout.  
+6. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
+7. The contract expires, all deposits are released.  
 
-  **Worst Path: Deposits Expire**  
+**Deposits Expire (ugliest path)**  
 
-  5e. Everything above happens, except the last part.  
-  6e. The entire escrow platform goes down in flames.  
-  7e. The timelock on deposits expire, Alice can spend via the refund path.  
+5. Everything above happens, except the last part.  
+6. The entire escrow platform goes down in flames.  
+7. The timelock on deposits expire, Alice can spend via the refund path.
+
+Even in a worst-case scenario, deposits are recoverable by the time-locked refund path.
 
 ### Security Model
 
