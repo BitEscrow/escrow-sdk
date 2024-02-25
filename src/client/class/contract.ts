@@ -7,9 +7,11 @@ import { EscrowSigner }      from './signer.js'
 
 import {
   ContractData,
+  ContractDigest,
   ContractStatus,
   DraftData
 } from '@/types/index.js'
+import { update_contract } from '@/lib/contract.js'
 
 interface EscrowContractConfig {
   refresh_ival : number
@@ -122,9 +124,8 @@ export class EscrowContract extends EventEmitter <{
     try {
       if (this.is_stale || force) {
         const res = await this._status()
-        if (res.status !== this.status) {
-          const data = await this._digest()
-          this._update(data)
+        if (res.updated) {
+          this._update(res.contract)
         } else {
           this._updated = now()
         }
@@ -149,14 +150,14 @@ export class EscrowContract extends EventEmitter <{
     const api = this.client.contract
     const res = await api.status(this.cid)
     if (!res.ok) throw new Error(res.error)
-    return res.data.contract
+    return res.data
   }
 
-  _update (data : ContractData) {
-    const changed = (data.status !== this.status)
+  async _update (updated : ContractData | ContractDigest) {
+    const changed = (updated.status !== this.status)
     try {
-
-      this._data    = data 
+      const data    = this.data
+      this._data    = await update_contract(data, updated)
       this._updated = now()
       if (changed) this.emit('status', data.status)
       this.emit('update', this)

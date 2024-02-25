@@ -16,8 +16,3 @@ export interface ErrorResponse {
   error  : string
   status : number
 }
-
-export interface RecordStatus<T> {
-  status     : T
-  updated_at : number
-}

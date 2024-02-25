@@ -27,8 +27,11 @@ import {
   Network,
   AgentSession,
   RegisterRequest,
-  CommitRequest
+  CommitRequest,
+  DepositDigest
 } from '../types/index.js'
+
+import * as schema from '@/schema/index.js'
 
 /**
  * Initialization object for deposit state.
@@ -94,6 +97,17 @@ export function create_deposit (
   validate_deposit(deposit)
   // Return a sorted object.
   return sort_record(deposit)
+}
+
+/**
+ * Update a contract using a digest.
+ */
+export async function update_deposit (
+  data   : DepositData,
+  digest : DepositDigest
+) {
+  const parser = schema.deposit.data
+  return parser.parseAsync({ ...data, ...digest })
 }
 
 /**

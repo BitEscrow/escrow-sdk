@@ -5,10 +5,10 @@ import { print_banner } from '@scrow/test'
 
 const funder = signers[0]
 
-contract.on('payment', () => {
-  print_banner('new payment')
-  console.dir(account.payments, { depth : null })
-  console.log('\n')
-})
+// contract.on('payment', () => {
+//   print_banner('new payment')
+//   console.dir(account.payments, { depth : null })
+//   console.log('\n')
+// })
 
 await deposit.lock(contract.data, funder)

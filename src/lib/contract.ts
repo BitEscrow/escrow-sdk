@@ -14,12 +14,15 @@ import {
 import {
   ContractConfig,
   ContractData,
+  ContractDigest,
   ContractStatus,
   MemberData,
   PaymentEntry,
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
+
+import * as schema from '@/schema/index.js'
 
 const GET_INIT_CONTRACT = () => {
   return {
@@ -84,6 +87,17 @@ export function create_contract (
     updated_at  : published,
     vout_size   : vout_size
   })
+}
+
+/**
+ * Update a contract using a digest.
+ */
+export async function update_contract (
+  data   : ContractData,
+  digest : ContractDigest
+) {
+  const parser = schema.contract.data
+  return parser.parseAsync({ ...data, ...digest })
 }
 
 /**

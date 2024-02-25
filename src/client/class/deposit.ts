@@ -8,9 +8,11 @@ import {
   ContractData,
   DepositAccount,
   DepositData,
+  DepositDigest,
   DepositStatus,
   TxOutput
 } from '@/types/index.js'
+import { update_deposit } from '@/lib/deposit.js'
 
 interface EscrowDepositConfig {
   refresh_ival : number
@@ -113,9 +115,8 @@ export class EscrowDeposit extends EventEmitter <{
     try {
       if (this.is_stale || force) {
         const res = await this._status()
-        if (res.status !== this.status) {
-          const data = await this._digest()
-          this._update(data)
+        if (res.updated) {
+          this._update(res.deposit)
         } else {
           this._updated = now()
         }
@@ -140,13 +141,14 @@ export class EscrowDeposit extends EventEmitter <{
     const api = this.client.deposit
     const res = await api.status(this.dpid)
     if (!res.ok) throw new Error(res.error)
-    return res.data.deposit
+    return res.data
   }
 
-  _update (data : DepositData) {
-    const changed = (data.status !== this.status)
+  async _update (updated : DepositData | DepositDigest) {
+    const changed = (updated.status !== this.status)
     try {
-      this._data    = data 
+      const data    = this.data
+      this._data    = await update_deposit(data, updated)
       this._updated = now()
       if (changed) this.emit('status', data.status)
       this.emit('update', this)

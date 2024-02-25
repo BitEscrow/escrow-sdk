@@ -1,13 +1,11 @@
 import { ContractData } from '../contract.js'
 import { CovenantData } from '../covenant.js'
-import { RecordStatus } from './index.js'
 import { TxOutput }     from '../tx.js'
 
 import {
   DepositAccount,
   DepositData,
   DepositDigest,
-  DepositStatus
 } from '../deposit.js'
 
 export interface AccountRequest {
@@ -53,8 +51,12 @@ export interface DepositDigestResponse {
   deposit : DepositDigest
 }
 
-export interface DepositStatusResponse {
-  deposit : RecordStatus<DepositStatus>
+export type DepositStatusResponse = {
+  deposit : DepositDigest
+  updated : true
+} | {
+  deposit : undefined
+  updated : false
 }
 
 export interface FundingDataResponse {

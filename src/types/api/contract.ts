@@ -1,6 +1,5 @@
 import { DepositDigest } from '../deposit.js'
 import { MemberData }    from '../draft.js'
-import { RecordStatus }  from './index.js'
 import { ProposalData }  from '../proposal.js'
 import { WitnessData }   from '../program.js'
 import { StateData }     from '../vm.js'

@@ -66,6 +66,14 @@ export function is_literal (value : unknown) : value is Literal {
   return false
 }
 
+export function is_stamp (value : unknown) : value is number {
+  return (
+    typeof value === 'number' &&
+    value > 500_000_000       &&
+    value <= Number.MAX_SAFE_INTEGER
+  )
+}
+
 export function is_uint (
   value : unknown, 
   max_val = Number.MAX_SAFE_INTEGER
