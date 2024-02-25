@@ -33,8 +33,12 @@ export interface ContractDigestResponse {
   contract : ContractDigest
 }
 
-export interface ContractStatusResponse {
-  contract : RecordStatus<ContractStatus>
+export type ContractStatusResponse = {
+  contract : ContractDigest
+  updated  : true
+} | {
+  contract : undefined
+  updated  : false
 }
 
 export interface ContractVMStateResponse {

@@ -2,6 +2,7 @@ import { now, sleep }       from '@/lib/util.js'
 import { validate_deposit } from '@/validators/deposit.js'
 import { EscrowClient }     from './client.js'
 import { EventEmitter }     from './emitter.js'
+import { EscrowSigner }     from './signer.js'
 
 import {
   ContractData,
@@ -10,7 +11,6 @@ import {
   DepositStatus,
   TxOutput
 } from '@/types/index.js'
-import { EscrowSigner } from './signer.js'
 
 interface EscrowDepositConfig {
   refresh_ival : number
@@ -25,6 +25,7 @@ const DEFAULT_CONFIG : EscrowDepositConfig = {
 export class EscrowDeposit extends EventEmitter <{
   'error'  : unknown
   'fetch'  : EscrowDeposit
+  'status' : DepositStatus
   'update' : EscrowDeposit
 }> {
 
@@ -108,9 +109,9 @@ export class EscrowDeposit extends EventEmitter <{
     return dep
   }
 
-  async _fetch () {
+  async _fetch (force = false) {
     try {
-      if (this.is_stale) {
+      if (this.is_stale || force) {
         const res = await this._status()
         if (res.status !== this.status) {
           const data = await this._digest()
@@ -118,8 +119,8 @@ export class EscrowDeposit extends EventEmitter <{
         } else {
           this._updated = now()
         }
+        this.emit('fetch', this)
       }
-      this.emit('fetch', this)
     } catch (err) {
       this.emit('error', err)
     }
@@ -143,9 +144,11 @@ export class EscrowDeposit extends EventEmitter <{
   }
 
   _update (data : DepositData) {
+    const changed = (data.status !== this.status)
     try {
       this._data    = data 
       this._updated = now()
+      if (changed) this.emit('status', data.status)
       this.emit('update', this)
     } catch (err) {
       this.emit('error', err)
@@ -160,26 +163,12 @@ export class EscrowDeposit extends EventEmitter <{
     const req = signer.account.close(this.data, txfee)
     const res = await api.close(this.dpid, req)
     if (!res.ok) throw new Error(res.error)
-    return this._fetch()
+    this._update(res.data.deposit)
+    return this
   }
 
-  async fetch () {
-    return this._fetch()
-  }
-
-  async poll (
-    status   : DepositStatus,
-    interval : number,
-    retries  : number
-  ) {
-    for (let i = 0; i < retries; i++) {
-      await this.fetch()
-      if (this.status === status) {
-        return this
-      }
-      await sleep(interval * 1000)
-    }
-    throw new Error('polling timed out')
+  async fetch (force ?: boolean) {
+    return this._fetch(force)
   }
 
   async lock (
@@ -190,7 +179,22 @@ export class EscrowDeposit extends EventEmitter <{
     const req = signer.account.lock(contract, this.data)
     const res = await api.lock(this.dpid, req)
     if (!res.ok) throw new Error(res.error)
-    return this._fetch()
+    this._update(res.data.deposit)
+    return this
+  }
+
+  async poll (
+    status  : DepositStatus,
+    retries : number
+  ) {
+    for (let i = 0; i < retries; i++) {
+      await this.fetch(true)
+      if (this.status === status) {
+        return this
+      }
+      await sleep(this.opt.refresh_ival * 1000)
+    }
+    throw new Error('polling timed out')
   }
 
   toJSON () {

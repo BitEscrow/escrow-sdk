@@ -118,9 +118,9 @@ export class EscrowContract extends EventEmitter <{
     return contract
   }
 
-  async _fetch () {
+  async _fetch (force = false) {
     try {
-      if (this.is_stale) {
+      if (this.is_stale || force) {
         const res = await this._status()
         if (res.status !== this.status) {
           const data = await this._digest()
@@ -170,26 +170,24 @@ export class EscrowContract extends EventEmitter <{
     const tkn = signer.request.contract_cancel(this.cid)
     const res = await api.cancel(this.cid, tkn)
     if (!res.ok) throw new Error(res.error)
-    const contract = res.data.contract
-    this._update(contract)
+    this._update(res.data.contract)
     return this
   }
 
-  async fetch () {
-    return this._fetch()
+  async fetch (force ?: boolean) {
+    return this._fetch(force)
   }
 
   async poll (
     status   : ContractStatus,
-    interval : number,
     retries  : number
   ) {
     for (let i = 0; i < retries; i++) {
-      await this.fetch()
+      await this.fetch(true)
       if (this.status === status) {
         return this
       }
-      await sleep(interval * 1000)
+      await sleep(this.opt.refresh_ival * 1000)
     }
     throw new Error('polling timed out')
   }
