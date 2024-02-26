@@ -7,6 +7,7 @@ import {
   SignedEvent,
   WalletAPI,
 } from '@/types/index.js'
+
 import { NostrSocket } from './index.js'
 
 export interface ClientConfig {
