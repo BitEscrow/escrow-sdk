@@ -8,17 +8,13 @@
 import { print_banner } from '@scrow/test'
 import { contract }     from '@scrow/demo/class/contract/active.js'
 
-contract.on('status', (status) => {
-  if (status === 'active') {
-    const vm = contract.vm
+await contract.poll('active', 5)
 
-    vm.on('fetch', () => {
-      print_banner('new vm')
-      console.dir(vm.data, { depth : null })
-    })
+const vm = contract.vm
 
-    vm.poll('open', 1)
-  }
+vm.on('fetch', () => {
+  print_banner('new vm')
+  console.dir(vm.data, { depth : null })
 })
 
-contract.poll('active', 5)
+await vm.poll('init', 1)
