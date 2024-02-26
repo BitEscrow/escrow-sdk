@@ -46,6 +46,11 @@ export type EventFilter = {
   limit   ?: number
 } & { [ key : string ] : any | undefined }
 
+export interface DraftItem {
+  draft_id   : string,
+  updated_at : number
+}
+
 export interface SocketConfig {
   connect_retries : number
   connect_timeout : number

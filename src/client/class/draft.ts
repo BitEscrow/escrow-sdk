@@ -8,6 +8,7 @@ import { NostrSocket }     from './socket.js'
 import { NostrSub }        from './sub.js'
 
 import {
+  DraftItem,
   EventFilter,
   EventMessage,
   SessionConfig
@@ -549,15 +550,15 @@ export class DraftSession extends EventEmitter <{
       kinds   : [ this._store.opt.kind ],
       until   : now()
     }
-    let sessions : { id : string, updated_at : number }[] = []
+    let sessions : DraftItem[] = []
     const socket = new NostrSocket(this._signer._signer)
     const events = await socket.query(address, filter)
     socket.close()
     events.filter(e => socket.can_recover(e)).forEach(e => {
       const updated_at = e.created_at
       try {
-        const id = socket.recover(e)
-        sessions.push({ id, updated_at })
+        const draft_id = socket.recover(e)
+        sessions.push({ draft_id, updated_at })
       } catch { return }
     })
     return sessions
