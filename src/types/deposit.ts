@@ -17,16 +17,19 @@ import {
   TxData
 } from '@scrow/tapscript'
 
-export type AccountStatus = 'init' | 'reserved' | 'funded' | 'registered'
-export type DepositState  = DepositConfirmed | DepositUnconfirmed
-export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
-export type DepositData   = AgentSession & DepositInfo & DepositState & SettleState & SpendState & TxOutput
+export type DepositData  = AgentSession & DepositInfo & DepositState & SettleState & SpendState & TxOutput
+export type DepositState = DepositConfirmed | DepositUnconfirmed
 
-// export type FundData = DepositState & SettleState & SpendState & TxOutput & {
-//   sequence   : number
-//   status     : DepositStatus
-//   updated_at : number
-// }
+export type AccountStatus = 'init' | 'reserved' | 'funded' | 'registered'
+export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
+
+export type DepositDigest = DepositState & SettleState & SpendState & {
+  covenant   : CovenantData | null
+  status     : DepositStatus
+  updated_at : number
+}
+
+export type FundDigest = DepositDigest & TxOutput
 
 interface DepositConfirmed {
   confirmed    : true
@@ -84,20 +87,6 @@ export interface DepositInfo {
   spend_xpub  : string
   status      : DepositStatus
   updated_at  : number
-}
-
-export interface DepositDigest {
-  block_height : number | null
-  confirmed    : boolean
-  expires_at   : number | null
-  settled      : boolean
-  spent        : boolean
-  spent_txid   : string | null
-  status       : DepositStatus
-  updated_at   : number
-  txid         : string
-  value        : number
-  vout         : number
 }
 
 export interface ReturnData {

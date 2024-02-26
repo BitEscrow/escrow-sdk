@@ -1,4 +1,4 @@
-import { DepositDigest } from '../deposit.js'
+import { FundDigest }    from '../deposit.js'
 import { MemberData }    from '../draft.js'
 import { ProposalData }  from '../proposal.js'
 import { WitnessData }   from '../program.js'
@@ -17,7 +17,7 @@ export interface ContractRequest {
 }
 
 export interface FundListResponse {
-  funds : DepositDigest[]
+  funds : FundDigest[]
 }
 
 export interface ContractDataResponse {

@@ -5,7 +5,7 @@ import proposal from './proposal.js'
 import tx       from './tx.js'
 import vm       from './vm.js'
 
-const { bool, hash, hex, label, nonce, num, payment, stamp } = base
+const { hash, hex, label, nonce, num, payment, stamp }       = base
 const { close_state, settle_data, spend_data, spend_state }  = tx
 
 const agent = z.object({
@@ -23,14 +23,12 @@ const digest = z.object({
   est_txfee   : num,
   est_txsize  : num,
   pending     : num,
-  settled     : bool,
-  spent       : bool,
-  spent_txid  : hash.nullable(),
   status,
   total       : num,
   txin_count  : num,
-  updated_at  : stamp
-})
+  updated_at  : stamp,
+  vm_state    : vm.data.nullable()
+}).and(spend_state).and(close_state)
 
 const base_data = z.object({
   activated   : stamp.nullable(),

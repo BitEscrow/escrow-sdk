@@ -1,0 +1,24 @@
+/**
+ * Contract Class API Demo: Active Status
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/class/contract/active
+ */
+
+import { print_banner } from '@scrow/test'
+import { contract }     from '@scrow/demo/class/contract/active.js'
+
+contract.on('status', (status) => {
+  if (status === 'active') {
+    const vm = contract.vm
+
+    vm.on('fetch', () => {
+      print_banner('new vm')
+      console.dir(vm.data, { depth : null })
+    })
+
+    vm.poll('open', 1)
+  }
+})
+
+contract.poll('active', 5)

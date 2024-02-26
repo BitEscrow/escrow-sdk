@@ -2,7 +2,7 @@
  * Account Class API Demo for event: "reserved"
  * 
  * You can run this demo using the shell command:
- * yarn load demo/client/account/reserved
+ * yarn load demo/class/account/reserved
  */
 
 import { EscrowAccount } from '@scrow/core'
@@ -21,7 +21,6 @@ const account = new EscrowAccount(client, signer)
 account.on('reserved', () => {
   print_banner('new account')
   console.dir(account.data, { depth : null })
-  console.log('\n')
 })
 
 if (is_demo) {

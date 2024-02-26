@@ -2,12 +2,12 @@
  * Account Class API Demo for event: "payment"
  * 
  * You can run this demo using the shell command:
- * yarn load demo/client/account/payment
+ * yarn load demo/class/account/payment
  */
 
 import { print_banner }  from '@scrow/test'
 import { config }        from '@scrow/demo/00_demo_config.js'
-import { account }       from '@scrow/demo/client/account/reserved.js'
+import { account }       from '@scrow/demo/class/account/reserved.js'
 
 import {
   fund_mutiny_address,
@@ -51,7 +51,6 @@ account.on('fetch', () => {
 account.on('payment', () => {
   print_banner('new payment')
   console.dir(account.payments, { depth : null })
-  console.log('\n')
 })
 
 if (is_demo) {

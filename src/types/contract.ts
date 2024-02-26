@@ -27,6 +27,19 @@ export type ContractStatus =
 
 export type ContractData = AgentSession & ContractBase & SettleState & SpendState
 
+export type ContractDigest = SettleState & SpendState & {
+  activated  : number | null
+  balance    : number
+  est_txsize : number
+  est_txfee  : number
+  pending    : number
+  status     : ContractStatus
+  total      : number
+  txin_count : number
+  updated_at : number
+  vm_state   : null | StateData
+}
+
 export type SpendTemplate = [
   label : string,
   txhex : string
@@ -69,19 +82,4 @@ export interface ContractBase {
   updated_at  : number
   vm_state    : null | StateData
   vout_size   : number
-}
-
-export interface ContractDigest {
-  activated  : number | null
-  balance    : number
-  est_txsize : number
-  est_txfee  : number
-  pending    : number
-  settled    : boolean
-  spent      : boolean
-  spent_txid : string | null
-  status     : ContractStatus
-  total      : number
-  txin_count : number
-  updated_at : number
 }

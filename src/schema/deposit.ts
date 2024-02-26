@@ -53,19 +53,10 @@ const covenant = z.object({
 })
 
 const digest = z.object({
-  block_height : num.nullable(),
-  cid          : hash.nullable(),
-  confirmed    : bool,
-  expires_at   : stamp.nullable(),
-  settled      : bool,
-  spent        : bool,
-  spent_txid   : hash.nullable(),
+  covenant   : covenant.nullable(),
   status,
-  updated_at   : stamp,
-  txid         : hash,
-  value        : num,
-  vout         : num
-})
+  updated_at : stamp,
+}).and(deposit_state).and(spend_state).and(close_state)
 
 const base_data = z.object({
   status,

@@ -147,7 +147,6 @@ export class ContractVM extends EventEmitter <{
 
   async poll (
     status   : PathStatus,
-    interval : number,
     retries  : number
   ) {
     return new Promise(async (res) => {
@@ -156,7 +155,7 @@ export class ContractVM extends EventEmitter <{
         if (this.status === status) {
           res(this)
         }
-        await sleep(interval * 1000)
+        await sleep(this.opt.refresh_ival * 1000)
       }
     })
   }

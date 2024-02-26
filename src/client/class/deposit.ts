@@ -59,6 +59,7 @@ export class EscrowDeposit extends EventEmitter <{
   readonly _opt    : EscrowDepositConfig
   
   _data    : DepositData
+  _init    : boolean
   _updated : number
 
   constructor (
@@ -70,6 +71,7 @@ export class EscrowDeposit extends EventEmitter <{
     this._client  = client
     this._opt     = { ...DEFAULT_CONFIG, ...config }
     this._data    = deposit
+    this._init    = false
     this._updated = deposit.updated_at
   }
 
@@ -102,15 +104,6 @@ export class EscrowDeposit extends EventEmitter <{
     return this._updated
   }
 
-  async _digest () {
-    const api = this.client.deposit
-    const res = await api.digest(this.dpid)
-    if (!res.ok) throw new Error(res.error)
-    const dep = { ...this._data, ...res.data.deposit }
-    validate_deposit(dep)
-    return dep
-  }
-
   async _fetch (force = false) {
     try {
       if (this.is_stale || force) {
@@ -121,6 +114,10 @@ export class EscrowDeposit extends EventEmitter <{
           this._updated = now()
         }
         this.emit('fetch', this)
+      }
+      if (!this._init) {
+        this._init = true
+        this.emit('status', this.status)
       }
     } catch (err) {
       this.emit('error', err)
@@ -150,7 +147,10 @@ export class EscrowDeposit extends EventEmitter <{
       const data    = this.data
       this._data    = await update_deposit(data, updated)
       this._updated = now()
-      if (changed) this.emit('status', data.status)
+      if (changed) {
+        if (!this._init) this._init = true
+        this.emit('status', updated.status)
+      }
       this.emit('update', this)
     } catch (err) {
       this.emit('error', err)

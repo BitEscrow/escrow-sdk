@@ -1,3 +1,4 @@
+import { update_contract }   from '@/lib/contract.js'
 import { now, sleep }        from '@/lib/util.js'
 import { validate_contract } from '@/validators/contract.js'
 import { EscrowClient }      from './client.js'
@@ -9,9 +10,9 @@ import {
   ContractData,
   ContractDigest,
   ContractStatus,
-  DraftData
+  DraftData,
+  FundDigest
 } from '@/types/index.js'
-import { update_contract } from '@/lib/contract.js'
 
 interface EscrowContractConfig {
   refresh_ival : number
@@ -26,6 +27,7 @@ const DEFAULT_CONFIG : EscrowContractConfig = {
 export class EscrowContract extends EventEmitter <{
   'error'  : unknown
   'fetch'  : EscrowContract
+  'fund'   : FundDigest
   'status' : ContractStatus
   'update' : EscrowContract
 }> {
@@ -56,6 +58,7 @@ export class EscrowContract extends EventEmitter <{
   readonly _opt    : EscrowContractConfig
   
   _data    : ContractData
+  _init    : boolean
   _updated : number
 
   constructor (
@@ -67,6 +70,7 @@ export class EscrowContract extends EventEmitter <{
     this._client  = client
     this._opt     = { ...DEFAULT_CONFIG, ...config }
     this._data    = contract
+    this._init    = false
     this._updated = contract.updated_at
   }
 
@@ -111,15 +115,6 @@ export class EscrowContract extends EventEmitter <{
     return new ContractVM(this.client, this.data, this.opt)
   }
 
-  async _digest () {
-    const api = this.client.contract
-    const res = await api.digest(this.cid)
-    if (!res.ok) throw new Error(res.error)
-    const contract = { ...this._data, ...res.data.contract }
-    validate_contract(contract)
-    return contract
-  }
-
   async _fetch (force = false) {
     try {
       if (this.is_stale || force) {
@@ -130,6 +125,10 @@ export class EscrowContract extends EventEmitter <{
           this._updated = now()
         }
         this.emit('fetch', this)
+      }
+      if (!this._init) {
+        this._init = true
+        this.emit('status', this.status)
       }
     } catch (err) {
       this.emit('error', err)
@@ -155,11 +154,22 @@ export class EscrowContract extends EventEmitter <{
 
   async _update (updated : ContractData | ContractDigest) {
     const changed = (updated.status !== this.status)
+    const funded  = (updated.txin_count > this.data.txin_count)
     try {
       const data    = this.data
       this._data    = await update_contract(data, updated)
       this._updated = now()
-      if (changed) this.emit('status', data.status)
+      if (changed) {
+        if (!this._init) this._init = true
+        this.emit('status', updated.status)
+      }
+      if (funded) {
+        const funds  = await this.funds
+        const sorted = funds.sort((a, b) => {
+          return b.updated_at - a.updated_at
+        })
+        this.emit('fund', sorted[0])
+      }
       this.emit('update', this)
     } catch (err) {
       this.emit('error', err)

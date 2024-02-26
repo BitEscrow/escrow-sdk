@@ -2,11 +2,11 @@
  * Account Class API Demo for event: "register"
  * 
  * You can run this demo using the shell command:
- * yarn load demo/client/account/register
+ * yarn load demo/class/account/register
  */
 
 import { print_banner } from '@scrow/test'
-import { account }      from '@scrow/demo/client/account/payment.js'
+import { account }      from '@scrow/demo/class/account/payment.js'
 
 const is_demo = import.meta.url === `file://${process.argv[1]}`
 
@@ -21,7 +21,6 @@ account.on('payment', async (utxo) => {
 account.on('register', (deposit) => {
   print_banner('open deposit')
   console.dir(deposit, { depth : null })
-  console.log('\n')
 })
 
 if (is_demo) {

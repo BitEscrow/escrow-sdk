@@ -2,12 +2,12 @@
  * Account Class API Demo for event: "commit"
  * 
  * You can run this demo using the shell command:
- * yarn load demo/client/account/commit
+ * yarn load demo/class/account/commit
  */
 
 import { print_banner } from '@scrow/test'
 import { new_contract } from '@scrow/demo/05_create_contract.js'
-import { account }      from '@scrow/demo/client/account/payment.js'
+import { account }      from '@scrow/demo/class/account/payment.js'
 
 const is_demo = import.meta.url === `file://${process.argv[1]}`
 
@@ -24,7 +24,6 @@ account.on('commit', ({ contract, deposit }) => {
   console.dir(contract, { depth : null })
   print_banner('locked deposit')
   console.dir(deposit, { depth : null })
-  console.log('\n')
 })
 
 if (is_demo) {

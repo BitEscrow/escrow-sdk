@@ -1,3 +1,10 @@
+/**
+ * Deposit Class API Demo: Create a Deposit
+ * 
+ * You can run this demo using the shell command:
+ * yarn load demo/class/deposit/create
+ */
+
 import { EscrowDeposit } from '@scrow/core'
 import { print_banner }  from '@scrow/test'
 import { client }        from '@scrow/demo/01_create_client.js'
@@ -8,14 +15,14 @@ import { fund_address }  from '@scrow/demo/util.js'
 const is_demo = import.meta.url === `file://${process.argv[1]}`
 
 const address = new_account.address
-const amount  = new_contract.total
+const vin_fee = new_contract.feerate * 65
+const amount  = new_contract.total + vin_fee
 const utxo    = await fund_address(address, amount)
 const deposit = await EscrowDeposit.create(client, new_account, utxo)
 
 if (is_demo) {
   print_banner('open deposit')
   console.dir(deposit.data, { depth : null })
-  console.log('\n')
 }
 
 export { deposit }
