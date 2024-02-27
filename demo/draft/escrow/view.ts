@@ -1,4 +1,4 @@
-import { DraftSession, EscrowContract } from '@scrow/core'
+import { DraftSession } from '@scrow/core'
 import { secret_id, signer } from '../terms.js'
 import { client } from '@scrow/demo/01_create_client.js'
 
