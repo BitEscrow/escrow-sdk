@@ -117,6 +117,10 @@ export class EscrowSigner {
     return this._signer.pubkey
   }
 
+  get xpub () {
+    return this._wallet.xpub
+  }
+
   account    = account_api(this)
   credential = member_api(this)
   draft      = draft_api(this)

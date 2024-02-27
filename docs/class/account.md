@@ -2,8 +2,8 @@
 
 Reference guide for the `EscrowAccount` class API.
 
-- [EscrowAccount Config](#escrowaccount-config)
-- [EscrowAccount Class](#escrowaccount-class)
+- [Config Interface](#config-interface)
+- [Class Interface](#class-interface)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -11,7 +11,7 @@ Reference guide for the `EscrowAccount` class API.
 
 ---
 
-## EscrowAccount Config
+## Config Interface
 
 Configuration interface for the `EscrowAccount` class.
 
@@ -22,7 +22,7 @@ interface EscrowAccountConfig {
 }
 ```
 
-## EscrowAccount Class
+## Class Interface
 
 ```ts
 class EscrowAccount extends EventEmitter<{
