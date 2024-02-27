@@ -38,6 +38,7 @@ const policy = z.object({
 const terms = prop.data.keyof()
 
 const session = z.object({
+  approvals  : hex.array(),
   members    : membership.array(),
   proposal   : prop.data,
   roles      : policy.array(),

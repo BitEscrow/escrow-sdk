@@ -33,7 +33,6 @@ import {
 } from '@/lib/util.js'
 
 import {
-  create_draft,
   find_program,
   get_proposal_id
 } from '@/lib/proposal.js'
@@ -45,7 +44,6 @@ import {
 
 import {
   DraftData,
-  DraftTemplate,
   MemberData,
   ProgramQuery,
   ProposalData,
@@ -452,6 +450,10 @@ export class DraftSession extends EventEmitter <{
     return this
   }
 
+  delete (store_id : string) {
+    this._socket.delete(store_id)
+  }
+
   endorse () {
     assert.ok(!this.is_endorsed, 'endorsement already exists')
     verify_proposal(this.proposal)
@@ -504,13 +506,12 @@ export class DraftSession extends EventEmitter <{
   async init (
     address  : string, 
     secret   : string,
-    template : DraftTemplate | DraftData
+    session  : DraftData
   ) {
-    const store = create_draft(template)
-    validate_draft(store)
-    verify_draft(store)
+    validate_draft(session)
+    verify_draft(session)
     return Promise.all([
-      this._store.init(address, secret, store),
+      this._store.init(address, secret, session),
       this.sub.when_ready()
     ])
   }
@@ -555,9 +556,10 @@ export class DraftSession extends EventEmitter <{
     socket.close()
     events.filter(e => socket.can_recover(e)).forEach(e => {
       const updated_at = e.created_at
+      const store_id   = e.id
       try {
-        const draft_id = socket.recover(e)
-        sessions.push({ draft_id, updated_at })
+        const session_id = socket.recover(e)
+        sessions.push({ session_id, store_id, updated_at })
       } catch { return }
     })
     return sessions

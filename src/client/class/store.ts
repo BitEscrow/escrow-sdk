@@ -254,8 +254,7 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
   }
 
   async connect (address : string, secret : string) {
-    this._socket.connect(address, secret)
-    await this.sub.when_ready()
+    await this._socket.connect(address, secret)
     return this
   }
 

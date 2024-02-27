@@ -63,7 +63,7 @@
 </div>
 
 <script type="module">
-  import { DraftSession, EscrowClient, EscrowSigner } from '../../dist/module.mjs'
+  import { DraftSession, EscrowClient, EscrowSigner, create_draft } from '../../dist/module.mjs'
 
   const config = {
     hostname : 'https://bitescrow-mutiny.vercel.app',
@@ -74,7 +74,7 @@
   const client = new EscrowClient(config)
   const signer = EscrowSigner.generate(config)
 
-  const template = {
+  const template = create_draft({
     proposal : {
       title     : 'Basic two-party contract with third-party arbitration.',
       duration  : 14400,
@@ -105,7 +105,7 @@
         ]
       },
     ]
-  }
+  })
 
   const session = new DraftSession(signer, {
     socket_config : { verbose : true, debug : true },

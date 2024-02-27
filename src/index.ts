@@ -1,5 +1,9 @@
 import { create_policy }   from './lib/policy.js'
-import { create_proposal } from './lib/proposal.js'
+
+import {
+  create_draft,
+  create_proposal
+} from './lib/proposal.js'
 
 export * as assert   from './assert.js'
 export * as Config   from './config.js'
@@ -12,6 +16,7 @@ export * from './client/index.js'
 export * from './types/index.js'
 
 export {
+  create_draft,
   create_policy,
   create_proposal
 }

@@ -2,6 +2,7 @@ import { Buff }          from '@cmdcode/buff'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
+import { create_policy } from './policy.js'
 
 import {
   parse_program,
@@ -23,10 +24,11 @@ import {
   SignerAPI,
   ProposalTemplate,
   DraftData,
-  DraftTemplate
+  DraftTemplate,
+  RolePolicy,
 } from '@/types/index.js'
 
-import { create_policy } from './policy.js'
+import * as schema from '@/schema/index.js'
 
 type PathTotal = [ path: string, total : number ]
 
@@ -55,8 +57,13 @@ export function create_draft (
     terms      = [] 
   } = template
   const prop     = create_proposal(proposal)
-  const policies = roles.map(e => create_policy(e))
-  return { approvals, members, proposal : prop, roles : policies, signatures, terms }
+  const policies = roles.map(e => {
+    return (e.id === undefined)
+      ? create_policy(e) 
+      : e as RolePolicy
+  })
+  const draft = { approvals, members, proposal : prop, roles : policies, signatures, terms }
+  return schema.draft.session.parse(draft)
 }
 
 export function create_proposal (template : ProposalTemplate) {

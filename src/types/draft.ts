@@ -10,6 +10,7 @@ export interface MemberData {
 
 export interface RoleTemplate {
   title      : string
+  id        ?: string
   min_slots ?: number
   max_slots ?: number
   paths     ?: [ string, number ][]

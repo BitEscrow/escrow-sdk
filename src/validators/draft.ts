@@ -118,7 +118,7 @@ export function verify_draft (
     assert.ok(pol !== undefined, 'policy does not exist: ' + mbr.pol)
     verify_enrollment(mbr, pol, proposal)
   }
-}
+} 
 
 function check_program_policy (
   programs : ProgramTerms[],

@@ -48,7 +48,8 @@ export type EventFilter = {
 } & { [ key : string ] : any | undefined }
 
 export interface DraftItem {
-  draft_id   : string,
+  session_id : string,
+  store_id   : string,
   updated_at : number
 }
 

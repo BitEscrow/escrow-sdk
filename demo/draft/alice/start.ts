@@ -25,6 +25,7 @@ const session = new DraftSession(signer, {
   store_config  : { verbose : true, debug : false },
   verbose : true
 })
+
 // Create an account object.
 const account = new EscrowAccount(client, signer)
 
@@ -148,7 +149,7 @@ function settle_contract (contract : EscrowContract) {
   })
 
   console.log('polling contract...')
-  return contract.poll('settled', 10, 30)
+  return contract.poll('settled', 10)
 }
 
 /** ========== [ Flow Control ] ========== **/
@@ -165,5 +166,7 @@ session.on('published', async (cid) => {
 session.on('error', console.log)
 
 // await session.connect('wss://relay.damus.io', secret_id)
+
+console.log('draft:', agent_draft)
 
 await session.init('wss://relay.damus.io', secret_id, agent_draft)

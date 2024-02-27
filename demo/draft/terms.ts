@@ -42,15 +42,14 @@ const PROP_ROLES   : RoleTemplate[] = [
       [ 'endorse', 'dispute', '*', 1 ]
     ]
   },
+  {
+    title    : 'agent',
+    payment  : 2000,
+    programs : [
+      [ 'endorse', 'resolve', '*', 1 ]
+    ]
+  }
 ]
-
-export const AGENT_ROLE = create_policy({
-  title    : 'agent',
-  payment  : 2000,
-  programs : [
-    [ 'endorse', 'resolve', '*', 1 ]
-  ]
-})
 
 export const alias     = AGENT_ALIAS
 // Compute draft id for nostr store.
@@ -66,5 +65,7 @@ const base_draft = create_draft({
   }),
   roles : PROP_ROLES.map(e => create_policy(e))
 })
+
+const AGENT_ROLE = base_draft.roles[2]
 
 export const agent_draft = signer.draft.join(AGENT_ROLE, base_draft)
