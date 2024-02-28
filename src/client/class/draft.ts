@@ -164,6 +164,7 @@ export class DraftSession extends EventEmitter <{
   }
 
   get is_approved () {
+    if (!this.is_member) return false
     const mship = this.membership.data
     const sig   = this.approvals.find(e => {
       return e.slice(0, 64) === mship.pub
