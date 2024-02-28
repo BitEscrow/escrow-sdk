@@ -237,8 +237,8 @@ export class NostrStore <T extends Record<string, any>> extends EventEmitter<{
       // Emit ready message.
       this.emit('ready', this)
     } else {
-      this.emit('update', this)
       this._send('post', data)
+      this.emit('update', this)
     }
     // Print debug message to console.
     this.log.debug('update data:', this.data)

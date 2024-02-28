@@ -17,3 +17,5 @@ const session = new DraftSession(signer, {
 const drafts = await session.list('wss://relay.damus.io')
 
 console.dir(drafts, { depth : null })
+
+session.delete(drafts[0].store_id)

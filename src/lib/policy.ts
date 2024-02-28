@@ -66,7 +66,7 @@ export function tabulate_enrollment (
       if (mbr.pol === pol.id) {
         scores.set(pol.id, tab + 1)
       }
-    } 
+    }
   }
   return scores
 }

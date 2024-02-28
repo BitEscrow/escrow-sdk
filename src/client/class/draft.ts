@@ -23,7 +23,8 @@ import {
 import {
   has_full_enrollment,
   join_role,
-  rem_enrollment
+  rem_enrollment,
+  tabulate_enrollment
 } from '@/lib/policy.js'
 
 import {
@@ -144,6 +145,22 @@ export class DraftSession extends EventEmitter <{
   get approvals () {
     return this.data.approvals
   }
+  
+  get available () {
+    const map = tabulate_enrollment(this.members, this.roles)
+    return this.roles.filter(e => {
+      const score = map.get(e.id) ?? e.max_slots
+      return score >= e.max_slots
+    })
+  }
+
+  get data () {
+    return this._store.data
+  }
+
+  get id () {
+    return this._store._socket.topic_id
+  }
 
   get is_approved () {
     const mship = this.membership.data
@@ -162,30 +179,6 @@ export class DraftSession extends EventEmitter <{
     })
   }
 
-  get data () {
-    return this._store.data
-  }
-
-  get members () {
-    return this.data.members
-  }
-
-  get opt () {
-    return this._opt
-  }
-
-  get proposal () {
-    return this.data.proposal
-  }
-
-  get prop_id () {
-    return get_proposal_id(this.proposal)
-  }
-
-  get pubkey () {
-    return this.signer.pubkey
-  }
-
   get is_endorsed () {
     const sig = this.signatures.find(e => {
       return e.slice(0, 64) === this.pubkey
@@ -199,20 +192,6 @@ export class DraftSession extends EventEmitter <{
 
   get is_member () {
     return this.signer.credential.exists(this.members)
-  }
-
-  get member_idx () {
-    const idx = this.members.findIndex(e => {
-      return this.signer.credential.claimable(e)
-    })
-    return idx !== -1 ? idx : null
-  }
-
-  get membership () {
-    if (!this.is_member) {
-      throw new Error('signer is not a member of the draft')
-    }
-    return this.signer.credential.claim(this.members)
   }
 
   get is_moderated () {
@@ -236,8 +215,46 @@ export class DraftSession extends EventEmitter <{
     }
   }
 
+  get members () {
+    return this.data.members
+  }
+
+  get member_idx () {
+    const idx = this.members.findIndex(e => {
+      return this.signer.credential.claimable(e)
+    })
+    return idx !== -1 ? idx : null
+  }
+
+  get membership () {
+    if (!this.is_member) {
+      throw new Error('signer is not a member of the draft')
+    }
+    return this.signer.credential.claim(this.members)
+  }
+
+  get opt () {
+    return this._opt
+  }
+
+  get proposal () {
+    return this.data.proposal
+  }
+
+  get prop_id () {
+    return get_proposal_id(this.proposal)
+  }
+
+  get pubkey () {
+    return this.signer.pubkey
+  }
+
   get roles () {
     return this.data.roles
+  }
+
+  get secret () {
+    return this._store._socket.secret
   }
 
   get signatures () {
@@ -451,7 +468,7 @@ export class DraftSession extends EventEmitter <{
   }
 
   delete (store_id : string) {
-    this._socket.delete(store_id)
+    this._store._socket.delete(store_id)
   }
 
   endorse () {
@@ -555,11 +572,12 @@ export class DraftSession extends EventEmitter <{
     const events = await socket.query(address, filter)
     socket.close()
     events.filter(e => socket.can_recover(e)).forEach(e => {
+      const pubkey     = e.pubkey
       const updated_at = e.created_at
       const store_id   = e.id
       try {
         const session_id = socket.recover(e)
-        sessions.push({ session_id, store_id, updated_at })
+        sessions.push({ pubkey, session_id, store_id, updated_at })
       } catch { return }
     })
     return sessions
