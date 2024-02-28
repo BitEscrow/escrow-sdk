@@ -49,7 +49,8 @@ export type EventFilter = {
 
 export interface DraftItem {
   pubkey     : string,
-  session_id : string,
+  id         : string,
+  secret     : string,
   store_id   : string,
   updated_at : number
 }

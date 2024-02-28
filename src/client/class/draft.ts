@@ -53,6 +53,7 @@ import {
 
 import * as assert from '@/assert.js'
 import * as schema from '@/schema/index.js'
+import { sha256 } from '@cmdcode/crypto-tools/hash'
 
 export class DraftSession extends EventEmitter <{
   'approve'    : string
@@ -576,8 +577,9 @@ export class DraftSession extends EventEmitter <{
       const updated_at = e.created_at
       const store_id   = e.id
       try {
-        const session_id = socket.recover(e)
-        sessions.push({ pubkey, session_id, store_id, updated_at })
+        const secret   = socket.recover(e)
+        const id       = sha256(secret).hex
+        sessions.push({ pubkey, id, secret, store_id, updated_at })
       } catch { return }
     })
     return sessions
