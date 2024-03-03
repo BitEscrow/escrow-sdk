@@ -6,8 +6,6 @@ export * from './class/contract.js'
 export * from './class/deposit.js'
 export * from './class/signer.js'
 export * from './class/draft.js'
-export * from './class/socket.js'
-export * from './class/store.js'
 export * from './types.js'
 
 export { Seed, Signer, Wallet }

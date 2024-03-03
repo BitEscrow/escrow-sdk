@@ -2,7 +2,7 @@ import 'websocket-polyfill'
 
 import { Buff, Bytes }  from '@cmdcode/buff'
 import { verify_sig }   from '@cmdcode/crypto-tools/signer'
-import { EventEmitter } from './emitter.js'
+import { EventEmitter } from '../../src/client/class/emitter.js'
 import { NostrSub }     from './sub.js'
 
 import {
@@ -20,7 +20,7 @@ import {
   EventMessage,
   SocketConfig,
   SubscribeConfig
-} from '../types.js'
+} from '../../src/client/types.js'
 
 import {
   encrypt_cbc,

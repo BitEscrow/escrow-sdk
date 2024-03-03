@@ -5,7 +5,7 @@ import { SignerConfig } from '../types.js'
 import {
   Seed,
   Signer,
-  Wallet
+  Wallet,
 } from '@cmdcode/signer'
 
 import account_api   from '../api/signer/account.js'

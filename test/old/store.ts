@@ -1,6 +1,6 @@
 import { Buff }         from '@cmdcode/buff'
 import { stringify }    from '@/lib/util.js'
-import { EventEmitter } from './emitter.js'
+import { EventEmitter } from '../../src/client/class/emitter.js'
 import { NostrSub }     from './sub.js'
 
 import {
@@ -12,7 +12,7 @@ import {
   EventFilter,
   EventMessage,
   StoreConfig
-} from '../types.js'
+} from '../../src/client/types.js'
 
 const now = () => Math.floor(Date.now() / 1000)
 

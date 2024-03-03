@@ -36,7 +36,7 @@ export interface CredentialAPI extends SignerAPI {
 }
 
 export interface SignOptions {
-  nonce_tweak : Bytes
+  nonce_tweak ?: Bytes
 }
 
 export interface WalletAPI {

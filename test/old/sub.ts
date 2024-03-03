@@ -1,11 +1,11 @@
-import { EventEmitter } from './emitter.js'
-import { NostrSocket }  from './socket.js'
+import { EventEmitter } from '../../src/client/class/emitter.js'
+import { NostrSocket }  from '../../src/client/class./../../test/old/socket.js'
 
 import {
   EventFilter,
   EventMessage,
   SubscribeConfig
-} from '../types.js'
+} from '../../src/client/types.js'
 
 import { SignedEvent } from '@/types/index.js'
 

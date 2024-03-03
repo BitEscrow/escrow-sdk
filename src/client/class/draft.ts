@@ -1,18 +1,13 @@
 import { verify_proposal } from '@/validators/proposal.js'
 import { EventEmitter }    from './emitter.js'
 import { EscrowSigner }    from './signer.js'
-import { NostrStore }      from './store.js'
 import { EscrowContract }  from './contract.js'
 import { EscrowClient }    from './client.js'
-import { NostrSocket }     from './socket.js'
-import { NostrSub }        from './sub.js'
 
 import {
-  DraftItem,
-  EventFilter,
   EventMessage,
-  SessionConfig
-} from '../types.js'
+  NostrRoom
+} from '@cmdcode/nostr-sdk'
 
 import {
   get_membership,
@@ -53,7 +48,11 @@ import {
 
 import * as assert from '@/assert.js'
 import * as schema from '@/schema/index.js'
-import { sha256 } from '@cmdcode/crypto-tools/hash'
+
+interface SessionConfig {
+  debug   : boolean
+  verbose : boolean
+}
 
 export class DraftSession extends EventEmitter <{
   'approve'    : string
@@ -61,7 +60,7 @@ export class DraftSession extends EventEmitter <{
   'confirmed'  : DraftSession
   'debug'      : unknown[]
   'endorse'    : string
-  'error'      : Error
+  'error'      : [ unknown, unknown ]
   'full'       : DraftSession
   'info'       : unknown[]
   'join'       : MemberData
@@ -79,51 +78,33 @@ export class DraftSession extends EventEmitter <{
 
   readonly _opt    : SessionConfig
   readonly _signer : EscrowSigner
-  readonly _socket : NostrSocket
-  readonly _store  : NostrStore<DraftData>
-  readonly _sub    : NostrSub
-
+  readonly _room   : NostrRoom<DraftData>
+  
   _agreed : boolean
   _full   : boolean
   _init   : boolean
 
   constructor (
+    secret   : string,
     signer   : EscrowSigner, 
     options ?: Partial<SessionConfig>
   ) {
-    const { socket_config, store_config, ...opt } = options ?? {}
-    const socket_opt = { ...socket_config }
-    const store_opt  = { ...store_config  }
-
     super()
 
-    this._opt    = { debug : false, verbose : false, ...opt }
+    this._opt    = { debug : false, verbose : false, ...options }
     this._signer = signer
-    this._socket = new NostrSocket(signer._signer, socket_opt)
-    this._store  = new NostrStore(this._socket, store_opt)
-    this._sub    = this._socket.subscribe({ selfsub : false })
+    this._room   = new NostrRoom(secret, signer._signer, options)
+
     this._agreed = false
     this._full   = false
     this._init   = false
 
-    this._socket.on('error', (err)   => { this.emit('error', err)  })
-    this._store.on('error',  (err)   => { this.emit('error', err)  })
-
-    this._store.on('ready', () => {
-      if (!this.is_ready && this.sub.is_ready) {
-        this._init = true
-        this.emit('ready', this)
-      }
+    this._room.on('ready', () => {
+      this._init = true
+      this.emit('ready', this)
     })
 
-    this.sub.on('ready', () => {
-      if (!this.is_ready && this._store.is_ready) {
-        this._init = true
-        this.emit('ready', this)
-      }
-    })
-
-    this.sub.on('message', (msg) => {
+    this._room.on('msg', (msg) => {
       switch (msg.subject) {
         case 'approve':
           return this._approve_handler(msg)
@@ -156,11 +137,11 @@ export class DraftSession extends EventEmitter <{
   }
 
   get data () {
-    return this._store.data
+    return this._room.data
   }
 
   get id () {
-    return this._store._socket.topic_id
+    return this._room._store.id
   }
 
   get is_approved () {
@@ -187,7 +168,7 @@ export class DraftSession extends EventEmitter <{
     })
     return (sig !== undefined)
   }
-
+ 
   get is_full () {
     return has_full_enrollment(this.members, this.roles)
   }
@@ -256,7 +237,7 @@ export class DraftSession extends EventEmitter <{
   }
 
   get secret () {
-    return this._store._socket.secret
+    return this._room._store.secret
   }
 
   get signatures () {
@@ -267,16 +248,12 @@ export class DraftSession extends EventEmitter <{
     return this._signer
   }
 
-  get sub () {
-    return this._sub
-  }
-
   get terms () {
     return this.data.terms
   }
 
   get updated_at () {
-    return this._store.updated_at
+    return this._room._store.updated_at
   }
 
   log = {
@@ -364,9 +341,9 @@ export class DraftSession extends EventEmitter <{
     this.emit('join', mship)
   }
 
-  _join_handler (msg : EventMessage<MemberData>) {
+  _join_handler (msg : EventMessage) {
     const cat   = msg.envelope.created_at
-    const mship = msg.body
+    const mship = JSON.parse(msg.body)
     if (mship.pol === undefined || !this.has_policy(mship.pol)) {
       const err = 'invalid policy id: ' + mship.pol
       this.log.info('join rejected :', mship.pol)
@@ -392,8 +369,8 @@ export class DraftSession extends EventEmitter <{
     this.log.info('member left   :', mship.pub)
   }
 
-  _terms_handler (msg : EventMessage<Partial<ProposalData>>) {
-    const terms = msg.body
+  _terms_handler (msg : EventMessage) {
+    const terms = JSON.parse(msg.body)
     const cat   = msg.envelope.created_at
     const pub   = msg.envelope.pubkey
     if (!this.check_terms(terms)) {
@@ -424,11 +401,13 @@ export class DraftSession extends EventEmitter <{
     this.emit('terms', terms)
   }
 
-  _update (data : DraftData, created_at = now()) {
+  // TODO:  Fix the use of a timestamp here.
+
+  async _update (data : DraftData, _cat = now()) {
     validate_draft(data)
     verify_draft(data)
-    this._store._update(data, created_at)
-    if (this.is_full && !this._agreed) {
+    await this._room.update(data)
+    if (this.is_full && !this._full) {
       this.emit('full', this)
     }
     if (this.is_approved && !this._agreed) {
@@ -442,7 +421,7 @@ export class DraftSession extends EventEmitter <{
   approve () {
     const sig = this.signer.draft.approve(this.data)
     this._approve(sig)
-    this.sub.send('approve', sig)
+    this._room.send('approve', sig)
     this.log.info('send approve  :', this.signer.pubkey)
   }
 
@@ -461,16 +440,13 @@ export class DraftSession extends EventEmitter <{
     return true
   }
 
-  async connect (address : string, secret : string) {
-    await Promise.all([
-      this._socket.connect(address, secret),
-      this._store.connect(address, secret)
-    ])
+  async connect (address : string) {
+    await this._room.connect(address)
     return this
   }
 
-  delete (store_id : string) {
-    this._store._socket.delete(store_id)
+  delete () {
+    this._room.delete()
   }
 
   endorse () {
@@ -479,7 +455,7 @@ export class DraftSession extends EventEmitter <{
     const signer = this.signer
     const sig    = signer.draft.endorse(this.data)
     this._endorse(sig)
-    this.sub.send('endorse', sig)
+    this._room.send('endorse', sig)
     this.log.info('send endorse  :', signer.pubkey)
   }
 
@@ -524,15 +500,11 @@ export class DraftSession extends EventEmitter <{
 
   async init (
     address  : string, 
-    secret   : string,
     session  : DraftData
   ) {
     validate_draft(session)
     verify_draft(session)
-    return Promise.all([
-      this._store.init(address, secret, session),
-      this.sub.when_ready()
-    ])
+    return this._room.init(address, session)
   }
 
   join (policy_id : string, index ?: number) {
@@ -544,7 +516,7 @@ export class DraftSession extends EventEmitter <{
     const pol = this.get_policy(policy_id)
     mship.pol = policy_id
     this._join(mship, pol)
-    this.sub.send('join', mship)
+    this._room.send('join', JSON.stringify(mship))
     this.log.info('send join     :', mship.pub)
   }
 
@@ -557,44 +529,28 @@ export class DraftSession extends EventEmitter <{
       const commit_id = get_object_id(mship).hex
       const receipt   = this.when_commit(commit_id)
       this.log.info('send commit   :', commit_id)
-      this.sub.send('leave', mship)
+      this._room.send('leave', JSON.stringify(mship))
       return receipt
     }
     return
   }
 
   async list (address : string) {
-    const filter : EventFilter = {
-      authors : [ this._store.pubkey   ],
-      kinds   : [ this._store.opt.kind ],
-      until   : now()
-    }
-    let sessions : DraftItem[] = []
-    const socket = new NostrSocket(this._signer._signer)
-    const events = await socket.query(address, filter)
-    socket.close()
-    events.filter(e => socket.can_recover(e)).forEach(e => {
-      const pubkey     = e.pubkey
-      const updated_at = e.created_at
-      const store_id   = e.id
-      try {
-        const secret   = socket.recover(e)
-        const id       = sha256(secret).hex
-        sessions.push({ pubkey, id, secret, store_id, updated_at })
-      } catch { return }
-    })
-    return sessions
+    const filter = this._room._store.filter
+    const signer = this._signer._signer
+    return NostrRoom.list(address, signer, filter)
   }
 
   async publish (client : EscrowClient) {
     verify_proposal(this.data.proposal)
     const contract = await EscrowContract.create(client, this.data)
-    this.sub.send('publish', contract.cid)
+    this._room.send('publish', contract.cid)
+    this.emit('published', contract.cid)
     return contract
   }
 
   async refresh () {
-    return this._store.refresh()
+    return this._room._store.fetch()
   }
 
   update_terms (terms : Partial<ProposalData>) {
@@ -602,7 +558,7 @@ export class DraftSession extends EventEmitter <{
       throw new Error('invalid terms: ' + terms.toString())
     }
     this._update_terms(terms)
-    this.sub.send('terms', terms)
+    this._room.send('terms', JSON.stringify(terms))
     this.log.info('send terms     :', terms)
   }
 

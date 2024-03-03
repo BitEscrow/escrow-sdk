@@ -122,9 +122,9 @@
     "@cmdcode/buff": "2.2.5",
     "@cmdcode/crypto-tools": "2.7.6",
     "@cmdcode/musig2": "2.4.3",
-    "@cmdcode/signer": "1.4.1",
+    "@cmdcode/nostr-sdk": "^0.0.3",
+    "@cmdcode/signer": "1.4.2",
     "@scrow/tapscript": "2.2.2",
-    "websocket-polyfill": "^0.0.3",
     "zod": "^3.22.4"
   }
 }

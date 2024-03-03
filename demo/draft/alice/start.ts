@@ -20,10 +20,9 @@ import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 /** ========== [ Draft Session ] ========== **/
 
 // Create a draft session
-const session = new DraftSession(signer, {
-  socket_config : { verbose : true, debug : false },
-  store_config  : { verbose : true, debug : false },
-  verbose : true
+const session = new DraftSession(secret_id, signer, {
+  debug   : false,
+  verbose : false
 })
 
 // Create an account object.
@@ -35,9 +34,7 @@ session.on('error', console.log)
 
 // When the session is ready:
 session.on('ready', () => {
-  console.log('updated at :', new Date(session.updated_at * 1000))
-  console.log('init data  :')
-  console.dir(session.data)
+  console.log('alice ready')
   // If we are not a member:
   if (!session.is_member) {
     // Grab the buyer policy from the roles list.
@@ -53,32 +50,42 @@ session.on('ready', () => {
 
 // Each time the session updates:
 session.on('update', async () => {
-  console.log('draft updated')
-  console.log('draft:', session.data)
+  console.log('alice draft updated')
+  console.log('is full      :', session.is_full)
+  console.log('is approved  :', session.is_approved)
+  console.log('is confirmed :', session.is_confirmed)
+})
+
+session.on('join', (msg) => {
+  console.log('pubkey joined draft   :', msg.pub)
+  console.log('pubkey joined as role :', msg.pol)
+})
+
+session.on('approve', (proof) => {
+  const pub = proof.slice(0, 64)
+  console.log('pubkey approved:', pub)
+})
+
+session.on('endorse', (proof) => {
+  const pub = proof.slice(0, 64)
+  console.log('pubkey endorsed:', pub)
+})
+
+session.on('full', () => {
+  console.log('draft is full')
   // If all roles have been assigned:
   if (session.is_full) {
     // If we have not yet endorsed the draft:
     if (!session.is_approved) {
       // Endorse the draft.
       session.approve()
-      console.log(`${alias} approved the draft`)
-    } else if (session.is_confirmed) {
-      // console.log('publishing the contract...')
-      try {
-        session.publish(client)
-      } catch (err) {
-        console.log('error publishing contract:', err)
-      }
     }
   }
 })
 
-session.on('full', () => {
-  console.log('all roles have been filled')
-})
-
 session.on('confirmed', () => {
   console.log('draft has enough signatures')
+  session.publish(client)
 })
 
 session.on('error', console.log)
@@ -169,4 +176,4 @@ session.on('error', console.log)
 
 console.log('draft:', agent_draft)
 
-await session.init('wss://relay.damus.io', secret_id, agent_draft)
+await session.init('wss://relay.damus.io', agent_draft)
