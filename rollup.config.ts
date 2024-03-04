@@ -39,10 +39,13 @@ export default {
       format: 'iife',
       name: 'escrow_core',
       plugins: [terser()],
-      sourcemap: true
+      sourcemap: true,
+      globals : {
+        'ws' : 'WebSocket'
+      }
     }
   ],
-  external : ['websocket'],
+  external : ['ws'],
   plugins: [ typescript(), nodeResolve(), commonjs() ],
   strictDeprecations: true,
   treeshake

@@ -8,14 +8,6 @@ import { signer } from './config.js'
 
 console.log(signer.pubkey)
 
-const session = new DraftSession(signer, {
-  socket_config : { verbose : true, debug : true },
-  store_config  : { verbose : true, debug : false },
-  verbose : true
-})
-
-const drafts = await session.list('wss://relay.damus.io')
+const drafts = await DraftSession.list('wss://relay.damus.io', signer, { verbose : true })
 
 console.dir(drafts, { depth : null })
-
-session.delete(drafts[0].store_id)

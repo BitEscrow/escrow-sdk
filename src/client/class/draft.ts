@@ -3,10 +3,12 @@ import { EventEmitter }    from './emitter.js'
 import { EscrowSigner }    from './signer.js'
 import { EscrowContract }  from './contract.js'
 import { EscrowClient }    from './client.js'
+import { DraftItem }       from '../types.js'
 
 import {
   EventMessage,
-  NostrRoom
+  NostrRoom,
+  SocketConfig
 } from '@cmdcode/nostr-sdk'
 
 import {
@@ -75,6 +77,14 @@ export class DraftSession extends EventEmitter <{
   'update'     : DraftSession
   'published'  : string
 }> {
+
+  static async list (
+    address  : string, 
+    signer   : EscrowSigner,
+    options ?: Partial<SocketConfig>
+  ) : Promise<DraftItem[]> {
+    return NostrRoom.list(address, signer._signer, undefined, options)
+  }
 
   readonly _opt    : SessionConfig
   readonly _signer : EscrowSigner

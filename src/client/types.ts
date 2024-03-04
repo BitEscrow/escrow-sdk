@@ -29,9 +29,9 @@ export interface FetchConfig {
 
 export interface DraftItem {
   pubkey     : string,
-  id         : string,
   secret     : string,
   store_id   : string,
+  topic_id   : string,
   updated_at : number
 }
 
