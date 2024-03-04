@@ -62,6 +62,7 @@ export class DraftSession extends EventEmitter <{
   'debug'      : unknown[]
   'endorse'    : string
   'error'      : [ unknown, unknown ]
+  'fetch'      : DraftSession
   'full'       : DraftSession
   'info'       : unknown[]
   'join'       : MemberData
@@ -107,6 +108,8 @@ export class DraftSession extends EventEmitter <{
     this._agreed = false
     this._full   = false
     this._init   = false
+
+    this._room.on('fetch', () => { void this.emit('fetch', this) })
 
     this._room.on('ready', () => {
       this._init = true
@@ -468,6 +471,10 @@ export class DraftSession extends EventEmitter <{
     this.log.info('send endorse  :', signer.pubkey)
   }
 
+  async fetch () {
+    return this._room.fetch()
+  }
+
   get_policy (pol_id : string) {
     const pol = this.roles.find(e => e.id === pol_id)
     if (pol === undefined) throw new Error('policy does not exist: ' + pol_id)
@@ -554,10 +561,6 @@ export class DraftSession extends EventEmitter <{
     this._room.send('publish', contract.cid)
     this.emit('published', contract.cid)
     return contract
-  }
-
-  async refresh () {
-    return this._room._store.fetch()
   }
 
   update_terms (terms : Partial<ProposalData>) {
