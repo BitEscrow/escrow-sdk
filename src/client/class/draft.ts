@@ -25,7 +25,6 @@ import {
 } from '@/lib/policy.js'
 
 import {
-  get_object_id,
   is_hash,
   now
 } from '@/lib/util.js'
@@ -372,8 +371,8 @@ export class DraftSession extends EventEmitter <{
     this.emit('leave', mship)
   }
 
-  _leave_handler (msg : EventMessage<MemberData>) {
-    const mship = msg.body
+  _leave_handler (msg : EventMessage) {
+    const mship = JSON.parse(msg.body)
     const cat   = msg.envelope.created_at
     this._leave(mship, cat)
     this.log.info('member left   :', mship.pub)
@@ -534,13 +533,11 @@ export class DraftSession extends EventEmitter <{
     const members = this.data.members
     const signer  = this.signer   
     if (has_membership(members, signer._signer)) {
-      const cred      = signer.credential.claim(members)
-      const mship     = cred.data
-      const commit_id = get_object_id(mship).hex
-      const receipt   = this.when_commit(commit_id)
-      this.log.info('send commit   :', commit_id)
+      const cred  = signer.credential.claim(members)
+      const mship = cred.data
+      this._leave(mship)
       this._room.send('leave', JSON.stringify(mship))
-      return receipt
+      this.log.info('send leave     :', mship.pub)
     }
     return
   }
