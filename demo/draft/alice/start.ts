@@ -20,7 +20,7 @@ import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 /** ========== [ Draft Session ] ========== **/
 
 // Create a draft session
-const session = new DraftSession(secret_id, signer, {
+const session = new DraftSession(signer, {
   debug   : false,
   verbose : false
 })
@@ -176,4 +176,4 @@ session.on('error', console.log)
 
 console.log('draft:', agent_draft)
 
-await session.init('wss://relay.damus.io', agent_draft)
+await session.init('wss://relay.damus.io', secret_id, agent_draft)

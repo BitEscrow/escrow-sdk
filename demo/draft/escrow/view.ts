@@ -1,13 +1,10 @@
-import { DraftSession } from '@scrow/core'
+import { DraftSession }      from '@scrow/core'
 import { secret_id, signer } from '../terms.js'
-import { client } from '@scrow/demo/01_create_client.js'
 
 /** ========== [ Draft Session ] ========== **/
 
 // Create a draft session
 const session = new DraftSession(signer, {
-  socket_config : { verbose : true, debug : false },
-  store_config  : { verbose : true,  debug : false },
   verbose : true
 })
 

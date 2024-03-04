@@ -10,14 +10,14 @@ import { config }       from '@scrow/demo/00_demo_config.js'
 import { print_banner } from '@scrow/test'
 import { secret_id }    from '../terms.js'
 
-import { fund_mutiny_address, fund_regtest_address, sleep } from '@scrow/demo/util.js'
+import { fund_mutiny_address, fund_regtest_address } from '@scrow/demo/util.js'
 
 import { alias, fund_amt, role, signer, wit_tmpl } from './config.js'
 
 /** ========== [ Draft Session ] ========== **/
 
 // Create a draft session
-const session = new DraftSession(secret_id, signer, {
+const session = new DraftSession(signer, {
   debug   : false,
   verbose : false
 })
@@ -162,4 +162,4 @@ session.on('published', async (cid) => {
 
 session.on('error', console.log)
 
-await session.connect('wss://relay.damus.io')
+await session.connect('wss://relay.damus.io', secret_id)

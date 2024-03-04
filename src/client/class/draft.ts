@@ -91,7 +91,6 @@ export class DraftSession extends EventEmitter <{
   _init   : boolean
 
   constructor (
-    secret   : string,
     signer   : EscrowSigner, 
     options ?: Partial<SessionConfig>
   ) {
@@ -99,7 +98,7 @@ export class DraftSession extends EventEmitter <{
 
     this._opt    = { debug : false, verbose : false, ...options }
     this._signer = signer
-    this._room   = new NostrRoom(secret, signer._signer, options)
+    this._room   = new NostrRoom(signer._signer, options)
 
     this._agreed = false
     this._full   = false
@@ -446,8 +445,8 @@ export class DraftSession extends EventEmitter <{
     return true
   }
  
-  async connect (address : string) {
-    await this._room.connect(address)
+  async connect (address : string, secret : string) {
+    await this._room.connect(address, secret)
     return this
   }
 
@@ -510,11 +509,12 @@ export class DraftSession extends EventEmitter <{
 
   async init (
     address  : string, 
+    secret   : string,
     session  : DraftData
   ) {
     validate_draft(session)
     verify_draft(session)
-    return this._room.init(address, session)
+    return this._room.init(address, session, secret)
   }
 
   join (policy_id : string, index ?: number) {
