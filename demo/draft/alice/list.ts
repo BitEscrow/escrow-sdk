@@ -1,13 +1,9 @@
 import { DraftSession } from '@scrow/core'
-
-import { signer } from './config.js'
-
-/** ========== [ Draft Session ] ========== **/
-
-// Create a draft session
+import { signer }       from './config.js'
 
 console.log(signer.pubkey)
 
-const drafts = await DraftSession.list('wss://relay.damus.io', signer, { verbose : true })
+const addr   = 'wss://relay.damus.io'
+const drafts = await DraftSession.list(addr, signer)
 
 console.dir(drafts, { depth : null })

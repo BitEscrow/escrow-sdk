@@ -1,9 +1,10 @@
 import { verify_proposal } from '@/validators/proposal.js'
-import { EventEmitter }    from './emitter.js'
-import { EscrowSigner }    from './signer.js'
-import { EscrowContract }  from './contract.js'
-import { EscrowClient }    from './client.js'
-import { DraftItem }       from '../types.js'
+import { EscrowClient }    from '@/client/class/client.js'
+import { EscrowContract }  from '@/client/class/contract.js'
+import { EventEmitter }    from '@/client/class/emitter.js'
+import { EscrowSigner }    from '@/client/class/signer.js'
+import { DraftItem }       from '@/client/types.js'
+import { is_hash }         from '@/lib/util.js'
 
 import {
   EventMessage,
@@ -23,11 +24,6 @@ import {
   rem_enrollment,
   tabulate_enrollment
 } from '@/lib/policy.js'
-
-import {
-  is_hash,
-  now
-} from '@/lib/util.js'
 
 import {
   find_program,
@@ -111,7 +107,7 @@ export class DraftSession extends EventEmitter <{
 
     this._room.on('fetch', () => { void this.emit('fetch', this) })
 
-    this._room.on('ready', () => {
+    this._room.once('ready', () => {
       this._init = true
       this.emit('ready', this)
     })
@@ -413,12 +409,10 @@ export class DraftSession extends EventEmitter <{
     this.emit('terms', terms)
   }
 
-  // TODO:  Fix the use of a timestamp here.
-
-  async _update (data : DraftData, _cat = now()) {
+  async _update (data : DraftData, cat ?: number) {
     validate_draft(data)
     verify_draft(data)
-    await this._room.update(data)
+    this._room.update(data, [], cat)
     if (this.is_full && !this._full) {
       this.emit('full', this)
     }
@@ -451,7 +445,7 @@ export class DraftSession extends EventEmitter <{
     }
     return true
   }
-
+ 
   async connect (address : string) {
     await this._room.connect(address)
     return this
@@ -561,6 +555,10 @@ export class DraftSession extends EventEmitter <{
     this._room.send('publish', contract.cid)
     this.emit('published', contract.cid)
     return contract
+  }
+
+  refresh () {
+    return this._room.refresh()
   }
 
   update_terms (terms : Partial<ProposalData>) {
