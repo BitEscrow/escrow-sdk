@@ -12,6 +12,7 @@ import {
 
 const AGENT_ALIAS   : string = 'carol'
 const SECRET_PASS   : string = 'test_draft4'
+const RELAY_ADDR    : string = 'wss://nos.lol'
 
 const PROP_TEMPLATE : ProposalTemplate = {
   title     : 'Basic two-party contract with third-party arbitration.',
@@ -51,6 +52,9 @@ const PROP_ROLES   : RoleTemplate[] = [
   }
 ]
 
+//
+export const address   = RELAY_ADDR
+//
 export const alias     = AGENT_ALIAS
 // Compute draft id for nostr store.
 export const secret_id = Buff.str(SECRET_PASS).digest.hex

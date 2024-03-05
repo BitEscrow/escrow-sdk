@@ -105,9 +105,10 @@ export class DraftSession extends EventEmitter <{
     this._full   = false
     this._init   = false
 
-
-    this._room.on('close', () => { void this.emit('close', this) })
-    this._room.on('fetch', () => { void this.emit('fetch', this) })
+    this._room.on('close',  () => { void this.emit('close', this) })
+    this._room.on('fetch',  () => { void this.emit('fetch', this) })
+    this._room.on('error',  (err) => { void this.emit('error', err) })
+    this._room.on('reject', (err) => { void this.emit('error', err) })
 
     this._room.once('ready', () => {
       this._init = true
@@ -402,7 +403,7 @@ export class DraftSession extends EventEmitter <{
   async _update (data : DraftData, cat ?: number) {
     validate_draft(data)
     verify_draft(data)
-    this._room.update(data, [], cat)
+    this._room.update(data, cat)
     if (this.is_full && !this._full) {
       this.emit('full', this)
     }
@@ -533,7 +534,7 @@ export class DraftSession extends EventEmitter <{
   ) {
     validate_draft(session)
     verify_draft(session)
-    return this._room.init(address, session, secret)
+    return this._room.init(address, secret, session)
   }
 
   join (policy_id : string, index ?: number) {

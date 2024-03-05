@@ -3,8 +3,6 @@ import { signer }       from './config.js'
 
 import { address, secret_id } from '../terms.js'
 
-const role = 'buyer'
-
 const session = new DraftSession(signer, {
   debug   : false,
   verbose : false
@@ -13,17 +11,14 @@ const session = new DraftSession(signer, {
 session.on('ready', () => {
   console.log('session ready')
   console.log('session:', session.data)
-  if (!session.is_member) {
-    if (session.has_role(role)) {
-      console.log('joining session as:', role)
-      const pol = session.get_role(role)
-      session.join(pol.id)
-    }
+  if (session.is_member) {
+    console.log('member leaving session:', session.mship.pub)
+    session.leave()
   }
 })
 
-session.on('join', (mship) => {
-  console.log('member joined:', mship.pub)
+session.on('leave', (mship) => {
+  console.log('member left:', mship.pub)
   session.close()
 })
 

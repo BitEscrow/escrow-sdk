@@ -2,6 +2,7 @@ import { DraftSession } from '@scrow/core'
 import { signer }       from './config.js'
 
 import {
+  address,
   agent_draft,
   secret_id
 } from '../terms.js'
@@ -22,7 +23,4 @@ session.on('ready', () => {
   console.log('alice ready')
 })
 
-await session.init('wss://relay.damus.io', secret_id, agent_draft)
-
-console.log('session id  :', session.id)
-console.log('session sec :', session.secret)
+await session.init(address, secret_id, agent_draft)
