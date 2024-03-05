@@ -37,10 +37,10 @@
     "@cmdcode/buff" "^2.2.5"
     "@cmdcode/crypto-tools" "^2.7.6"
 
-"@cmdcode/nostr-sdk@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@cmdcode/nostr-sdk/-/nostr-sdk-0.1.0.tgz#4ca253cddf3d9505d86bda38bc864699f41e10b8"
-  integrity sha512-ykQmLbgQxoF56473jjQAC5y6KdsAFTAPDPwhR1YpbCXoDBGghwuLAMhoGHysAh1PbKYccVY6Re69wKlHgZQMJA==
+"@cmdcode/nostr-sdk@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@cmdcode/nostr-sdk/-/nostr-sdk-0.1.2.tgz#b762d1663e0da279dc33ac3b7ee92457b187170f"
+  integrity sha512-/G8FYtpEAJiDHhxl1gKZpVmwyySEsok/bkud2z6Sb/CrZnBFK7uZ51CcJYiAOKLOKwtWrdJhlL0c4XGOXSPm7A==
   dependencies:
     "@cmdcode/buff" "2.2.5"
     "@cmdcode/crypto-tools" "2.7.6"

@@ -53,6 +53,7 @@ interface SessionConfig {
 
 export class DraftSession extends EventEmitter <{
   'approve'    : string
+  'close'      : DraftSession
   'commit'     : string
   'confirmed'  : DraftSession
   'debug'      : unknown[]
@@ -104,6 +105,8 @@ export class DraftSession extends EventEmitter <{
     this._full   = false
     this._init   = false
 
+
+    this._room.on('close', () => { void this.emit('close', this) })
     this._room.on('fetch', () => { void this.emit('fetch', this) })
 
     this._room.once('ready', () => {
@@ -135,14 +138,6 @@ export class DraftSession extends EventEmitter <{
     return this.data.approvals
   }
   
-  get available () {
-    const map = tabulate_enrollment(this.members, this.roles)
-    return this.roles.filter(e => {
-      const score = map.get(e.id) ?? e.max_slots
-      return score >= e.max_slots
-    })
-  }
-
   get data () {
     return this._room.data
   }
@@ -153,7 +148,7 @@ export class DraftSession extends EventEmitter <{
 
   get is_approved () {
     if (!this.is_member) return false
-    const mship = this.membership.data
+    const mship = this.mship
     const sig   = this.approvals.find(e => {
       return e.slice(0, 64) === mship.pub
     })
@@ -209,18 +204,15 @@ export class DraftSession extends EventEmitter <{
     return this.data.members
   }
 
-  get member_idx () {
-    const idx = this.members.findIndex(e => {
-      return this.signer.credential.claimable(e)
-    })
-    return idx !== -1 ? idx : null
-  }
+  // get member_idx () {
+  //   const idx = this.members.findIndex(e => {
+  //     return this.signer.credential.claimable(e)
+  //   })
+  //   return idx !== -1 ? idx : null
+  // }
 
-  get membership () {
-    if (!this.is_member) {
-      throw new Error('signer is not a member of the draft')
-    }
-    return this.signer.credential.claim(this.members)
+  get mship () {
+    return this.get_mship().data
   }
 
   get opt () {
@@ -373,7 +365,6 @@ export class DraftSession extends EventEmitter <{
     const mship = JSON.parse(msg.body)
     const cat   = msg.envelope.created_at
     this._leave(mship, cat)
-    this.log.info('member left   :', mship.pub)
   }
 
   _terms_handler (msg : EventMessage) {
@@ -444,6 +435,11 @@ export class DraftSession extends EventEmitter <{
     }
     return true
   }
+
+  close () {
+    this._room.close()
+    return this
+  }
  
   async connect (address : string, secret : string) {
     await this._room.connect(address, secret)
@@ -468,6 +464,13 @@ export class DraftSession extends EventEmitter <{
     return this._room.fetch()
   }
 
+  get_mship () {
+    if (!this.is_member) {
+      throw new Error('you are not a member of the draft')
+    }
+    return this.signer.credential.claim(this.members)
+  }
+
   get_policy (pol_id : string) {
     const pol = this.roles.find(e => e.id === pol_id)
     if (pol === undefined) throw new Error('policy does not exist: ' + pol_id)
@@ -486,9 +489,21 @@ export class DraftSession extends EventEmitter <{
     return pol
   }
 
+  get_seats () {
+    const map = tabulate_enrollment(this.members, this.roles)
+    return this.roles.filter(e => {
+      const score = map.get(e.id) ?? e.max_slots
+      return score < e.max_slots
+    })
+  }
+
   get_term <K extends keyof ProposalData> (key : K) {
     if (!this.terms.includes(key)) throw new Error('term is not negotiable: ' + key)
     return this.proposal[key]
+  }
+
+  has_mship () {
+    return this.signer.credential.exists(this.members)
   }
 
   has_policy (pol_id : string) {
@@ -501,6 +516,10 @@ export class DraftSession extends EventEmitter <{
 
   has_role (title : string) {
     return this.roles.find(e => e.title === title) !== undefined
+  }
+
+  has_seats () {
+    return this.get_seats().length > 0
   }
 
   has_term <K extends keyof ProposalData> (key : K) {
