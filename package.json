@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.7.26",
+  "version": "0.7.27",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
