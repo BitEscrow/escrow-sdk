@@ -1,5 +1,4 @@
 contrib
-coredata
 dist
 node_modules
 src/**/_*

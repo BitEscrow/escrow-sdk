@@ -1,3 +1,12 @@
+import { EscrowClient } from "@/index.js";
 import { Buff } from "@cmdcode/buff";
 
-console.log(Buff.random(32).hex)
+const client = new EscrowClient({
+  network  : 'mutiny',
+  hostname : 'https://bitescrow-mutiny.vercel.app',
+  oracle   : 'https://mutinynet.com'
+})
+
+const est = await client.oracle.fee_estimates()
+
+console.log(est)

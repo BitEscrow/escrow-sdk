@@ -1,7 +1,7 @@
 import { DraftSession } from '@scrow/core'
 import { signer }       from './config.js'
 
-import { address, secret_id }    from '../terms.js'
+import { address, secret_id } from '../terms.js'
 
 /** ========== [ Draft Session ] ========== **/
 
@@ -33,4 +33,6 @@ session.on('leave', (mship) => {
   console.log('member left:', mship.pub)
 })
 
-await session.connect(address, secret_id)
+
+
+await session.connect('wss://nos.lol', '9112933aec51b7b79da16c64ce17e34fa892dd34acd6a005d7ea8db45fffa38f')

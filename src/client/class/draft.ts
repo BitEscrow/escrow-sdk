@@ -157,11 +157,11 @@ export class DraftSession extends EventEmitter <{
   }
 
   get is_confirmed () {
-    const pubkeys = this.members.map(e => e.pub)
-    return this.is_full && this.approvals.every(e => {
-      const included = pubkeys.includes(e.slice(0 ,64))
-      const verified = verify_endorsement(this.prop_id, e)
-      return included && verified
+    const acks = this.approvals
+    return this.is_full && this.members.every(e => {
+      const ack = acks.find(x => x.slice(0, 64) === e.pub)
+      if (ack === undefined) return false
+      return verify_endorsement(this.prop_id, ack)
     })
   }
 
@@ -335,6 +335,7 @@ export class DraftSession extends EventEmitter <{
     created_at ?: number
   ) {
     const new_draft = join_role(mship, policy, this.data)
+    
     this._update(new_draft, created_at)
     this.log.info('member joined :', mship.pub)
     this.log.info('role joined   :', policy.id)
@@ -395,7 +396,13 @@ export class DraftSession extends EventEmitter <{
       schedule : [ ...schedule, ...terms.schedule ?? [] ],
     }
 
-    const session = { ...this.data, proposal }
+    const session = {
+      ...this.data,
+      proposal,
+      approvals  : [],
+      signatures : []
+    }
+
     this._update(session, created_at)
     this.emit('terms', terms)
   }
@@ -416,10 +423,16 @@ export class DraftSession extends EventEmitter <{
   }
 
   approve () {
-    const sig = this.signer.draft.approve(this.data)
-    this._approve(sig)
-    this._room.send('approve', sig)
-    this.log.info('send approve  :', this.signer.pubkey)
+    const sig  = this.signer.draft.approve(this.data)
+    const pub  = this.mship.pub
+    const acks = this.approvals.map(e => e.slice(0, 64))
+    if (acks.includes(pub)) {
+      throw new Error('draft is already approved by member: ' + pub)
+    } else {
+      this._approve(sig)
+      this._room.send('approve', sig)
+      this.log.info('send approve  :', this.signer.pubkey)
+    }
   }
 
   check_member (pubkey : string) {
@@ -569,6 +582,13 @@ export class DraftSession extends EventEmitter <{
     return NostrRoom.list(address, signer, filter)
   }
 
+  on_topic (
+    topic : string, 
+    fn    : (msg: EventMessage<string>) => void
+  ) {
+    return this._room.on_topic(topic, fn)
+  }
+
   async publish (client : EscrowClient) {
     verify_proposal(this.data.proposal)
     const contract = await EscrowContract.create(client, this.data)
@@ -579,6 +599,10 @@ export class DraftSession extends EventEmitter <{
 
   refresh () {
     return this._room.refresh()
+  }
+
+  send (subject: string, body: string) {
+    return this._room.send(subject, body)
   }
 
   update_terms (terms : Partial<ProposalData>) {
