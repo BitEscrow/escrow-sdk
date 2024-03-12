@@ -54,6 +54,7 @@ export function create_draft (
     members    = [],
     roles      = [],
     signatures = [],
+    store      = {},
     terms      = [] 
   } = template
   const prop     = create_proposal(proposal)
@@ -62,7 +63,7 @@ export function create_draft (
       ? create_policy(e) 
       : e as RolePolicy
   })
-  const draft = { approvals, members, proposal : prop, roles : policies, signatures, terms }
+  const draft = { approvals, members, proposal : prop, roles : policies, signatures, store, terms }
   return schema.draft.session.parse(draft)
 }
 

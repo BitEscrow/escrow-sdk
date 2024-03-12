@@ -35,6 +35,10 @@ const policy = z.object({
   programs  : prop.terms.array()
 })
 
+const store = z.object({
+  cid : str.optional()
+})
+
 const terms = prop.data.keyof()
 
 const session = z.object({
@@ -43,6 +47,7 @@ const session = z.object({
   proposal   : prop.data,
   roles      : policy.array(),
   signatures : hex.array(),
+  store      : store,
   terms      : terms.array()
 })
 
@@ -51,6 +56,7 @@ const template = z.object({
   proposal   : prop.template,
   roles      : role.array().optional(),
   signatures : hex.array().optional(),
+  store      : store.optional(),
   terms      : terms.array().optional()
 })
 

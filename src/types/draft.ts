@@ -34,6 +34,7 @@ export interface DraftTemplate {
   proposal    : ProposalTemplate | ProposalData
   roles      ?: Array<RolePolicy | RoleTemplate>
   signatures ?: string[]
+  store      ?: DraftStore
   terms      ?: string[]
 }
 
@@ -43,5 +44,10 @@ export interface DraftData {
   proposal   : ProposalData
   roles      : RolePolicy[]
   signatures : string[]
+  store      : DraftStore
   terms      : string[]
+}
+
+export interface DraftStore {
+  cid ?: string
 }
