@@ -27,7 +27,8 @@ export function create_account_api (signer : EscrowSigner) {
     index = index ?? signer._gen_idx()
     const deposit_pk = signer.pubkey
     const spend_xpub = signer.wallet.get(index).xpub
-    return { deposit_pk, locktime, spend_xpub }
+    const stamp      = index
+    return { deposit_pk, locktime, spend_xpub, stamp }
   }
 }
 

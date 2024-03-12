@@ -5,7 +5,7 @@ import depo  from './deposit.js'
 import prop  from './proposal.js'
 import tx    from './tx.js'
  
-const { hash, hex, nonce, num, str } = base
+const { hash, hex, nonce, num, stamp, str } = base
 const { covenant, locktime } = depo
 const { txspend } = tx
 
@@ -18,7 +18,8 @@ const contract_create_request = z.object({
 const deposit_acct_req = z.object({
   deposit_pk : hash,
   locktime   : locktime.optional(),
-  spend_xpub : str
+  spend_xpub : str,
+  stamp      : stamp.optional()
 })
 
 const deposit_register_req = z.object({
