@@ -12,7 +12,6 @@ export interface AccountRequest {
   deposit_pk : string
   locktime  ?: number
   spend_xpub : string
-  stamp     ?: number
 }
 
 export interface RegisterRequest {

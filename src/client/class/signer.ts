@@ -34,7 +34,7 @@ export class EscrowSigner {
     const signer = new Signer({ seed })
     const wallet = (xpub !== undefined)
       ? new Wallet(xpub)
-      : Wallet.generate({ seed, network : config.network as Network })
+      : Wallet.create({ seed, network : config.network as Network })
     return new EscrowSigner({ ...config, signer, wallet })
   }
 
