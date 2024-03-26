@@ -1,4 +1,4 @@
-import { EscrowClient } from '../../class/client.js'
+/* Module Imports */
 
 import {
   broadcast_tx,
@@ -7,12 +7,19 @@ import {
   get_utxo_data,
   get_tx_data,
   get_address_utxos
-} from '@/lib/oracle.js'
+} from '@/core/lib/oracle.js'
 
-import { OracleQuery, OracleSpendData } from '@/types/index.js'
+import {
+  OracleQuery,
+  OracleSpendData
+} from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
-import { sleep } from '@/lib/util.js'
+import { sleep }   from '@/util.js'
+
+/* Local Imports */
+
+import { EscrowClient } from '@/client/class/client.js'
 
 function broadcast_tx_api (client : EscrowClient) {
   return async (txhex : string) => {
@@ -27,21 +34,20 @@ function fee_estimates_api (client : EscrowClient) {
   }
 }
 
-
-function get_fee_target_api (client: EscrowClient) {
+function get_fee_target_api (client : EscrowClient) {
   return async (target : number) => {
     return get_fee_target(client._oracle, target)
   }
 }
 
-function get_txdata_api (client: EscrowClient) {
+function get_txdata_api (client : EscrowClient) {
   return async (txid : string) => {
     assert.is_hash(txid)
     return get_tx_data(client._oracle, txid)
   }
 }
 
-function get_utxo_api (client: EscrowClient) {
+function get_utxo_api (client : EscrowClient) {
   return async (query : OracleQuery) => {
     assert.is_hash(query.txid)
     return get_utxo_data(client._oracle, query)

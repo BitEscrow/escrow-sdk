@@ -1,6 +1,6 @@
-import { update_contract }   from '@/lib/contract.js'
-import { now, sleep }        from '@/lib/util.js'
-import { validate_contract } from '@/validators/contract.js'
+import { now, sleep }        from '@/util.js'
+import { validate_contract } from '@/core/validators/contract.js'
+import { update_contract }   from '@/client/lib/contract.js'
 import { EscrowClient }      from './client.js'
 import { EventEmitter }      from './emitter.js'
 import { ContractVM }        from './machine.js'
@@ -12,7 +12,7 @@ import {
   ContractStatus,
   DraftData,
   FundDigest
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 interface EscrowContractConfig {
   refresh_ival : number
@@ -31,7 +31,6 @@ export class EscrowContract extends EventEmitter <{
   'status' : ContractStatus
   'update' : EscrowContract
 }> {
-
   static async create (
     client  : EscrowClient,
     draft   : DraftData,
@@ -56,7 +55,7 @@ export class EscrowContract extends EventEmitter <{
 
   readonly _client : EscrowClient
   readonly _opt    : EscrowContractConfig
-  
+
   _data    : ContractData
   _init    : boolean
   _updated : number
@@ -120,7 +119,7 @@ export class EscrowContract extends EventEmitter <{
       if (this.is_stale || force) {
         const res = await this._status()
         if (res.updated) {
-          this._update(res.contract)
+          void this._update(res.contract)
         } else {
           this._updated = now()
         }
@@ -181,7 +180,7 @@ export class EscrowContract extends EventEmitter <{
     const tkn = signer.request.contract_cancel(this.cid)
     const res = await api.cancel(this.cid, tkn)
     if (!res.ok) throw new Error(res.error)
-    this._update(res.data.contract)
+    void this._update(res.data.contract)
     return this
   }
 
@@ -207,7 +206,7 @@ export class EscrowContract extends EventEmitter <{
     return this.data
   }
 
-  toString() {
+  toString () {
     return JSON.stringify(this.data)
   }
 }

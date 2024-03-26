@@ -1,12 +1,14 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
-import { EscrowClient } from './client.js'
-import { SignerConfig } from '../types.js'
 
 import {
   Seed,
   Signer,
-  Wallet,
+  Wallet
 } from '@cmdcode/signer'
+
+import { Network } from '@/types.js'
+
+import { EscrowClient } from './client.js'
 
 import account_api   from '../api/signer/account.js'
 import fetch_api     from '../api/signer/fetch.js'
@@ -18,14 +20,13 @@ import wallet_api    from '../api/signer/wallet.js'
 
 import {
   CredentialAPI,
-  Network,
+  SignerConfig,
   WalletAPI
-} from '@/types/index.js'
+} from '../types/index.js'
 
 const DEFAULT_IDXGEN = () => Buff.now(4).num
 
 export class EscrowSigner {
-
   static create (
     config : Partial<SignerConfig>,
     seed   : Bytes,
@@ -34,7 +35,7 @@ export class EscrowSigner {
     const signer = new Signer({ seed })
     const wallet = (xpub !== undefined)
       ? new Wallet(xpub)
-      : Wallet.create({ seed, network : config.network as Network })
+      : Wallet.create({ seed, network: config.network as Network })
     return new EscrowSigner({ ...config, signer, wallet })
   }
 
@@ -51,14 +52,14 @@ export class EscrowSigner {
     xpub  ?: string
   ) {
     return {
-      from_phrase : (
+      from_phrase: (
         phrase : string,
         salt  ?: string | undefined
       ) => {
         const seed = Seed.import.from_char(phrase, salt)
         return EscrowSigner.create(config, seed, xpub)
       },
-      from_words : (
+      from_words: (
         words     : string | string[],
         password ?: string | undefined
       ) => {

@@ -1,14 +1,14 @@
 import { parse_extkey }   from '@cmdcode/crypto-tools/hd'
 import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 import { EscrowSigner }   from '@/client/index.js'
-import { get_object_id }  from '@/lib/util.js'
+import { get_object_id }  from '@/util.js'
 
 import {
   get_deposit_address,
   get_deposit_ctx
-} from '@/lib/deposit.js'
+} from '@/core/lib/deposit.js'
 
-import { DepositAccount } from '@/types/index.js'
+import { DepositAccount } from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
 
@@ -19,9 +19,9 @@ export function verify_account (
   const { acct_id, acct_sig, ...rest } = account
   const { host_pub, network, pubkey }  = signer
 
-  const { 
-    address, agent_pk, deposit_pk, 
-    sequence, spend_xpub 
+  const {
+    address, agent_pk, deposit_pk,
+    sequence, spend_xpub
   } = rest
 
   assert.ok(host_pub !== undefined,           'host pubkey is not set on device')
@@ -35,6 +35,6 @@ export function verify_account (
 
   assert.ok(address === depo_addr,            'account address does not match context')
   assert.ok(digest.hex === acct_id,           'account id does not match digest')
-  
-  verify_sig(acct_sig, acct_id, host_pub, { throws : true })
+
+  verify_sig(acct_sig, acct_id, host_pub, { throws: true })
 }

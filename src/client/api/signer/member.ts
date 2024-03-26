@@ -1,14 +1,14 @@
 import { Wallet }       from '@cmdcode/signer'
 import { EscrowSigner } from '@/client/class/signer.js'
-import { MemberData }   from '@/types/index.js'
-import { Membership }   from '@/client/types.js'
+import { MemberData }   from '@/core/types/index.js'
+import { Membership }   from '../../types/index.js'
 
 import {
   gen_membership,
   get_membership,
   has_credential,
-  has_membership,
-} from '@/lib/member.js'
+  has_membership
+} from '@/client/lib/member.js'
 
 export function gen_membership_api (client : EscrowSigner) {
   return (index ?: number) => {
@@ -55,6 +55,6 @@ export default function (client : EscrowSigner) {
     claimable : is_claimable_api(client),
     claim     : claim_membership_api(client),
     exists    : has_membership_api(client),
-    generate  : gen_membership_api(client),
+    generate  : gen_membership_api(client)
   }
 }

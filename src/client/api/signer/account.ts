@@ -1,23 +1,24 @@
-import { parse_extkey }     from '@cmdcode/crypto-tools/hd'
-import { EscrowSigner }     from '@/client/class/signer.js'
-import { get_deposit_ctx }  from '@/lib/deposit.js'
-import { verify_account }   from '@/client/validators/deposit.js'
+import { parse_extkey }       from '@cmdcode/crypto-tools/hd'
+import { EscrowSigner }       from '@/client/class/signer.js'
+import { get_deposit_ctx }    from '@/core/lib/deposit.js'
+import { create_account_req, get_account_ctx } from '@/core/lib/account.js'
+import { verify_account }     from '@/client/validators/deposit.js'
 
 import {
   create_covenant,
   create_return_psig
-} from '@/lib/session.js'
+} from '@/core/lib/session.js'
 
 import {
   AccountRequest,
   CloseRequest,
   CommitRequest,
   ContractData,
-  DepositAccount,
+  AccountData,
   DepositData,
   LockRequest,
   TxOutput
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 export function create_account_api (signer : EscrowSigner) {
   return (
@@ -27,12 +28,12 @@ export function create_account_api (signer : EscrowSigner) {
     index = index ?? signer._gen_idx()
     const deposit_pk = signer.pubkey
     const spend_xpub = signer.wallet.get(index).xpub
-    return { deposit_pk, locktime, spend_xpub }
+    return create_account_req(deposit_pk, locktime, spend_xpub)
   }
 }
 
 export function verify_account_api (signer : EscrowSigner) {
-  return (account : DepositAccount) : boolean => {
+  return (account : AccountData) : boolean => {
     try {
       verify_account(account, signer)
       return true
@@ -44,7 +45,7 @@ export function verify_account_api (signer : EscrowSigner) {
 
 export function commit_funds_api (signer : EscrowSigner) {
   return (
-    account  : DepositAccount,
+    account  : AccountData,
     contract : ContractData,
     utxo     : TxOutput
   ) : CommitRequest => {
@@ -59,9 +60,9 @@ export function commit_funds_api (signer : EscrowSigner) {
     // Define our xpub as the return pubkey.
     const return_pk  = parse_extkey(spend_xpub).pubkey
     // Get the context object for our deposit account.
-    const ctx  = get_deposit_ctx(agent_pk, deposit_pk, return_pk, sequence)
+    const ctx  = get_account_ctx(agent_pk, deposit_pk, return_pk, sequence)
     // Create a covenant with the contract and deposit.
-    const covenant   = create_covenant(ctx, contract, signer._signer, utxo)
+    const covenant = create_covenant(ctx, contract, signer._signer, utxo)
     return { covenant, deposit_pk, sequence, spend_xpub, utxo }
   }
 }
@@ -72,8 +73,8 @@ export function lock_funds_api (signer : EscrowSigner) {
     deposit  : DepositData
   ) : LockRequest => {
     // Unpack the deposit object.
-    const { 
-      agent_pk, sequence, txid, vout, 
+    const {
+      agent_pk, sequence, txid, vout,
       value, scriptkey, spend_xpub
     } = deposit
     // Check if account xpub is valid.

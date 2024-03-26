@@ -4,11 +4,11 @@ import {
   ServerKeysResponse,
   ServerPolicyResponse,
   ServerStatusResponse
-} from '@/types/api/server.js'
+} from '@/core/types/api/server.js'
 
 import {
   ApiResponse
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 function server_keys_api (client : EscrowClient) {
   return async () : Promise<ApiResponse<ServerKeysResponse>> => {

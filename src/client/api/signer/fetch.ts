@@ -1,7 +1,7 @@
 import { EscrowSigner } from '@/client/class/signer.js'
 
 export function fetch_deposit_list_api (signer : EscrowSigner) {
-  return () => {
+  return async () => {
     const pub     = signer.pubkey
     const host    = signer.client.host
     const url     = `${host}/api/deposit/list/${pub}`
@@ -12,7 +12,7 @@ export function fetch_deposit_list_api (signer : EscrowSigner) {
 }
 
 export function fetch_contract_list_api (signer : EscrowSigner) {
-  return () => {
+  return async () => {
     const pub     = signer.pubkey
     const host    = signer.client.host
     const url     = `${host}/api/contract/list/${pub}`

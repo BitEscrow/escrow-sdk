@@ -1,25 +1,25 @@
 import { EscrowSigner }     from '@/client/class/signer.js'
-import { endorse_proposal } from '@/lib/proposal.js'
-import { parse_proposal }   from '@/lib/parse.js'
+import { endorse_proposal } from '@/core/lib/proposal.js'
+import { parse_proposal }   from '@/core/lib/parse.js'
 
 import {
   add_enrollment,
   rem_enrollment
-} from '@/lib/policy.js'
+} from '@/client/lib/policy.js'
 
 import {
   validate_draft,
   verify_draft,
   verify_slots_full
-} from '@/validators/draft.js'
+} from '@/client/validators/draft.js'
 
 import {
   DraftData,
   MemberData,
   RolePolicy
-} from '@/types/index.js'
+} from '../../types/index.js'
 
-import { verify_proposal } from '@/validators/proposal.js'
+import { verify_proposal } from '@/core/validators/proposal.js'
 
 import * as assert from '@/assert.js'
 

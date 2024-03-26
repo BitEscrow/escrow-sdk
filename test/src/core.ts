@@ -67,9 +67,9 @@ export async function fund_address (
   value   : number,
   mine_block = false
 ) : Promise<string> {
-    const wdat = await client.load_wallet(label)
-    await wdat.ensure_funds(value)
-    return wdat.send_funds(value, address, mine_block)
+    const wallet = await client.load_wallet(label)
+    await wallet.ensure_funds(value)
+    return wallet.send_funds(value, address, mine_block)
 }
 
 export async function get_utxo (

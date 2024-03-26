@@ -1,4 +1,5 @@
-import { ProposalData } from '@scrow/core'
+import { ProposalData } from '@scrow/sdk/core'
+import { now }          from '@/util.js'
 import { CoreSigner }   from '../types.js'
 
 const NETWORK = 'regtest'
@@ -8,11 +9,12 @@ export async function get_proposal (
 ) : Promise<ProposalData> {
   const [ alice, bob, carol ] = members
   return {
-    title    : 'Basic two-party contract with third-party dispute resolution.',
-    content  : 'n/a',
-    duration : 14400,
-    network  : NETWORK,
-    paths    : [
+    title      : 'Basic two-party contract with third-party dispute resolution.',
+    content    : 'n/a',
+    created_at : now(),
+    duration   : 14400,
+    network    : NETWORK,
+    paths : [
       [ 'payout', 90000, await bob.core.new_address   ],
       [ 'return', 90000, await alice.core.new_address ]
     ],

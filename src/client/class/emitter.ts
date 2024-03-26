@@ -6,15 +6,18 @@
  *
  * */
 
-export class EventEmitter <T extends Record<string, any> = {}> {
-  readonly _events : Map<keyof T, Set<Function>>
+type Manifest = Record<string, unknown>
+type Method   = (args : any) => void | Promise<void>
+
+export class EventEmitter <T extends Manifest> {
+  readonly _events : Map<keyof T, Set<Method>>
 
   constructor () {
     this._events = new Map()
   }
 
-  _get_methods (event : string) : Set<Function> {
-    /** 
+  _get_methods (event : string) : Set<Method> {
+    /**
      * If key undefined, create a new set for the event,
      * else return the stored subscriber list.
      */
@@ -35,10 +38,10 @@ export class EventEmitter <T extends Record<string, any> = {}> {
   }
 
   on <K extends string & keyof T> (
-    event  : K, 
+    event  : K,
     method : (args : T[K]) => void | Promise<void>
   ) : void {
-    /** 
+    /**
      * Subscribe function to run on a given event.
      */
     this._get_methods(event).add(method)
@@ -48,7 +51,7 @@ export class EventEmitter <T extends Record<string, any> = {}> {
     event  : K,
     method : (args : T[K]) => void | Promise<void>
   ) : void {
-    /** 
+    /**
      * Subscribe function to run once, using
      * a callback to cancel the subscription.
      */
@@ -83,13 +86,13 @@ export class EventEmitter <T extends Record<string, any> = {}> {
     /** Emit a series of arguments for the event, and
      *  present them to each subscriber in the list.
      * */
-    const methods : Function[] = []
+    const methods : any[] = []
     this._get_methods(event).forEach(fn => {
       methods.push(fn.apply(this, [ args ]))
     })
 
     this._get_methods('*').forEach(fn => {
-      methods.push(fn.apply(this, [ event, args ]))
+      methods.push(fn.apply(this, [ [ event, args ] ]))
     })
 
     void Promise.allSettled(methods)

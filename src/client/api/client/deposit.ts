@@ -1,5 +1,4 @@
-
-import { EscrowClient } from '../../class/client.js'
+/* Module Imports */
 
 import {
   validate_account_req,
@@ -7,7 +6,7 @@ import {
   validate_commit_req,
   validate_close_req,
   validate_lock_req
-} from '@/validators/index.js'
+} from '@/core/validators/index.js'
 
 import {
   ApiResponse,
@@ -22,9 +21,13 @@ import {
   LockRequest,
   DepositDigestResponse,
   DepositStatusResponse
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
+
+/* Local Imports */
+
+import { EscrowClient } from '@/client/class/client.js'
 
 /**
  * Request a deposit account from the provider.
@@ -40,7 +43,7 @@ function request_account_api (client : EscrowClient) {
     const init = {
       method  : 'POST',
       body    : JSON.stringify(request),
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Return the response.
     return client.fetcher<AccountDataResponse>({ url, init })
@@ -62,7 +65,7 @@ function register_deposit_api (client : EscrowClient) {
     const init = {
       method  : 'POST',
       body    : JSON.stringify(request),
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Return the response.
     return client.fetcher<DepositDataResponse>({ url, init })
@@ -84,7 +87,7 @@ function commit_deposit_api (client : EscrowClient) {
     const init = {
       method  : 'POST',
       body    : JSON.stringify(request),
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Return the response.
     return client.fetcher<FundingDataResponse>({ url, init })
@@ -151,7 +154,7 @@ function list_deposit_api (client : EscrowClient) {
     // Define the request config.
     const init = {
       method  : 'GET',
-      headers : { 'Authorization' : 'Bearer ' + token }
+      headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
     return client.fetcher<DepositListResponse>({ url, init })
@@ -173,7 +176,7 @@ function lock_deposit_api (client : EscrowClient) {
     const init   = {
       body    : JSON.stringify(request),
       method  : 'POST',
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Fetch and return a response.
     return client.fetcher<FundingDataResponse>({ url, init })

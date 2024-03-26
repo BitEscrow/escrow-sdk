@@ -1,18 +1,18 @@
-import { now, sleep }       from '@/lib/util.js'
-import { validate_deposit } from '@/validators/deposit.js'
+import { now, sleep }       from '@/util.js'
+import { validate_deposit } from '@/core/validators/deposit.js'
 import { EscrowClient }     from './client.js'
 import { EventEmitter }     from './emitter.js'
 import { EscrowSigner }     from './signer.js'
+import { update_deposit }   from '@/client/lib/deposit.js'
 
 import {
   ContractData,
-  DepositAccount,
+  AccountData,
   DepositData,
   DepositDigest,
   DepositStatus,
   TxOutput
-} from '@/types/index.js'
-import { update_deposit } from '@/lib/deposit.js'
+} from '@/core/types/index.js'
 
 interface EscrowDepositConfig {
   refresh_ival : number
@@ -30,10 +30,9 @@ export class EscrowDeposit extends EventEmitter <{
   'status' : DepositStatus
   'update' : EscrowDeposit
 }> {
-
   static async create (
     client  : EscrowClient,
-    account : DepositAccount,
+    account : AccountData,
     utxo    : TxOutput,
     config ?: Partial<EscrowDepositConfig>
   ) {
@@ -57,7 +56,7 @@ export class EscrowDeposit extends EventEmitter <{
 
   readonly _client : EscrowClient
   readonly _opt    : EscrowDepositConfig
-  
+
   _data    : DepositData
   _init    : boolean
   _updated : number
@@ -109,7 +108,7 @@ export class EscrowDeposit extends EventEmitter <{
       if (this.is_stale || force) {
         const res = await this._status()
         if (res.updated) {
-          this._update(res.deposit)
+          void this._update(res.deposit)
         } else {
           this._updated = now()
         }
@@ -165,7 +164,7 @@ export class EscrowDeposit extends EventEmitter <{
     const req = signer.account.close(this.data, txfee)
     const res = await api.close(this.dpid, req)
     if (!res.ok) throw new Error(res.error)
-    this._update(res.data.deposit)
+    void this._update(res.data.deposit)
     return this
   }
 
@@ -181,7 +180,7 @@ export class EscrowDeposit extends EventEmitter <{
     const req = signer.account.lock(contract, this.data)
     const res = await api.lock(this.dpid, req)
     if (!res.ok) throw new Error(res.error)
-    this._update(res.data.deposit)
+    void this._update(res.data.deposit)
     return this
   }
 
@@ -203,7 +202,7 @@ export class EscrowDeposit extends EventEmitter <{
     return this.data
   }
 
-  toString() {
+  toString () {
     return JSON.stringify(this.data)
   }
 }

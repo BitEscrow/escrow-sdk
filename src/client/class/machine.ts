@@ -1,5 +1,5 @@
-import { now, sleep }       from '@/lib/util.js'
-import { verify_execution } from '@/validators/contract.js'
+import { now, sleep }       from '@/util.js'
+import { verify_execution } from '@/core/validators/contract.js'
 import { EscrowClient }     from './client.js'
 import { EventEmitter }     from './emitter.js'
 import { EscrowSigner }     from './signer.js'
@@ -10,7 +10,7 @@ import {
   StateData,
   WitnessData,
   WitnessTemplate
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
 
@@ -29,7 +29,6 @@ export class ContractVM extends EventEmitter <{
   'fetch'  : ContractVM
   'update' : ContractVM
 }> {
-
   static async fetch (
     client  : EscrowClient,
     cid     : string,
@@ -107,7 +106,7 @@ export class ContractVM extends EventEmitter <{
         if (!res.ok) throw new Error(res.error)
         const state = res.data.vm_state
         if (state.head !== this.head) {
-          this._update(state)
+          void this._update(state)
         } else {
           this._updated = now()
         }
@@ -149,15 +148,14 @@ export class ContractVM extends EventEmitter <{
     status   : PathStatus,
     retries  : number
   ) {
-    return new Promise(async (res) => {
-      for (let i = 0; i < retries; i++) {
-        await this._fetch()
-        if (this.status === status) {
-          res(this)
-        }
-        await sleep(this.opt.refresh_ival * 1000)
+    for (let i = 0; i < retries; i++) {
+      await this._fetch()
+      if (this.status === status) {
+        return this
       }
-    })
+      await sleep(this.opt.refresh_ival * 1000)
+    }
+    throw new Error('polling timed out')
   }
 
   async check (
@@ -188,7 +186,7 @@ export class ContractVM extends EventEmitter <{
     return this.data
   }
 
-  toString() {
+  toString () {
     return JSON.stringify(this.data)
   }
 }

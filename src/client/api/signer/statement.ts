@@ -1,18 +1,17 @@
-
 import { EscrowSigner }     from '@/client/class/signer.js'
-import { find_program }     from '@/lib/proposal.js'
-import { validate_witness } from '@/validators/program.js'
+import { find_program }     from '@/core/lib/proposal.js'
+import { validate_witness } from '@/core/validators/program.js'
 
 import {
   create_witness,
   sign_witness
-} from '@/lib/witness.js'
+} from '@/core/lib/witness.js'
 
 import {
   ContractData,
   WitnessData,
   WitnessTemplate
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 export function can_sign_api (signer : EscrowSigner) {
   return (
@@ -40,7 +39,7 @@ export function sign_witness_api (signer : EscrowSigner) {
   ) => {
     const terms = contract.terms
     const cred  = signer.credential.claim(contract.members)
-      let wdat  = create_witness(terms.programs, cred.data.pub, template)
+    const wdat  = create_witness(terms.programs, cred.data.pub, template)
     validate_witness(contract, wdat)
     return sign_witness(cred.signer, wdat)
   }
@@ -61,6 +60,6 @@ export default function (signer : EscrowSigner) {
   return {
     can_sign : can_sign_api(signer),
     endorse  : endorse_witness_api(signer),
-    sign     : sign_witness_api(signer),
+    sign     : sign_witness_api(signer)
   }
 }

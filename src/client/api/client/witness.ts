@@ -3,7 +3,7 @@ import { EscrowClient } from '../../class/client.js'
 import {
   ApiResponse,
   WitnessDataResponse
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
 
@@ -22,6 +22,6 @@ function read_witness_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    read : read_witness_api(client)
+    read: read_witness_api(client)
   }
 }

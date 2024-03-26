@@ -1,7 +1,7 @@
 import { Buff, Bytes } from '@cmdcode/buff'
+import { Point }       from '@cmdcode/crypto-tools'
 
-import * as util from './lib/util.js'
-import { Point } from '@cmdcode/crypto-tools'
+import * as util from './util.js'
 
 export function ok (
   value    : unknown,
@@ -14,13 +14,13 @@ export function ok (
 
 export function is_hex (value : string) : asserts value is string {
   if (!util.is_hex(value)) {
-    throw new TypeError(`Invalid hex: ${value}`)
+    throw new TypeError(`Invalid hex: ${String(value)}`)
   }
 }
 
 export function is_hash (value : string) : asserts value is string {
   if (!util.is_hash(value)) {
-    throw new TypeError(`Invalid hash: ${value}`)
+    throw new TypeError(`Invalid hash: ${String(value)}`)
   }
 }
 
@@ -36,7 +36,7 @@ export function exists <T> (
   msg  ?: string
   ) : asserts value is NonNullable<T> {
   if (!util.exists(value)) {
-    throw new Error(msg ?? `Value is null or undefined!`)
+    throw new Error(msg ?? 'Value is null or undefined!')
   }
 }
 
@@ -54,8 +54,7 @@ export function valid_pubkey (pubkey : string) {
   try {
     is_hash(pubkey)
     Point.from_x(pubkey)
-  }
-  catch {
+  } catch {
     throw new Error('Invalid pubkey: ' + String(pubkey))
   }
 }

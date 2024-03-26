@@ -4,7 +4,7 @@ import { EscrowContract } from './contract.js'
 import { EscrowDeposit }  from './deposit.js'
 import { EscrowSigner }   from './signer.js'
 
-import { compare, now, sleep } from '@/lib/util.js'
+import { compare, now, sleep } from '@/util.js'
 
 import {
   AccountRequest,
@@ -17,7 +17,7 @@ import {
   OracleSpendData,
   RegisterRequest,
   TxOutput
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 interface EscrowAccountConfig {
   refresh_ival : number
@@ -36,11 +36,10 @@ export class EscrowAccount extends EventEmitter <{
   'register' : DepositData
   'reserved' : DepositAccount
 }> {
-
   readonly _client : EscrowClient
   readonly _signer : EscrowSigner
   readonly _opt    : EscrowAccountConfig
-  
+
   _data     : DepositAccount | null
   _deposit  : DepositData    | null
   _payments : OracleSpendData[]
@@ -217,7 +216,7 @@ export class EscrowAccount extends EventEmitter <{
   }
 
   async poll (
-    interval : number, 
+    interval : number,
     retries  : number
   ) {
     for (let i = 0; i < retries; i++) {
@@ -239,7 +238,7 @@ export class EscrowAccount extends EventEmitter <{
     return this.data
   }
 
-  toString() {
+  toString () {
     return JSON.stringify(this.data)
   }
 }

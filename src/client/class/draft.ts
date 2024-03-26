@@ -1,50 +1,57 @@
-import { verify_proposal } from '@/validators/proposal.js'
-import { EscrowClient }    from '@/client/class/client.js'
-import { EscrowContract }  from '@/client/class/contract.js'
-import { EventEmitter }    from '@/client/class/emitter.js'
-import { EscrowSigner }    from '@/client/class/signer.js'
-import { DraftItem }       from '@/client/types.js'
-import { is_hash }         from '@/lib/util.js'
-
 import {
   EventMessage,
   NostrRoom,
   SocketConfig
 } from '@cmdcode/nostr-sdk'
 
-import {
-  get_membership,
-  has_membership,
-  verify_endorsement
-}  from '@/lib/member.js'
-
-import {
-  has_full_enrollment,
-  join_role,
-  rem_enrollment,
-  tabulate_enrollment
-} from '@/lib/policy.js'
+import { verify_proposal } from '@/core/validators/proposal.js'
+import { is_hash }         from '@/util.js'
 
 import {
   find_program,
   get_proposal_id
-} from '@/lib/proposal.js'
-
-import {
-  validate_draft,
-  verify_draft
-} from '@/validators/draft.js'
+} from '@/core/lib/proposal.js'
 
 import {
   DraftData,
   MemberData,
   ProgramQuery,
   ProposalData,
-  RolePolicy,
-} from '@/types/index.js'
+  RolePolicy
+} from '@/core/types/index.js'
+
+import { EscrowClient }    from '../class/client.js'
+import { EscrowContract }  from '../class/contract.js'
+import { EventEmitter }    from '../class/emitter.js'
+import { EscrowSigner }    from '../class/signer.js'
+
+import {
+  parse_mship,
+  parse_terms
+} from '../lib/parse.js'
+
+import {
+  get_membership,
+  has_membership,
+  verify_endorsement
+}  from '../lib/member.js'
+
+import {
+  has_full_enrollment,
+  join_role,
+  rem_enrollment,
+  tabulate_enrollment
+} from '../lib/policy.js'
+
+import {
+  validate_draft,
+  verify_draft
+} from '../validators/draft.js'
+
+import { DraftItem } from '../types/index.js'
 
 import * as assert from '@/assert.js'
-import * as schema from '@/schema/index.js'
+import * as schema from '@/core/schema/index.js'
 
 interface SessionConfig {
   debug   : boolean
@@ -74,9 +81,8 @@ export class DraftSession extends EventEmitter <{
   'update'     : DraftSession
   'published'  : string
 }> {
-
   static async list (
-    address  : string, 
+    address  : string,
     signer   : EscrowSigner,
     options ?: Partial<SocketConfig>
   ) : Promise<DraftItem[]> {
@@ -86,18 +92,18 @@ export class DraftSession extends EventEmitter <{
   readonly _opt    : SessionConfig
   readonly _signer : EscrowSigner
   readonly _room   : NostrRoom<DraftData>
-  
+
   _agreed : boolean
   _full   : boolean
   _init   : boolean
 
   constructor (
-    signer   : EscrowSigner, 
+    signer   : EscrowSigner,
     options ?: Partial<SessionConfig>
   ) {
     super()
 
-    this._opt    = { debug : false, verbose : false, ...options }
+    this._opt    = { debug: false, verbose: false, ...options }
     this._signer = signer
     this._room   = new NostrRoom(signer._signer, options)
 
@@ -105,32 +111,32 @@ export class DraftSession extends EventEmitter <{
     this._full   = false
     this._init   = false
 
-    this._room.on('close',  () => { void this.emit('close', this) })
-    this._room.on('fetch',  () => { void this.emit('fetch', this) })
-    this._room.on('error',  (err) => { void this.emit('error', err) })
-    this._room.on('reject', (err) => { void this.emit('error', err) })
+    this._room.on('close',  () => { this.emit('close', this) })
+    this._room.on('fetch',  () => { this.emit('fetch', this) })
+    this._room.on('error',  (err) => { this.emit('error', err) })
+    this._room.on('reject', (err) => { this.emit('error', err) })
 
     this._room.once('ready', () => {
       this._init = true
       this.emit('ready', this)
     })
 
-    this._room.on('msg', (msg) => {
+    this._room.on('msg', (msg : EventMessage<string>) => {
       switch (msg.subject) {
         case 'approve':
-          return this._approve_handler(msg)
+          { this._approve_handler(msg); return }
         case 'endorse':
-          return this._endorse_handler(msg)
+          { this._endorse_handler(msg); return }
         case 'join':
-          return this._join_handler(msg)
+          { this._join_handler(msg); return }
         case 'leave':
-          return this._leave_handler(msg)
+          { this._leave_handler(msg); return }
         case 'publish':
           if (!is_hash(msg.body)) return
           this.emit('published', msg.body)
           break
         case 'terms':
-          return this._terms_handler(msg)
+          { this._terms_handler(msg)  }
       }
     })
   }
@@ -138,7 +144,7 @@ export class DraftSession extends EventEmitter <{
   get approvals () {
     return this.data.approvals
   }
-  
+
   get data () {
     return this._room.data
   }
@@ -171,7 +177,7 @@ export class DraftSession extends EventEmitter <{
     })
     return (sig !== undefined)
   }
- 
+
   get is_full () {
     return has_full_enrollment(this.members, this.roles)
   }
@@ -257,13 +263,13 @@ export class DraftSession extends EventEmitter <{
   }
 
   log = {
-    debug : (...s : unknown[]) => {
+    debug: (...s : unknown[]) => {
       if (this.opt.debug) {
         console.log('[session]', ...s)
         this.emit('debug', s)
       }
     },
-    info  : (...s : unknown[]) => {
+    info: (...s : unknown[]) => {
       if (this.opt.verbose) {
         console.log('[session]', ...s)
         this.emit('info', s)
@@ -274,7 +280,7 @@ export class DraftSession extends EventEmitter <{
   _approve (sig : string, created_at ?: number) {
     const approvals = [ ...this.approvals, sig ]
     const session   = { ...this.data, approvals }
-    this._update(session, created_at)
+    void this._update(session, created_at)
     this.emit('approve', sig)
   }
 
@@ -304,7 +310,7 @@ export class DraftSession extends EventEmitter <{
   _endorse (sig : string, created_at ?: number) {
     const signatures = [ ...this.signatures, sig ]
     const session    = { ...this.data, signatures }
-    this._update(session, created_at)
+    void this._update(session, created_at)
     this.emit('endorse', sig)
   }
 
@@ -330,21 +336,21 @@ export class DraftSession extends EventEmitter <{
   }
 
   _join (
-    mship       : MemberData, 
+    mship       : MemberData,
     policy      : RolePolicy,
     created_at ?: number
   ) {
     const new_draft = join_role(mship, policy, this.data)
-    
-    this._update(new_draft, created_at)
+
+    void this._update(new_draft, created_at)
     this.log.info('member joined :', mship.pub)
     this.log.info('role joined   :', policy.id)
     this.emit('join', mship)
   }
 
-  _join_handler (msg : EventMessage) {
+  _join_handler (msg : EventMessage<string>) {
     const cat   = msg.envelope.created_at
-    const mship = JSON.parse(msg.body)
+    const mship = parse_mship(msg.body)
     if (mship.pol === undefined || !this.has_policy(mship.pol)) {
       const err = 'invalid policy id: ' + mship.pol
       this.log.info('join rejected :', mship.pol)
@@ -358,19 +364,19 @@ export class DraftSession extends EventEmitter <{
 
   _leave (mship : MemberData, created_at ?: number) {
     const session = rem_enrollment(mship, this.data)
-    this._update(session, created_at)
+    void this._update(session, created_at)
     this.log.info('member left   :', mship.pub)
     this.emit('leave', mship)
   }
 
-  _leave_handler (msg : EventMessage) {
-    const mship = JSON.parse(msg.body)
+  _leave_handler (msg : EventMessage<string>) {
+    const mship = parse_mship(msg.body)
     const cat   = msg.envelope.created_at
     this._leave(mship, cat)
   }
 
-  _terms_handler (msg : EventMessage) {
-    const terms = JSON.parse(msg.body)
+  _terms_handler (msg : EventMessage<string>) {
+    const terms = parse_terms(msg.body)
     const cat   = msg.envelope.created_at
     const pub   = msg.envelope.pubkey
     if (!this.check_terms(terms)) {
@@ -389,11 +395,11 @@ export class DraftSession extends EventEmitter <{
 
     const proposal = {
       ...this.proposal,
-      ...rest, 
+      ...rest,
       paths    : [ ...paths,    ...terms.paths    ?? [] ],
       payments : [ ...payments, ...terms.payments ?? [] ],
       programs : [ ...programs, ...terms.programs ?? [] ],
-      schedule : [ ...schedule, ...terms.schedule ?? [] ],
+      schedule : [ ...schedule, ...terms.schedule ?? [] ]
     }
 
     const session = {
@@ -403,7 +409,7 @@ export class DraftSession extends EventEmitter <{
       signatures : []
     }
 
-    this._update(session, created_at)
+    void this._update(session, created_at)
     this.emit('terms', terms)
   }
 
@@ -430,7 +436,7 @@ export class DraftSession extends EventEmitter <{
       throw new Error('draft is already approved by member: ' + pub)
     } else {
       this._approve(sig)
-      this._room.send('approve', sig)
+      void this._room.send('approve', sig)
       this.log.info('send approve  :', this.signer.pubkey)
     }
   }
@@ -451,10 +457,10 @@ export class DraftSession extends EventEmitter <{
   }
 
   close () {
-    this._room.close()
+    void this._room.close()
     return this
   }
- 
+
   async connect (address : string, secret : string) {
     await this._room.connect(address, secret)
     return this
@@ -470,7 +476,7 @@ export class DraftSession extends EventEmitter <{
     const signer = this.signer
     const sig    = signer.draft.endorse(this.data)
     this._endorse(sig)
-    this._room.send('endorse', sig)
+    void this._room.send('endorse', sig)
     this.log.info('send endorse  :', signer.pubkey)
   }
 
@@ -541,7 +547,7 @@ export class DraftSession extends EventEmitter <{
   }
 
   async init (
-    address  : string, 
+    address  : string,
     secret   : string,
     session  : DraftData
   ) {
@@ -559,21 +565,20 @@ export class DraftSession extends EventEmitter <{
     const pol = this.get_policy(policy_id)
     mship.pol = policy_id
     this._join(mship, pol)
-    this._room.send('join', JSON.stringify(mship))
+    void this._room.send('join', JSON.stringify(mship))
     this.log.info('send join     :', mship.pub)
   }
 
   leave () {
     const members = this.data.members
-    const signer  = this.signer   
+    const signer  = this.signer
     if (has_membership(members, signer._signer)) {
       const cred  = signer.credential.claim(members)
       const mship = cred.data
       this._leave(mship)
-      this._room.send('leave', JSON.stringify(mship))
+      void this._room.send('leave', JSON.stringify(mship))
       this.log.info('send leave     :', mship.pub)
     }
-    return
   }
 
   async list (address : string) {
@@ -583,25 +588,25 @@ export class DraftSession extends EventEmitter <{
   }
 
   on_topic (
-    topic : string, 
-    fn    : (msg: EventMessage<string>) => void
+    topic : string,
+    fn    : (msg : EventMessage<string>) => void
   ) {
-    return this._room.on_topic(topic, fn)
+    this._room.on_topic(topic, fn)
   }
 
   async publish (client : EscrowClient) {
     verify_proposal(this.data.proposal)
     const contract = await EscrowContract.create(client, this.data)
-    this._room.send('publish', contract.cid)
+    void this._room.send('publish', contract.cid)
     this.emit('published', contract.cid)
     return contract
   }
 
-  refresh () {
+  async refresh () {
     return this._room.refresh()
   }
 
-  send (subject: string, body: string) {
+  async send (subject : string, body : string) {
     return this._room.send(subject, body)
   }
 
@@ -610,7 +615,7 @@ export class DraftSession extends EventEmitter <{
       throw new Error('invalid terms: ' + terms.toString())
     }
     this._update_terms(terms)
-    this._room.send('terms', JSON.stringify(terms))
+    void this._room.send('terms', JSON.stringify(terms))
     this.log.info('send terms     :', terms)
   }
 
@@ -631,7 +636,7 @@ export class DraftSession extends EventEmitter <{
     const duration = 10_000
     const timeout  = 'commit timed out'
     return new Promise((res, rej) => {
-      const timer = setTimeout(() => rej(timeout), duration)
+      const timer = setTimeout(() => { rej(timeout) }, duration)
       this.within('commit', (id) => {
         if (id === commit_id) {
           this.log.info('conf commit   :', commit_id)
@@ -639,6 +644,6 @@ export class DraftSession extends EventEmitter <{
           res(this)
         }
       }, duration)
-    }).catch(err => { throw new Error(err) })
+    })
   }
 }

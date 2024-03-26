@@ -1,5 +1,11 @@
 const DEBUG = false
 
+export class VMError extends Error {
+  constructor (msg : string) {
+    super(msg)
+  }
+}
+
 export function debug (...msg : unknown[]) {
   if (DEBUG) {
     console.log('[vm]', ...msg)
@@ -13,11 +19,9 @@ export function err_handler (
    * Handle the different types of
    * errors returned from the vm.
    */
-  if (err instanceof Error) {
-    throw err
-  } else if (typeof err !== 'string') {
-    throw new Error('Unknown error: ' + String(err))
+  if (err instanceof VMError) {
+    return err.message
   } else {
-    return err
+    throw err
   }
 }

@@ -34,7 +34,7 @@ export function request_contract_cancel_api (signer : EscrowSigner) {
 
 export function sign_request_api (signer : EscrowSigner) {
   return (
-    url    : string, 
+    url    : string,
     body   : string = '',
     method : string = 'GET'
   ) => {

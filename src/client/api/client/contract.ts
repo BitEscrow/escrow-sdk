@@ -1,8 +1,8 @@
-import { verify_endorsement } from '@/lib/member.js'
-import { get_proposal_id }    from '@/lib/proposal.js'
-import { EscrowClient }       from '@/client/class/client.js'
-import { parse_proposal }     from '@/lib/parse.js'
-import { verify_proposal }    from '@/validators/index.js'
+/* Module Imports */
+
+import { get_proposal_id }    from '@/core/lib/proposal.js'
+import { parse_proposal }     from '@/core/lib/parse.js'
+import { verify_proposal }    from '@/core/validators/index.js'
 
 import {
   ApiResponse,
@@ -15,9 +15,14 @@ import {
   ContractVMStateResponse,
   DraftData,
   ContractStatusResponse
-} from '@/types/index.js'
+} from '@/core/types/index.js'
 
 import * as assert from '@/assert.js'
+
+/* Local Imports */
+
+import { verify_endorsement } from '@/client/lib/member.js'
+import { EscrowClient }       from '@/client/class/client.js'
 
 /**
  * Create a contract from a proposal document.
@@ -44,7 +49,7 @@ function create_contract_api (
     const init = {
       body    : JSON.stringify({ members, proposal, signatures }),
       method  : 'POST',
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Return the response.
     return client.fetcher<ContractDataResponse>({ url, init })
@@ -119,7 +124,7 @@ function read_contract_status_api (client : EscrowClient) {
 }
 
 /**
- * Return a list of contracts that 
+ * Return a list of contracts that
  * are associated with a given pubkey.
  */
 function list_contract_api (client : EscrowClient) {
@@ -132,7 +137,7 @@ function list_contract_api (client : EscrowClient) {
     // Define the request config.
     const init = {
       method  : 'GET',
-      headers : { 'Authorization' : 'Bearer ' + token }
+      headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
     return client.fetcher<ContractListResponse>({ url, init })
@@ -157,7 +162,7 @@ function list_funds_api (client : EscrowClient) {
 }
 
 /**
- * Return a list of verified witnesses 
+ * Return a list of verified witnesses
  * that are associated with the contract.
  */
 function list_witness_api (client : EscrowClient) {
@@ -190,7 +195,7 @@ function cancel_contract_api (
     // Define the request config.
     const init = {
       method  : 'GET',
-      headers : { 'Authorization' : 'Bearer ' + token }
+      headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
     return client.fetcher<ContractDataResponse>({ url, init })
@@ -211,9 +216,9 @@ function submit_witness_api (client : EscrowClient) {
     const url  = `${client._host}/api/contract/${cid}/submit`
     // Formulate the request body.
     const init = {
-      method  : 'POST', 
+      method  : 'POST',
       body    : JSON.stringify(witness),
-      headers : { 'content-type' : 'application/json' }
+      headers : { 'content-type': 'application/json' }
     }
     // Return the response.
     return client.fetcher<ContractDataResponse>({ url, init })
