@@ -17,8 +17,8 @@ import { sort_bytes } from '@/util.js'
 
 /* Local Imports */
 
-import { get_deposit_hash }   from './deposit.js'
-import { get_session_pnonce } from './session.js'
+import { get_deposit_hash } from './deposit.js'
+import { create_sighash }   from './tx.js'
 
 import {
   get_account_agent,
@@ -26,9 +26,9 @@ import {
 } from './account.js'
 
 import {
-  create_sighash,
-  create_txinput
-} from './tx.js'
+  get_session_pnonce,
+  get_session_seed
+} from './session.js'
 
 import {
   AccountContext,
@@ -75,8 +75,11 @@ export function settle_covenant (
   psig      : string,
   server_sd : SignerAPI
 ) : string {
+  //
   assert.exists(deposit.covenant)
+  //
   const { cid, outputs }   = contract
+  //
   const { covenant, utxo } = deposit
   // Get signing agent for account.
   const agent   = get_account_agent(deposit, server_sd)
@@ -87,7 +90,7 @@ export function settle_covenant (
   //
   const session = get_covenant_session(ctx, cvid, output, covenant.pnonce, utxo)
   //
-  const ag_psig = create_covenant_psig(session, agent)
+  const ag_psig = settle_covenant_psig(session, agent)
   //
   const musig   = combine_psigs(session.musig, [ psig, ag_psig ])
   //
@@ -115,15 +118,15 @@ export function get_covenant_id (
 export function get_covenant_sessions (
   cvid    : string,
   outputs : SpendTemplate[],
-  pnonce  : Bytes,
+  pnonce  : string,
   request : RegisterTemplate
 ) : SessionEntry[] {
   // Get account context object.
-  const ctx     = get_account_ctx(request)
+  const ctx = get_account_ctx(request)
   // Return a list of musig contexts for each spending path.
-  return outputs.map(([ label, vout ]) => {
+  return outputs.map(([ label, output ]) => {
     // Create a musig context object with the txinput.
-    const session = get_covenant_session(ctx, cvid, vout, pnonce, request.utxo)
+    const session = get_covenant_session(ctx, cvid, output, pnonce, request.utxo)
     // Return the musig context as a labeled tuple.
     return [ label, session ]
   })
@@ -137,19 +140,17 @@ export function get_covenant_session (
   acct   : AccountContext,
   cvid   : string,
   output : string,
-  pnonce : Bytes,
+  pnonce : string,
   utxo   : TxOutput
 ) : CovenantSession {
   // Unpack the context object.
   const { key_data, tap_data, session } = acct
   // Define array of pnonces for session.
   const pnonces   = [ pnonce, session.pn ]
-  // Create a txinput for the transaction.
-  const txinput   = create_txinput(utxo)
   // Unpack the group pubkey for the deposit.
   const group_pub = key_data.group_pubkey
   // Compute the transaction signature hash.
-  const sighash   = create_sighash(txinput, output)
+  const sighash   = create_sighash(output, utxo)
   // Compute the nonce tweak for the given signing session.
   const nonce_twk = get_covenant_tweak(cvid, pnonces, sighash)
   // Get a list of tweaked pubnonces, using the session tweak.
@@ -195,6 +196,17 @@ export function create_covenant_psig (
   const { cvid, musig, tweak } = session
   const opt = { nonce_tweak: tweak }
   return signer.musign(musig, cvid, opt).hex
+}
+
+export function settle_covenant_psig (
+  session : CovenantSession,
+  signer  : SignerAPI
+) : string {
+  const { acct, musig, tweak } = session
+  const { id, ts } = acct.session
+  const seed = get_session_seed(id, signer, ts)
+  const opt  = { nonce_tweak: tweak }
+  return signer.musign(musig, seed, opt).hex
 }
 
 export function get_covenant_psig (

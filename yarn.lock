@@ -15,10 +15,10 @@
     "@noble/hashes" "^1.3.3"
     "@scure/base" "^1.1.5"
 
-"@cmdcode/core-cmd@1.5.1":
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.5.1.tgz#c639426992289f347ae82db40270c83f430bdb03"
-  integrity sha512-j478jby0UkcohDo48fGMtBs4ICYv0k3A7faqcJuPk2Z3x5suCE8RpKPMjmr1BTGf6aWJkfe41KYAyZR05hX5eQ==
+"@cmdcode/core-cmd@1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.5.2.tgz#29896320ebbb4a7ae9a4fcbd18056c29275d9d79"
+  integrity sha512-8CCyfZzMHH+KmB1LgTLu1E+GNOJRXJB46XdeikRnCO5/BT6abN0t76MP0+i7iaxgotNv9eD0TkoDlGuaphICtA==
   dependencies:
     "@cmdcode/crypto-tools" "^2.7.6"
     "@scrow/tapscript" "^2.2.2"
@@ -54,7 +54,20 @@
     ws "^8.16.0"
     zod "^3.22.4"
 
-"@cmdcode/signer@1.4.2", "@cmdcode/signer@^1.4.2":
+"@cmdcode/signer@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.3.tgz#8379ebeff1dfc367e7bb3009212efda9d14cad77"
+  integrity sha512-SAeufoAX+8KjrjInjeVr9O1m9Kb3aYdI91r/tSEcFKFsO8eQpUSpKni6gYo3fpJQPQ/sfR8K/PwK91cI2ZEUUQ==
+  dependencies:
+    "@cmdcode/buff" "^2.2.5"
+    "@cmdcode/crypto-tools" "^2.7.6"
+    "@cmdcode/musig2" "^2.4.3"
+    "@noble/ciphers" "^0.4.1"
+    "@scrow/tapscript" "^2.2.2"
+    "@scure/bip32" "^1.3.2"
+    "@scure/bip39" "^1.2.1"
+
+"@cmdcode/signer@^1.4.2":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.2.tgz#02260c34777f784c46e7421e29362d5390abe358"
   integrity sha512-9cu9mtqhvi5T/SCJTVcIePRsuMHicAY4E8gXBZvoUdKxawvFMZEx9YrXbpEw7hGROvwXC4rwdQn9DNXpw55Eow==
@@ -806,6 +819,11 @@ balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
+
+bip68@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/bip68/-/bip68-1.0.4.tgz#78a95c7a43fad183957995cc2e08d79b0c372c4d"
+  integrity sha512-O1htyufFTYy3EO0JkHg2CLykdXEtV2ssqw47Gq9A0WByp662xpJnMEB9m43LZjsSDjIAOozWRExlFQk2hlV1XQ==
 
 brace-expansion@^1.1.7:
   version "1.1.11"

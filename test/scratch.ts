@@ -1,12 +1,10 @@
-import { EscrowClient } from "@/index.js";
-import { Buff } from "@cmdcode/buff";
+import { Buff } from '@cmdcode/buff'
+import bip68 from 'bip68'
 
-const client = new EscrowClient({
-  network  : 'mutiny',
-  hostname : 'https://bitescrow-mutiny.vercel.app',
-  oracle   : 'https://mutinynet.com'
-})
+const sequence = bip68.encode({ seconds: 512 })
+const seqhex   = Buff.num(sequence, 4).hex
 
-const est = await client.oracle.fee_estimates()
+const locktime = bip68.decode(4194305)
 
-console.log(est)
+console.log(seqhex)
+console.log(locktime)

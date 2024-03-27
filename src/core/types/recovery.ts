@@ -1,16 +1,18 @@
-import { TxData } from '@scrow/tapscript'
+import { ScriptWord } from '@scrow/tapscript'
+import { Network }    from '@/types.js'
 
-export interface ReturnContext {
-  pubkey    : string
-  sequence  : number
-  signature : string
-  tapkey    : string
-  tx        : TxData
+export interface RecoveryConfig {
+  agent_pk    : string
+  deposit_pk  : string
+  locktime    : number
+  network     : Network
+  return_addr : string
 }
 
-export interface ReturnData {
-  dpid   : string
-  pnonce : string
-  psig   : string
-  txhex  : string
+export interface RecoveryContext {
+  cblock     : string
+  extension ?: string
+  pubkey     : string
+  sequence   : number
+  script     : ScriptWord[]
 }

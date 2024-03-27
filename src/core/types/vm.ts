@@ -62,5 +62,4 @@ export interface VMReceipt {
   sig     : string
   updated : number
   vmid    : string
-  wid     : string
 }

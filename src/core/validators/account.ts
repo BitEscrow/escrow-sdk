@@ -17,6 +17,7 @@ import {
 } from '../types/index.js'
 
 import AcctSchema from '../schema/account.js'
+import { parse_addr } from '@scrow/tapscript/address'
 
 export function validate_account_req (
   request : unknown
@@ -39,9 +40,13 @@ export function verify_account_req (
   const net = ([ 'mutiny', 'signet' ].includes(network))
     ? 'testnet'
     : network
-  // Assert that all terms are valid.
+  // Assert that the pubkey and address are valid.
   assert.valid_pubkey(deposit_pk)
   assert.valid_address(return_addr, net)
+  // Assert that the address is a P2TR address.
+  const addr_ctx = parse_addr(return_addr)
+  assert.ok(addr_ctx.type === 'p2tr', 'the return address must be a taproot address')
+  // Assert that the locktime is valid.
   assert.ok(locktime >= MIN_LOCKTIME, `locktime is below threshold: ${locktime} < ${MIN_LOCKTIME}`)
   assert.ok(locktime <= MAX_LOCKTIME, `locktime is above threshold: ${locktime} > ${MAX_LOCKTIME}`)
 }

@@ -102,7 +102,7 @@ export function create_account_ctx (
   // Get the context of the return address.
   const addr_ctx     = parse_addr(return_addr)
   // Get the recovery script path.
-  const script       = get_recovery_script(return_addr, sequence)
+  const script       = get_recovery_script(addr_ctx.key, sequence)
   // Get the musig context for the internal key.
   const int_data     = get_key_ctx(members)
   // Get the key data for the taproot key.
@@ -111,6 +111,10 @@ export function create_account_ctx (
   const key_data     = tweak_key_ctx(int_data, [ tap_data.taptweak ])
   // Get the deposit address from the taproot data.
   const deposit_addr = get_address(tap_data.tapkey, addr_ctx.network)
+  // Ensure that the return address is a taproot address.
+  if (addr_ctx.type !== 'p2tr') {
+    throw new Error('only taproot addresses are valid for recovery')
+  }
   // Return context object.
   return { deposit_addr, deposit_pk, key_data, network, return_addr, script, sequence, session, tap_data }
 }

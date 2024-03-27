@@ -1,7 +1,11 @@
 /* Global Imports */
 
 import { Buff } from '@cmdcode/buff'
-import { decode_tx, encode_tx } from '@scrow/tapscript/tx'
+
+import {
+  decode_tx,
+  encode_tx
+} from '@scrow/tapscript/tx'
 
 /* Module Imports */
 
@@ -66,7 +70,8 @@ export function create_contract_req (
  */
 export function create_contract (
   config  : ContractConfig,
-  request : ContractRequest
+  request : ContractRequest,
+  signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.
   const { fees } = config
@@ -102,6 +107,7 @@ export function create_contract (
     prop_id,
     pubkeys    : signatures.map(e => e.slice(0, 64)),
     published,
+    sig        : signer.sign(cid),
     signatures,
     subtotal,
     terms      : proposal,
@@ -128,21 +134,12 @@ export function activate_contract (
 }
 
 export function settle_contract (
-  contract  : ContractData,
-  deposits  : DepositData[],
-  pathname  : string,
-  server_sd : SignerAPI
-) : string {
-  const output = get_spend_template(pathname, contract.outputs)
-  const txdata = decode_tx(output, false)
-  for (const deposit of deposits) {
-    assert.exists(deposit.covenant)
-    const vin  = create_txinput(deposit.utxo)
-    const psig = get_covenant_psig(pathname, deposit.covenant)
-    const sig  = settle_covenant(contract, deposit, output, psig, server_sd)
-    txdata.vin.push({ ...vin, witness: [ sig ] })
-  }
-  return encode_tx(txdata).hex
+  contract   : ContractData,
+  spent_at   : number,
+  spent_txid : string
+) : ContractData {
+  const status = 'spent' as ContractStatus
+  return { ...contract, spent_at, status, spent_txid, spent: true }
 }
 
 /**
@@ -246,4 +243,22 @@ export function get_vm_id (
   const cb = Buff.hex(cid)
   const sb = Buff.num(stamp, 4)
   return Buff.join([ cb, sb ]).digest.hex
+}
+
+export function get_settlement_tx (
+  contract  : ContractData,
+  deposits  : DepositData[],
+  pathname  : string,
+  server_sd : SignerAPI
+) : string {
+  const output = get_spend_template(pathname, contract.outputs)
+  const txdata = decode_tx(output, false)
+  for (const deposit of deposits) {
+    assert.exists(deposit.covenant)
+    const vin  = create_txinput(deposit.utxo)
+    const psig = get_covenant_psig(pathname, deposit.covenant)
+    const sig  = settle_covenant(contract, deposit, output, psig, server_sd)
+    txdata.vin.push({ ...vin, witness: [ sig ] })
+  }
+  return encode_tx(txdata).hex
 }

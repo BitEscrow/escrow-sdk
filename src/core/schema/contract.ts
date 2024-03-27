@@ -42,6 +42,7 @@ const base_data = z.object({
   prop_id    : hash,
   pubkeys    : hash.array(),
   published  : stamp,
+  sig        : hex,
   signatures : hex.array(),
   status,
   subtotal   : num,

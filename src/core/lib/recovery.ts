@@ -1,78 +1,105 @@
-import { Buff, Bytes } from '@cmdcode/buff'
+import { Buff }        from '@cmdcode/buff'
+import { get_key_ctx } from '@cmdcode/musig2'
 import { parse_addr }  from '@scrow/tapscript/address'
-import { parse_proof } from '@scrow/tapscript/tapkey'
+import { taproot }     from '@scrow/tapscript/sighash'
+import { TxData }      from '@scrow/tapscript'
 
-import BaseSchema from '@/schema.js'
+import {
+  create_sequence,
+  create_tx,
+  encode_tx
+} from '@scrow/tapscript/tx'
+
+import * as assert from '@/assert.js'
+
+import { parse_session_token } from './session.js'
 
 import {
   create_txinput,
+  get_tapkey,
   sign_tx
 } from './tx.js'
 
 import {
-  ScriptWord,
-  SigHashOptions,
-  TxBytes
-} from '@scrow/tapscript'
-
-import {
-  create_tx,
-  encode_tx,
-  parse_tx
-} from '@scrow/tapscript/tx'
-
-import {
-  AccountContext,
-  ReturnContext,
+  AccountTemplate,
+  RecoveryConfig,
+  RecoveryContext,
   SignerAPI,
   TxOutput
 } from '../types/index.js'
 
-import * as assert from '@/assert.js'
-
-const MIN_RECOVER_FEE = 1000
+const DUST_LIMIT      = 520
+const RECOVERY_TXSIZE = 118
 
 /**
- * Computes and returns a context
- * object from a given transaction.
+ * Create and sign a recovery transaction
+ * for a given unspent transaction output.
+ */
+export function get_recovery_tx (
+  config    : RecoveryConfig,
+  feerate   : number,
+  recv_addr : string,
+  signer    : SignerAPI,
+  utxo      : TxOutput
+) : string {
+  // Get recovery context object.
+  const ctx = get_recovery_ctx(config)
+  // Calculate the transaction fee.
+  const txfee = RECOVERY_TXSIZE * feerate
+  // Assert the transaction is above the dust limit.
+  assert.ok((utxo.value - txfee) >= DUST_LIMIT, 'tx value + fee is below dust limit')
+  // Convert utxo into a txinput.
+  const tx_input  = create_txinput(utxo)
+  // Create the return transaction.
+  const recover_tx = create_tx({
+    vin  : [ { ...tx_input, sequence: ctx.sequence } ],
+    vout : [ {
+      value        : utxo.value - txfee,
+      scriptPubKey : parse_addr(recv_addr).asm
+    } ]
+  })
+  // Sign the recovery transaction.
+  const signed_tx = sign_recovery_tx(ctx, signer, recover_tx)
+  // Return the completed transaction as hex.
+  return encode_tx(signed_tx).hex
+}
+
+/**
+ * Get a recovery config object from
+ * an existing deposit account object.
+ */
+export function get_recovery_config (
+  account : AccountTemplate
+) : RecoveryConfig {
+  const { agent_tkn, deposit_pk, locktime, network, return_addr } = account
+  const session = parse_session_token(agent_tkn)
+  return { agent_pk: session.pk, deposit_pk, locktime, network, return_addr }
+}
+
+/**
+ * Get a context object for creating
+ * a deposit recovery transaction.
  */
 export function get_recovery_ctx (
-  txhex : TxBytes
-) : ReturnContext {
-  // Parse the transaction hex.
-  const tx   = parse_tx(txhex)
-  // Define the first input of the tx.
-  const txin = tx.vin.at(0)
-  // Assert that an input exists.
-  assert.exists(txin)
-  // Parse the input witness for context.
-  const wit_ctx = parse_proof(txin.witness)
-  // Unpack the context object
-  const { params, script, tapkey } = wit_ctx
-  // Define the sequence value.
-  const seq = script.at(0)
-  // Define variables for the pubkey and signature.
-  let pub : Bytes | undefined, sig : Bytes | undefined
-  // Parse the script based on its content.
-  if (script.includes('OP_HASH160')) {
-    pub = params.at(0)
-    sig = params.at(1)
-  } else if (script.length === 5) {
-    pub = script.at(3)
-    sig = params.at(0)
-  } else {
-    throw new Error('Invalid witness script: ' + script.toString())
-  }
-  // Assert that all parsed values exist.
-  assert.exists(seq)
-  assert.exists(pub)
-  assert.exists(sig)
-  // Format the parsed values.
-  const pubkey    = Buff.bytes(pub).hex
-  const sequence  = Buff.hex(seq).reverse().num
-  const signature = Buff.bytes(sig).hex
-  // Return the parsed values.
-  return { pubkey, sequence, signature, tapkey, tx }
+  config : RecoveryConfig
+) : RecoveryContext {
+  const { agent_pk, deposit_pk, locktime, return_addr } = config
+  // Define the members of the multi-sig.
+  const members      = [ deposit_pk, agent_pk ]
+  // Get the context of the return address.
+  const pubkey       = parse_addr(return_addr).key
+  // Get the sequence value from the locktime.
+  const sequence     = create_sequence('stamp', locktime)
+  // Get the recovery script path.
+  const script       = get_recovery_script(pubkey, sequence)
+  // Get the musig context for the internal key.
+  const int_data     = get_key_ctx(members)
+  // Get the key data for the taproot key.
+  const tap_data     = get_tapkey(int_data.group_pubkey.hex, script)
+  // Unpack the tap_data object,
+  const { cblock, extension } = tap_data
+  // Return the recovery context object.
+  return { cblock, extension, pubkey, script, sequence }
 }
 
 /**
@@ -80,72 +107,39 @@ export function get_recovery_ctx (
  * using the provided input arguments.
  */
 export function get_recovery_script (
-  return_addr : string,
-  sequence    : number
+  pubkey   : string,
+  sequence : number
 ) {
-  // Parse the address and return the context.
-  const addr = parse_addr(return_addr)
-  // Define a variable for the script.
-  let script : string[]
-  // Configure the script based on the address type.
-  if (addr.type === 'p2pkh' || addr.type === 'p2w-pkh') {
-    script = [ 'OP_DUP', 'OP_HASH160', addr.key, 'OP_EQUALVERIFY' ]
-  } else if (addr.type === 'p2tr') {
-    script = [ addr.key ]
-  } else {
-    throw new Error('Invalid address type: ' + addr.type)
-  }
   // Return the recovery script.
   return [
     Buff.num(sequence, 4).reverse().hex,
     'OP_CHECKSEQUENCEVERIFY',
     'OP_DROP',
-    ...script,
+    pubkey,
     'OP_CHECKSIG'
   ]
 }
 
 /**
- * Create and sign a recovery transaction
- * for a given unspent transaction output.
+ * Returns a signed transaction object,
+ * using the provided recovery context.
  */
-export function create_recovery_tx (
-  address : string,
-  context : AccountContext,
-  signer  : SignerAPI,
-  txout   : TxOutput,
-  txfee = MIN_RECOVER_FEE
-) : string {
-  const { sequence, tap_data } = context
-  const { cblock, extension, script } = tap_data
-  assert.ok(txout.value > txfee, 'tx value does not cover txfee')
-  assert.exists(script)
-  const tx_input  = create_txinput(txout)
-  const return_tx = create_tx({
-    vin  : [ { ...tx_input, sequence } ],
-    vout : [ {
-      value        : txout.value - txfee,
-      scriptPubKey : parse_addr(address).asm
-    } ]
-  })
-
-  const opt : SigHashOptions = { extension, txindex: 0, throws: true }
-  const sig = sign_tx(signer, return_tx, opt)
-  return_tx.vin[0].witness = [ sig, script, cblock ]
-  // assert.ok(taproot.verify_tx(recover_tx, opt), 'recovery tx failed to generate!')
-  return encode_tx(return_tx).hex
-}
-
-/**
- * Parse and return the public key that is
- * contained in a transaction locking script.
- */
-export function parse_return_key (words : ScriptWord[]) {
-  const pubkey = words.at(3)
-  if (pubkey === undefined) return null
-  try {
-    return BaseSchema.hash.parse(pubkey)
-  } catch {
-    return null
-  }
+export function sign_recovery_tx (
+  ctx    : RecoveryContext,
+  signer : SignerAPI,
+  txdata : TxData
+) {
+  // Get recovery context object.
+  const { cblock, extension, script } = ctx
+  // Configure the signature session.
+  const opt = { extension, txindex: 0, throws: true }
+  // We may need to add a naked tap tweak??
+  // Create a signature for the transaction.
+  const sig = sign_tx(signer, txdata, opt)
+  // Apply the params and proof to the witness.
+  txdata.vin[0].witness = [ sig, script, cblock ]
+  // Verify that the tx is signed correctly.
+  taproot.verify_tx(txdata, opt)
+  // Return the completed transaction data.
+  return txdata
 }

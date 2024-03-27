@@ -6,22 +6,16 @@ import assert from 'assert'
 import {
   create_witness,
   sign_witness
-} from '@scrow/core/witness'
+} from '@scrow/sdk/core/vm'
 
 import {
-  Schema,
-  MachineConfig,
-  ProgramTerms,
+  ProgramEntry,
   SignerAPI,
+  VMConfig,
   WitnessData,
-  StateData
-} from '@scrow/core'
+} from '@scrow/sdk/core'
 
-import {
-  eval_schedule,
-  eval_witness,
-  init_vm
-} from '@scrow/core/vm'
+import { VM, VMData } from '@scrow/sdk/vm'
 
 interface MemberSigner {
   alias  : string
@@ -42,30 +36,25 @@ export function get_signer (alias : string) : MemberSigner {
 
 export function resolve_aliases (
   aliases  : string[],
-  programs : (string | number)[][]
-) : ProgramTerms[] {
+  programs : ProgramEntry[]
+) : ProgramEntry[] {
   const mbrs  = aliases.map(e => get_signer(e))
-  const progs = Schema.proposal.terms.array().parse(programs)
-  for (let i = 0; i < progs.length; i++) {
-    const terms = progs[i]
+  for (let i = 0; i < programs.length; i++) {
+    const terms = programs[i]
     for (let j = 0; j < terms.length; j++) {
       const term = terms[j]
       if (typeof term === 'string' && aliases.includes(term)) {
         const mbr = mbrs.find(e => e.alias === term)
         assert.ok(mbr !== undefined)
-        progs[i][j] = mbr.signer.pubkey
+        programs[i][j] = mbr.signer.pubkey
       }
     }
   }
-  return progs
-}
-
-export function parse_config (config : unknown) : MachineConfig {
-  return Schema.vm.config.parse(config)
+  return programs
 }
 
 export function compile_witness (
-  programs  : ProgramTerms[],
+  programs  : ProgramEntry[],
   witnesses : WitnessVector[]
 ) {
   const wit_data : WitnessData[] = []
@@ -88,17 +77,17 @@ export function compile_witness (
 }
 
 export function run_vm (
-  config    : MachineConfig,
+  config    : VMConfig,
   stamp     : number,
   witnesses : WitnessData[]
-) : StateData {
+) : VMData {
   const timeout  = config.activated + stamp
-    let vm_state = init_vm(config)
+    let vm_state = VM.init(config)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:
   for (const wit of witnesses) {
     // Evaluate the witness statement.
-    vm_state = eval_witness(vm_state, wit)
+    vm_state = VM.eval(vm_state, wit)
     // Unpack the current state results:
     const { error, output } = vm_state
     if (error !== null || output !== null) {
@@ -107,5 +96,5 @@ export function run_vm (
     }
   }
   // If the vm is still running, eval the timestamp.
-  return eval_schedule(vm_state, timeout)
+  return VM.run(vm_state, timeout)
 }

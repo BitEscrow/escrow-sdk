@@ -10,7 +10,7 @@ import {
   create_account_req,
 } from '@scrow/sdk/core/account'
 
-import { AccountData, PaymentEntry, SignerAPI } from '@scrow/sdk/core'
+import { PaymentEntry } from '@scrow/sdk/core'
 
 import { endorse_proposal } from '@scrow/sdk/core/proposal'
 import { now }              from '@scrow/sdk/util'
@@ -27,7 +27,8 @@ import {
   create_contract,
   activate_contract,
   settle_contract,
-  get_vm_config
+  get_vm_config,
+  get_settlement_tx
 } from '@scrow/sdk/core/contract'
 
 import {
@@ -44,7 +45,7 @@ import {
   verify_settlement,
   verify_witness,
   verify_commit_req,
-  verify_vm_receipt
+  verify_execution
 } from '@scrow/sdk/core/validate'
 
 import * as assert from '@scrow/sdk/assert'
@@ -65,15 +66,16 @@ const FEERATE  = 2
 const LOCKTIME = 60 * 60 * 2
 const NETWORK  = 'regtest'
 
-export default async function (client : CoreClient, tape : Test) {
-  tape.test('E2E test of the core protocol', async t => {
-    t.plan(1)
-
+export default async function (
+  client  : CoreClient,
+  tape    : Test
+) {
+  tape.test('E2E Settlement Test', async t => {
     try {
 
       /* ------------------- [ Init ] ------------------- */
 
-      const banner    = (title : string) => `\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n'
+      const banner    = (title : string) => `\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n'
       const aliases   = [ 'agent', 'alice', 'bob', 'carol' ]
       const ret_addr  = await client.core.faucet.get_address('faucet')
       const users     = await get_members(client, aliases)
@@ -96,6 +98,8 @@ export default async function (client : CoreClient, tape : Test) {
       if (VERBOSE) {
         console.log(banner('proposal'))
         console.dir(proposal, { depth : null })
+      } else {
+        t.pass('proposal ok')
       }
 
       /* ------------------- [ Create Contract ] ------------------- */
@@ -105,13 +109,15 @@ export default async function (client : CoreClient, tape : Test) {
       // Server: Verify contract request.
       verify_contract_req(pub_req)
       // Server: Create contract data.
-      const contract = create_contract(ct_config, pub_req)
+      const contract = create_contract(ct_config, pub_req, server_sd)
       // Client: Verify contract data.
-      // verify_contract(contract, proposal, server_pk)
+      verify_contract(contract, proposal, server_pk)
       
       if (VERBOSE) {
         console.log(banner('contract'))
         console.dir(contract, { depth : null })
+      } else {
+        t.pass('contract ok')
       }
 
       /* ------------------- [ Create Accounts ] ------------------ */
@@ -132,14 +138,16 @@ export default async function (client : CoreClient, tape : Test) {
       if (VERBOSE) {
         console.log(banner('account'))
         console.dir(account, { depth : null })
+      } else {
+        t.pass('account ok')
       }
 
       /* ------------------- [ Create Deposits ] ------------------- */
 
       // Fund deposit address and get txid.
-      const txid = await fund_address(client, 'faucet', account.deposit_addr, contract.total, false)
+      const dep_txid = await fund_address(client, 'faucet', account.deposit_addr, contract.total, false)
       // Fetch the utxo for the funded address.
-      const utxo = await get_utxo(client, account.deposit_addr, txid)
+      const utxo = await get_utxo(client, account.deposit_addr, dep_txid)
       // Client: Create the commit request.
       const commit_req = create_commit_req(FEERATE, contract, account, funder, utxo)
       // Server: Verify the registration request.
@@ -154,6 +162,8 @@ export default async function (client : CoreClient, tape : Test) {
       if (VERBOSE) {
         console.log(banner('deposit'))
         console.dir(deposit, { depth : null })
+      } else {
+        t.pass('deposit ok')
       }
 
       /* ------------------ [ Activate Contract ] ------------------ */
@@ -166,6 +176,8 @@ export default async function (client : CoreClient, tape : Test) {
         console.log('contract activated')
         console.log(banner('vm state'))
         console.dir(vm_state, { depth : null })
+      } else {
+        t.pass('activation ok')
       }
 
       /* ------------------- [ Submit Statements ] ------------------- */
@@ -186,6 +198,8 @@ export default async function (client : CoreClient, tape : Test) {
       if (VERBOSE) {
         console.log(banner('witness'))
         console.dir(witness, { depth : null })
+      } else {
+        t.pass('witness ok')
       }
 
       let state = VM.eval(vm_state, witness, now())
@@ -196,39 +210,39 @@ export default async function (client : CoreClient, tape : Test) {
       //
       const { head, updated, vmid } = state
       // Create a signed receipt for the latest commit.
-      const vm_receipt = create_vm_receipt(head, server_sd, vmid, witness.wid, updated)
+      const vm_receipt = create_vm_receipt(head, server_sd, vmid, updated)
       // Verify the latest commit matches the receipt.
-      verify_vm_receipt(head, vm_receipt, server_pk, vmid, witness.wid)
+      verify_execution(ct_active, vm_receipt, server_pk, [ witness ])
 
       if (VERBOSE) {
         console.log(banner('vm receipt'))
         console.dir(state, { depth : null })
+      } else {
+        t.pass('execution ok')
       }
 
       /* ------------------- [ Settle Contract ] ------------------- */
 
-      state = VM.run(state, now() + 8000)
+      const settled_at = now() + 8000
+
+      state = VM.run(state, settled_at)
 
       assert.exists(state.output)
 
-      const txdata = settle_contract(ct_active, [ deposit ], state.output, server_sd)
+      const txdata     = get_settlement_tx(ct_active, [ deposit ], state.output, server_sd)
+      const txid       = await client.publish_tx(txdata, true)
+      const ct_settled = settle_contract(ct_active, settled_at, txid)
 
-      // verify_settlement(ct_active, [ witness ], txdata)
+      verify_settlement(ct_settled, [ witness ], [ deposit.utxo ])
 
       if (VERBOSE) {
         console.log(banner('closing tx'))
         console.dir(txdata, { depth : null })
+      } else {
+        t.pass('settlement ok')
       }
 
-      const settlement_txid = await client.publish_tx(txdata, true)
-
-      if (VERBOSE) {
-        console.log(banner('txid'))
-        console.log(settlement_txid)
-        console.log('\n' + '='.repeat(80) + '\n')
-      }
-
-      t.true(typeof settlement_txid === 'string', 'E2E test passed with txid: ' + settlement_txid)
+      t.pass('completed with txid: ' + txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

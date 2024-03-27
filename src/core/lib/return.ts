@@ -1,6 +1,6 @@
 /* Global Imports */
 
-import { Buff, Bytes }   from '@cmdcode/buff'
+import { Buff }          from '@cmdcode/buff'
 import { combine_psigs } from '@cmdcode/musig2'
 import { TxData }        from '@scrow/tapscript'
 import { encode_tx }     from '@scrow/tapscript/tx'
@@ -11,13 +11,14 @@ import { RETURN_TX_VSIZE } from '@/const.js'
 
 /* Local Imports */
 
-import { get_account_ctx }    from './account.js'
+import { get_account_agent, get_account_ctx }    from './account.js'
 import { get_deposit_hash }   from './deposit.js'
 import { get_session_pnonce } from './session.js'
 
 import {
   create_covenant_psig,
-  get_covenant_session
+  get_covenant_session,
+  settle_covenant_psig
 } from './covenant.js'
 
 import {
@@ -38,7 +39,7 @@ import {
  * collaboratively closing a deposit.
  */
 export function get_return_session (
-  pnonce  : Bytes,
+  pnonce  : string,
   request : RegisterTemplate,
   txdata  : TxData
 ) : CovenantSession {
@@ -94,19 +95,21 @@ export function create_return_template (
  * Complete a settlement transaction
  * for closing an escrow deposit.
  */
-export function settle_return (
+export function get_return_tx (
   request : RegisterRequest,
   signer  : SignerAPI
 ) : string {
   const { return_psig, utxo } = request
-  //
+  // Parse the pnonce from the return psig.
   const [ pnonce, dp_psig ] = parse_return_psig(return_psig)
   // Create a transaction template from the request.
   const txdata  = create_return_template(request)
   // Compute a musig context object for the transaction.
-  const session = get_return_session(pnonce, request, txdata)
+  const session = get_return_session(pnonce.hex, request, txdata)
+  // Get signing agent for account.
+  const agent   = get_account_agent(request, signer)
   // Compute the partial signature for the signer.
-  const ag_psig = create_covenant_psig(session, signer)
+  const ag_psig = settle_covenant_psig(session, agent)
   // Compute the combined signature.
   const musig   = combine_psigs(session.musig, [ dp_psig, ag_psig ])
   // Format the signature for ANYONECANPAY_SIGHASH_SINGLE.

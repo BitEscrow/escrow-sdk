@@ -17,6 +17,7 @@ import {
 import {
   ContractData,
   ProgramEntry,
+  VMBase,
   VMReceipt,
   WitnessData
 } from '../types/index.js'
@@ -101,16 +102,15 @@ export function verify_witness_sigs (
 }
 
 export function verify_vm_receipt (
-  head      : string,
   receipt   : VMReceipt,
   server_pk : string,
-  vmid      : string,
-  wid       : string
+  vm_state  : VMBase
 ) {
-  assert.ok(head === receipt.head)
-  assert.ok(vmid === receipt.vmid)
-  assert.ok(wid  === receipt.wid)
-  const hash     = create_vm_hash(head, vmid, wid, receipt.updated)
-  const is_valid = verify_sig(receipt.sig, hash, server_pk)
-  assert.ok(is_valid)
+  const { head, updated, vmid } = vm_state
+  assert.ok(head    === receipt.head,    'vm commit head does not match receipt')
+  assert.ok(updated === receipt.updated, 'vm updated timestamp does not match receipt')
+  assert.ok(vmid    === receipt.vmid,    'vm identifier does not match receipt')
+  const vm_hash  = create_vm_hash(head, vmid, updated)
+  const is_valid = verify_sig(receipt.sig, vm_hash, server_pk)
+  assert.ok(is_valid, 'receipt signature is invalid for pubkey: ' + server_pk)
 }

@@ -137,6 +137,15 @@ export function create_deposit (
   return sort_record(deposit)
 }
 
+export function close_deposit (
+  deposit    : DepositData,
+  spent_at   : number,
+  spent_txid : string
+) {
+  const status = 'spent' as DepositStatus
+  return { ...deposit, spent_at, status, spent_txid, spent: true }
+}
+
 export function get_deposit_hash (
   request : RegisterTemplate | DepositData
 ) {

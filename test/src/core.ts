@@ -8,14 +8,15 @@ import {
   CoreDaemon
 } from '@cmdcode/core-cmd'
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG : Partial<CoreConfig> = {
   corepath : 'test/bin/bitcoind',
   clipath  : 'test/bin/bitcoin-cli',
   confpath : 'test/regtest.conf',
   datapath : 'test/data',
   network  : 'regtest',
   isolated : true,
-  verbose  : false
+  verbose  : false,
+  core_params : [ '-reindex' ]
 }
 
 let daemon : CoreDaemon | null = null

@@ -17,7 +17,7 @@ export function verify_return_psig (
   // Create a return transaction using the provided params.
   const txdata  = create_return_template(request)
   //
-  const session = get_return_session(pnonce, request, txdata)
+  const session = get_return_session(pnonce.hex, request, txdata)
   //
   verify_covenant_psig(session, psig.hex)
 }

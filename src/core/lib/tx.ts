@@ -15,7 +15,6 @@ import {
   TapContext,
   TxBytes,
   TxData,
-  TxInput,
   TxPrevout
 } from '@scrow/tapscript'
 
@@ -34,7 +33,6 @@ import {
 import { Network } from '@/types.js'
 
 import {
-  SpendTemplate,
   SignerAPI,
   OracleTxIn,
   TxOutput,
@@ -192,32 +190,13 @@ export function create_spend_template (
 }
 
 export function create_sighash (
-  txinput : TxInput,
-  txbytes : TxBytes
+  txhex : string,
+  utxo  : TxOutput
 ) {
-  const txdata = decode_tx(txbytes, false)
+   // Create a txinput for the transaction.
+  const txinput = create_txinput(utxo)
+  const txdata  = decode_tx(txhex, false)
   return taproot.hash_tx(txdata, { sigflag: 0x81, txinput }).hex
-}
-
-export function get_sighashes (
-  outputs : SpendTemplate[],
-  txinput : TxPrevout
-) {
-  return outputs.map(([ label, vout ]) => {
-    return [ label, create_sighash(txinput, vout) ]
-  })
-}
-
-export function get_sighash (
-  path_name : string,
-  outputs   : SpendTemplate[],
-  txinput   : TxPrevout
-) {
-  const output = outputs.find(e => e[0] === path_name)
-  if (output === undefined) {
-    throw new Error('Unable to find spending path:' + path_name)
-  }
-  return create_sighash(txinput, output[1])
 }
 
 export function sign_tx (

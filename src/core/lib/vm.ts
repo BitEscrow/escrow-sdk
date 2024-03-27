@@ -127,26 +127,23 @@ export function get_program_idx (
 }
 
 export function create_vm_hash (
-  head    : string,
-  vmid    : string,
-  wid     : string,
+  head : string,
+  vmid : string,
   updated = now()
 ) {
   const sb  = Buff.num(updated, 4)
   const hb  = Buff.hex(head)
   const vb  = Buff.hex(vmid)
-  const wb  = Buff.hex(wid)
-  return Buff.join([ vb, wb, hb, sb ]).digest.hex
+  return Buff.join([ vb, hb, sb ]).digest.hex
 }
 
 export function create_vm_receipt (
   head    : string,
   signer  : SignerAPI,
   vmid    : string,
-  wid     : string,
   updated = now()
 ) : VMReceipt {
-  const hash = create_vm_hash(head, vmid, wid, updated)
+  const hash = create_vm_hash(head, vmid, updated)
   const sig  = signer.sign(hash)
-  return { head, sig, updated, vmid, wid }
+  return { head, sig, updated, vmid }
 }
