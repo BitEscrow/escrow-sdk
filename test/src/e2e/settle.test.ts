@@ -58,7 +58,7 @@ import {
   get_utxo
 } from '../core.js'
 
-import { get_proposal } from '../vectors/basic_escrow.js'
+import { get_proposal } from './util.js'
 import { P2TR } from '@scrow/tapscript/address'
 
 const VERBOSE = process.env.VERBOSE === 'true'

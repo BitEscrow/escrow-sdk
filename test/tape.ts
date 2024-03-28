@@ -5,7 +5,7 @@ import e2e_recover_test from './src/e2e/recover.test.js'
 import e2e_return_test  from './src/e2e/return.test.js'
 import e2e_settle_test  from './src/e2e/settle.test.js'
 
-// import vm_test  from './src/vm/vm.test.js'
+import vm_test  from './src/vm/vm.test.js'
 
 // const local_config = {
 //   network  : 'regtest',
@@ -14,7 +14,8 @@ import e2e_settle_test  from './src/e2e/settle.test.js'
 // }
 
 tape('Escrow Core Test Suite', async t => {
-  // vm_test(t)
+  vm_test(t)
+
   const core   = get_daemon()
   const client = await core.startup()
 

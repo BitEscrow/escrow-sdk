@@ -12,10 +12,11 @@ import {
   ProgramEntry,
   SignerAPI,
   VMConfig,
+  VMData,
   WitnessData,
 } from '@scrow/sdk/core'
 
-import { VM, VMData } from '@scrow/sdk/vm'
+import { VirtualMachine } from '@scrow/sdk/vm'
 
 interface MemberSigner {
   alias  : string
@@ -77,24 +78,24 @@ export function compile_witness (
 }
 
 export function run_vm (
-  config    : VMConfig,
-  stamp     : number,
-  witnesses : WitnessData[]
+  config     : VMConfig,
+  statements : WitnessData[],
+  timeout    : number
 ) : VMData {
-  const timeout  = config.activated + stamp
-    let vm_state = VM.init(config)
+  const marker = config.activated + timeout
+  const vm = new VirtualMachine(config)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:
-  for (const wit of witnesses) {
+  for (const witness of statements) {
     // Evaluate the witness statement.
-    vm_state = VM.eval(vm_state, wit)
+    const state = vm.eval(witness)
     // Unpack the current state results:
-    const { error, output } = vm_state
+    const { error, output } = state
+    // If there's an error or result, return.
     if (error !== null || output !== null) {
-      // If there's a result, return.
-      return vm_state
+      return state
     }
   }
   // If the vm is still running, eval the timestamp.
-  return VM.run(vm_state, timeout)
+  return vm.run(marker)
 }
