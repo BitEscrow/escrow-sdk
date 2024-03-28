@@ -1,25 +1,27 @@
 import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
-import * as assert       from '@/assert.js'
-import { VALID_METHODS } from '@/config.js'
-import { Literal }       from '@/types.js'
-import { regex }         from '@/util.js'
-import { VM }            from '@/vm/index.js'
+import * as assert        from '@/assert.js'
+import { VALID_METHODS }  from '@/config.js'
+import { Literal }        from '@/types.js'
+import { regex }          from '@/util.js'
+import { VirtualMachine } from '@/vm/index.js'
 
 import { get_path_names } from '../lib/proposal.js'
 
 import {
   create_program,
-  create_vm_hash,
+  get_receipt_hash,
+  get_receipt_id,
   get_witness_id
 } from '../lib/vm.js'
 
 import {
   ContractData,
   ProgramEntry,
-  VMBase,
-  VMReceipt,
-  WitnessData
+  VMConfig,
+  VMData,
+  WitnessData,
+  WitnessReceipt
 } from '../types/index.js'
 
 import ProgSchema from '../schema/vm.js'
@@ -44,11 +46,7 @@ export function verify_program (
     throw new Error('invalid program method: ' + method)
   }
 
-  const program = VM.methods[method]
-
-  assert.ok(program !== undefined, 'program method does not exist in vm: ' + method)
-
-  const err = program.verify(params)
+  const err = VirtualMachine.check(method, params)
 
   if (err !== null) throw new Error(err)
 }
@@ -101,16 +99,67 @@ export function verify_witness_sigs (
   assert.ok(is_valid,     'signature verifcation failed')
 }
 
-export function verify_vm_receipt (
-  receipt   : VMReceipt,
-  server_pk : string,
-  vm_state  : VMBase
+export function verify_receipt (
+  receipt : WitnessReceipt,
+  result  : VMData
 ) {
-  const { head, updated, vmid } = vm_state
-  assert.ok(head    === receipt.head,    'vm commit head does not match receipt')
-  assert.ok(updated === receipt.updated, 'vm updated timestamp does not match receipt')
-  assert.ok(vmid    === receipt.vmid,    'vm identifier does not match receipt')
-  const vm_hash  = create_vm_hash(head, vmid, updated)
-  const is_valid = verify_sig(receipt.sig, vm_hash, server_pk)
-  assert.ok(is_valid, 'receipt signature is invalid for pubkey: ' + server_pk)
+  const { created_at, hash, id, pubkey, sig, ...data } = receipt
+
+  const int_hash = get_receipt_hash(data)
+
+  if (int_hash !== hash) {
+    throw new Error('receipt hash does not match internal hash: ' + int_hash)
+  }
+
+  const int_id = get_receipt_id(hash, pubkey, created_at)
+
+  if (int_hash !== hash) {
+    throw new Error('receipt id does not match internal id: ' + int_id)
+  }
+
+  const is_valid = verify_sig(sig, id, pubkey)
+
+  if (!is_valid) {
+    throw new Error('receipt signature is invalid')
+  }
+
+  if (receipt.vmid !== result.vmid) {
+    throw new Error('receipt does not match vmid: '   + result.vmid)
+  } else if (receipt.step !== result.step) {
+    throw new Error('receipt does not match step: '   + result.step)
+  } else if (receipt.head !== result.head) {
+    throw new Error('receipt does not match head: '   + result.head)
+  } else if (receipt.stamp !== result.stamp) {
+    throw new Error('receipt does not match stamp: '  + result.stamp)
+  } else if (receipt.error !== result.error) {
+    throw new Error('receipt does not match error: '  + result.error)
+  } else if (receipt.output !== result.output) {
+    throw new Error('receipt does not match output: ' + result.output)
+  }
+}
+
+export function verify_exec (
+  config     : VMConfig,
+  receipt    : WitnessReceipt,
+  statements : WitnessData[] = []
+) {
+  //
+  const VM = new VirtualMachine(config)
+  //
+  for (const witness of statements) {
+    //
+    const eval_state = VM.eval(witness)
+    //
+    if (
+      eval_state.error !== null ||
+      eval_state.output !== null
+    ) {
+      verify_receipt(receipt, eval_state)
+      return
+    }
+  }
+  //
+  const run_state = VM.run(receipt.stamp)
+  //
+  verify_receipt(receipt, run_state)
 }

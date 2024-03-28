@@ -2,11 +2,9 @@ import { Literal } from '@/types.js'
 
 import {
   ProgramData,
-  VMBase,
+  VMData,
   WitnessData
 } from '@/core/types/index.js'
-
-export type MethodManifest = Record<string, ProgramMethod | undefined>
 
 export type ProgramExec = (
   params : Literal[],
@@ -23,7 +21,7 @@ export type ProgramVerify = (
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
 export type StoreEntry = [ string, string ]
-export type WitProgram = (...args : string[]) => boolean
+// export type WitProgram = (...args : string[]) => boolean
 
 export type CommitEntry = [
   step   : number,
@@ -52,12 +50,12 @@ export enum PathState {
   closed
 }
 
-export interface ProgramMethod {
+export interface ProgMethodAPI {
   exec   : ProgramExec
   verify : ProgramVerify
 }
 
-export interface VMData extends VMBase {
+export interface VMState extends VMData {
   commits   : CommitEntry[]   // List of commits to the VM.
   paths     : StateEntry[]    // List of spend paths and their current state.
   programs  : ProgramData[]   // List of programs available in the VM.

@@ -1,6 +1,6 @@
 import { Buff }         from '@cmdcode/buff'
 
-import { now, regex }   from '@/util.js'
+import { regex }        from '@/util.js'
 import { ProgramEntry } from '@/core/types/index.js'
 
 import { run_action } from './action.js'
@@ -10,7 +10,7 @@ import {
   PathState,
   PathStatus,
   StateEntry,
-  VMData
+  VMState
 } from '../types.js'
 
 const INIT_TERMS = {
@@ -35,14 +35,15 @@ export function update_path (
   action : string,
   hash   : string,
   path   : string,
-  state  : VMData
+  stamp  : number,
+  state  : VMState
 ) {
   const pst = get_path(state.paths, path)
   const idx = pst[0]
   const ret = run_action(action, pst[1], state)
 
   if (ret !== null) {
-    commit_action(action, hash, path, state)
+    commit_action(action, hash, path, stamp, state)
     state.paths[idx] = [ path, ret ]
     state.status = update_status(state.status, ret)
   }
@@ -111,14 +112,15 @@ function commit_action (
   action  : string,
   hash    : string,
   path    : string,
-  state   : VMData
+  stamp   : number,
+  state   : VMState
 ) {
   const head  = state.head
-  const stamp = now()
-  const step  = state.commits.length
+  const step  = state.step + 1
   state.commits.push([ step, stamp, head, hash, action, path ])
-  state.head    = get_hash_tip(step, stamp, head, hash)
-  state.updated = stamp
+  state.head  = get_hash_tip(step, stamp, head, hash)
+  state.step  = step
+  state.stamp = stamp
 }
 
 function validate_path_terms (
@@ -135,10 +137,9 @@ function validate_path_terms (
 
 export function check_stamp (
   stamp : number,
-  state : VMData
+  state : VMState
 ) {
-  const { updated } = state
-  if (stamp < updated) {
-    throw new Error(`timestamp occurs before latest update: ${stamp} <= ${updated}`)
+  if (stamp < state.stamp) {
+    throw new Error(`timestamp occurs before latest update: ${stamp} <= ${state.stamp}`)
   }
 }

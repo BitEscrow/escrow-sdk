@@ -1,4 +1,5 @@
 import { create_program } from '@/core/lib/vm.js'
+import { Literal }        from '@/types.js'
 import { regex }          from '@/util.js'
 
 import {
@@ -7,15 +8,37 @@ import {
   WitnessData
 } from '@/core/types/index.js'
 
-import { MANIFEST }    from '../methods/index.js'
 import { update_path } from './state.js'
 import { debug }       from '../util.js'
 
 import {
-  VMData,
+  VMState,
   StoreEntry,
-  ProgramReturn
+  ProgramReturn,
+  ProgMethodAPI
 } from '../types.js'
+
+import EndorseMethod from './methods/endorse.js'
+
+export function call_method (method : string) : ProgMethodAPI | null {
+  switch (method) {
+    case 'endorse':
+      return EndorseMethod
+    default:
+      return null
+  }
+}
+
+export function check_params (
+  method : string,
+  params : Literal[]
+) {
+  const mthd = call_method(method)
+  if (mthd === null) {
+    return 'method not found'
+  }
+  return mthd.verify(params)
+}
 
 export function init_stores (
   prog_ids : string[]
@@ -30,15 +53,14 @@ export function init_programs (
 }
 
 export function run_program (
-  state   : VMData,
+  state   : VMState,
   witness : WitnessData
 ) {
   const { programs, store } = state
-  const { action, path } = witness
+  const { action, path, stamp, wid } = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {
-    const hash = witness.wid
-    update_path(action, hash, path, state)
+    update_path(action, wid, path, stamp, state)
   }
 }
 
@@ -53,9 +75,9 @@ function load_program (
   const store = stores.find(e => e[0] === prog_id)
 
   if (prog === undefined) {
-    throw new Error('program not found for id ' + prog_id)
+    throw new Error('program not found for id: ' + prog_id)
   } else if (store === undefined) {
-    throw new Error('store not found for id ' + prog_id)
+    throw new Error('store not found for id: ' + prog_id)
   }
 
   debug('[vm] loading witness program:', prog_id)
@@ -63,18 +85,18 @@ function load_program (
   const { actions, method, params, paths } = prog
 
   if (!regex(action, actions)) {
-    throw new Error('program does not have access to action ' + action)
+    throw new Error('program does not have access to action: ' + action)
   }
 
   if (!regex(path, paths)) {
-    throw new Error('program does not have access to path ' + path)
+    throw new Error('program does not have access to path: ' + path)
   }
 
-  const program = MANIFEST[method]
+  const mthd = call_method(method)
 
-  if (program === undefined) {
-    throw new Error('program method does not exist in manifest ' + method)
+  if (mthd === null) {
+    throw new Error('program method does not exist: ' + method)
   }
 
-  return program.exec(params, store)
+  return mthd.exec(params, store)
 }

@@ -1,6 +1,6 @@
 import {
   PathState,
-  VMData
+  VMState
 } from '../types.js'
 
 import { VMError } from '../util.js'
@@ -8,7 +8,7 @@ import { VMError } from '../util.js'
 export function run_action (
   action : string,
   path   : PathState,
-  state  : VMData
+  state  : VMState
 ) : PathState | null {
   /**
    * Run an action on a specified path.
@@ -36,7 +36,7 @@ export function exec_dispute (state : PathState) {
   return PathState.disputed
 }
 
-export function exec_resolve (state : VMData) {
+export function exec_resolve (state : VMState) {
   if (state.status !== 'disputed') {
     throw new VMError('path is not in a dispute')
   }

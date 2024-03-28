@@ -1,9 +1,10 @@
 import {
   VMConfig,
+  VMData,
   WitnessData
 } from '@/core/types/index.js'
 
-import { now } from '@/util.js'
+import { now, sort_record } from '@/util.js'
 
 import {
   init_tasks,
@@ -26,7 +27,7 @@ import {
 import {
   PathStatus,
   CommitEntry,
-  VMData
+  VMState
 } from '../types.js'
 
 const GET_INIT_STATE = () => {
@@ -35,7 +36,7 @@ const GET_INIT_STATE = () => {
     error   : null,
     output  : null,
     status  : 'init' as PathStatus,
-    steps   : 0
+    step    : 0
   }
 }
 
@@ -43,14 +44,12 @@ const GET_INIT_STATE = () => {
  * Evaluates the witness data against the current virtual machine state.
  */
 export function eval_witness (
-  state   : VMData,
+  state   : VMState,
   witness : WitnessData,
   marker  = now()
-) : VMData {
+) : VMState {
   // Return early if there is already a result.
-  if (state.output !== null) {
-    return state
-  }
+  if (state.output !== null) return state
   // Reset our error varaible.
   state.error = null
   // Try to run the scheduler and program.
@@ -66,8 +65,6 @@ export function eval_witness (
     // Handle raised errors.
     state.error = err_handler(err)
   }
-  // Update the state timestamp.
-  state.updated = marker
   // Return the current state.
   return state
 }
@@ -76,9 +73,9 @@ export function eval_witness (
  * Evaluates the schedule of the virtual machine to process due events.
  */
 export function eval_schedule (
-  state  : VMData,
+  state  : VMState,
   marker : number = now()
-) : VMData {
+) : VMState {
   // Return early if there is already a result.
   if (state.output !== null) return state
   // Evaluate the schedule for due events.
@@ -92,14 +89,18 @@ export function eval_schedule (
  */
 export function init_vm (
   config : VMConfig
-) : VMData {
+) : VMState {
   const { activated, vmid } = config
   const head     = config.vmid
   const paths    = init_paths(config.pathnames, config.programs)
   const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e.prog_id))
-  const start    = config.activated
+  const stamp    = config.activated
   const tasks    = init_tasks(config.schedule)
-  const updated  = start
-  return { ...GET_INIT_STATE(), activated, head, paths, programs, store, tasks, updated, vmid }
+  return sort_record({ ...GET_INIT_STATE(), activated, head, paths, programs, stamp, store, tasks, vmid })
+}
+
+export function get_vmdata (vmstate : VMState) : VMData {
+  const { activated, error, head, output, step, stamp, vmid } = vmstate
+  return { activated, error, head, output, step, stamp, vmid }
 }

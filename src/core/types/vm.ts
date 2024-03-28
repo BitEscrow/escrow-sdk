@@ -26,7 +26,7 @@ export interface WitnessTemplate {
   stamp ?: number
 }
 
-export interface WitnessPreimage {
+export interface WitnessPreImage {
   action  : string
   args    : Literal[]
   method  : string
@@ -35,9 +35,17 @@ export interface WitnessPreimage {
   stamp   : number
 }
 
-export interface WitnessData extends WitnessPreimage {
+export interface WitnessData extends WitnessPreImage {
   sigs : string[]
   wid  : string
+}
+
+export interface WitnessReceipt extends VMData {
+  created_at : number
+  hash       : string
+  id         : string
+  pubkey     : string
+  sig        : string
 }
 
 export interface VMConfig {
@@ -48,18 +56,20 @@ export interface VMConfig {
   vmid      : string
 }
 
-export interface VMBase {
+export interface VMData {
   activated : number          // Timestamp for when the VM was initialized.
   error     : string | null   // Error output of the VM.
   head      : string          // Current head of the commit-chain.
   output    : string | null   // Standard output of the VM.
-  updated   : number          // Timestamp for when the VM was last updated.
-  vmid      : string
+  stamp     : number          // Timestamp for when the VM was last updated.
+  step      : number          // Counts the number of commits to the VM.
+  vmid      : string          // The virtual machine identifier.
 }
 
-export interface VMReceipt {
-  head    : string
-  sig     : string
-  updated : number
-  vmid    : string
+export interface VirtualMachineAPI {
+  data    : VMData
+  methods : string[]
+  check   : (method  : string, params  : Literal[])   => string | null
+  eval    : (witness : WitnessData, marker ?: number) => VMData
+  run     : (marker ?: number)                        => VMData
 }

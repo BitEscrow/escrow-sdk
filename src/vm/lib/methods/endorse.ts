@@ -1,12 +1,12 @@
 import * as assert     from '@/assert.js'
 import { Literal }     from '@/types.js'
 import { WitnessData } from '@/core/types/index.js'
-import { VMError }     from '../util.js'
+import { VMError }     from '../../util.js'
 
 /**
  * Main execution logic for the endorse method.
  */
-export function exec (
+function exec (
   params : Literal[],
   store  : string[]
 ) {
@@ -35,15 +35,22 @@ export function exec (
   }
 }
 
-export function verify (params : Literal[]) {
-  const [ threshold, ...pubkeys ] = params
-  const thold = Number(threshold)
-  const pubs  = pubkeys.map(e => String(e))
+function verify (params : Literal[]) {
   try {
-    assert.ok(typeof thold === 'number', 'invalid threshold value: ' + String(thold))
-    assert.ok(thold > 0,                 'threshold must be greater than zero')
-    assert.ok(thold <= pubs.length,      'threshold must not exceed pubkey count')
+    const [ threshold, ...pubkeys ] = params
+    const thold = Number(threshold)
+    const pubs  = pubkeys.map(e => String(e))
+
+    if (typeof thold !== 'number') {
+      return 'invalid threshold value: ' + String(thold)
+    } else if (thold <= 0) {
+      return 'threshold must be greater than zero'
+    } else if (thold > pubs.length) {
+      return 'threshold must not exceed pubkey count'
+    }
+
     pubs.forEach(e => { assert.valid_pubkey(e) })
+
     return null
   } catch (err) {
     const { message } = err as Error
@@ -94,3 +101,5 @@ function record_entry (
   // Return the new length of the label array.
   return arr.length
 }
+
+export default { exec, verify }

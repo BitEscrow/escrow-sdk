@@ -4,7 +4,7 @@ import { ScheduleEntry }   from '@/core/types/index.js'
 
 import { update_path }     from './state.js'
 import { debug }           from '../util.js'
-import { VMData }          from '../types.js'
+import { VMState }         from '../types.js'
 
 export function init_tasks (
   schedule : ScheduleEntry[]
@@ -14,7 +14,7 @@ export function init_tasks (
 }
 
 export function run_schedule (
-  state  : VMData,
+  state  : VMState,
   marker : number
 ) {
   /**
@@ -26,10 +26,10 @@ export function run_schedule (
   for (const task of tasks) {
     const [ ts, actions, paths ] = task
     const stamp = state.activated + ts
-    const prev  = state.updated
+    const prev  = state.stamp
     if (prev <= stamp && stamp <= marker) {
       debug('[vm] running task:', task)
-      run_task(actions, paths, state)
+      run_task(actions, paths, stamp, state)
       state.tasks.shift()
       if (state.output !== null) return
     }
@@ -39,7 +39,8 @@ export function run_schedule (
 function run_task (
   actsexp : string,
   pathexp : string,
-  state   : VMData
+  stamp   : number,
+  state   : VMState
 ) {
   /**
    * Run a task within the virtual machine.
@@ -50,8 +51,8 @@ function run_task (
   for (const action of alist) {
     for (const path of plist) {
       try {
-        const hash = state.head
-        update_path(action, hash, path, state)
+        const hash = state.vmid
+        update_path(action, hash, path, stamp, state)
         if (state.output !== null) return
       } catch (err) {
         debug('[vm] task failed to execute:' + String(err))
@@ -61,12 +62,12 @@ function run_task (
 }
 
 function get_tasks (
-  state : VMData
+  state : VMState
 ) {
   /**
    * Filters tasks that fall within
    * the current vm schedule.
    */
-  const { activated, updated } = state
-  return state.tasks.filter(e => e[0] + activated > updated)
+  const { activated, stamp } = state
+  return state.tasks.filter(e => e[0] + activated > stamp)
 }

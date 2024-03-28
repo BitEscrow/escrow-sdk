@@ -14,10 +14,10 @@ import { PaymentEntry } from '@scrow/sdk/core'
 
 import { endorse_proposal } from '@scrow/sdk/core/proposal'
 import { now }              from '@scrow/sdk/util'
-import { VM }               from '@scrow/sdk/vm'
+import { VirtualMachine }   from '@scrow/sdk/vm'
 
 import {
-  create_vm_receipt,
+  create_receipt,
   create_witness,
   sign_witness
 } from '@scrow/sdk/core/vm'
@@ -172,12 +172,11 @@ export default async function (
 
       const ct_active = activate_contract(contract)
       const vm_config = get_vm_config(ct_active)
-      const vm_state  = VM.init(vm_config)
+      const vm = new VirtualMachine(vm_config)
 
       if (VERBOSE) {
-        console.log('contract activated')
         console.log(banner('vm state'))
-        console.dir(vm_state, { depth : null })
+        console.dir(vm.data, { depth : null })
       } else {
         t.pass('activation ok')
       }
@@ -204,17 +203,16 @@ export default async function (
         t.pass('witness ok')
       }
 
-      let state = VM.eval(vm_state, witness, now())
+      let state = vm.eval(witness)
 
       if (state.error !== null) {
         throw new Error(state.error)
       }
-      //
-      const { head, updated, vmid } = state
+
       // Create a signed receipt for the latest commit.
-      const vm_receipt = create_vm_receipt(head, server_sd, vmid, updated)
+      const vm_receipt = create_receipt(state, server_sd)
       // Verify the latest commit matches the receipt.
-      verify_execution(ct_active, vm_receipt, server_pk, [ witness ])
+      verify_execution(ct_active, vm_receipt, witness)
 
       if (VERBOSE) {
         console.log(banner('vm receipt'))
@@ -227,7 +225,7 @@ export default async function (
 
       const settled_at = now() + 8000
 
-      state = VM.run(state, settled_at)
+      state = vm.run(settled_at)
 
       assert.exists(state.output)
 

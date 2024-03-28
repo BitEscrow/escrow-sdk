@@ -1,13 +1,13 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
 
-export function fail (
-  error : string,
-  throws = false
-) : false {
-  if (!throws) return false
-  throw new Error(error)
-}
+// export function fail (
+//   error : string,
+//   throws = false
+// ) : false {
+//   if (!throws) return false
+//   throw new Error(error)
+// }
 
 export function exists <T> (
   value ?: T | null

@@ -6,8 +6,8 @@ import {
   parse_txid
 } from '@scrow/tapscript/tx'
 
-import * as assert from '@/assert.js'
-import { VM }      from '@/vm/index.js'
+import * as assert        from '@/assert.js'
+import { VirtualMachine } from '@/vm/index.js'
 
 import { get_proposal_id } from '../lib/proposal.js'
 import { create_txinput }  from '../lib/tx.js'
@@ -29,13 +29,13 @@ import {
   ContractRequest,
   ProposalData,
   TxOutput,
-  VMBase,
-  VMReceipt,
+  VMData,
+  WitnessReceipt,
   WitnessData
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
-import { verify_vm_receipt } from './vm.js'
+import { verify_receipt } from './vm.js'
 
 export function validate_contract (
   contract : unknown
@@ -73,7 +73,7 @@ export function verify_contract (
 
 export function verify_activation (
   contract : ContractData,
-  state    : VMBase
+  state    : VMData
 ) {
   const { activated, vmid } = contract
   assert.ok(activated !== null,            'contract activated date is null')
@@ -83,23 +83,20 @@ export function verify_activation (
 }
 
 export function verify_execution (
-  contract   : ContractData,
-  receipt    : VMReceipt,
-  server_pk  : string,
-  statements : WitnessData[]
+  contract : ContractData,
+  receipt  : WitnessReceipt,
+  witness  : WitnessData
 ) {
   // Compute the vm configuration.
-  const vm_config = get_vm_config(contract)
+  const config = get_vm_config(contract)
   // Initialize the vm state.
-  let vm_state  = VM.init(vm_config)
+  const vm = new VirtualMachine(config)
   // Verify the activation of the vm.
-  verify_activation(contract, vm_state)
+  verify_activation(contract, vm.data)
   // Update the vm state for each witness.
-  for (const witness of statements) {
-    vm_state = VM.eval(vm_state, witness)
-  }
+  const result = vm.eval(witness)
   // Verify the final vm state with the receipt.
-  verify_vm_receipt(receipt, server_pk, vm_state)
+  verify_receipt(receipt, result)
 }
 
 export function verify_settlement (
@@ -113,21 +110,23 @@ export function verify_settlement (
   assert.ok(spent_at !== null,   'contract spent_at is null')
   assert.ok(spent_txid !== null, 'contract spent_txid is null')
   // Compute the vm configuration.
-  const vm_config = get_vm_config(contract)
+  const config = get_vm_config(contract)
   // Initialize the vm state.
-  let vm_state  = VM.init(vm_config)
+  const vm = new VirtualMachine(config)
   // Verify the activation of the vm.
-  verify_activation(contract, vm_state)
+  verify_activation(contract, vm.data)
   // Update the vm state for each witness.
   for (const witness of statements) {
-    vm_state = VM.eval(vm_state, witness)
+    const state = vm.eval(witness)
+    const error = `vm terminated early on step ${state.step} with error: ${state.error}`
+    assert.ok(state.error === null, error)
   }
   // Run the vm up to the final timestamp.
-  vm_state = VM.run(vm_state, spent_at)
+  const state = vm.run(spent_at)
   // Assert the state output is not null.
-  assert.ok(vm_state.output !== null, 'contract vm output is null')
+  assert.ok(state.output !== null, 'contract vm output is null')
   // Get the spend template for the provided output.
-  const output = get_spend_template(vm_state.output, contract.outputs)
+  const output = get_spend_template(state.output, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
   // Add each utxo to the txdata object.
