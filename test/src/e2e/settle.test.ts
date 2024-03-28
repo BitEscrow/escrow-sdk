@@ -59,6 +59,7 @@ import {
 } from '../core.js'
 
 import { get_proposal } from '../vectors/basic_escrow.js'
+import { P2TR } from '@scrow/tapscript/address'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -75,16 +76,17 @@ export default async function (
 
       /* ------------------- [ Init ] ------------------- */
 
-      const banner    = (title : string) => `\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n'
-      const aliases   = [ 'agent', 'alice', 'bob', 'carol' ]
-      const ret_addr  = await client.core.faucet.get_address('faucet')
-      const users     = await get_members(client, aliases)
+      const banner   = (title : string) => `\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n'
+      const aliases  = [ 'agent', 'alice', 'bob', 'carol' ]
+      const fee_addr = await client.core.faucet.get_address('faucet')
+      const users    = await get_members(client, aliases)
 
       const [ server, ...members ] = users
 
-      const fees      = [[ 1000, ret_addr ]] as PaymentEntry[]
-
+      const fees      = [[ 1000, fee_addr ]] as PaymentEntry[]
       const ct_config = { fees, feerate: FEERATE }
+
+      const funder_sd = members[0].signer
       const server_sd = server.signer
       const server_pk = server_sd.pubkey
 
@@ -122,16 +124,16 @@ export default async function (
 
       /* ------------------- [ Create Accounts ] ------------------ */
 
-      const funder = members[0].signer
-
+      //
+      const return_addr = P2TR.create(funder_sd.pubkey, NETWORK)
       // Client: Create account request.
-      const acct_req = create_account_req(funder.pubkey, LOCKTIME, NETWORK, ret_addr)
+      const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
       verify_account_req(acct_req)
       // Server: Create account data.
       const account = create_account(acct_req, server_sd)
       // Client: Verify account data.
-      verify_account(account, server_pk, funder)
+      verify_account(account, server_pk, funder_sd)
       // Return account and signer as tuple.
 
 
@@ -149,7 +151,7 @@ export default async function (
       // Fetch the utxo for the funded address.
       const utxo = await get_utxo(client, account.deposit_addr, dep_txid)
       // Client: Create the commit request.
-      const commit_req = create_commit_req(FEERATE, contract, account, funder, utxo)
+      const commit_req = create_commit_req(FEERATE, contract, account, funder_sd, utxo)
       // Server: Verify the registration request.
       verify_commit_req(contract, commit_req, server_sd)
       // Server: Create the deposit data.

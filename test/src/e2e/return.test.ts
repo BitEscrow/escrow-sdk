@@ -34,6 +34,7 @@ import {
 } from '../core.js'
 
 import { get_return_tx } from '@/core/lib/return.js'
+import { P2TR } from '@scrow/tapscript/address'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -53,7 +54,6 @@ export default async function (
 
       const banner    = (title : string) => `\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n'
       const aliases   = [ 'agent', 'alice' ]
-      const ret_addr  = await client.core.faucet.get_address('faucet')
       const users     = await get_members(client, aliases)
 
       const [ server, funder ] = users
@@ -64,8 +64,9 @@ export default async function (
 
       /* ------------------- [ Create Account ] ------------------ */
 
+      const return_addr = P2TR.create(funder_sd.pubkey, NETWORK)
       // Client: Create account request.
-      const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, ret_addr)
+      const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
       verify_account_req(acct_req)
       // Server: Create account data.
