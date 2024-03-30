@@ -11,10 +11,10 @@ const locktime = z.union([ str, num ]).transform(e => Number(e))
 const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
 const register_req = acct.request.extend({
-  agent_tkn   : cov.token,
   feerate     : num,
   network,
   return_psig : hex,
+  server_tkn  : cov.token,
   utxo        : tx.txspend
 })
 
@@ -67,7 +67,6 @@ const digest = z.object({
 
 const base_data = z.object({
   status,
-  agent_tkn    : hex,
   covenant     : cov.data.nullable(),
   created_at   : stamp,
   dpid         : hash,
@@ -79,8 +78,9 @@ const base_data = z.object({
   return_addr  : str,
   return_fee   : num,
   return_psig  : hex,
-  sequence     : num,
-  spend_xpub   : str,
+  server_pk    : hash,
+  server_sig   : hex,
+  server_tkn   : hex,
   updated_at   : stamp,
   utxo         : txspend
 })

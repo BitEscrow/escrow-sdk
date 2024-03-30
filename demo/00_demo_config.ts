@@ -1,28 +1,5 @@
-const configs = {
-  mutiny : {
-    hostname : 'https://bitescrow-mutiny.vercel.app',
-    oracle   : 'https://mutinynet.com',
-    network  : 'mutiny'
-  },
-
-  regtest : {
-    hostname : 'http://localhost:3000',
-    oracle   : 'http://172.21.0.3:3300',
-    network  : 'regtest'
-  },
-
-  signet : {
-    hostname : 'https://bitescrow-signet.vercel.app',
-    oracle   : 'https://mempool.space/signet',
-    network  : 'signet'
-  },
-
-  testnet : {
-    hostname : 'https://bitescrow-testnet.vercel.app',
-    oracle   : 'https://mempool.space/testnet',
-    network  : 'testnet'
-  }
-}
+import { get_server_config } from "@/config/index.js"
+import { Network }           from "@/types.js"
 
 const faucets = {
   mutiny  : 'https://faucet.mutinynet.com',
@@ -47,9 +24,12 @@ const poll_rates = {
 
 const network = process.argv.slice(2)[0] ?? 'mutiny'
 
+const { server_pk, ...client } = get_server_config(network as Network)
+
 export const config = {
   network,
-  client  : configs[network as keyof typeof configs],
+  client,
+  signer  : { server_pk },
   faucet  : faucets[network as keyof typeof faucets],
   members : [ 'alice', 'bob', 'carol' ],
   poll    : poll_rates[network as keyof typeof poll_rates],

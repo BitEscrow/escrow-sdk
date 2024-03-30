@@ -1,8 +1,6 @@
-import { CoreUtil, print_banner } from '@scrow/test'
-import { config }                 from './00_demo_config.js'
-import { client }                 from './01_create_client.js'
-
-export const sleep = (ms : number) => new Promise(res => setTimeout(res, ms))
+import { CoreUtil } from '@scrow/test'
+import { config }   from './00_demo_config.js'
+import { client }   from './01_create_client.js'
 
 export async function fund_address (
   address : string,
@@ -30,7 +28,7 @@ export async function fund_address (
   const [ ival, retries ] = config.poll
 
   let tries = 1,
-      utxos = await client.oracle.get_address_utxos(address)
+      utxos = await client.blockchain.get_address_utxos(address)
 
   // While there are no utxos (and we still have tries):
   while (utxos.length === 0 && tries < retries) {
@@ -39,7 +37,7 @@ export async function fund_address (
     // Sleep for interval number of secords.
     await sleep(ival * 1000)
     // Check again for utxos at address.
-    utxos = await client.oracle.get_address_utxos(address)
+    utxos = await client.blockchain.get_address_utxos(address)
     // Increment our tries counter
     tries += 1
   }

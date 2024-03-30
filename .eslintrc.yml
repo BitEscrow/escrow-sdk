@@ -72,5 +72,6 @@ ignorePatterns:
   - dist
   - docs
   - scripts
+  - src/wip
   - test
   - rollup.config.ts

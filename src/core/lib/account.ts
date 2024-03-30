@@ -11,8 +11,8 @@ import {
 
 /* Module Imports */
 
-import { Network } from '@/types.js'
-import { get_object_id, now, sort_record } from '@/util.js'
+import { Network }          from '@/types.js'
+import { now, sort_record } from '@/util.js'
 
 /* Local Imports */
 
@@ -29,7 +29,6 @@ import {
   AccountContext,
   AccountRequest,
   SignerAPI,
-  SessionToken,
   AccountTemplate
 } from '../types/index.js'
 
@@ -59,30 +58,30 @@ export function create_account_req (
  * prior use on the blockchain, and if used, reject the request.
  */
 export function create_account (
-  request   : AccountRequest,
-  server_sd : SignerAPI,
+  request : AccountRequest,
+  signer  : SignerAPI,
   created_at = now()
 ) : AccountData {
   // Unpack the request object.
   const { deposit_pk, locktime, network, return_addr } = request
   // Get signing agent for account.
-  const agent        = get_account_agent(request, server_sd)
+  const agent        = get_account_agent(request, signer)
   // Generate a session token.
-  const session      = gen_session_token(agent, created_at)
-  // Define the token string for the agent.
-  const agent_tkn    = session.tkn
+  const server_tkn   = gen_session_token(agent, created_at).tkn
   // Create a context object for the account.
-  const acct_ctx     = create_account_ctx(deposit_pk, locktime, network, return_addr, session)
+  const acct_ctx     = create_account_ctx(deposit_pk, locktime, network, return_addr, server_tkn)
   // Compute the deposit address from the account context.
   const deposit_addr = acct_ctx.deposit_addr
-  // Pack the account object in prep for signing.
-  const acct = { agent_tkn, deposit_addr, deposit_pk, locktime, network, return_addr }
+  // Compute the hash for the account request.
+  const hash         = get_account_hash(request)
+  // Set the server pubkey.
+  const server_pk    = signer.pubkey
   // Compute the id for the account data.
-  const acct_id = get_object_id(acct)
+  const acct_id      = get_account_id(deposit_addr, hash, server_pk, created_at, server_tkn)
   // Sign the account identifier.
-  const sig = server_sd.sign(acct_id)
+  const server_sig   = signer.sign(acct_id)
   // Return the complete account data object.
-  return sort_record({ ...acct, acct_id: acct_id.hex, sig })
+  return sort_record({ ...request, acct_id, created_at, deposit_addr, server_pk, server_sig, server_tkn })
 }
 
 /**
@@ -93,8 +92,10 @@ export function create_account_ctx (
   locktime    : number,
   network     : Network,
   return_addr : string,
-  session     : SessionToken
+  token       : string
 ) : AccountContext {
+  // Parse the session token.
+  const session      = parse_session_token(token)
   // Define the members of the multi-sig.
   const members      = [ deposit_pk, session.pk ]
   // Get the sequence value from the locktime.
@@ -124,11 +125,9 @@ export function create_account_ctx (
  */
 export function get_account_ctx (template : AccountTemplate) {
   // Unpack the account object.
-  const { agent_tkn, deposit_pk, locktime, network, return_addr } = template
-  // Parse session token.
-  const session = parse_session_token(agent_tkn)
+  const { deposit_pk, locktime, network, return_addr, server_tkn } = template
   // Return the account context object.
-  return create_account_ctx(deposit_pk, locktime, network, return_addr, session)
+  return create_account_ctx(deposit_pk, locktime, network, return_addr, server_tkn)
 }
 
 /**
@@ -150,13 +149,17 @@ export function get_account_hash (
  */
 export function get_account_id (
   address  : string,
-  req_hash : string,
-  stamp    : number
+  reqhash  : string,
+  pubkey   : string,
+  stamp    : number,
+  token    : string
 ) : string {
   const addr = Buff.str(address)
-  const hash = Buff.hex(req_hash)
+  const hash = Buff.hex(reqhash)
+  const pub  = Buff.hex(pubkey)
   const stmp = Buff.num(stamp, 4)
-  return Buff.join([ addr, hash, stmp ]).digest.hex
+  const tkn  = Buff.hex(token)
+  return Buff.join([ addr, hash, pub, stmp, tkn ]).digest.hex
 }
 
 export function get_account_agent (

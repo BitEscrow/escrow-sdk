@@ -1,26 +1,27 @@
 /* Global Imports */
 
-import { Test }         from 'tape'
-import { CoreClient }   from '@cmdcode/core-cmd'
+import { Test }       from 'tape'
+import { CoreClient } from '@cmdcode/core-cmd'
+import { P2TR }       from '@scrow/tapscript/address'
 
 /* Package Imports */
 
 import {
   create_account,
   create_account_req,
-} from '@scrow/sdk/core/account'
+} from '@scrow/sdk/account'
 
-import { PaymentEntry } from '@scrow/sdk/core'
-
-import { endorse_proposal } from '@scrow/sdk/core/proposal'
+import { PaymentEntry }     from '@scrow/sdk/core'
+import { DefaultPolicy }    from '@scrow/sdk/config'
+import { endorse_proposal } from '@scrow/sdk/proposal'
 import { now }              from '@scrow/sdk/util'
 import { VirtualMachine }   from '@scrow/sdk/vm'
 
 import {
   create_receipt,
   create_witness,
-  sign_witness
-} from '@scrow/sdk/core/vm'
+  endorse_witness
+} from '@scrow/sdk/witness'
 
 import {
   create_contract_req,
@@ -29,24 +30,25 @@ import {
   settle_contract,
   get_vm_config,
   get_settlement_tx
-} from '@scrow/sdk/core/contract'
+} from '@scrow/sdk/contract'
 
 import {
   create_commit_req,
   create_deposit
-} from '@scrow/sdk/core/deposit'
+} from '@scrow/sdk/deposit'
 
 import {
   verify_account_req,
   verify_account,
   verify_contract_req,
-  verify_contract,
   verify_deposit,
   verify_settlement,
   verify_witness,
   verify_commit_req,
-  verify_execution
-} from '@scrow/sdk/core/validate'
+  verify_execution,
+  verify_proposal,
+  verify_publishing
+} from '@scrow/sdk/validate'
 
 import * as assert from '@scrow/sdk/assert'
 
@@ -59,12 +61,11 @@ import {
 } from '../core.js'
 
 import { get_proposal } from './util.js'
-import { P2TR } from '@scrow/tapscript/address'
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
 const FEERATE  = 2
-const LOCKTIME = 60 * 60 * 2
+const LOCKTIME = 172800
 const NETWORK  = 'regtest'
 
 export default async function (
@@ -86,14 +87,16 @@ export default async function (
       const fees      = [[ 1000, fee_addr ]] as PaymentEntry[]
       const ct_config = { fees, feerate: FEERATE }
 
-      const funder_sd = members[0].signer
-      const server_sd = server.signer
-      const server_pk = server_sd.pubkey
+      const funder_sd  = members[0].signer
+      const server_sd  = server.signer
+      const server_pol = DefaultPolicy
 
       /* ------------------- [ Create Proposal ] ------------------- */
 
       // Construct a proposal from the template.
       const proposal   = await get_proposal(members)
+      // Verify the proposal
+      verify_proposal(proposal, server_pol)
       // Have each member endorse the proposal.
       const signatures = members.map(e => endorse_proposal(proposal, e.signer))
 
@@ -109,11 +112,11 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_contract_req(proposal, signatures)
       // Server: Verify contract request.
-      verify_contract_req(pub_req)
+      verify_contract_req(server_pol, pub_req)
       // Server: Create contract data.
-      const contract = create_contract(ct_config, pub_req, server_sd)
+      const contract = create_contract(ct_config, server_pol, pub_req, server_sd)
       // Client: Verify contract data.
-      verify_contract(contract, proposal, server_pk)
+      verify_publishing(contract, proposal)
       
       if (VERBOSE) {
         console.log(banner('contract'))
@@ -129,11 +132,11 @@ export default async function (
       // Client: Create account request.
       const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
-      verify_account_req(acct_req)
+      verify_account_req(server_pol, acct_req)
       // Server: Create account data.
       const account = create_account(acct_req, server_sd)
       // Client: Verify account data.
-      verify_account(account, server_pk, funder_sd)
+      verify_account(account, funder_sd)
       // Return account and signer as tuple.
 
 
@@ -153,11 +156,11 @@ export default async function (
       // Client: Create the commit request.
       const commit_req = create_commit_req(FEERATE, contract, account, funder_sd, utxo)
       // Server: Verify the registration request.
-      verify_commit_req(contract, commit_req, server_sd)
+      verify_commit_req(contract, server_pol, commit_req, server_sd)
       // Server: Create the deposit data.
-      const deposit = create_deposit({}, commit_req)
+      const deposit = create_deposit({}, commit_req, server_sd)
       // Client: Verify the deposit data.
-      verify_deposit(deposit, server_pk)
+      verify_deposit(deposit, funder_sd)
 
       await client.mine_blocks(1)
 
@@ -192,7 +195,7 @@ export default async function (
       }
 
       let witness = create_witness(proposal.programs, signer.pubkey, config)
-          witness = sign_witness(signer, witness)
+          witness = endorse_witness(signer, witness)
 
       verify_witness(ct_active, witness)
 

@@ -38,7 +38,7 @@ export function verify_covenant (
   //
   const agent   = get_account_agent(request, server_sd)
   //
-  const session = parse_session_token(request.agent_tkn)
+  const session = parse_session_token(request.server_tkn)
   //
   assert.ok(session.pk === agent.pubkey, 'session pubkey does not match account agent')
   // Check if covenant exists from the current session.

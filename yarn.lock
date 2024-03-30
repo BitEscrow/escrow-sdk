@@ -54,10 +54,10 @@
     ws "^8.16.0"
     zod "^3.22.4"
 
-"@cmdcode/signer@1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.3.tgz#8379ebeff1dfc367e7bb3009212efda9d14cad77"
-  integrity sha512-SAeufoAX+8KjrjInjeVr9O1m9Kb3aYdI91r/tSEcFKFsO8eQpUSpKni6gYo3fpJQPQ/sfR8K/PwK91cI2ZEUUQ==
+"@cmdcode/signer@1.4.5":
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.5.tgz#d547ab710db061e6f7c19fbb5401244db0791f73"
+  integrity sha512-I1xvFGudnPkaZ5UyCY6NoePzmahCRPLxPhyn3u1EnyOkL9uW4w2LbJ84q9+7x2yBwGuVFY54+FyeJjqzVIzE1g==
   dependencies:
     "@cmdcode/buff" "^2.2.5"
     "@cmdcode/crypto-tools" "^2.7.6"

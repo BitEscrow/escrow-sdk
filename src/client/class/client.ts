@@ -1,59 +1,67 @@
-import { resolve_json }  from '@/core/lib/oracle.js'
-import { parse_network } from '@/core/lib/parse.js'
-import { Network }       from '@/types.js'
+import { resolve_json } from '@/fetch.js'
+
+import {
+  DefaultPolicy,
+  get_server_config
+} from '@/config/index.js'
 
 import contract_api from '../api/client/contract.js'
 import deposit_api  from '../api/client/deposit.js'
 import oracle_api   from '../api/client/oracle.js'
 import server_api   from '../api/client/server.js'
+import vmachine_api from '../api/client/vm.js'
 import witness_api  from '../api/client/witness.js'
 
 import {
   ClientConfig,
+  ClientOptions,
   FetchConfig
-} from '../types/index.js'
+} from '../types.js'
+
+import ClientSchema from '../schema.js'
 
 type Resolver = ReturnType<typeof get_fetcher>
 
-const DEFAULT_HOST   = 'http://localhost:3000'
-const DEFAULT_ORACLE = 'http://172.21.0.3:3300'
-const DEFAULT_CHAIN  = 'regtest'
+const DEFAULT_CONFIG = {
+  ...get_server_config('mutiny'),
+  policy : DefaultPolicy
+}
 
 export class EscrowClient {
+  readonly _config  : ClientConfig
   readonly _fetcher : Resolver
-  readonly _host    : string
-  readonly _oracle  : string
-  readonly _network : Network
 
-  constructor (config : ClientConfig) {
-    this._fetcher = get_fetcher(config.fetcher ?? fetch)
-    this._host    = config.hostname ?? DEFAULT_HOST
-    this._oracle  = config.oracle   ?? DEFAULT_ORACLE
-    this._network = (config.network !== undefined)
-      ? parse_network(config.network)
-      : DEFAULT_CHAIN as Network
+  constructor (opt : ClientOptions = {}) {
+    const config  = { ...DEFAULT_CONFIG, ...opt }
+    this._config  = ClientSchema.client_config.parse(config)
+    this._fetcher = get_fetcher(opt.fetcher ?? fetch)
   }
 
   get fetcher () {
     return this._fetcher
   }
 
-  get host () {
-    return this._host
+  get network () {
+    return this._config.network
   }
 
-  get network () {
-    return this._network
+  get oracle_url () {
+    return this._config.oracle_url
+  }
+
+  get server_url () {
+    return this._config.server_url
   }
 
   contract = contract_api(this)
   deposit  = deposit_api(this)
   oracle   = oracle_api(this)
   server   = server_api(this)
+  vm       = vmachine_api(this)
   witness  = witness_api(this)
 
   toJSON () {
-    return { host: this.host }
+    return this._config
   }
 
   toString () {
@@ -76,7 +84,7 @@ export function get_fetcher (
     if (token !== undefined) {
       init.headers = {
         ...init.headers,
-        Authorization: 'Bearer ' + token
+        Authorization : 'Bearer ' + token
       }
     }
     // Run the fetcher method.

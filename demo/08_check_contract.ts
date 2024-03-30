@@ -1,8 +1,9 @@
 import { print_banner }    from '@scrow/test'
+import { sleep }           from '@scrow/sdk/util'
+
 import { config }          from './00_demo_config.js'
 import { client }          from './01_create_client.js'
 import { funded_contract } from './07_deposit_funds.js'
-import { sleep }           from './util.js'
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true'
 

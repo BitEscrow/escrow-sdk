@@ -1,13 +1,14 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
 
-// export function fail (
-//   error : string,
-//   throws = false
-// ) : false {
-//   if (!throws) return false
-//   throw new Error(error)
-// }
+export function assert (
+  value    : unknown,
+  message ?: string
+) : asserts value {
+  if (value === false) {
+    throw new Error(message ?? 'Assertion failed!')
+  }
+}
 
 export function exists <T> (
   value ?: T | null
@@ -94,6 +95,12 @@ export function now () {
 
 export async function sleep (ms ?: number) {
   return new Promise(res => setTimeout(res, ms ?? 1000))
+}
+
+export function parse_err (err : unknown) : string {
+  if (err instanceof Error)    return err.message
+  if (typeof err === 'string') return err
+  return 'unknown error occured'
 }
 
 export function regex (

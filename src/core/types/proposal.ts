@@ -45,6 +45,7 @@ export interface ProposalData {
   programs   : ProgramEntry[]
   schedule   : ScheduleEntry[]
   title      : string
+  txtimeout ?: number
   value      : number
   version    : number
 }

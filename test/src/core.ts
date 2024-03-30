@@ -42,7 +42,7 @@ export async function get_signer (
   client : CoreClient,
   label  : string
 ) : Promise<CoreSigner> {
-  const seed = Buff.str(label)
+  const seed = Buff.str(label).digest
   const wdat = await client.load_wallet(label)
   const xpub = await wdat.xpub
   return {

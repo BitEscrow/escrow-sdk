@@ -7,13 +7,17 @@ import { encode_tx }     from '@scrow/tapscript/tx'
 
 /* Module Imports */
 
-import { RETURN_TX_VSIZE } from '@/const.js'
+import { RETURN_TX_VSIZE } from '@/config/const.js'
 
 /* Local Imports */
 
-import { get_account_agent, get_account_ctx }    from './account.js'
 import { get_deposit_hash }   from './deposit.js'
 import { get_session_pnonce } from './session.js'
+
+import {
+  get_account_agent,
+  get_account_ctx
+} from './account.js'
 
 import {
   create_covenant_psig,

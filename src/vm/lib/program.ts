@@ -1,4 +1,4 @@
-import { create_program } from '@/core/lib/vm.js'
+import { create_program } from '@/core/lib/witness.js'
 import { Literal }        from '@/types.js'
 import { regex }          from '@/util.js'
 

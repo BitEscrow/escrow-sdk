@@ -1,4 +1,4 @@
-import { Buff, Bytes }  from '@cmdcode/buff'
+import { Buff, Bytes } from '@cmdcode/buff'
 
 import {
   Seed,
@@ -6,81 +6,68 @@ import {
   Wallet
 } from '@cmdcode/signer'
 
-import { Network } from '@/types.js'
+import { get_server_config } from '@/config/index.js'
+import { SignerAPI }         from '@/core/types/index.js'
 
-import { EscrowClient } from './client.js'
-
-import account_api   from '../api/signer/account.js'
-import fetch_api     from '../api/signer/fetch.js'
-import member_api    from '../api/signer/member.js'
-import draft_api     from '../api/signer/draft.js'
-import request_api   from '../api/signer/request.js'
-import statement_api from '../api/signer/statement.js'
-import wallet_api    from '../api/signer/wallet.js'
+import account_api  from '../api/signer/account.js'
+import contract_api from '../api/signer/contract.js'
+import deposit_api  from '../api/signer/deposit.js'
+import witness_api  from '../api/signer/witness.js'
 
 import {
-  CredentialAPI,
   SignerConfig,
+  SignerOptions,
   WalletAPI
-} from '../types/index.js'
+} from '../types.js'
 
-const DEFAULT_IDXGEN = () => Buff.now(4).num
+import ClientSchema from '../schema.js'
+
+const DEFAULT_CONFIG = get_server_config('mutiny')
 
 export class EscrowSigner {
   static create (
-    config : Partial<SignerConfig>,
-    seed   : Bytes,
-    xpub  ?: string
+    seed     : Bytes,
+    options ?: SignerOptions
   ) {
     const signer = new Signer({ seed })
-    const wallet = (xpub !== undefined)
-      ? new Wallet(xpub)
-      : Wallet.create({ seed, network: config.network as Network })
-    return new EscrowSigner({ ...config, signer, wallet })
+    return new EscrowSigner(signer, options)
   }
 
-  static generate (
-    config : Partial<SignerConfig>,
-    xpub  ?: string
-  ) {
+  static generate (options ?: SignerOptions) {
     const seed = Buff.random(32)
-    return EscrowSigner.create(config, seed, xpub)
+    return EscrowSigner.create(seed, options)
   }
 
-  static import (
-    config : Partial<SignerConfig>,
-    xpub  ?: string
-  ) {
+  static import (options ?: SignerOptions) {
     return {
-      from_phrase: (
+      from_phrase : (
         phrase : string,
         salt  ?: string | undefined
       ) => {
         const seed = Seed.import.from_char(phrase, salt)
-        return EscrowSigner.create(config, seed, xpub)
+        return EscrowSigner.create(seed, options)
       },
-      from_words: (
+      from_words : (
         words     : string | string[],
         password ?: string | undefined
       ) => {
         const seed = Seed.import.from_words(words, password)
-        return EscrowSigner.create(config, seed, xpub)
+        return EscrowSigner.create(seed, options)
       }
     }
   }
 
   static load (
-    config   : Partial<SignerConfig>,
     password : string,
-    payload  : string
+    payload  : string,
+    options ?: SignerOptions
   ) {
     const bytes   = Buff.bech32(payload)
     const encdata = bytes.subarray(0, 64)
     const xpub    = bytes.subarray(64).b58chk
     const pass    = Buff.str(password)
     const signer  = Signer.restore(pass, encdata)
-    const wallet  = new Wallet(xpub)
-    return new EscrowSigner({ ...config, signer, wallet })
+    return new EscrowSigner(signer, { ...options, xpub })
   }
 
   static util = {
@@ -88,47 +75,52 @@ export class EscrowSigner {
     gen_words : Seed.generate.words
   }
 
-  readonly _client    : EscrowClient
-  readonly _host_pub ?: string
-  readonly _gen_idx   : () => number
-  readonly _signer    : CredentialAPI
-  readonly _wallet    : WalletAPI
+  readonly _config : SignerConfig
+  readonly _signer : SignerAPI
+  readonly _wallet : WalletAPI
 
-  constructor (config : SignerConfig) {
-    this._client   = new EscrowClient(config)
-    this._gen_idx  = config.idxgen ?? DEFAULT_IDXGEN
-    this._host_pub = config.host_pubkey
-    this._signer   = config.signer
-    this._wallet   = config.wallet
-  }
+  constructor (
+    signer  : SignerAPI,
+    options : SignerOptions = {}
+  ) {
+    const config = { ...DEFAULT_CONFIG, ...options }
+    const xpub   = options.xpub ?? signer.xpub
 
-  get client () {
-    return this._client
-  }
-
-  get host_pub () {
-    return this._host_pub
+    this._config = ClientSchema.signer_config.parse(config)
+    this._signer = signer
+    this._wallet = new Wallet(xpub)
   }
 
   get network () {
-    return this._client.network
+    return this._config.network
+  }
+
+  get server_url () {
+    return this._config.server_url
   }
 
   get pubkey () {
     return this._signer.pubkey
   }
 
+  get server_pk () {
+    return this._config.server_pk
+  }
+
   get xpub () {
     return this._wallet.xpub
   }
 
-  account    = account_api(this)
-  credential = member_api(this)
-  draft      = draft_api(this)
-  fetch      = fetch_api(this)
-  request    = request_api(this)
-  wallet     = wallet_api(this)
-  witness    = statement_api(this)
+  account  = account_api(this)
+  contract = contract_api(this)
+  deposit  = deposit_api(this)
+  witness  = witness_api(this)
+
+  check_issuer (pubkey : string) {
+    if (pubkey !== this.server_pk) {
+      throw new Error('issuer\'s pubkey is not recognized')
+    }
+  }
 
   save (password : string) {
     const pass    = Buff.str(password)

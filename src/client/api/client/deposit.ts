@@ -1,5 +1,7 @@
 /* Module Imports */
 
+import { ApiResponse } from '@/types.js'
+
 import {
   validate_account_req,
   validate_register_req,
@@ -9,7 +11,6 @@ import {
 } from '@/core/validators/index.js'
 
 import {
-  ApiResponse,
   AccountRequest,
   AccountDataResponse,
   DepositDataResponse,
@@ -38,7 +39,8 @@ function request_account_api (client : EscrowClient) {
   ) : Promise<ApiResponse<AccountDataResponse>> => {
     validate_account_req(request)
     // Formulate the request.
-    const url = `${client.host}/api/deposit/request`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/request`
     // Formulate the request.
     const init = {
       method  : 'POST',
@@ -60,7 +62,8 @@ function register_deposit_api (client : EscrowClient) {
     // Validate the request.
     validate_register_req(request)
     // Configure the url.
-    const url = `${client.host}/api/deposit/register`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/register`
     // Formulate the request.
     const init = {
       method  : 'POST',
@@ -82,7 +85,8 @@ function commit_deposit_api (client : EscrowClient) {
     // Validate the request.
     validate_commit_req(request)
     // Formulate the request url.
-    const url  = `${client.host}/api/deposit/commit`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/commit`
     // Forulate the request body.
     const init = {
       method  : 'POST',
@@ -104,7 +108,8 @@ function read_deposit_api (client : EscrowClient) {
     // Validate the deposit id.
     assert.is_hash(dpid)
     // Formulate the request.
-    const url = `${client.host}/api/deposit/${dpid}`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}`
     // Return the response.
     return client.fetcher<DepositDataResponse>({ url })
   }
@@ -120,7 +125,8 @@ function read_deposit_digest_api (client : EscrowClient) {
     // Validate the deposit id.
     assert.is_hash(dpid)
     // Formulate the request.
-    const url = `${client.host}/api/deposit/${dpid}/digest`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}/digest`
     // Return the response.
     return client.fetcher<DepositDigestResponse>({ url })
   }
@@ -136,7 +142,8 @@ function read_deposit_status_api (client : EscrowClient) {
     // Validate the deposit id.
     assert.is_hash(dpid)
     // Formulate the request.
-    const url = `${client.host}/api/deposit/${dpid}/status`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}/status`
     // Return the response.
     return client.fetcher<DepositStatusResponse>({ url })
   }
@@ -150,7 +157,8 @@ function list_deposit_api (client : EscrowClient) {
     // Validate the pubkey.
     assert.is_hash(pubkey)
     // Define the request url.
-    const url = `${client.host}/api/deposit/list/${pubkey}`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/list/${pubkey}`
     // Define the request config.
     const init = {
       method  : 'GET',
@@ -171,7 +179,8 @@ function lock_deposit_api (client : EscrowClient) {
     // Validate the request body.
     validate_lock_req(request)
     // Create the request url.
-    const url    = `${client.host}/api/deposit/${dpid}/lock`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}/lock`
     // Create the request object.
     const init   = {
       body    : JSON.stringify(request),
@@ -193,7 +202,8 @@ function close_deposit_api (client : EscrowClient) {
     // Validate the request body.
     validate_close_req(request)
     // Create the request url.
-    const url  = `${client._host}/api/deposit/${dpid}/close`
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}/close`
     // Create the request object.
     const init = {
       body    : JSON.stringify(request),

@@ -1,11 +1,11 @@
-import { ServerConfig } from '../server.js'
+import { ServerPolicy } from '@/types.js'
 
 export interface ServerKeysResponse {
   pubkeys : string[]
 }
 
 export interface ServerPolicyResponse {
-  policy : ServerConfig
+  policy : ServerPolicy
 }
 
 export interface ServerStatusResponse {

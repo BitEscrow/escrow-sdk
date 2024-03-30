@@ -10,7 +10,7 @@ import {
 /* Module Imports */
 
 import * as assert          from '@/assert.js'
-import { DEFAULT_DEADLINE } from '@/config.js'
+import { ServerPolicy }     from '@/types.js'
 import { now, sort_record } from '@/util.js'
 
 /* Local Imports */
@@ -70,11 +70,14 @@ export function create_contract_req (
  */
 export function create_contract (
   config  : ContractConfig,
+  policy  : ServerPolicy,
   request : ContractRequest,
   signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.
   const { fees } = config
+  //
+  const { DEADLINE_DEF } = policy.proposal
   // Unpack request object.
   const { proposal, signatures = [] } = request
   // Define or create the contract outputs.
@@ -98,7 +101,7 @@ export function create_contract (
     ...CONTRACT_DEFAULTS(),
     cid,
     fees,
-    deadline   : get_deadline(proposal, published),
+    deadline   : get_deadline(proposal, published, DEADLINE_DEF),
     est_txfee  : txfee,
     est_txsize : vout_size,
     feerate,
@@ -107,7 +110,8 @@ export function create_contract (
     prop_id,
     pubkeys    : signatures.map(e => e.slice(0, 64)),
     published,
-    sig        : signer.sign(cid),
+    server_pk  : signer.pubkey,
+    server_sig : signer.sign(cid),
     signatures,
     subtotal,
     terms      : proposal,
@@ -165,17 +169,18 @@ export function get_contract_id (
  */
 function get_deadline (
   proposal  : ProposalData,
-  published : number
+  published : number,
+  defaults  : number
 ) {
   // Unpack the proposal object.
-  const { deadline, effective } = proposal
+  const { deadline = defaults, effective } = proposal
   // If an effective date is set:
   if (effective !== undefined) {
     // Return remaining time until effective date.
     return effective - published
   } else {
     // Return published date, plus deadline.
-    return published + (deadline ?? DEFAULT_DEADLINE)
+    return published + deadline
   }
 }
 

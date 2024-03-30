@@ -1,5 +1,5 @@
 import { print_banner }    from '@scrow/test'
-import { create_draft }    from '@/lib/proposal.js'
+import { create_draft }    from '@scrow/sdk/proposal'
 import { signers }         from './02_create_signer.js'
 import { proposal, roles } from './03_create_draft.js'
 

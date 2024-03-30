@@ -1,5 +1,7 @@
 /* Global Imports */
-import { Buff } from '@cmdcode/buff'
+
+import { Buff }   from '@cmdcode/buff'
+import { sha512 } from '@cmdcode/crypto-tools/hash'
 
 /* Module Imports */
 
@@ -14,6 +16,7 @@ import { get_utxo_bytes, parse_timelock }    from './tx.js'
 
 import {
   AccountTemplate,
+  CloseRequest,
   CommitRequest,
   ContractData,
   DepositConfig,
@@ -29,7 +32,6 @@ import {
 } from '../types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
-import { sha512 } from '@cmdcode/crypto-tools/hash'
 
 /**
  * Initialization object for deposit state.
@@ -56,8 +58,7 @@ const GET_INIT_DEPOSIT = () => {
     settled_at  : null,
     spent       : false as const,
     spent_at    : null,
-    spent_txid  : null,
-    status      : 'pending' as DepositStatus
+    spent_txid  : null
   }
 }
 
@@ -107,34 +108,59 @@ export function create_lock_req (
 }
 
 /**
+ * Create a lock request object.
+ */
+export function create_close_req (
+  deposit  : DepositData,
+  feerate  : number,
+  signer   : SignerAPI
+) : CloseRequest {
+  const dpid = deposit.dpid
+  const ctx  = { ...deposit, feerate }
+  const return_psig = create_return_psig(ctx, signer)
+  // Parse and return a valid register request object.
+  return DepositSchema.close_req.parse({ dpid, feerate, return_psig })
+}
+
+/**
  * Returns a new DepositData object from a partial template.
  */
 export function create_deposit (
   config  : DepositConfig,
-  request : RegisterRequest | CommitRequest
+  request : RegisterRequest | CommitRequest,
+  signer  : SignerAPI
 ) : DepositData {
+  //
   const { created_at = now(), utxo_state } = config
-  // Create our deposit id.
-  const dpid     = config.dpid ?? get_deposit_id(created_at, request)
-  // Unpack our data objects into a template.
-  const template = { ...GET_INIT_DEPOSIT(), ...request, ...utxo_state }
   // Get the deposit address from the account context.
   const { deposit_addr } = get_account_ctx(request)
-  // Add remaining data to complete deposit object.
-  const deposit = { ...template, deposit_addr, dpid, created_at, updated_at: created_at }
-  // If deposit is confirmed:
-  if (deposit.confirmed) {
-    // If a covenant exists:
-    if (deposit.covenant !== null) {
-      // Set the deposit as locked.
-      deposit.status = 'locked' as DepositStatus
-    } else {
-      // Set the deposit as open.
-      deposit.status = 'open' as DepositStatus
-    }
-  }
+  //
+  const req_hash   = config.req_hash ?? get_deposit_hash(request)
+  //
+  const server_pk  = signer.pubkey
+  // Create our deposit id.
+  const dpid       = config.dpid ?? get_deposit_id(created_at, req_hash, server_pk)
+  //
+  const server_sig = signer.sign(dpid)
+  // Unpack our data objects into a template.
+  const template   = { ...GET_INIT_DEPOSIT(), ...request, ...utxo_state }
+  //
+  const status     = (template.confirmed)
+    ? (template.covenant !== null)
+      ? 'locked' as DepositStatus
+      : 'open'   as DepositStatus
+    : 'pending'  as DepositStatus
   // Return a sorted object.
-  return sort_record(deposit)
+  return sort_record({
+    ...template,
+    created_at,
+    deposit_addr,
+    dpid,
+    server_pk,
+    server_sig,
+    status,
+    updated_at : created_at
+  })
 }
 
 export function close_deposit (
@@ -150,7 +176,7 @@ export function get_deposit_hash (
   request : RegisterTemplate | DepositData
 ) {
   const hash = get_account_hash(request)
-  const agnt = Buff.hex(request.agent_tkn)
+  const agnt = Buff.hex(request.server_tkn)
   const rate = Buff.num(request.feerate, 4)
   const utxo = get_utxo_bytes(request.utxo)
   const pimg = Buff.join([ hash, agnt, rate, utxo ])
@@ -159,11 +185,13 @@ export function get_deposit_hash (
 
 export function get_deposit_id (
   created_at : number,
-  request    : RegisterRequest | CommitRequest
+  dep_hash   : string,
+  pubkey     : string
 ) {
-  const hash = get_deposit_hash(request)
   const cat  = Buff.num(created_at, 4)
-  return Buff.join([ hash, cat ]).digest.hex
+  const hash = Buff.hex(dep_hash, 64)
+  const pub  = Buff.hex(pubkey, 32)
+  return Buff.join([ cat, hash, pub ]).digest.hex
 }
 
 /**

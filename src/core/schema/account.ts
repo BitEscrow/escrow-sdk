@@ -2,7 +2,7 @@ import { z } from 'zod'
 import base  from '@/schema.js'
 import cov   from './covenant.js'
 
-const { hash, network, nonce, num, str } = base
+const { hash, network, nonce, num, stamp, str } = base
 
 const request = z.object({
   deposit_pk  : hash,
@@ -13,13 +13,15 @@ const request = z.object({
 
 const data = z.object({
   acct_id      : hash,
-  agent_tkn    : cov.token,
+  created_at   : stamp,
   deposit_pk   : hash,
   deposit_addr : str,
   locktime     : num,
   network,
   return_addr  : str,
-  sig          : nonce
+  server_pk    : hash,
+  server_sig   : nonce,
+  server_tkn   : cov.token
 })
 
 export default { data, request }

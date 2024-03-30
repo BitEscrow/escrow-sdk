@@ -71,7 +71,8 @@ export interface ContractBase {
   pubkeys     : string[]
   prop_id     : string
   published   : number
-  sig         : string
+  server_pk   : string
+  server_sig  : string
   signatures  : string[]
   status      : ContractStatus
   subtotal    : number

@@ -68,8 +68,8 @@ export function get_recovery_tx (
 export function get_recovery_config (
   account : AccountTemplate
 ) : RecoveryConfig {
-  const { agent_tkn, deposit_pk, locktime, network, return_addr } = account
-  const session = parse_session_token(agent_tkn)
+  const { server_tkn, deposit_pk, locktime, network, return_addr } = account
+  const session = parse_session_token(server_tkn)
   return { agent_pk: session.pk, deposit_pk, locktime, network, return_addr }
 }
 

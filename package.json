@@ -1,7 +1,7 @@
 {
-  "name": "@scrow/sdk",
+  "name": "@scrow/sdk-dev",
   "version": "0.8.0",
-  "description": "Main SDK for the BitEscrow API.",
+  "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
   "repository": {
@@ -25,81 +25,89 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./account": {
+      "import": "./dist/core/lib/account.js",
+      "types": "./dist/core/lib/account.d.ts"
+    },
     "./assert": {
       "import": "./dist/assert.js",
       "types": "./dist/assert.d.ts"
-    },
-    "./client": {
-      "import": "./dist/client/index.js",
-      "types": "./dist/client/index.d.ts"
-    },
-    "./client/member": {
-      "import": "./dist/client/lib/member.js",
-      "types": "./dist/client/lib/member.d.ts"
-    },
-    "./client/policy": {
-      "import": "./dist/client/lib/policy.js",
-      "types": "./dist/client/lib/policy.d.ts"
     },
     "./core": {
       "import": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
     },
-    "./core/contract": {
+    "./client": {
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
+    },
+    "./contract": {
       "import": "./dist/core/lib/contract.js",
       "types": "./dist/core/lib/contract.d.ts"
     },
-    "./core/deposit": {
+    "./covenant": {
+      "import": "./dist/core/lib/covenant.js",
+      "types": "./dist/core/lib/covenant.d.ts"
+    },
+    "./deposit": {
       "import": "./dist/core/lib/deposit.js",
       "types": "./dist/core/lib/deposit.d.ts"
     },
-    "./core/oracle": {
+    "./member": {
+      "import": "./dist/client/lib/member.js",
+      "types": "./dist/client/lib/member.d.ts"
+    },
+    "./oracle": {
       "import": "./dist/core/lib/oracle.js",
       "types": "./dist/core/lib/oracle.d.ts"
     },
-    "./core/parse": {
+    "./parse": {
       "import": "./dist/core/lib/parse.js",
       "types": "./dist/core/lib/parse.d.ts"
     },
-    "./core/proposal": {
+    "./policy": {
+      "import": "./dist/client/lib/policy.js",
+      "types": "./dist/client/lib/policy.d.ts"
+    },
+    "./proposal": {
       "import": "./dist/core/lib/proposal.js",
       "types": "./dist/core/lib/proposal.d.ts"
     },
-    "./core/recovery": {
+    "./recovery": {
       "import": "./dist/core/lib/recovery.js",
       "types": "./dist/core/lib/recovery.d.ts"
     },
-    "./core/session": {
+    "./return": {
+      "import": "./dist/core/lib/return.js",
+      "types": "./dist/core/lib/return.d.ts"
+    },
+    "./session": {
       "import": "./dist/core/lib/session.js",
       "types": "./dist/core/lib/session.d.ts"
     },
-    "./core/settlement": {
+    "./settlement": {
       "import": "./dist/core/lib/settlement.js",
       "types": "./dist/core/lib/settlement.d.ts"
     },
-    "./core/tx": {
+    "./tx": {
       "import": "./dist/core/lib/tx.js",
       "types": "./dist/core/lib/tx.d.ts"
-    },
-    "./core/validate": {
-      "import": "./dist/core/validators/index.js",
-      "types": "./dist/core/validators/index.d.ts"
-    },
-    "./core/vm": {
-      "import": "./dist/core/lib/vm.js",
-      "types": "./dist/core/lib/vm.d.ts"
-    },
-    "./core/witness": {
-      "import": "./dist/core/lib/witness.js",
-      "types": "./dist/core/lib/witness.d.ts"
     },
     "./util": {
       "import": "./dist/util.js",
       "types": "./dist/util.d.ts"
     },
+    "./validate": {
+      "import": "./dist/core/validators/index.js",
+      "types": "./dist/core/validators/index.d.ts"
+    },
     "./vm": {
       "import": "./dist/vm/index.js",
       "types": "./dist/vm/index.d.ts"
+    },
+    "./witness": {
+      "import": "./dist/core/lib/witness.js",
+      "types": "./dist/core/lib/witness.d.ts"
     }
   },
   "scripts": {
@@ -139,7 +147,7 @@
     "@cmdcode/crypto-tools": "2.7.6",
     "@cmdcode/musig2": "2.4.3",
     "@cmdcode/nostr-sdk": "^0.1.6",
-    "@cmdcode/signer": "1.4.3",
+    "@cmdcode/signer": "1.4.5",
     "@scrow/tapscript": "2.2.2",
     "zod": "^3.22.4"
   }

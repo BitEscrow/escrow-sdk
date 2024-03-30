@@ -3,10 +3,9 @@ import contract from './contract.js'
 import covenant from './covenant.js'
 import deposit  from './deposit.js'
 import oracle   from './oracle.js'
-import program  from './vm.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
-import vm       from '../../vm/schema.js'
+import witness  from './witness.js'
 
 export default {
   account,
@@ -14,8 +13,7 @@ export default {
   covenant,
   deposit,
   oracle,
-  program,
   proposal,
   tx,
-  vm
+  witness
 }

@@ -1,18 +1,11 @@
-import * as assert from '@/assert.js'
-import { now }     from '@/util.js'
-
-import {
-  MIN_DEADLINE,
-  MIN_EXPIRY,
-  MAX_EXPIRY,
-  MIN_WINDOW,
-  MAX_EFFECT,
-  VALID_ACTIONS
-} from '@/config.js'
+import * as assert       from '@/assert.js'
+import { DefaultPolicy } from '@/config/index.js'
+import { ServerPolicy }  from '@/types.js'
+import { now }           from '@/util.js'
 
 import { parse_proposal } from '../lib/parse.js'
-import { create_program } from '../lib/vm.js'
-import { verify_program } from './vm.js'
+import { create_program } from '../lib/witness.js'
+import { verify_program } from './witness.js'
 
 import {
   get_pay_total,
@@ -26,11 +19,18 @@ import {
 } from './util.js'
 
 import {
+  ProgramEntry,
   ProposalData,
   ProposalTemplate
 } from '../types/index.js'
 
 import PropSchema from '../schema/proposal.js'
+
+export function validate_program (
+  program : unknown
+) : asserts program is ProgramEntry {
+  PropSchema.program.parse(program)
+}
 
 export function validate_prop_template (
   proposal : unknown
@@ -45,16 +45,17 @@ export function validate_proposal (
 }
 
 export function verify_proposal (
-  proposal : ProposalData
+  proposal : ProposalData,
+  policy   : ServerPolicy = DefaultPolicy
 ) {
   // Check spending paths are valid.
   check_payments(proposal)
   // Check if timestamps are valid.
-  check_stamps(proposal)
+  check_stamps(policy, proposal)
   // Check if path-based program terms are valid.
-  check_programs(proposal)
+  check_programs(policy, proposal)
   // Check if schedule tasks are valid.
-  check_schedule(proposal)
+  check_schedule(policy, proposal)
 }
 
 function check_payments (proposal : ProposalData) {
@@ -79,8 +80,10 @@ function check_payments (proposal : ProposalData) {
 }
 
 function check_programs (
+  policy   : ServerPolicy,
   proposal : ProposalData
 ) {
+  const { VALID_ACTIONS, VALID_METHODS } = policy.proposal
   const { paths, programs } = proposal
   const path_names = get_path_names(paths)
   for (const terms of programs) {
@@ -88,11 +91,15 @@ function check_programs (
     const { actions, params, paths, method } = prog
     check_regex(VALID_ACTIONS, actions)
     check_regex(path_names, paths)
-    verify_program(method, params)
+    verify_program(method, params, VALID_METHODS)
   }
 }
 
-function check_schedule (proposal : ProposalData) {
+function check_schedule (
+  policy   : ServerPolicy,
+  proposal : ProposalData
+) {
+  const { VALID_ACTIONS } = policy.proposal
   const { duration, paths, schedule } = proposal
   const path_names = get_path_names(paths)
   schedule.forEach(task => {
@@ -103,38 +110,39 @@ function check_schedule (proposal : ProposalData) {
   })
 }
 
-function check_stamps (proposal : ProposalData) {
-  const { deadline = MIN_DEADLINE, effective, duration } = proposal
-  const current = now()
+function check_stamps (
+  policy   : ServerPolicy,
+  proposal : ProposalData
+) {
+  const { effective, duration } = proposal
+  const pol      = policy.proposal
+  const current  = now()
+  const deadline = proposal.deadline ?? pol.DEADLINE_DEF
 
-  if (duration < MIN_EXPIRY) {
-    throw new Error(`The specified expiration window is below the minimum allowed: ${duration} < ${MIN_EXPIRY}`)
+  if (duration < pol.DURATION_MIN) {
+    throw new Error(`The specified contract duration is below the minimum allowed: ${duration} < ${pol.DURATION_MIN}`)
   }
 
-  if (duration > MAX_EXPIRY) {
-    throw new Error(`The specified expiration window is above the maximum allowed: ${duration} > ${MAX_EXPIRY}`)
+  if (duration > pol.DURATION_MAX) {
+    throw new Error(`The specified contract duration is above the maximum allowed: ${duration} > ${pol.DURATION_MAX}`)
   }
 
-  if (deadline < MIN_DEADLINE) {
-    throw new Error(`The specified deadline is below the minimum allowed: ${deadline} < ${MIN_DEADLINE}`)
+  if (deadline < pol.DEADLINE_MIN) {
+    throw new Error(`The specified funding deadline is below the minimum allowed: ${deadline} < ${pol.DEADLINE_MIN}`)
   }
 
-  if (deadline > (duration - MIN_WINDOW)) {
-    throw new Error('The delta between deadline and expiration does not meet the minimum execution window.')
+  if (deadline > pol.DEADLINE_MAX) {
+    throw new Error(`The specified funding deadline is above the maximum allowed: ${deadline} > ${pol.DEADLINE_MAX}`)
   }
 
   if (typeof effective === 'number') {
-    const MIN_EFFECT = current + MIN_WINDOW
-    const MIN_DLINE  = current + deadline
-    const MAX_DATE   = current + MAX_EFFECT
-    if (effective < MIN_EFFECT) {
-      throw new Error('The effective date does not currently meet the minimum execution window.')
+    const EFFECT_MIN = current + (deadline ?? pol.DEADLINE_DEF)
+    const EFFECT_MAX = current + pol.EFFECTIVE_MAX
+    if (effective < EFFECT_MIN) {
+      throw new Error(`The specified effective date does not leave enough time for the funding deadline: ${effective} < ${EFFECT_MIN}`)
     }
-    if (effective < MIN_DLINE) {
-      throw new Error('The effective date does not currently leave enough time for the deadline.')
-    }
-    if (effective > MAX_DATE) {
-      throw new Error(`The effective date is too far into the future: ${effective} > ${MAX_DATE}`)
+    if (effective > EFFECT_MAX) {
+      throw new Error(`The specified effective date is too far into the future: ${effective} > ${EFFECT_MAX}`)
     }
   }
 }

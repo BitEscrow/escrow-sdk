@@ -31,21 +31,23 @@ export interface AccountRequest {
 
 export interface AccountData {
   acct_id      : string
-  agent_tkn    : string
+  created_at   : number
   deposit_addr : string
   deposit_pk   : string
   locktime     : number
   network      : Network
   return_addr  : string
-  sig          : string
+  server_pk    : string
+  server_sig   : string
+  server_tkn   : string
 }
 
 export interface AccountTemplate {
-  agent_tkn   : string
   deposit_pk  : string
   locktime    : number
   network     : Network
   return_addr : string
+  server_tkn  : string
 }
 
 export interface RegisterTemplate extends AccountTemplate {

@@ -49,5 +49,5 @@ export function parse_proposal (
 export function parse_witness (
   witness : unknown
 ) : WitnessData {
-  return CoreSchema.program.witness.parse(witness)
+  return CoreSchema.witness.data.parse(witness)
 }

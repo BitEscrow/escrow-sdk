@@ -7,10 +7,12 @@ import {
 } from '@scrow/tapscript/tx'
 
 import * as assert        from '@/assert.js'
+import { ServerPolicy }   from '@/types.js'
 import { VirtualMachine } from '@/vm/index.js'
 
 import { get_proposal_id } from '../lib/proposal.js'
 import { create_txinput }  from '../lib/tx.js'
+import { verify_receipt }  from './witness.js'
 
 import {
   create_spend_templates,
@@ -35,7 +37,6 @@ import {
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
-import { verify_receipt } from './vm.js'
 
 export function validate_contract (
   contract : unknown
@@ -44,31 +45,39 @@ export function validate_contract (
 }
 
 export function verify_contract_req (
+  policy  : ServerPolicy,
   request : ContractRequest
 ) {
   const { proposal, signatures } = request
   validate_proposal(proposal)
-  verify_proposal(proposal)
+  verify_proposal(proposal, policy)
   verify_endorsements(proposal, signatures)
 }
 
-export function verify_contract (
-  contract  : ContractData,
-  proposal  : ProposalData,
-  server_pk : string
-) {
-  const { fees, published, sig } = contract
-  const out = create_spend_templates(proposal, fees)
-  const pid = get_proposal_id(proposal)
-  const cid = get_contract_id(out, pid, published)
-  assert.ok(pid === contract.prop_id, 'prop_id does not match contract')
-  assert.ok(cid === contract.cid,     'cid id does not match contract')
-  for (const [ label, txhex ] of out) {
+export function verify_contract (contract : ContractData) {
+  const { outputs, published, server_pk, server_sig, terms } = contract
+  const pid = get_proposal_id(terms)
+  const cid = get_contract_id(outputs, pid, published)
+  assert.ok(pid === contract.prop_id,         'computed terms id does not match contract')
+  assert.ok(cid === contract.cid,             'computed cid id does not match contract')
+  for (const [ label, txhex ] of outputs) {
     const tmpl = contract.outputs.find(e => e[0] === label)
     assert.ok(tmpl !== undefined, 'output template does not exist for label: ' + label)
     assert.ok(tmpl[1] === txhex,  'tx hex does not match output for label: ' + label)
   }
-  assert.ok(verify_sig(sig, cid, server_pk), 'signature is invalid for server pubkey: ' + server_pk)
+  assert.ok(verify_sig(server_sig, cid, server_pk), 'signature is invalid for server pubkey: ' + server_pk)
+}
+
+export function verify_publishing (
+  contract  : ContractData,
+  proposal  : ProposalData
+) {
+  const out = create_spend_templates(proposal, contract.fees)
+  const pid = get_proposal_id(proposal)
+  const cid = get_contract_id(out, pid, contract.published)
+  assert.ok(pid === contract.prop_id, 'computed proposal id does not match contract')
+  assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
+  verify_contract(contract)
 }
 
 export function verify_activation (

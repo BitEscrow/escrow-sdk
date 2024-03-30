@@ -7,7 +7,7 @@
  */
 
 import { print_banner } from '@scrow/test'
-import { sleep }        from '@scrow/demo/util.js'
+import { sleep }        from '@scrow/sdk/util'
 import { config }       from '@scrow/demo/00_demo_config.js'
 import { client }       from '@scrow/demo/01_create_client.js'
 import { signers }      from '@scrow/demo/02_create_signer.js'
@@ -27,8 +27,9 @@ console.log('depending on the network, this could take a while!\n')
 
 // While our response is ok, but the contract is not active (and we have tries):
 while (
-  res_status.ok && 
-  res_status.data.deposit.status !== 'open' && 
+  res_status.ok &&
+  res_status.data.deposit !== undefined     &&
+  res_status.data.deposit.status !== 'open' &&
   tries < retries
 ) {
   // Print our current status to console.
@@ -45,13 +46,13 @@ while (
 if (!res_status.ok) throw new Error(res_status.error)
 
 // Define our funder for the deposit.
-const depositor = signers[0]
+const funder = signers[0]
 // Define a txfee for the close transaction.
 const txfee = 1000
 // Generate a lock request from the depositor.
-const close_req = depositor.account.close(open_deposit, txfee)
+const req = funder.deposit.close(open_deposit, txfee)
 // Deliver the request and token.
-const res = await client.deposit.close(dpid, close_req)
+const res = await client.deposit.close(dpid, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our response data.

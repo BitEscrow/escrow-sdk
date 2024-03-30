@@ -24,39 +24,39 @@ import { EscrowClient } from '@/client/class/client.js'
 function broadcast_tx_api (client : EscrowClient) {
   return async (txhex : string) => {
     assert.is_hex(txhex)
-    return broadcast_tx(client._oracle, txhex)
+    return broadcast_tx(client.oracle_url, txhex)
   }
 }
 
 function fee_estimates_api (client : EscrowClient) {
   return async () => {
-    return fee_estimates(client._oracle)
+    return fee_estimates(client.oracle_url)
   }
 }
 
 function get_fee_target_api (client : EscrowClient) {
   return async (target : number) => {
-    return get_fee_target(client._oracle, target)
+    return get_fee_target(client.oracle_url, target)
   }
 }
 
 function get_txdata_api (client : EscrowClient) {
   return async (txid : string) => {
     assert.is_hash(txid)
-    return get_tx_data(client._oracle, txid)
+    return get_tx_data(client.oracle_url, txid)
   }
 }
 
 function get_utxo_api (client : EscrowClient) {
   return async (query : OracleQuery) => {
     assert.is_hash(query.txid)
-    return get_utxo_data(client._oracle, query)
+    return get_utxo_data(client.oracle_url, query)
   }
 }
 
 function get_addr_utxos_api (client : EscrowClient) {
   return async (address : string) => {
-    return get_address_utxos(client._oracle, address)
+    return get_address_utxos(client.oracle_url, address)
   }
 }
 
@@ -73,7 +73,7 @@ function poll_address_api (client : EscrowClient) {
       if (utxos.length > 0) {
         return utxos
       } else {
-        utxos = await get_address_utxos(client._oracle, address)
+        utxos = await get_address_utxos(client.oracle_url, address)
         tries += 1
         if (verbose) {
           const msg = `[${tries}/${retries}] checking address in ${interval} seconds...`

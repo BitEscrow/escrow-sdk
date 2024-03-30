@@ -15,7 +15,7 @@ const depositor = signers[0]
 // Define our deposit locktime.
 const locktime  = 60 * 60  // 1 hour locktime
 // Get an account request from the funder device.
-const acct_req  = depositor.account.create(locktime, 1234)
+const acct_req  = depositor.account.create('', locktime)
 // Submit the account request to the server
 const acct_res  = await client.deposit.request(acct_req)
 // Check the response is valid.

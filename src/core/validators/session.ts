@@ -23,7 +23,7 @@ export function verify_session_token (
   server_sd : SignerAPI
 ) {
   const agent = get_account_agent(request, server_sd)
-  const sess  = parse_session_token(request.agent_tkn)
+  const sess  = parse_session_token(request.server_tkn)
   const seed  = get_session_seed(sess.id, agent, sess.ts)
   const agpn  = get_session_pnonce(seed, agent).hex
 

@@ -1,4 +1,6 @@
 import { print_banner } from '@scrow/test'
+import { sleep }        from '@/util.js'
+
 import { config }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
 import { signers }      from './02_create_signer.js'
@@ -7,8 +9,7 @@ import { new_account }  from './06_request_account.js'
 
 import {
   fund_regtest_address,
-  fund_mutiny_address,
-  sleep
+  fund_mutiny_address
 } from './util.js'
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true'
@@ -23,7 +24,7 @@ depositor.account.verify(new_account)
 /** ========== [ Calculate Deposit Amount ] ========== **/
 
 // Unpack account address.
-const { address } = new_account
+const { deposit_addr } = new_account
 // Compute a txfee from the feerate.
 const vin_fee   = new_contract.feerate * 65
 // Compute a total amount (in sats) with the txfee.
@@ -35,14 +36,14 @@ const btc_total = amt_total / 100_000_000
 
 switch (config.network) {
   case 'mutiny':
-    fund_mutiny_address(address, amt_total)
+    fund_mutiny_address(deposit_addr, amt_total)
     break
   case 'regtest':
-    fund_regtest_address(address, amt_total)
+    fund_regtest_address(deposit_addr, amt_total)
     break
   default:
     print_banner('make a deposit')
-    console.log('copy this address :', address)
+    console.log('copy this address :', deposit_addr)
     console.log('send this amount  :', `${amt_total} sats || ${btc_total} btc`)
     console.log('get funds here    :', config.faucet, '\n')   
 }
@@ -54,7 +55,7 @@ await sleep(2000)
 const [ ival, retries ] = config.poll
 
 let tries = 1,
-    utxos = await client.oracle.get_address_utxos(address)
+    utxos = await client.oracle.get_address_utxos(deposit_addr)
 
 // While there are no utxos (and we still have tries):
 while (utxos.length === 0 && tries < retries) {
@@ -63,7 +64,7 @@ while (utxos.length === 0 && tries < retries) {
   // Sleep for interval number of secords.
   await sleep(ival * 1000)
   // Check again for utxos at address.
-  utxos = await client.oracle.get_address_utxos(address)
+  utxos = await client.oracle.get_address_utxos(deposit_addr)
   // Increment our tries counter
   tries += 1
 }
@@ -79,10 +80,12 @@ if (DEMO_MODE) {
 
 // Choose our first signer as the funder.
 const signer     = signers[0]
+// Specify a feerate for the return tx.
+const feerate    = 1
 // Get the output data from the utxo.
 const utxo       = utxos[0].txspend
 // Request the funders device to sign a covenant.
-const commit_req = signer.account.commit(new_account, new_contract, utxo)
+const commit_req = signer.deposit.commit(new_account, new_contract, feerate, utxo)
 // Deliver our registration request to the server.
 const res = await client.deposit.commit(commit_req)
 // Check the response is valid.

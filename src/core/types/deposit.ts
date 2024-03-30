@@ -49,11 +49,11 @@ interface DepositUnconfirmed {
 export interface DepositConfig {
   created_at ?: number
   dpid       ?: string
+  req_hash   ?: string
   utxo_state ?: DepositState
 }
 
 export interface DepositInfo {
-  agent_tkn    : string
   covenant     : CovenantData | null
   created_at   : number
   deposit_pk   : string
@@ -64,6 +64,9 @@ export interface DepositInfo {
   network      : Network
   return_addr  : string
   return_psig  : string
+  server_pk    : string
+  server_sig   : string
+  server_tkn   : string
   status       : DepositStatus
   utxo         : TxOutput
   updated_at   : number

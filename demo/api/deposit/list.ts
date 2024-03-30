@@ -11,11 +11,11 @@ import { client }       from '@scrow/demo/01_create_client.js'
 import { signers }      from '@scrow/demo/02_create_signer.js'
 
 // Define our funder for the deposit.
-const depositor = signers[0]
+const funder = signers[0]
 // Generate a request token.
-const req = depositor.request.deposit_list()
+const req = funder.deposit.list()
 // Deliver the request and token.
-const res = await client.deposit.list(depositor.pubkey, req)
+const res = await client.deposit.list(funder.pubkey, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our response data.

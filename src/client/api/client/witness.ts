@@ -1,7 +1,7 @@
-import { EscrowClient } from '../../class/client.js'
+import { EscrowClient } from '@/client/class/client.js'
+import { ApiResponse }  from '@/types.js'
 
 import {
-  ApiResponse,
   WitnessDataResponse
 } from '@/core/types/index.js'
 
@@ -14,7 +14,8 @@ function read_witness_api (client : EscrowClient) {
     // Validate witness id.
     assert.is_hash(wid)
     // Formulate the request.
-    const url = `${client.host}/api/witness/${wid}`
+    const host = client.server_url
+    const url  = `${host}/api/witness/${wid}`
     // Return a response.
     return client.fetcher<WitnessDataResponse>({ url })
   }
@@ -22,6 +23,6 @@ function read_witness_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    read: read_witness_api(client)
+    read : read_witness_api(client)
   }
 }

@@ -12,9 +12,11 @@ export type MusignDevice = (
 
 export interface SignerAPI {
   id        : string
-  cpubkey   : string
   pubkey    : string
+  xpub      : string
+  backup    : (password : Bytes) => Bytes
   gen_nonce : (data : Bytes) => Buff
+  gen_token : (content : string) => string
   has_id    : (id : Bytes, pubkey : Bytes) => boolean
   get_id    : (id : Bytes) => SignerAPI
   hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff

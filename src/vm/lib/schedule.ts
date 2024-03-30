@@ -1,5 +1,5 @@
 import { get_access_list } from '@/util.js'
-import { VALID_ACTIONS }   from '@/config.js'
+import { VALID_ACTIONS }   from '@/config/const.js'
 import { ScheduleEntry }   from '@/core/types/index.js'
 
 import { update_path }     from './state.js'

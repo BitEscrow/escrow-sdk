@@ -1,4 +1,4 @@
-import { EscrowSigner } from '@scrow/core/client'
+import { EscrowSigner } from '@scrow/sdk/client'
 import { config }       from './00_demo_config.js'
 
 /**

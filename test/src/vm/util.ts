@@ -5,10 +5,11 @@ import assert from 'assert'
 
 import {
   create_witness,
-  sign_witness
-} from '@scrow/sdk/core/vm'
+  endorse_witness
+} from '@scrow/sdk/witness'
 
 import {
+  CoreSchema,
   ProgramEntry,
   SignerAPI,
   VMConfig,
@@ -31,27 +32,32 @@ interface WitnessVector {
 }
 
 export function get_signer (alias : string) : MemberSigner {
-   const seed = Buff.str(alias)
+   const seed = Buff.str(alias).digest
    return { alias, signer : new Signer({ seed }) }
 }
 
 export function resolve_aliases (
   aliases  : string[],
-  programs : ProgramEntry[]
+  programs : unknown[]
 ) : ProgramEntry[] {
+  const progs = CoreSchema.proposal.programs.parse(programs)
   const mbrs  = aliases.map(e => get_signer(e))
   for (let i = 0; i < programs.length; i++) {
-    const terms = programs[i]
+    const terms = progs[i]
     for (let j = 0; j < terms.length; j++) {
       const term = terms[j]
       if (typeof term === 'string' && aliases.includes(term)) {
         const mbr = mbrs.find(e => e.alias === term)
         assert.ok(mbr !== undefined)
-        programs[i][j] = mbr.signer.pubkey
+        progs[i][j] = mbr.signer.pubkey
       }
     }
   }
-  return programs
+  return progs
+}
+
+export function get_config (vmconfig : unknown) {
+  return CoreSchema.witness.vmconfig.parse(vmconfig)
 }
 
 export function compile_witness (
@@ -69,7 +75,7 @@ export function compile_witness (
     // For each signer of the statement:
     for (const mbr of mbrs) {
       // Endorse the witness template.
-      witness = sign_witness(mbr.signer, witness)
+      witness = endorse_witness(mbr.signer, witness)
     }
     // Push the endorsed witness to the stack.
     wit_data.push(witness)
