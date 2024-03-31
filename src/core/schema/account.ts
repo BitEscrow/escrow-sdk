@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import base  from '@/schema.js'
+import base  from './base.js'
 import cov   from './covenant.js'
 
 const { hash, network, nonce, num, stamp, str } = base

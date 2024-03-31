@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import base  from '@/schema.js'
+import base  from '@/core/schema/base.js'
 import prop  from '@/core/schema/proposal.js'
 
 const { hash, label, literal, num, regex, stamp, str } = base

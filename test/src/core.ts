@@ -46,6 +46,7 @@ export async function get_signer (
   const wdat = await client.load_wallet(label)
   const xpub = await wdat.xpub
   return {
+    alias  : label,
     core   : wdat,
     signer : new Signer({ seed }),
     wallet : new Wallet(xpub)

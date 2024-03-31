@@ -1,15 +1,18 @@
-import { create_program } from '@/core/lib/witness.js'
-import { Literal }        from '@/types.js'
-import { regex }          from '@/util.js'
+/* Global Imports */
+
+import { create_program } from '@/core/lib/vm.js'
+import { regex }          from '@/core/util/index.js'
 
 import {
+  Literal,
   ProgramEntry,
   ProgramData,
   WitnessData
 } from '@/core/types/index.js'
 
-import { update_path } from './state.js'
-import { debug }       from '../util.js'
+/* Module Imports */
+
+import { debug } from './util.js'
 
 import {
   VMState,
@@ -18,7 +21,10 @@ import {
   ProgMethodAPI
 } from '../types.js'
 
-import EndorseMethod from './methods/endorse.js'
+/* Local Imports */
+
+import { update_path } from './state.js'
+import EndorseMethod   from './methods/endorse.js'
 
 export function call_method (method : string) : ProgMethodAPI | null {
   switch (method) {

@@ -1,16 +1,7 @@
 import { z } from 'zod'
-import base  from '@/schema.js'
-import prop  from './proposal.js'
+import base  from './base.js'
 
 const { hash, hex, label, literal, stamp, str } = base
-
-const vmconfig = z.object({
-  activated : stamp,
-  pathnames : str.array(),
-  programs  : prop.programs,
-  schedule  : prop.schedule,
-  vmid      : hash
-})
 
 const data = z.object({
   args    : literal.array(),
@@ -23,4 +14,4 @@ const data = z.object({
   wid     : hash
 })
 
-export default { data, vmconfig }
+export default { data }

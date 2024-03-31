@@ -1,15 +1,6 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
 
-export function assert (
-  value    : unknown,
-  message ?: string
-) : asserts value {
-  if (value === false) {
-    throw new Error(message ?? 'Assertion failed!')
-  }
-}
-
 export function exists <T> (
   value ?: T | null
 ) : value is NonNullable<T> {

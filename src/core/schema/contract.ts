@@ -1,5 +1,5 @@
 import { z }    from 'zod'
-import base     from '@/schema.js'
+import base     from './base.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
 
@@ -28,17 +28,17 @@ const digest = z.object({
 
 const base_data = z.object({
   activated  : stamp.nullable(),
-  balance    : num,
   cid        : hash,
   deadline   : stamp,
-  est_txfee  : num,
-  est_txsize : num,
   expires_at : stamp.nullable(),
   feerate    : num,
   fees       : payment.array(),
+  fund_count : num,
+  fund_pend  : num,
+  fund_txfee : num,
+  fund_value : num,
   outputs    : output.array(),
   moderator  : hash.nullable(),
-  pending    : num,
   prop_id    : hash,
   pubkeys    : hash.array(),
   published  : stamp,
@@ -49,10 +49,10 @@ const base_data = z.object({
   subtotal   : num,
   terms      : proposal.data,
   total      : num,
-  txin_count : num,
-  updated_at : stamp,
-  vmid       : hash.nullable(),
-  vout_size  : num
+  tx_fees    : num,
+  tx_total   : num,
+  tx_vsize   : num,
+  updated_at : stamp
 })
 
 const data  = base_data.and(spend_state).and(close_state)

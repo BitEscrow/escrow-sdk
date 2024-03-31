@@ -1,12 +1,7 @@
-/* Module Imports */
+/* Global Imports */
 
-import * as assert        from '@/assert.js'
-import { parse_proposal } from '@/core/lib/parse.js'
-
-import {
-  ApiResponse,
-  ServerPolicy
-} from '@/types.js'
+import { assert, parse_proposal } from '@/core/util/index.js'
+import { create_contract_req }    from '@/core/lib/contract.js'
 
 import {
   verify_endorsements,
@@ -14,17 +9,18 @@ import {
 } from '@/core/validators/index.js'
 
 import {
+  ApiResponse,
   ContractDataResponse,
   ContractListResponse,
   FundListResponse,
   ContractDigestResponse,
   ContractStatusResponse,
-  ContractRequest
+  ProposalData
 } from '@/core/types/index.js'
 
-/* Local Imports */
+/* Module Imports */
 
-import { EscrowClient } from '@/client/class/client.js'
+import { EscrowClient } from '../../class/client.js'
 
 /**
  * Create a contract from a proposal document.
@@ -33,22 +29,25 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    request : ContractRequest,
-    policy ?: ServerPolicy
+    proposal   : ProposalData,
+    signatures : string[]
   ) : Promise<ApiResponse<ContractDataResponse>> => {
-    const { proposal, signatures } = request
+    // Unpack configurations from client.
+    const { machine, server_pol } = client
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
-    verify_proposal(prop, policy)
+    verify_proposal(machine, server_pol, prop)
     // Verify any signatures.
     verify_endorsements(prop, signatures)
+    // Create a contract publish request.
+    const req  = create_contract_req(proposal, signatures)
     // Formulate the request url.
     const host = client.server_url
     const url  = `${host}/api/contract/create`
     // Formulate the request body.
     const init = {
-      body    : JSON.stringify(request),
+      body    : JSON.stringify(req),
       method  : 'POST',
       headers : { 'content-type': 'application/json' }
     }

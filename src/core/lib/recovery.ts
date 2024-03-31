@@ -1,3 +1,5 @@
+/* Global Imports */
+
 import { Buff }        from '@cmdcode/buff'
 import { get_key_ctx } from '@cmdcode/musig2'
 import { parse_addr }  from '@scrow/tapscript/address'
@@ -10,15 +12,9 @@ import {
   encode_tx
 } from '@scrow/tapscript/tx'
 
-import * as assert from '@/assert.js'
+/* Modules Imports */
 
-import { parse_session_token } from './session.js'
-
-import {
-  create_txinput,
-  get_tapkey,
-  sign_tx
-} from './tx.js'
+import { assert } from '../util/index.js'
 
 import {
   AccountTemplate,
@@ -27,6 +23,16 @@ import {
   SignerAPI,
   TxOutput
 } from '../types/index.js'
+
+/* Local Imports */
+
+import { parse_session_token } from './session.js'
+
+import {
+  create_txinput,
+  get_tapkey,
+  sign_tx
+} from './tx.js'
 
 const DUST_LIMIT      = 520
 const RECOVERY_TXSIZE = 118

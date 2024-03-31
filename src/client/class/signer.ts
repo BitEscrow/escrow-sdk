@@ -6,13 +6,9 @@ import {
   Wallet
 } from '@cmdcode/signer'
 
-import { get_server_config } from '@/config/index.js'
-import { SignerAPI }         from '@/core/types/index.js'
+import { SignerAPI } from '@/core/types/index.js'
 
-import account_api  from '../api/signer/account.js'
-import contract_api from '../api/signer/contract.js'
-import deposit_api  from '../api/signer/deposit.js'
-import witness_api  from '../api/signer/witness.js'
+import { DEFAULT_CONFIG } from '../config/client.js'
 
 import {
   SignerConfig,
@@ -20,9 +16,13 @@ import {
   WalletAPI
 } from '../types.js'
 
-import ClientSchema from '../schema.js'
+import account_api  from '../api/signer/account.js'
+import contract_api from '../api/signer/contract.js'
+import deposit_api  from '../api/signer/deposit.js'
+import proposal_api from '../api/signer/proposal.js'
+import witness_api  from '../api/signer/witness.js'
 
-const DEFAULT_CONFIG = get_server_config('mutiny')
+import ClientSchema  from '../schema.js'
 
 export class EscrowSigner {
   static create (
@@ -57,7 +57,7 @@ export class EscrowSigner {
     }
   }
 
-  static load (
+  static restore (
     password : string,
     payload  : string,
     options ?: SignerOptions
@@ -91,16 +91,24 @@ export class EscrowSigner {
     this._wallet = new Wallet(xpub)
   }
 
+  get machine () {
+    return this._config.machine
+  }
+
   get network () {
     return this._config.network
+  }
+
+  get pubkey () {
+    return this._signer.pubkey
   }
 
   get server_url () {
     return this._config.server_url
   }
 
-  get pubkey () {
-    return this._signer.pubkey
+  get server_pol () {
+    return this._config.server_pol
   }
 
   get server_pk () {
@@ -114,19 +122,20 @@ export class EscrowSigner {
   account  = account_api(this)
   contract = contract_api(this)
   deposit  = deposit_api(this)
+  proposal = proposal_api(this)
   witness  = witness_api(this)
 
-  check_issuer (pubkey : string) {
-    if (pubkey !== this.server_pk) {
-      throw new Error('issuer\'s pubkey is not recognized')
-    }
-  }
-
-  save (password : string) {
+  backup (password : string) {
     const pass    = Buff.str(password)
     const encdata = this._signer.backup(pass)
     const xbytes  = Buff.b58chk(this._wallet.xpub)
     const payload = Buff.join([ encdata, xbytes ])
     return payload.to_bech32('cred')
+  }
+
+  check_issuer (pubkey : string) {
+    if (pubkey !== this.server_pk) {
+      throw new Error('issuer\'s pubkey is not recognized')
+    }
   }
 }

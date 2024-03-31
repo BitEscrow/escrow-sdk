@@ -1,10 +1,12 @@
+/* Global Imports */
+
 import { verify_psig } from '@cmdcode/musig2'
 
-import * as assert from '@/assert.js'
+/* Module Imports */
 
-import { get_account_agent }   from '../lib/account.js'
-import { parse_covenant }      from '../lib/parse.js'
-import { parse_session_token } from '../lib/session.js'
+import { get_account_agent }      from '../lib/account.js'
+import { parse_session_token }    from '../lib/session.js'
+import { assert, parse_covenant } from '../util/index.js'
 
 import {
   get_covenant_id,

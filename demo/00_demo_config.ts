@@ -1,5 +1,5 @@
-import { get_server_config } from "@/config/index.js"
-import { Network }           from "@/types.js"
+import { Network }           from '@scrow/sdk'
+import { get_server_config } from '@scrow/test'
 
 const faucets = {
   mutiny  : 'https://faucet.mutinynet.com',
@@ -23,13 +23,11 @@ const poll_rates = {
 }
 
 const network = process.argv.slice(2)[0] ?? 'mutiny'
-
-const { server_pk, ...client } = get_server_config(network as Network)
+const client  = get_server_config(network as Network)
 
 export const config = {
   network,
   client,
-  signer  : { server_pk },
   faucet  : faucets[network as keyof typeof faucets],
   members : [ 'alice', 'bob', 'carol' ],
   poll    : poll_rates[network as keyof typeof poll_rates],

@@ -1,18 +1,10 @@
 /* Global Imports */
 
-import { Buff }   from '@cmdcode/buff'
-import { sha512 } from '@cmdcode/crypto-tools/hash'
+import { Buff } from '@cmdcode/buff'
 
 /* Module Imports */
 
-import { now, sort_record } from '@/util.js'
-
-/* Local Imports */
-
-import { get_account_ctx, get_account_hash } from './account.js'
-import { create_covenant }                   from './covenant.js'
-import { create_return_psig }                from './return.js'
-import { get_utxo_bytes, parse_timelock }    from './tx.js'
+import { now, sort_record } from '../util/index.js'
 
 import {
   AccountTemplate,
@@ -26,12 +18,19 @@ import {
   LockRequest,
   OracleTxStatus,
   RegisterRequest,
-  RegisterTemplate,
   SignerAPI,
   TxOutput
 } from '../types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
+
+/* Local Imports */
+
+import { create_covenant }    from './covenant.js'
+import { create_return_psig } from './return.js'
+import { parse_timelock }     from './tx.js'
+
+import { get_account_ctx, get_deposit_hash } from './account.js'
 
 /**
  * Initialization object for deposit state.
@@ -170,17 +169,6 @@ export function close_deposit (
 ) {
   const status = 'spent' as DepositStatus
   return { ...deposit, spent_at, status, spent_txid, spent: true }
-}
-
-export function get_deposit_hash (
-  request : RegisterTemplate | DepositData
-) {
-  const hash = get_account_hash(request)
-  const agnt = Buff.hex(request.server_tkn)
-  const rate = Buff.num(request.feerate, 4)
-  const utxo = get_utxo_bytes(request.utxo)
-  const pimg = Buff.join([ hash, agnt, rate, utxo ])
-  return sha512(pimg).hex
 }
 
 export function get_deposit_id (

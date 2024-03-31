@@ -1,11 +1,11 @@
-import { EscrowClient } from '@/client/class/client.js'
-import { ApiResponse }  from '@/types.js'
+import { assert } from '@/core/util/index.js'
 
 import {
+  ApiResponse,
   WitnessDataResponse
 } from '@/core/types/index.js'
 
-import * as assert from '@/assert.js'
+import { EscrowClient } from '../../class/client.js'
 
 function read_witness_api (client : EscrowClient) {
   return async (

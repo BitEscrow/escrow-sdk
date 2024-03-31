@@ -1,5 +1,5 @@
-import { Test }     from 'tape'
 import assert       from 'assert'
+import { Test }     from 'tape'
 import { now }      from '@scrow/sdk/util'
 import { VMVector } from './types.js'
 

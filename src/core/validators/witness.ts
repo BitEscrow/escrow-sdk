@@ -1,14 +1,14 @@
+/* Local Imports */
+
 import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
-import * as assert        from '@/assert.js'
-import { Literal }        from '@/types.js'
-import { regex }          from '@/util.js'
-import { VirtualMachine } from '@/vm/index.js'
+/* Module Imports */
 
 import { get_path_names } from '../lib/proposal.js'
+import { create_program } from '../lib/vm.js'
+import { assert, regex }  from '../util/index.js'
 
 import {
-  create_program,
   get_receipt_hash,
   get_receipt_id,
   get_witness_id
@@ -16,8 +16,9 @@ import {
 
 import {
   ContractData,
-  VMConfig,
+  Literal,
   VMData,
+  VirtualMachineAPI,
   WitnessData,
   WitnessReceipt
 } from '../types/index.js'
@@ -31,15 +32,15 @@ export function validate_witness (
 }
 
 export function verify_program (
-  method : string,
-  params : Literal[],
-  policy : string[]
+  machine : VirtualMachineAPI,
+  method  : string,
+  params  : Literal[]
 ) {
-  if (!policy.includes(method)) {
+  if (!machine.VALID_METHODS.includes(method)) {
     throw new Error('invalid program method: ' + method)
   }
 
-  const err = VirtualMachine.check(method, params)
+  const err = machine.check(method, params)
 
   if (err !== null) throw new Error(err)
 }
@@ -129,30 +130,4 @@ export function verify_receipt (
   } else if (receipt.output !== result.output) {
     throw new Error('receipt does not match output: ' + result.output)
   }
-}
-
-export function verify_exec (
-  config     : VMConfig,
-  receipt    : WitnessReceipt,
-  statements : WitnessData[] = []
-) {
-  //
-  const VM = new VirtualMachine(config)
-  //
-  for (const witness of statements) {
-    //
-    const eval_state = VM.eval(witness)
-    //
-    if (
-      eval_state.error !== null ||
-      eval_state.output !== null
-    ) {
-      verify_receipt(receipt, eval_state)
-      return
-    }
-  }
-  //
-  const run_state = VM.run(receipt.stamp)
-  //
-  verify_receipt(receipt, run_state)
 }

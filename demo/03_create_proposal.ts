@@ -1,4 +1,6 @@
-import { ProposalTemplate, RoleTemplate } from '@/index.js'
+import { ProposalTemplate } from '@scrow/sdk/core'
+import { RoleTemplate }     from '@scrow/sdk/client'
+
 import { config }  from './00_demo_config.js'
 import { signers } from './02_create_signer.js'
 

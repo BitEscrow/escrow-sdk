@@ -1,7 +1,7 @@
 import { Wallet }          from '@cmdcode/signer'
-import { get_object_id }   from '@/util.js'
+import { get_object_id }   from '@/core/util/index.js'
 import { ProposalData }    from '@/core/types/index.js'
-import { get_program_idx } from '@/core/lib/witness.js'
+import { get_program_idx } from '@/core/lib/vm.js'
 
 import {
   RolePolicy,
@@ -17,7 +17,7 @@ const GET_ROLE_DEFAULTS = () => {
   }
 }
 
-export function create_role (
+export function create_role_policy (
   template : RoleTemplate
 ) : RolePolicy {
   const pol = { ...GET_ROLE_DEFAULTS(), ...template }

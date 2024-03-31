@@ -7,16 +7,23 @@ import { encode_tx }     from '@scrow/tapscript/tx'
 
 /* Module Imports */
 
-import { RETURN_TX_VSIZE } from '@/config/const.js'
+import { RETURN_TX_VSIZE } from '../const.js'
+
+import {
+  CovenantSession,
+  RegisterRequest,
+  RegisterTemplate,
+  SignerAPI
+} from '../types/index.js'
 
 /* Local Imports */
 
-import { get_deposit_hash }   from './deposit.js'
 import { get_session_pnonce } from './session.js'
 
 import {
   get_account_agent,
-  get_account_ctx
+  get_account_ctx,
+  get_deposit_hash
 } from './account.js'
 
 import {
@@ -30,13 +37,6 @@ import {
   create_txinput,
   get_lock_script
 } from './tx.js'
-
-import {
-  CovenantSession,
-  RegisterRequest,
-  RegisterTemplate,
-  SignerAPI
-} from '../types/index.js'
 
 /**
  * Compute a musig context object for

@@ -1,16 +1,12 @@
-import { resolve_json } from '@/fetch.js'
+import { resolve_json } from '@/core/util/fetch.js'
 
 import {
-  DefaultPolicy,
-  get_server_config
-} from '@/config/index.js'
+  Network,
+  ServerPolicy,
+  VirtualMachineAPI
+} from '@/core/types/index.js'
 
-import contract_api from '../api/client/contract.js'
-import deposit_api  from '../api/client/deposit.js'
-import oracle_api   from '../api/client/oracle.js'
-import server_api   from '../api/client/server.js'
-import vmachine_api from '../api/client/vm.js'
-import witness_api  from '../api/client/witness.js'
+import { DEFAULT_CONFIG } from '../config/client.js'
 
 import {
   ClientConfig,
@@ -18,14 +14,16 @@ import {
   FetchConfig
 } from '../types.js'
 
-import ClientSchema from '../schema.js'
+import contract_api  from '../api/client/contract.js'
+import deposit_api   from '../api/client/deposit.js'
+import oracle_api    from '../api/client/oracle.js'
+import server_api    from '../api/client/server.js'
+import vmachine_api  from '../api/client/vm.js'
+import witness_api   from '../api/client/witness.js'
+
+import ClientSchema  from '../schema.js'
 
 type Resolver = ReturnType<typeof get_fetcher>
-
-const DEFAULT_CONFIG = {
-  ...get_server_config('mutiny'),
-  policy : DefaultPolicy
-}
 
 export class EscrowClient {
   readonly _config  : ClientConfig
@@ -41,15 +39,27 @@ export class EscrowClient {
     return this._fetcher
   }
 
-  get network () {
+  get machine () : VirtualMachineAPI {
+    return this._config.machine
+  }
+
+  get network ()  : Network {
     return this._config.network
   }
 
-  get oracle_url () {
+  get oracle_url () : string {
     return this._config.oracle_url
   }
 
-  get server_url () {
+  get server_pol () : ServerPolicy {
+    return this._config.server_pol
+  }
+
+  get server_pk () {
+    return this._config.server_pk
+  }
+
+  get server_url () : string {
     return this._config.server_url
   }
 
@@ -59,6 +69,12 @@ export class EscrowClient {
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)
+
+  check_issuer (pubkey : string) {
+    if (pubkey !== this.server_pk) {
+      throw new Error('issuer\'s pubkey is not recognized')
+    }
+  }
 
   toJSON () {
     return this._config

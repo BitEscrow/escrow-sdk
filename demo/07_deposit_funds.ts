@@ -1,5 +1,5 @@
 import { print_banner } from '@scrow/test'
-import { sleep }        from '@/util.js'
+import { sleep }        from '@scrow/sdk/util'
 
 import { config }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
@@ -17,9 +17,9 @@ const DEMO_MODE = process.env.DEMO_MODE === 'true'
 /** ========== [ Verify the Account ] ========== **/
 
 // Define our depositor from the signers.
-export const depositor = signers[0]
+export const funder = signers[0]
 // Verify the deposit.
-depositor.account.verify(new_account)
+funder.account.verify(new_account)
 
 /** ========== [ Calculate Deposit Amount ] ========== **/
 
@@ -78,16 +78,14 @@ if (DEMO_MODE) {
 
 /** ========== [ Create Deposit Covenant ] ========== **/
 
-// Choose our first signer as the funder.
-const signer     = signers[0]
 // Specify a feerate for the return tx.
-const feerate    = 1
+const feerate = 1
 // Get the output data from the utxo.
-const utxo       = utxos[0].txspend
+const utxo    = utxos[0].txspend
 // Request the funders device to sign a covenant.
-const commit_req = signer.deposit.commit(new_account, new_contract, feerate, utxo)
+const req     = funder.deposit.commit(new_account, new_contract, feerate, utxo)
 // Deliver our registration request to the server.
-const res = await client.deposit.commit(commit_req)
+const res     = await client.deposit.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 

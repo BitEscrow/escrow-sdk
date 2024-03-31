@@ -41,7 +41,7 @@ const res = await client.vm.submit(contract.cid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Assert that the settled contract exists.
-assert(res.data.contract !== undefined, 'contract is not settled')
+assert.ok(res.data.contract !== undefined, 'contract is not settled')
 // Unpack the settled contract from the response.
 const settled_contract = res.data.contract
 
@@ -61,7 +61,7 @@ if (DEMO_MODE) {
 // Unpack the txid from the settled contract.
 const txid = settled_contract.spent_txid
 // Assert that the txid exists.
-assert(txid !== null, 'no tx broadcast')
+assert.ok(txid !== null, 'no tx broadcast')
 
 if (DEMO_MODE) {
   print_banner('final transaction')

@@ -5,7 +5,7 @@ import {
   TapContext
 } from '@scrow/tapscript'
 
-import { Network }  from '@/types.js'
+import { Network }  from './base.js'
 import { TxOutput } from './tx.js'
 
 import { CovenantData, SessionToken } from './covenant.js'

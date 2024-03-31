@@ -1,12 +1,13 @@
-import { EscrowSigner }       from '@/client/class/signer.js'
 import { create_account_req } from '@/core/lib/account.js'
 import { verify_account }     from '@/core/validators/account.js'
-import { parse_err }          from '@/util.js'
+import { parse_err }          from '@/core/util/index.js'
 
 import {
   AccountRequest,
   AccountData
 } from '@/core/types/index.js'
+
+import { EscrowSigner } from '../../class/signer.js'
 
 export function create_account_api (esigner : EscrowSigner) {
   return (
@@ -31,9 +32,9 @@ export function verify_account_api (esigner : EscrowSigner) {
   }
 }
 
-export default function (signer : EscrowSigner) {
+export default function (esigner : EscrowSigner) {
   return {
-    create : create_account_api(signer),
-    verify : verify_account_api(signer)
+    create : create_account_api(esigner),
+    verify : verify_account_api(esigner)
   }
 }

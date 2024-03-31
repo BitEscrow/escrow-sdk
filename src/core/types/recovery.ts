@@ -1,5 +1,5 @@
 import { ScriptWord } from '@scrow/tapscript'
-import { Network }    from '@/types.js'
+import { Network }    from './base.js'
 
 export interface RecoveryConfig {
   agent_pk    : string

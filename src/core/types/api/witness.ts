@@ -1,5 +1,6 @@
-import { ContractData }        from '../contract.js'
-import { VMData, WitnessData } from '../witness.js'
+import { ContractData } from '../contract.js'
+import { VMData }       from '../vm.js'
+import { WitnessData }  from '../witness.js'
 
 export interface VMResponse {
   contract ?: ContractData

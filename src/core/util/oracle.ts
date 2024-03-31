@@ -4,17 +4,13 @@ import { parse_addr }  from '@scrow/tapscript/address'
 
 /* Module Imports */
 
-import { ApiResponse } from '@/types.js'
-import { exists }      from '@/util.js'
-
-import {
-  fetcher,
-  resolve_json
-} from '@/fetch.js'
+import { exists }                from './base.js'
+import { fetcher, resolve_json } from './fetch.js'
 
 /* Local Imports */
 
 import {
+  ApiResponse,
   OracleFeeEstimate,
   OracleQuery,
   OracleSpendData,

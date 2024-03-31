@@ -1,7 +1,7 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { Point }       from '@cmdcode/crypto-tools'
 
-import * as util from './util.js'
+import * as util from './base.js'
 
 export function ok (
   value    : unknown,

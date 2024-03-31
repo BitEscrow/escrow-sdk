@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import base  from '@/schema.js'
 import acct  from './account.js'
+import base  from './base.js'
 import cov   from './covenant.js'
 import tx    from './tx.js'
 

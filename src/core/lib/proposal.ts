@@ -1,11 +1,17 @@
+/* Global Imports */
+
 import { Buff }          from '@cmdcode/buff'
 import { parse_addr }    from '@scrow/tapscript/address'
 import { create_vout }   from '@scrow/tapscript/tx'
 import { TxOutput }      from '@scrow/tapscript'
 
-import { get_object_id, now } from '@/util.js'
+/* Module Imports */
 
-import { parse_proposal } from './parse.js'
+import {
+  get_object_id,
+  now,
+  parse_proposal
+} from '../util/index.js'
 
 import {
   PaymentEntry,

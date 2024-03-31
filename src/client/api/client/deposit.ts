@@ -1,6 +1,4 @@
-/* Module Imports */
-
-import { ApiResponse } from '@/types.js'
+import { assert } from '@/core/util/index.js'
 
 import {
   validate_account_req,
@@ -11,6 +9,7 @@ import {
 } from '@/core/validators/index.js'
 
 import {
+  ApiResponse,
   AccountRequest,
   AccountDataResponse,
   DepositDataResponse,
@@ -24,11 +23,9 @@ import {
   DepositStatusResponse
 } from '@/core/types/index.js'
 
-import * as assert from '@/assert.js'
+/* Module Imports */
 
-/* Local Imports */
-
-import { EscrowClient } from '@/client/class/client.js'
+import { EscrowClient } from '../../class/client.js'
 
 /**
  * Request a deposit account from the provider.

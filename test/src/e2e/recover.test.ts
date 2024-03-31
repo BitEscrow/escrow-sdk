@@ -12,8 +12,7 @@ import {
   create_account_req,
 } from '@scrow/sdk/account'
 
-import { DefaultPolicy } from '@scrow/sdk/config'
-import { now }           from '@scrow/sdk/util'
+import { now } from '@scrow/sdk/util'
 
 import {
   close_deposit,
@@ -32,7 +31,7 @@ import {
   verify_account,
   verify_deposit,
   verify_register_req
-} from '@scrow/sdk/validate'
+} from '@scrow/sdk/verify'
 
 /* Local Imports */
 
@@ -41,6 +40,8 @@ import {
   get_members,
   get_utxo
 } from '../core.js'
+
+import ServerPolicy from '../config/policy.json' assert { type: 'json' }
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -66,7 +67,7 @@ export default async function (
 
       const funder_sd  = funder.signer
       const server_sd  = server.signer
-      const server_pol = DefaultPolicy
+      const server_pol = ServerPolicy
 
       /* ------------------- [ Create Account ] ------------------ */
 

@@ -1,8 +1,6 @@
-import { Literal } from '@/types.js'
-
 import {
+  Literal,
   ProgramData,
-  VMData,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -21,7 +19,6 @@ export type ProgramVerify = (
 
 export type PathStatus = 'init' | 'open' | 'disputed' | 'closed'
 export type StoreEntry = [ string, string ]
-// export type WitProgram = (...args : string[]) => boolean
 
 export type CommitEntry = [
   step   : number,
@@ -55,7 +52,14 @@ export interface ProgMethodAPI {
   verify : ProgramVerify
 }
 
-export interface VMState extends VMData {
+export interface VMState {
+  activated : number          // Timestamp for when the VM was initialized.
+  error     : string | null   // Error output of the VM.
+  head      : string          // Current head of the commit-chain.
+  output    : string | null   // Standard output of the VM.
+  stamp     : number          // Timestamp for when the VM was last updated.
+  step      : number          // Counts the number of commits to the VM.
+  vmid      : string          // The virtual machine identifier.
   commits   : CommitEntry[]   // List of commits to the VM.
   paths     : StateEntry[]    // List of spend paths and their current state.
   programs  : ProgramData[]   // List of programs available in the VM.

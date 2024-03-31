@@ -1,36 +1,31 @@
-import { ZodTypeAny }  from 'zod'
-import { Buff, Bytes } from '@cmdcode/buff'
-import { Network }     from '@/types.js'
+import { ZodTypeAny } from 'zod'
+import { Bytes }      from '@cmdcode/buff'
 
 import {
+  Network,
   ProgramEntry,
-  SignerAPI
+  ServerPolicy,
+  VirtualMachineAPI
 } from '@/core/types/index.js'
 
-export interface ClientOptions {
-  fetcher    ?: typeof fetch
-  network    ?: string
-  oracle_url ?: string
-  server_url ?: string
-}
-
-export interface ClientConfig {
-  network    : Network
-  oracle_url : string
-  server_url : string
-}
-
-export interface SignerOptions {
-  network    ?: string
-  server_pk  ?: string
-  server_url ?: string
-  xpub       ?: string
-}
-
 export interface SignerConfig {
+  machine    : VirtualMachineAPI
   network    : Network
+  server_pol : ServerPolicy
   server_pk  : string
   server_url : string
+}
+
+export interface SignerOptions extends Partial<SignerConfig> {
+  xpub ?: string
+}
+
+export interface ClientConfig extends SignerConfig {
+  oracle_url : string
+}
+
+export interface ClientOptions extends Partial<ClientConfig> {
+  fetcher ?: typeof fetch
 }
 
 export interface FetchConfig {
@@ -60,21 +55,21 @@ export interface RolePolicy {
   programs  : ProgramEntry[]
 }
 
-export interface CredentialAPI extends SignerAPI {
-  // TODO: Streamline this API into SignerAPI and make it async.
-  backup    : (password : Bytes) => Bytes
-  get_id    : (id : Bytes) => CredentialAPI
-  gen_cred  : (idx : number, xpub : string) => CredentialData
-  gen_token : (content : string) => string
-  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
-}
+// export interface CredentialAPI extends SignerAPI {
+//   // TODO: Streamline this API into SignerAPI and make it async.
+//   backup    : (password : Bytes) => Bytes
+//   get_id    : (id : Bytes) => CredentialAPI
+//   gen_cred  : (idx : number, xpub : string) => CredentialData
+//   gen_token : (content : string) => string
+//   hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
+// }
 
-export interface CredentialData {
-  id   : string
-  pub  : string
-  sig  : string
-  xpub : string
-}
+// export interface CredentialData {
+//   id   : string
+//   pub  : string
+//   sig  : string
+//   xpub : string
+// }
 
 export interface WalletAPI {
   xpub : string

@@ -1,4 +1,4 @@
-import { ServerPolicy } from '@/types.js'
+import { ServerPolicy } from '../server.js'
 
 export interface ServerKeysResponse {
   pubkeys : string[]

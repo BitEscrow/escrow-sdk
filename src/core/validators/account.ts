@@ -1,8 +1,11 @@
+/* Global Imports */
+
 import { verify_sig } from '@cmdcode/crypto-tools/signer'
 import { parse_addr } from '@scrow/tapscript/address'
 
-import * as assert      from '@/assert.js'
-import { ServerPolicy } from '@/types.js'
+/* Module Imports */
+
+import { assert } from '../util/index.js'
 
 import {
   get_account_ctx,
@@ -13,6 +16,7 @@ import {
 import {
   AccountData,
   AccountRequest,
+  ServerPolicy,
   SignerAPI
 } from '../types/index.js'
 

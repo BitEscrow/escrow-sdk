@@ -6,7 +6,6 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 /* Package Imports */
 
-import { DefaultPolicy } from '@scrow/sdk/config'
 import { get_return_tx } from '@scrow/sdk/return'
 import { now }           from '@scrow/sdk/util'
 
@@ -26,7 +25,7 @@ import {
   verify_account,
   verify_deposit,
   verify_register_req
-} from '@scrow/sdk/validate'
+} from '@scrow/sdk/verify'
 
 /* Local Imports */
 
@@ -35,6 +34,8 @@ import {
   get_members,
   get_utxo
 } from '../core.js'
+
+import ServerPolicy from '../config/policy.json' assert { type: 'json' }
 
 const VERBOSE = process.env.VERBOSE === 'true'
 
@@ -60,7 +61,7 @@ export default async function (
 
       const funder_sd  = funder.signer
       const server_sd  = server.signer
-      const server_pol = DefaultPolicy
+      const server_pol = ServerPolicy
 
       /* ------------------- [ Create Account ] ------------------ */
 

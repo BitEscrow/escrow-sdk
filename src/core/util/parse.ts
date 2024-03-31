@@ -7,19 +7,18 @@ import {
   WitnessData
 } from '../types/index.js'
 
-import BaseSchema from '@/schema.js'
-import CoreSchema from '@/core/schema/index.js'
+import CoreSchema from '../schema/index.js'
 
 export function parse_network (
   network : unknown
 ) {
-  return BaseSchema.network.parse(network)
+  return CoreSchema.base.network.parse(network)
 }
 
 export function parse_payments (
   payments : unknown[]
 ) : PaymentEntry[] {
-  return BaseSchema.payment.array().parse(payments)
+  return CoreSchema.base.payment.array().parse(payments)
 }
 
 export function parse_contract (

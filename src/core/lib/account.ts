@@ -11,28 +11,31 @@ import {
 
 /* Module Imports */
 
-import { Network }          from '@/types.js'
-import { now, sort_record } from '@/util.js'
-
-/* Local Imports */
-
-import { get_recovery_script }     from './recovery.js'
-import { get_address, get_tapkey } from './tx.js'
-
-import {
-  gen_session_token,
-  parse_session_token
-} from './session.js'
+import { now, sort_record } from '../util/index.js'
 
 import {
   AccountData,
   AccountContext,
   AccountRequest,
+  Network,
   SignerAPI,
-  AccountTemplate
+  AccountTemplate,
+  RegisterTemplate,
+  DepositData
 } from '../types/index.js'
 
 import AcctSchema from '../schema/account.js'
+
+/* Local Imports */
+
+import { get_recovery_script }     from './recovery.js'
+import { get_address, get_tapkey, get_utxo_bytes } from './tx.js'
+
+import {
+  gen_session_token,
+  parse_session_token
+} from './session.js'
+import { sha512 } from '@cmdcode/crypto-tools/hash'
 
 /**
  * Create an account request object.
@@ -142,6 +145,17 @@ export function get_account_hash (
   const seq = Buff.num(locktime, 4)
   const rta = Buff.str(return_addr)
   return Buff.join([ net, pub, seq, rta ]).digest.hex
+}
+
+export function get_deposit_hash (
+  request : RegisterTemplate | DepositData
+) {
+  const hash = get_account_hash(request)
+  const agnt = Buff.hex(request.server_tkn)
+  const rate = Buff.num(request.feerate, 4)
+  const utxo = get_utxo_bytes(request.utxo)
+  const pimg = Buff.join([ hash, agnt, rate, utxo ])
+  return sha512(pimg).hex
 }
 
 /**

@@ -1,6 +1,6 @@
-import { EscrowSigner }   from '@/client/class/signer.js'
-import { verify_account } from '@/core/validators/account.js'
-import { verify_deposit } from '@/core/validators/deposit.js'
+import { verify_account }  from '@/core/validators/account.js'
+import { verify_contract } from '@/core/validators/contract.js'
+import { verify_deposit }  from '@/core/validators/deposit.js'
 
 import {
   create_close_req,
@@ -19,7 +19,8 @@ import {
   TxOutput,
   RegisterRequest
 } from '@/core/types/index.js'
-import { verify_contract } from '@/core/validators/contract.js'
+
+import { EscrowSigner }   from '../../class/signer.js'
 
 export function request_deposits_api (esigner : EscrowSigner) {
   return () => {

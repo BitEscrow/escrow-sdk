@@ -1,3 +1,5 @@
+/* Global Imports */
+
 import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 import {
@@ -6,37 +8,40 @@ import {
   parse_txid
 } from '@scrow/tapscript/tx'
 
-import * as assert        from '@/assert.js'
-import { ServerPolicy }   from '@/types.js'
-import { VirtualMachine } from '@/vm/index.js'
+/* Module Imports */
 
 import { get_proposal_id } from '../lib/proposal.js'
 import { create_txinput }  from '../lib/tx.js'
-import { verify_receipt }  from './witness.js'
+import { assert }          from '../util/index.js'
 
 import {
   create_spend_templates,
   get_contract_id,
   get_spend_template,
-  get_vm_config
+  get_vm_id
 } from '../lib/contract.js'
+
+import {
+  ContractData,
+  ContractRequest,
+  ProposalData,
+  ServerPolicy,
+  TxOutput,
+  VMData,
+  VirtualMachineAPI,
+  WitnessReceipt
+} from '../types/index.js'
+
+import ContractSchema from '../schema/contract.js'
+
+/* Local Imports */
 
 import {
   validate_proposal,
   verify_proposal
 } from './proposal.js'
 
-import {
-  ContractData,
-  ContractRequest,
-  ProposalData,
-  TxOutput,
-  VMData,
-  WitnessReceipt,
-  WitnessData
-} from '../types/index.js'
-
-import ContractSchema from '../schema/contract.js'
+import { verify_receipt } from './witness.js'
 
 export function validate_contract (
   contract : unknown
@@ -45,13 +50,27 @@ export function validate_contract (
 }
 
 export function verify_contract_req (
+  machine : VirtualMachineAPI,
   policy  : ServerPolicy,
   request : ContractRequest
 ) {
   const { proposal, signatures } = request
   validate_proposal(proposal)
-  verify_proposal(proposal, policy)
+  verify_proposal(machine, policy, proposal)
   verify_endorsements(proposal, signatures)
+}
+
+export function verify_endorsements (
+  proposal   : ProposalData,
+  signatures : string[] = []
+) {
+  // List all pubkeys in proposal.
+  const prop_id = get_proposal_id(proposal)
+  for (const signature of signatures) {
+    const pub = signature.slice(0, 64)
+    const sig = signature.slice(64)
+    assert.ok(verify_sig(sig, prop_id, pub), 'signature is invalid for pubkey: ' + pub)
+  }
 }
 
 export function verify_contract (contract : ContractData) {
@@ -84,8 +103,9 @@ export function verify_activation (
   contract : ContractData,
   state    : VMData
 ) {
-  const { activated, vmid } = contract
+  const { activated, cid } = contract
   assert.ok(activated !== null,            'contract activated date is null')
+  const vmid = get_vm_id(cid, activated)
   assert.ok(vmid !== null,                 'contract vmid is null')
   assert.ok(activated === state.activated, 'contract activated date does not match vm')
   assert.ok(vmid === state.vmid,           'contract vmid does not match vm')
@@ -94,23 +114,17 @@ export function verify_activation (
 export function verify_execution (
   contract : ContractData,
   receipt  : WitnessReceipt,
-  witness  : WitnessData
+  result   : VMData
 ) {
-  // Compute the vm configuration.
-  const config = get_vm_config(contract)
-  // Initialize the vm state.
-  const vm = new VirtualMachine(config)
   // Verify the activation of the vm.
-  verify_activation(contract, vm.data)
-  // Update the vm state for each witness.
-  const result = vm.eval(witness)
+  verify_activation(contract, result)
   // Verify the final vm state with the receipt.
   verify_receipt(receipt, result)
 }
 
 export function verify_settlement (
   contract   : ContractData,
-  statements : WitnessData[],
+  result     : VMData,
   utxos      : TxOutput[]
 ) {
   // Unpack the contract object.
@@ -118,24 +132,14 @@ export function verify_settlement (
   // Assert the spent timestamp and txid exists.
   assert.ok(spent_at !== null,   'contract spent_at is null')
   assert.ok(spent_txid !== null, 'contract spent_txid is null')
-  // Compute the vm configuration.
-  const config = get_vm_config(contract)
-  // Initialize the vm state.
-  const vm = new VirtualMachine(config)
   // Verify the activation of the vm.
-  verify_activation(contract, vm.data)
-  // Update the vm state for each witness.
-  for (const witness of statements) {
-    const state = vm.eval(witness)
-    const error = `vm terminated early on step ${state.step} with error: ${state.error}`
-    assert.ok(state.error === null, error)
-  }
+  verify_activation(contract, result)
   // Run the vm up to the final timestamp.
-  const state = vm.run(spent_at)
+  assert.ok(result.stamp === spent_at, 'contract spent_at does not match vm result')
   // Assert the state output is not null.
-  assert.ok(state.output !== null, 'contract vm output is null')
+  assert.ok(result.output !== null, 'result vm output is null')
   // Get the spend template for the provided output.
-  const output = get_spend_template(state.output, contract.outputs)
+  const output = get_spend_template(result.output, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
   // Add each utxo to the txdata object.
@@ -149,17 +153,4 @@ export function verify_settlement (
   const txid  = parse_txid(txhex)
   // Assert that the transaction id matches.
   assert.ok(txid === contract.spent_txid, 'settlement txid does not match contract')
-}
-
-export function verify_endorsements (
-  proposal   : ProposalData,
-  signatures : string[] = []
-) {
-  // List all pubkeys in proposal.
-  const prop_id = get_proposal_id(proposal)
-  for (const signature of signatures) {
-    const pub = signature.slice(0, 64)
-    const sig = signature.slice(64)
-    assert.ok(verify_sig(sig, prop_id, pub), 'signature is invalid for pubkey: ' + pub)
-  }
 }

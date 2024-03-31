@@ -57,7 +57,7 @@ export function resolve_aliases (
 }
 
 export function get_config (vmconfig : unknown) {
-  return CoreSchema.witness.vmconfig.parse(vmconfig)
+  return CoreSchema.vm.config.parse(vmconfig)
 }
 
 export function compile_witness (
@@ -89,12 +89,12 @@ export function run_vm (
   timeout    : number
 ) : VMData {
   const marker = config.activated + timeout
-  const vm = new VirtualMachine(config)
+  let   state  = VirtualMachine.init(config)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:
   for (const witness of statements) {
     // Evaluate the witness statement.
-    const state = vm.eval(witness)
+    state = VirtualMachine.eval(state, witness)
     // Unpack the current state results:
     const { error, output } = state
     // If there's an error or result, return.
@@ -103,5 +103,5 @@ export function run_vm (
     }
   }
   // If the vm is still running, eval the timestamp.
-  return vm.run(marker)
+  return VirtualMachine.run(state, marker)
 }

@@ -1,10 +1,17 @@
-import { get_access_list } from '@/util.js'
-import { VALID_ACTIONS }   from '@/config/const.js'
-import { ScheduleEntry }   from '@/core/types/index.js'
+/* Global Imports */
 
-import { update_path }     from './state.js'
-import { debug }           from '../util.js'
-import { VMState }         from '../types.js'
+import { ScheduleEntry }   from '@/core/types/index.js'
+import { get_access_list } from '@/core/util/index.js'
+
+/* Module Imports */
+
+import { VALID_ACTIONS } from '../const.js'
+import { VMState }       from '../types.js'
+
+/* Local Imports */
+
+import { update_path } from './state.js'
+import { debug }       from './util.js'
 
 export function init_tasks (
   schedule : ScheduleEntry[]

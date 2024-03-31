@@ -1,6 +1,7 @@
-import * as assert from '@/assert.js'
+/* Module Imports */
 
 import { get_account_agent } from '../lib/account.js'
+import { assert }            from '../util/index.js'
 
 import {
   get_session_pnonce,
@@ -8,7 +9,10 @@ import {
   parse_session_token
 } from '../lib/session.js'
 
-import { RegisterRequest, SignerAPI } from '../types/index.js'
+import {
+  RegisterRequest,
+  SignerAPI
+} from '../types/index.js'
 
 import CovenantSchema from '../schema/covenant.js'
 

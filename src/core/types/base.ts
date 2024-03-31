@@ -1,10 +1,6 @@
-import { DefaultPolicy } from './config/index.js'
-
 export type Literal = string | number | boolean | null
 export type Json    = Literal | { [key : string] : Json } | Json[]
 export type Network = 'regtest' | 'main' | 'testnet' | 'signet' | 'mutiny'
-
-export type ServerPolicy = typeof DefaultPolicy
 
 export type ApiResponse<T> = DataResponse<T> | ErrorResponse
 

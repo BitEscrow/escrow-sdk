@@ -1,4 +1,4 @@
-import { Literal, Network } from '../../types.js'
+import { Literal, Network } from './base.js'
 
 export type PaymentEntry = [
   value   : number,

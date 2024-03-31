@@ -9,9 +9,24 @@ import {
 
 /* Module Imports */
 
-import * as assert          from '@/assert.js'
-import { ServerPolicy }     from '@/types.js'
-import { now, sort_record } from '@/util.js'
+import { SPEND_TXIN_SIZE }          from '../const.js'
+import { assert, now, sort_record } from '../util/index.js'
+
+import {
+  ContractConfig,
+  ContractData,
+  ContractRequest,
+  ContractStatus,
+  DepositData,
+  PaymentEntry,
+  ProposalData,
+  ServerPolicy,
+  SignerAPI,
+  SpendTemplate,
+  VMConfig
+} from '../types/index.js'
+
+import ContractSchema from '../schema/contract.js'
 
 /* Local Imports */
 
@@ -26,35 +41,19 @@ import {
   get_proposal_id
 } from './proposal.js'
 
-import {
-  ContractConfig,
-  ContractData,
-  ContractRequest,
-  ContractStatus,
-  DepositData,
-  PaymentEntry,
-  ProposalData,
-  SignerAPI,
-  SpendTemplate,
-  VMConfig
-} from '../types/index.js'
-
-import ContractSchema from '../schema/contract.js'
-
 const CONTRACT_DEFAULTS = () => {
   return {
     activated  : null,
-    balance    : 0,
     expires_at : null,
-    pending    : 0,
+    fund_count : 0,
+    fund_pend  : 0,
+    fund_value : 0,
     settled    : false as const,
     settled_at : null,
     spent      : false as const,
     spent_at   : null,
     spent_txid : null,
-    status     : 'published' as ContractStatus,
-    txin_count : 0,
-    vmid       : null
+    status     : 'published' as ContractStatus
   }
 }
 
@@ -81,30 +80,31 @@ export function create_contract (
   // Unpack request object.
   const { proposal, signatures = [] } = request
   // Define or create the contract outputs.
-  const feerate   = config.feerate   ?? request.proposal.feerate
+  const feerate    = config.feerate   ?? request.proposal.feerate
+  // Define the funding input txfee.
+  const fund_txfee = feerate * SPEND_TXIN_SIZE
   // Define or create the contract outputs.
-  const outputs   = config.outputs   ?? create_spend_templates(proposal, fees)
+  const outputs    = config.outputs   ?? create_spend_templates(proposal, fees)
   // Define or compute the proposal id.
-  const prop_id   = config.prop_id   ?? get_proposal_id(proposal)
+  const prop_id    = config.prop_id   ?? get_proposal_id(proposal)
   // Define or compute the published date.
-  const published = config.published ?? now()
+  const published  = config.published ?? now()
   // Define or compute the contract id.
-  const cid       = config.cid       ?? get_contract_id(outputs, prop_id, published)
+  const cid        = config.cid       ?? get_contract_id(outputs, prop_id, published)
   // Calculate the subtotal.
-  const subtotal  = proposal.value + get_pay_total(fees)
+  const subtotal   = proposal.value + get_pay_total(fees)
   // Calculate the vout size of the tx output.
-  const vout_size = get_max_vout_size(outputs)
+  const tx_vsize   = get_max_vout_size(outputs)
   // Calculate the transaction fee.
-  const txfee     = vout_size * feerate
+  const tx_fees    =  tx_vsize * feerate
   // Return a completed contract.
   return sort_record({
     ...CONTRACT_DEFAULTS(),
     cid,
     fees,
     deadline   : get_deadline(proposal, published, DEADLINE_DEF),
-    est_txfee  : txfee,
-    est_txsize : vout_size,
     feerate,
+    fund_txfee,
     moderator  : request.proposal.moderator ?? null,
     outputs,
     prop_id,
@@ -115,10 +115,30 @@ export function create_contract (
     signatures,
     subtotal,
     terms      : proposal,
-    total      : subtotal + txfee,
-    updated_at : published,
-    vout_size
+    tx_fees,
+    tx_vsize,
+    tx_total   : subtotal + tx_fees,
+    updated_at : published
   })
+}
+
+export function fund_contract (
+  contract : ContractData,
+  deposit  : DepositData
+) {
+  const { confirmed, utxo } = deposit
+  const fund_value = (confirmed)
+    ? contract.fund_value + utxo.value
+    : contract.fund_value
+  const fund_pend  = (confirmed)
+    ? contract.fund_pend
+    : contract.fund_pend + utxo.value
+  const fund_count  = contract.fund_count + 1
+  const tx_fee_data = get_txfee_data(contract, fund_count)
+  const tx_fees     = tx_fee_data.tx_total_fee
+  const tx_size     = tx_fee_data.tx_total_size
+  const tx_total    = contract.subtotal + tx_fees
+  return sort_record({ ...contract, fund_count, fund_pend, fund_value, tx_fees, tx_size, tx_total })
 }
 
 /**
@@ -190,8 +210,8 @@ function get_deadline (
 export function get_max_vout_size (
   outputs : SpendTemplate[]
 ) {
-  const lens = outputs.map(e => e[1].length)
-  return Math.max(...lens) / 2
+  const tx_lens = outputs.map(e => e[1].length)
+  return Math.max(...tx_lens) / 2
 }
 
 /**
@@ -233,11 +253,11 @@ export function get_spend_template (
 }
 
 export function get_vm_config (contract : ContractData) : VMConfig {
-  const { activated, terms, vmid } = contract
+  assert.exists(contract.activated)
+  const { activated, cid, terms } = contract
   const { paths, programs, schedule } = terms
   const pathnames = get_path_names(paths)
-  assert.exists(activated)
-  assert.exists(vmid)
+  const vmid      = get_vm_id(cid, activated)
   return { activated, pathnames, programs, schedule, vmid }
 }
 
@@ -266,4 +286,28 @@ export function get_settlement_tx (
     txdata.vin.push({ ...vin, witness: [ sig ] })
   }
   return encode_tx(txdata).hex
+}
+
+export function get_txfee_data (
+  contract  : ContractData,
+  vin_count : number
+) {
+  const { feerate, outputs } = contract
+  const tx_base_size  = get_max_vout_size(outputs)
+  const tx_base_fee   = tx_base_size * feerate
+  const tx_txin_size  = SPEND_TXIN_SIZE * vin_count
+  const tx_txin_fee   = tx_txin_size * feerate
+  const tx_total_size = tx_base_fee  + tx_txin_fee
+  const tx_total_fee  = tx_base_size + tx_txin_size
+  const tx_sats_vbyte = Math.floor(tx_total_size / tx_total_fee)
+
+  return {
+    tx_base_fee,
+    tx_base_size,
+    tx_txin_fee,
+    tx_txin_size,
+    tx_total_fee,
+    tx_total_size,
+    tx_sats_vbyte
+  }
 }

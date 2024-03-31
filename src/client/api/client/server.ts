@@ -1,11 +1,11 @@
-import { EscrowClient } from '@/client/class/client.js'
-import { ApiResponse }  from '@/types.js'
-
 import {
+  ApiResponse,
   ServerKeysResponse,
   ServerPolicyResponse,
   ServerStatusResponse
-} from '@/core/types/api/server.js'
+} from '@/core/types/index.js'
+
+import { EscrowClient } from '../../class/client.js'
 
 function server_keys_api (client : EscrowClient) {
   return async () : Promise<ApiResponse<ServerKeysResponse>> => {

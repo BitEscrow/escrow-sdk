@@ -1,12 +1,10 @@
-import { Buff, Bytes } from '@cmdcode/buff'
-import { sort_record } from '@/util.js'
+import { Buff, Bytes }         from '@cmdcode/buff'
+import { assert, sort_record } from '../util/index.js'
 
 import {
   SessionToken,
   SignerAPI
 } from '../types/index.js'
-
-import * as assert from '@/assert.js'
 
 /**
  * Generates a cryptographic token for use

@@ -7,7 +7,7 @@ import { config }       from './00_demo_config.js'
  */
 function create_signer (alias : string) {
   // Return an escrow signer.
-  return EscrowSigner.import(config).from_phrase(alias)
+  return EscrowSigner.import(config.client).from_phrase(alias)
 }
 
 /**

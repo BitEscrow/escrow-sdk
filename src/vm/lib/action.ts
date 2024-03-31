@@ -1,9 +1,7 @@
-import {
-  PathState,
-  VMState
-} from '../types.js'
+/* Module Imports */
 
-import { VMError } from '../util.js'
+import { PathState, VMState } from '../types.js'
+import { VMError }            from './util.js'
 
 export function run_action (
   action : string,

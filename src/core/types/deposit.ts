@@ -1,4 +1,4 @@
-import { Network }      from '@/types.js'
+import { Network }      from './base.js'
 import { CovenantData } from './covenant.js'
 
 import {

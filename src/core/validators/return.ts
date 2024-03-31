@@ -1,4 +1,4 @@
-import { verify_covenant_psig } from './covenant.js'
+/* Module Imports */
 
 import {
   create_return_template,
@@ -7,6 +7,10 @@ import {
 } from '../lib/return.js'
 
 import { RegisterTemplate } from '../types/index.js'
+
+/* Local Imports */
+
+import { verify_covenant_psig } from './covenant.js'
 
 export function verify_return_psig (
   request     : RegisterTemplate,

@@ -1,6 +1,9 @@
-import { print_banner } from '@scrow/test'
-import { now }          from '@/util.js'
-import { VMUtil }       from '@scrow/test'
+import { now } from '@scrow/sdk/util'
+
+import {
+  print_banner,
+  VMUtil
+} from '@scrow/test'
 
 import vector from './vector.json' assert { type: 'json' }
 

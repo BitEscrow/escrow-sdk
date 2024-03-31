@@ -1,10 +1,12 @@
-import { Buff }         from '@cmdcode/buff'
+/* Global Imports */
 
-import { regex }        from '@/util.js'
+import { Buff }         from '@cmdcode/buff'
+import { regex }        from '@/core/util/index.js'
 import { ProgramEntry } from '@/core/types/index.js'
 
-import { run_action } from './action.js'
-import { debug }      from '../util.js'
+/* Module Imports */
+
+import { debug } from './util.js'
 
 import {
   PathState,
@@ -12,6 +14,10 @@ import {
   StateEntry,
   VMState
 } from '../types.js'
+
+/* Local Imports */
+
+import { run_action } from './action.js'
 
 const INIT_TERMS = {
   can_dispute : false,

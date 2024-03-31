@@ -1,11 +1,6 @@
-import * as assert       from '@/assert.js'
-import { DefaultPolicy } from '@/config/index.js'
-import { ServerPolicy }  from '@/types.js'
-import { now }           from '@/util.js'
+/* Module Imports */
 
-import { parse_proposal } from '../lib/parse.js'
-import { create_program } from '../lib/witness.js'
-import { verify_program } from './witness.js'
+import { create_program } from '../lib/vm.js'
 
 import {
   get_pay_total,
@@ -14,17 +9,29 @@ import {
 } from '../lib/proposal.js'
 
 import {
-  check_expires,
-  check_regex
-} from './util.js'
+  assert,
+  now,
+  parse_proposal
+} from '../util/index.js'
 
 import {
   ProgramEntry,
   ProposalData,
-  ProposalTemplate
+  ProposalTemplate,
+  ServerPolicy,
+  VirtualMachineAPI
 } from '../types/index.js'
 
 import PropSchema from '../schema/proposal.js'
+
+/* Local Imports */
+
+import { verify_program } from './witness.js'
+
+import {
+  check_expires,
+  check_regex
+} from './util.js'
 
 export function validate_program (
   program : unknown
@@ -45,17 +52,18 @@ export function validate_proposal (
 }
 
 export function verify_proposal (
-  proposal : ProposalData,
-  policy   : ServerPolicy = DefaultPolicy
+  machine  : VirtualMachineAPI,
+  policy   : ServerPolicy,
+  proposal : ProposalData
 ) {
   // Check spending paths are valid.
   check_payments(proposal)
   // Check if timestamps are valid.
   check_stamps(policy, proposal)
   // Check if path-based program terms are valid.
-  check_programs(policy, proposal)
+  check_programs(machine, proposal)
   // Check if schedule tasks are valid.
-  check_schedule(policy, proposal)
+  check_schedule(machine, proposal)
 }
 
 function check_payments (proposal : ProposalData) {
@@ -80,10 +88,10 @@ function check_payments (proposal : ProposalData) {
 }
 
 function check_programs (
-  policy   : ServerPolicy,
+  machine  : VirtualMachineAPI,
   proposal : ProposalData
 ) {
-  const { VALID_ACTIONS, VALID_METHODS } = policy.proposal
+  const { VALID_ACTIONS } = machine
   const { paths, programs } = proposal
   const path_names = get_path_names(paths)
   for (const terms of programs) {
@@ -91,15 +99,15 @@ function check_programs (
     const { actions, params, paths, method } = prog
     check_regex(VALID_ACTIONS, actions)
     check_regex(path_names, paths)
-    verify_program(method, params, VALID_METHODS)
+    verify_program(machine, method, params)
   }
 }
 
 function check_schedule (
-  policy   : ServerPolicy,
+  machine  : VirtualMachineAPI,
   proposal : ProposalData
 ) {
-  const { VALID_ACTIONS } = policy.proposal
+  const { VALID_ACTIONS } = machine
   const { duration, paths, schedule } = proposal
   const path_names = get_path_names(paths)
   schedule.forEach(task => {

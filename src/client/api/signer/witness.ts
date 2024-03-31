@@ -1,4 +1,3 @@
-import { EscrowSigner }    from '@/client/class/signer.js'
 import { verify_contract } from '@/core/validators/contract.js'
 import { verify_witness }  from '@/core/validators/witness.js'
 
@@ -13,6 +12,8 @@ import {
   WitnessData,
   WitnessTemplate
 } from '@/core/types/index.js'
+
+import { EscrowSigner } from '../../class/signer.js'
 
 export function can_sign_api (esigner : EscrowSigner) {
   return (

@@ -1,4 +1,6 @@
-/* Module Imports */
+/* Global Imports */
+
+import { assert, sleep } from '@/core/util/index.js'
 
 import {
   broadcast_tx,
@@ -7,17 +9,14 @@ import {
   get_utxo_data,
   get_tx_data,
   get_address_utxos
-} from '@/core/lib/oracle.js'
+} from '@/core/util/oracle.js'
 
 import {
   OracleQuery,
   OracleSpendData
 } from '@/core/types/index.js'
 
-import * as assert from '@/assert.js'
-import { sleep }   from '@/util.js'
-
-/* Local Imports */
+/* Module Imports */
 
 import { EscrowClient } from '@/client/class/client.js'
 

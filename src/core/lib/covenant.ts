@@ -12,23 +12,7 @@ import {
 
 /* Module Imports */
 
-import * as assert    from '@/assert.js'
-import { sort_bytes } from '@/util.js'
-
-/* Local Imports */
-
-import { get_deposit_hash } from './deposit.js'
-import { create_sighash }   from './tx.js'
-
-import {
-  get_account_agent,
-  get_account_ctx
-} from './account.js'
-
-import {
-  get_session_pnonce,
-  get_session_seed
-} from './session.js'
+import { assert, sort_bytes } from '../util/index.js'
 
 import {
   AccountContext,
@@ -43,6 +27,21 @@ import {
   SpendTemplate,
   TxOutput
 } from '../types/index.js'
+
+/* Local Imports */
+
+import { create_sighash } from './tx.js'
+
+import {
+  get_account_agent,
+  get_account_ctx,
+  get_deposit_hash
+} from './account.js'
+
+import {
+  get_session_pnonce,
+  get_session_seed
+} from './session.js'
 
 /**
  * Returns a partially-signed covenant based

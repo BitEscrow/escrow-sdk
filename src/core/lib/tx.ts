@@ -30,16 +30,15 @@ import {
   create_vout
 } from '@scrow/tapscript/tx'
 
-import { Network } from '@/types.js'
+import { assert } from '../util/index.js'
 
 import {
+  Network,
   SignerAPI,
   OracleTxIn,
   TxOutput,
   TxVout
 } from '../types/index.js'
-
-import * as assert from '@/assert.js'
 
 export function create_timelock (
   duration : number

@@ -1,20 +1,18 @@
+/* Global Imports */
+
 import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
 import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 
-import * as assert      from '@/assert.js'
-import { ServerPolicy } from '@/types.js'
+/* Module Imports */
 
-import { get_account_ctx }      from '../lib/account.js'
-import { verify_account_req }   from './account.js'
-import { verify_covenant }      from './covenant.js'
-import { verify_return_psig }   from './return.js'
-import { verify_session_token } from './session.js'
+import { get_deposit_id }  from '../lib/deposit.js'
+import { assert }          from '../util/index.js'
 
 import {
-  get_deposit_hash,
-  get_deposit_id
-} from '../lib/deposit.js'
+  get_account_ctx,
+  get_deposit_hash
+} from '../lib/account.js'
 
 import {
   CloseRequest,
@@ -24,10 +22,18 @@ import {
   DepositStatus,
   LockRequest,
   RegisterRequest,
+  ServerPolicy,
   SignerAPI
 } from '../types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
+
+/* Local Imports */
+
+import { verify_account_req }   from './account.js'
+import { verify_covenant }      from './covenant.js'
+import { verify_return_psig }   from './return.js'
+import { verify_session_token } from './session.js'
 
 export function validate_register_req (
   request : unknown
