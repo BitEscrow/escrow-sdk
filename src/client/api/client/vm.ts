@@ -2,9 +2,10 @@ import { assert } from '@/core/util/index.js'
 
 import {
   ApiResponse,
-  VMResponse,
-  WitnessData,
-  WitnessListResponse
+  VMDataResponse,
+  VMReceiptResponse,
+  VMStatementResponse,
+  WitnessData
 } from '@/core/types/index.js'
 
 import { EscrowClient } from '../../class/client.js'
@@ -14,14 +15,14 @@ import { EscrowClient } from '../../class/client.js'
  * that are associated with the contract.
  */
 function list_witness_api (client : EscrowClient) {
-  return async (cid : string) : Promise<ApiResponse<WitnessListResponse>> => {
+  return async (cid : string) : Promise<ApiResponse<VMStatementResponse>> => {
      // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/vm/${cid}/witness`
+    const url  = `${host}/api/vm/${cid}/list`
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url })
+    return client.fetcher<VMStatementResponse>({ url })
   }
 }
 
@@ -32,7 +33,7 @@ function submit_witness_api (client : EscrowClient) {
   return async (
     cid     : string,
     witness : WitnessData
-  ) : Promise<ApiResponse<VMResponse>> => {
+  ) : Promise<ApiResponse<VMReceiptResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request url.
@@ -45,7 +46,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<VMResponse>({ url, init })
+    return client.fetcher<VMReceiptResponse>({ url, init })
   }
 }
 
@@ -54,14 +55,14 @@ function submit_witness_api (client : EscrowClient) {
  * that are associated with the contract.
  */
 function read_vm_state_api (client : EscrowClient) {
-  return async (cid : string) : Promise<ApiResponse<VMResponse>> => {
+  return async (cid : string) : Promise<ApiResponse<VMDataResponse>> => {
     // Validate the contract id.
     assert.is_hash(cid)
     // Formulate the request.
     const host = client.server_url
     const url  = `${host}/api/witness/{${cid}}`
     // Return the response.
-    return client.fetcher<VMResponse>({ url })
+    return client.fetcher<VMDataResponse>({ url })
   }
 }
 

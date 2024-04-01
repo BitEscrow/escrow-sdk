@@ -6,21 +6,14 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 import { get_path_names } from '../lib/proposal.js'
 import { create_program } from '../lib/vm.js'
+import { get_witness_id } from '../lib/witness.js'
 import { assert, regex }  from '../util/index.js'
-
-import {
-  get_receipt_hash,
-  get_receipt_id,
-  get_witness_id
-} from '../lib/witness.js'
 
 import {
   ContractData,
   Literal,
-  VMData,
   VirtualMachineAPI,
-  WitnessData,
-  WitnessReceipt
+  WitnessData
 } from '../types/index.js'
 
 import WitSchema from '../schema/witness.js'
@@ -91,43 +84,4 @@ export function verify_witness_sigs (
   })
 
   assert.ok(is_valid,     'signature verifcation failed')
-}
-
-export function verify_receipt (
-  receipt : WitnessReceipt,
-  result  : VMData
-) {
-  const { created_at, hash, id, pubkey, sig, ...data } = receipt
-
-  const int_hash = get_receipt_hash(data)
-
-  if (int_hash !== hash) {
-    throw new Error('receipt hash does not match internal hash: ' + int_hash)
-  }
-
-  const int_id = get_receipt_id(hash, pubkey, created_at)
-
-  if (int_hash !== hash) {
-    throw new Error('receipt id does not match internal id: ' + int_id)
-  }
-
-  const is_valid = verify_sig(sig, id, pubkey)
-
-  if (!is_valid) {
-    throw new Error('receipt signature is invalid')
-  }
-
-  if (receipt.vmid !== result.vmid) {
-    throw new Error('receipt does not match vmid: '   + result.vmid)
-  } else if (receipt.step !== result.step) {
-    throw new Error('receipt does not match step: '   + result.step)
-  } else if (receipt.head !== result.head) {
-    throw new Error('receipt does not match head: '   + result.head)
-  } else if (receipt.stamp !== result.stamp) {
-    throw new Error('receipt does not match stamp: '  + result.stamp)
-  } else if (receipt.error !== result.error) {
-    throw new Error('receipt does not match error: '  + result.error)
-  } else if (receipt.output !== result.output) {
-    throw new Error('receipt does not match output: ' + result.output)
-  }
 }

@@ -8,7 +8,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 import { endorse_proposal } from '@scrow/sdk/proposal'
 import { assert, now }      from '@scrow/sdk/util'
-import { VirtualMachine }   from '@scrow/sdk/vm'
+import { VirtualMachine }   from '@scrow/sdk/cvm'
 
 import {
   DepositData,
@@ -22,17 +22,10 @@ import {
 } from '@scrow/sdk/account'
 
 import {
-  create_receipt,
-  create_witness,
-  endorse_witness
-} from '@scrow/sdk/witness'
-
-import {
   create_contract_req,
   create_contract,
   activate_contract,
   settle_contract,
-  get_vm_config,
   get_settlement_tx,
   fund_contract
 } from '@scrow/sdk/contract'
@@ -50,10 +43,17 @@ import {
   verify_settlement,
   verify_witness,
   verify_commit_req,
-  verify_execution,
   verify_proposal,
-  verify_publishing
+  verify_publishing,
+  verify_receipt
 } from '@scrow/sdk/verify'
+
+import { create_receipt, get_vm_config } from '@scrow/sdk/vm'
+
+import {
+  create_witness,
+  endorse_witness
+} from '@scrow/sdk/witness'
 
 /* Local Imports */
 
@@ -249,7 +249,7 @@ export default async function (
       // Create a signed receipt for the latest commit.
       const vm_receipt = create_receipt(vm_state, server_sd)
       // Verify the latest commit matches the receipt.
-      verify_execution(contract, vm_receipt, vm_state)
+      verify_receipt(vm_receipt, vm_state)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))
@@ -271,9 +271,9 @@ export default async function (
       const txdata = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
       const txid   = await client.publish_tx(txdata, true)
 
-      contract = settle_contract(contract, vm_state.stamp, txid)
+      contract = settle_contract(contract, vm_state.updated, txid)
 
-      verify_settlement(contract, vm_state, utxos)
+      verify_settlement(contract, deposits, vm_state)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))

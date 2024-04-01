@@ -8,11 +8,6 @@ import {
   SpendState
 } from './tx.js'
 
-export interface ContractRequest {
-  proposal    : ProposalData
-  signatures ?: string[]
-}
-
 export type ContractStatus =
   'published' |  // Contract is published and awaiting funds.
   'funded'    |  // Contract is funded and awaiting confirmation.
@@ -28,22 +23,15 @@ export type ContractStatus =
 
 export type ContractData = ContractBase & SettleState & SpendState
 
-export type ContractDigest = SettleState & SpendState & {
-  activated  : number | null
-  balance    : number
-  est_txsize : number
-  est_txfee  : number
-  pending    : number
-  status     : ContractStatus
-  total      : number
-  txin_count : number
-  updated_at : number
-}
-
 export type SpendTemplate = [
   label : string,
   txhex : string
 ]
+
+export interface ContractRequest {
+  proposal    : ProposalData
+  signatures ?: string[]
+}
 
 export interface ContractConfig {
   cid        ?: string

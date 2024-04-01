@@ -1,5 +1,4 @@
 import { Literal } from './base.js'
-import { VMData }  from './vm.js'
 
 export interface WitnessTemplate {
   action : string
@@ -21,12 +20,4 @@ export interface WitnessPreImage {
 export interface WitnessData extends WitnessPreImage {
   sigs : string[]
   wid  : string
-}
-
-export interface WitnessReceipt extends VMData {
-  created_at : number
-  hash       : string
-  id         : string
-  pubkey     : string
-  sig        : string
 }

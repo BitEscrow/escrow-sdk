@@ -1,6 +1,7 @@
 /* Global Imports */
 
 import { Buff }            from '@cmdcode/buff'
+import { sha512 }          from '@cmdcode/crypto-tools/hash'
 import { parse_addr }      from '@scrow/tapscript/address'
 import { create_sequence } from '@scrow/tapscript/tx'
 
@@ -28,14 +29,18 @@ import AcctSchema from '../schema/account.js'
 
 /* Local Imports */
 
-import { get_recovery_script }     from './recovery.js'
-import { get_address, get_tapkey, get_utxo_bytes } from './tx.js'
+import { get_recovery_script } from './recovery.js'
+
+import {
+  get_address,
+  get_tapkey,
+  get_utxo_bytes
+} from './tx.js'
 
 import {
   gen_session_token,
   parse_session_token
 } from './session.js'
-import { sha512 } from '@cmdcode/crypto-tools/hash'
 
 /**
  * Create an account request object.

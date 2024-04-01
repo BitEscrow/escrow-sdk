@@ -1,12 +1,8 @@
-import { FundDigest }  from '../deposit.js'
-
-import {
-  ContractData,
-  ContractDigest
-} from '../contract.js'
+import { FundingData }  from '../deposit.js'
+import { ContractData } from '../contract.js'
 
 export interface FundListResponse {
-  funds : FundDigest[]
+  funds : FundingData[]
 }
 
 export interface ContractDataResponse {
@@ -15,16 +11,4 @@ export interface ContractDataResponse {
 
 export interface ContractListResponse {
   contracts : ContractData[]
-}
-
-export interface ContractDigestResponse {
-  contract : ContractDigest
-}
-
-export type ContractStatusResponse = {
-  contract : ContractDigest
-  updated  : true
-} | {
-  contract : undefined
-  updated  : false
 }

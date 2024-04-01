@@ -1,11 +1,11 @@
-import { print_banner }      from '@scrow/test'
-import { client }            from './01_create_client.js'
-import { draft, signatures } from './04_finish_proposal.js'
+import { print_banner } from '@scrow/test'
+import { client }       from './01_create_client.js'
+import { publish_req }  from './04_finish_proposal.js'
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true'
 
 // Deliver proposal and endorsements to server.
-const res = await client.contract.create(draft, signatures)
+const res = await client.contract.create(publish_req)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 

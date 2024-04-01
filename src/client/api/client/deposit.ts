@@ -18,9 +18,7 @@ import {
   RegisterRequest,
   CommitRequest,
   CloseRequest,
-  LockRequest,
-  DepositDigestResponse,
-  DepositStatusResponse
+  LockRequest
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -112,40 +110,6 @@ function read_deposit_api (client : EscrowClient) {
   }
 }
 
-/**
- * Fetch a deposit's status from the server by Id.
- */
-function read_deposit_digest_api (client : EscrowClient) {
-  return async (
-    dpid  : string
-  ) : Promise<ApiResponse<DepositDigestResponse>> => {
-    // Validate the deposit id.
-    assert.is_hash(dpid)
-    // Formulate the request.
-    const host = client.server_url
-    const url  = `${host}/api/deposit/${dpid}/digest`
-    // Return the response.
-    return client.fetcher<DepositDigestResponse>({ url })
-  }
-}
-
-/**
- * Fetch a deposit's status from the server by Id.
- */
-function read_deposit_status_api (client : EscrowClient) {
-  return async (
-    dpid  : string
-  ) : Promise<ApiResponse<DepositStatusResponse>> => {
-    // Validate the deposit id.
-    assert.is_hash(dpid)
-    // Formulate the request.
-    const host = client.server_url
-    const url  = `${host}/api/deposit/${dpid}/status`
-    // Return the response.
-    return client.fetcher<DepositStatusResponse>({ url })
-  }
-}
-
 function list_deposit_api (client : EscrowClient) {
   return async (
     pubkey : string,
@@ -216,8 +180,6 @@ export default function (client : EscrowClient) {
     request  : request_account_api(client),
     register : register_deposit_api(client),
     commit   : commit_deposit_api(client),
-    digest   : read_deposit_digest_api(client),
-    status   : read_deposit_status_api(client),
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     lock     : lock_deposit_api(client),

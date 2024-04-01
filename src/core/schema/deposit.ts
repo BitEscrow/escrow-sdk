@@ -59,10 +59,11 @@ const unconfirmed = z.object({
 
 const deposit_state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 
-const digest = z.object({
+const fund = z.object({
   covenant   : cov.data.nullable(),
   status,
-  updated_at : stamp
+  updated_at : stamp,
+  utxo       : tx.txspend
 }).and(deposit_state).and(spend_state).and(close_state)
 
 const base_data = z.object({
@@ -92,9 +93,9 @@ export default {
   commit_req,
   close_req,
   data,
-  digest,
   deposit_data,
   deposit_state,
+  fund,
   locktime,
   lock_req,
   register_req,

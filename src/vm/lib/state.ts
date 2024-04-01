@@ -124,9 +124,9 @@ function commit_action (
   const head  = state.head
   const step  = state.step + 1
   state.commits.push([ step, stamp, head, hash, action, path ])
-  state.head  = get_hash_tip(step, stamp, head, hash)
-  state.step  = step
-  state.stamp = stamp
+  state.head    = get_hash_tip(step, stamp, head, hash)
+  state.step    = step
+  state.updated = stamp
 }
 
 function validate_path_terms (
@@ -145,7 +145,7 @@ export function check_stamp (
   stamp : number,
   state : VMState
 ) {
-  if (stamp < state.stamp) {
-    throw new Error(`timestamp occurs before latest update: ${stamp} <= ${state.stamp}`)
+  if (stamp < state.updated) {
+    throw new Error(`timestamp occurs before latest update: ${stamp} <= ${state.updated}`)
   }
 }

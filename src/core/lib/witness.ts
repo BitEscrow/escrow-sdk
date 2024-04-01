@@ -12,9 +12,7 @@ import {
   SignerAPI,
   WitnessData,
   WitnessPreImage,
-  WitnessTemplate,
-  WitnessReceipt,
-  VMData
+  WitnessTemplate
 } from '../types/index.js'
 
 export function create_witness (
@@ -66,28 +64,6 @@ export function endorse_witness (
   return sort_record({ ...witness, sigs })
 }
 
-export function create_receipt (
-  data   : VMData,
-  signer : SignerAPI,
-  created_at = now()
-) : WitnessReceipt {
-  const hash   = get_receipt_hash(data)
-  const pubkey = signer.pubkey
-  const id     = get_receipt_id(hash, pubkey, created_at)
-  const sig    = signer.sign(id)
-  return sort_record({ ...data, created_at, hash, id, pubkey, sig })
-}
-
-export function get_receipt_hash (data : VMData) {
-  const err   = Buff.str(data.error  ?? 'null')
-  const head  = Buff.hex(data.head, 32)
-  const out   = Buff.str(data.output ?? 'null')
-  const stamp = Buff.num(data.stamp, 4)
-  const step  = Buff.num(data.step, 4)
-  const vmid  = Buff.hex(data.vmid, 32)
-  return Buff.join([ err, head, out, stamp, step, vmid ]).digest.hex
-}
-
 /**
  * Returns a serialized preimage
  * for signing a witness statement.
@@ -96,15 +72,4 @@ export function get_witness_id (
   preimg : WitnessPreImage
 ) {
   return get_object_id(preimg).hex
-}
-
-export function get_receipt_id (
-  hash   : string,
-  pubkey : string,
-  stamp  : number
-) {
-  const cat = Buff.num(stamp, 4)
-  const dig = Buff.hex(hash, 32)
-  const pub = Buff.hex(pubkey, 32)
-  return Buff.join([ cat, dig, pub ]).digest.hex
 }

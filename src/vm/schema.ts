@@ -1,49 +1,44 @@
 import { z } from 'zod'
 import base  from '@/core/schema/base.js'
 import prop  from '@/core/schema/proposal.js'
+import vm    from '@/core/schema/vm.js'
 
 const { hash, label, literal, num, regex, stamp, str } = base
 
 const commit  = z.tuple([ num, stamp, hash, hash, label, label ])
 const entry   = z.tuple([ hash ]).rest(literal)
-const method  = z.enum([ 'oracle', 'reveal', 'endorse' ])
+const method  = z.enum([ 'endorse' ])
 const path    = z.tuple([ str, num ])
-const program = z.tuple([ hash, label, regex, regex ]).rest(literal)
 const store   = z.tuple([ hash, str ]).array()
 const status  = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
-const config = z.object({
+const data = z.object({
   activated : stamp,
-  cid       : hash,
-  pathnames : label.array(),
-  programs  : prop.programs,
-  schedule  : prop.schedule
+  error     : str.nullable(),
+  head      : hash,
+  output    : label.nullable(),
+  step      : num.max(255),
+  updated   : stamp,
+  vmid      : hash
 })
 
-const data = z.object({
+const state = data.extend({
   commits  : commit.array(),
-  error    : str.nullable(),
-  head     : hash,
-  output   : label.nullable(),
   paths    : path.array(),
-  programs : program.array(),
-  start    : stamp,
-  steps    : num.max(255),
+  programs : vm.program.array(),
   store,
   status,
-  tasks    : prop.schedule,
-  updated  : stamp,
-  vmid     : hash
+  tasks    : prop.schedule
 })
 
 export default {
   commit,
-  config,
   data,
   entry,
   method,
   path,
   regex,
   store,
+  state,
   status
 }

@@ -6,12 +6,12 @@
  * yarn load demo/api/contract/create
  */
 
-import { print_banner }      from '@scrow/test'
-import { client }            from '@scrow/demo/01_create_client.js'
-import { draft, signatures } from '@scrow/demo/04_finish_proposal.js'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { publish_req }  from '@scrow/demo/04_finish_proposal.js'
 
 // Deliver proposal and endorsements to server.
-const res = await client.contract.create(draft, signatures)
+const res = await client.contract.create(publish_req)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.

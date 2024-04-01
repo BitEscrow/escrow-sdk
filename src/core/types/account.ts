@@ -10,6 +10,13 @@ import { TxOutput } from './tx.js'
 
 import { CovenantData, SessionToken } from './covenant.js'
 
+export interface AccountRequest {
+  deposit_pk  : string
+  locktime    : number
+  network     : Network
+  return_addr : string
+}
+
 export interface AccountContext {
   deposit_addr : string
   deposit_pk   : string
@@ -20,13 +27,6 @@ export interface AccountContext {
   sequence     : number
   session      : SessionToken
   tap_data     : TapContext
-}
-
-export interface AccountRequest {
-  deposit_pk  : string
-  locktime    : number
-  network     : Network
-  return_addr : string
 }
 
 export interface AccountData {

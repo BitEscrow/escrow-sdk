@@ -33,7 +33,7 @@ export function run_schedule (
   for (const task of tasks) {
     const [ ts, actions, paths ] = task
     const stamp = state.activated + ts
-    const prev  = state.stamp
+    const prev  = state.updated
     if (prev <= stamp && stamp <= marker) {
       debug('[vm] running task:', task)
       run_task(actions, paths, stamp, state)
@@ -75,6 +75,6 @@ function get_tasks (
    * Filters tasks that fall within
    * the current vm schedule.
    */
-  const { activated, stamp } = state
-  return state.tasks.filter(e => e[0] + activated > stamp)
+  const { activated, updated } = state
+  return state.tasks.filter(e => e[0] + activated > updated)
 }

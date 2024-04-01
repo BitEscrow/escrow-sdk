@@ -99,7 +99,7 @@ export function init_vm (config : VMConfig) : VMState {
   const paths    = init_paths(config.pathnames, config.programs)
   const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e.prog_id))
-  const stamp    = config.activated
+  const updated  = config.activated
   const tasks    = init_tasks(config.schedule)
-  return sort_record({ ...GET_INIT_STATE(), activated, head, paths, programs, stamp, store, tasks, vmid })
+  return sort_record({ ...GET_INIT_STATE(), activated, head, paths, programs, store, tasks, updated, vmid })
 }

@@ -41,6 +41,10 @@
       "import": "./dist/client/index.js",
       "types": "./dist/client/index.d.ts"
     },
+    "./cvm": {
+      "import": "./dist/vm/index.js",
+      "types": "./dist/vm/index.d.ts"
+    },
     "./contract": {
       "import": "./dist/core/lib/contract.js",
       "types": "./dist/core/lib/contract.d.ts"
@@ -102,8 +106,8 @@
       "types": "./dist/core/validators/index.d.ts"
     },
     "./vm": {
-      "import": "./dist/vm/index.js",
-      "types": "./dist/vm/index.d.ts"
+      "import": "./dist/core/lib/vm.js",
+      "types": "./dist/core/lib/vm.d.ts"
     },
     "./witness": {
       "import": "./dist/core/lib/witness.js",

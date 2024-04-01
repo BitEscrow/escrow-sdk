@@ -11,13 +11,12 @@ export type DepositData   = DepositInfo & DepositState & SettleState & SpendStat
 export type DepositState  = DepositConfirmed | DepositUnconfirmed
 export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
-export type DepositDigest = DepositState & SettleState & SpendState & {
+export type FundingData = DepositState & SettleState & SpendState & {
   covenant   : CovenantData | null
   status     : DepositStatus
   updated_at : number
+  utxo       : TxOutput
 }
-
-export type FundDigest = DepositDigest & TxOutput
 
 export interface LockRequest {
   dpid     : string

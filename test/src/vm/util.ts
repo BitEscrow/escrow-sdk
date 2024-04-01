@@ -17,7 +17,7 @@ import {
   WitnessData,
 } from '@scrow/sdk/core'
 
-import { VirtualMachine } from '@scrow/sdk/vm'
+import { VirtualMachine } from '@scrow/sdk/cvm'
 
 interface MemberSigner {
   alias  : string

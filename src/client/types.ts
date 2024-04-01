@@ -4,6 +4,7 @@ import { Bytes }      from '@cmdcode/buff'
 import {
   Network,
   ProgramEntry,
+  ProposalData,
   ServerPolicy,
   VirtualMachineAPI
 } from '@/core/types/index.js'
@@ -55,21 +56,23 @@ export interface RolePolicy {
   programs  : ProgramEntry[]
 }
 
-// export interface CredentialAPI extends SignerAPI {
-//   // TODO: Streamline this API into SignerAPI and make it async.
-//   backup    : (password : Bytes) => Bytes
-//   get_id    : (id : Bytes) => CredentialAPI
-//   gen_cred  : (idx : number, xpub : string) => CredentialData
-//   gen_token : (content : string) => string
-//   hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
-// }
+export type MemberEntry = [
+  mship  : string,
+  pol_id : string,
+  sig   ?: string
+]
 
-// export interface CredentialData {
-//   id   : string
-//   pub  : string
-//   sig  : string
-//   xpub : string
-// }
+export interface MemberData {
+  hid  : string
+  pub  : string
+  xpub : string
+}
+
+export interface DraftSession {
+  proposal : ProposalData
+  members  : MemberEntry[]
+  roles    : RolePolicy[]
+}
 
 export interface WalletAPI {
   xpub : string

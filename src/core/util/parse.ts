@@ -4,7 +4,9 @@ import {
   DepositData,
   ProposalData,
   CovenantData,
-  WitnessData
+  WitnessData,
+  ProgramData,
+  FundingData
 } from '../types/index.js'
 
 import CoreSchema from '../schema/index.js'
@@ -37,6 +39,18 @@ export function parse_deposit (
   deposit : unknown
 ) : DepositData {
   return CoreSchema.deposit.data.parse(deposit)
+}
+
+export function parse_fund (
+  deposit : unknown
+) : FundingData {
+  return CoreSchema.deposit.fund.parse(deposit)
+}
+
+export function parse_program (
+  program : unknown
+) : ProgramData {
+  return CoreSchema.vm.program.parse(program)
 }
 
 export function parse_proposal (

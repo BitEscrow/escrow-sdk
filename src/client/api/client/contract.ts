@@ -13,9 +13,7 @@ import {
   ContractDataResponse,
   ContractListResponse,
   FundListResponse,
-  ContractDigestResponse,
-  ContractStatusResponse,
-  ProposalData
+  ContractRequest
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -29,11 +27,11 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    proposal   : ProposalData,
-    signatures : string[]
+    request : ContractRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
-    const { machine, server_pol } = client
+    const { machine, server_pol }  = client
+    const { proposal, signatures } = request
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
@@ -70,42 +68,6 @@ function read_contract_api (client : EscrowClient) {
     const url  = `${host}/api/contract/${cid}`
     // Return the response.
     return client.fetcher<ContractDataResponse>({ url })
-  }
-}
-
-/**
- * Return a list of committed deposits
- * that are associated with the contract.
- */
-function read_contract_digest_api (client : EscrowClient) {
-  return async (
-    cid : string
-  ) : Promise<ApiResponse<ContractDigestResponse>> => {
-    // Validate the contract id.
-    assert.is_hash(cid)
-    // Formulate the request.
-    const host = client.server_url
-    const url  = `${host}/api/contract/${cid}/digest`
-    // Return the response.
-    return client.fetcher<ContractDigestResponse>({ url })
-  }
-}
-
-/**
- * Return a list of committed deposits
- * that are associated with the contract.
- */
-function read_contract_status_api (client : EscrowClient) {
-  return async (
-    cid : string
-  ) : Promise<ApiResponse<ContractStatusResponse>> => {
-    // Validate the contract id.
-    assert.is_hash(cid)
-    // Formulate the request.
-    const host = client.server_url
-    const url  = `${host}/api/contract/${cid}/status`
-    // Return the response.
-    return client.fetcher<ContractStatusResponse>({ url })
   }
 }
 
@@ -178,10 +140,8 @@ export default function (client : EscrowClient) {
   return {
     cancel : cancel_contract_api(client),
     create : create_contract_api(client),
-    digest : read_contract_digest_api(client),
     funds  : list_funds_api(client),
     list   : list_contract_api(client),
-    read   : read_contract_api(client),
-    status : read_contract_status_api(client)
+    read   : read_contract_api(client)
   }
 }

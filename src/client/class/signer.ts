@@ -19,7 +19,7 @@ import {
 import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
-import proposal_api from '../api/signer/proposal.js'
+import proposal_api from '../api/signer/draft.js'
 import witness_api  from '../api/signer/witness.js'
 
 import ClientSchema  from '../schema.js'

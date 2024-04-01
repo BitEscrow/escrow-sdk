@@ -18,30 +18,24 @@ import {
   create_spend_templates,
   get_contract_id,
   get_spend_template,
-  get_vm_id
+  tabulate_funds
 } from '../lib/contract.js'
 
 import {
   ContractData,
   ContractRequest,
+  FundingData,
   ProposalData,
   ServerPolicy,
-  TxOutput,
   VMData,
-  VirtualMachineAPI,
-  WitnessReceipt
+  VirtualMachineAPI
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
 
 /* Local Imports */
 
-import {
-  validate_proposal,
-  verify_proposal
-} from './proposal.js'
-
-import { verify_receipt } from './witness.js'
+import { validate_proposal, verify_proposal } from './proposal.js'
 
 export function validate_contract (
   contract : unknown
@@ -99,49 +93,55 @@ export function verify_publishing (
   verify_contract(contract)
 }
 
-export function verify_activation (
+export function verify_funding (
   contract : ContractData,
-  state    : VMData
+  funds    : FundingData[]
 ) {
-  const { activated, cid } = contract
-  assert.ok(activated !== null,            'contract activated date is null')
-  const vmid = get_vm_id(cid, activated)
-  assert.ok(vmid !== null,                 'contract vmid is null')
-  assert.ok(activated === state.activated, 'contract activated date does not match vm')
-  assert.ok(vmid === state.vmid,           'contract vmid does not match vm')
+  const { fund_count, fund_pend, fund_value, tx_fees, tx_total, tx_vsize } = contract
+  const tab    = tabulate_funds(contract, funds)
+  const vtotal = fund_pend + fund_value
+  assert.ok(fund_count === tab.fund_count, 'tabulated funds count does not match contract')
+  assert.ok(vtotal     === tab.fund_value, 'tabulated funds value does not match contract')
+  assert.ok(tx_fees    === tab.tx_fees,    'tabulated tx fees does not match contract')
+  assert.ok(tx_total   === tab.tx_total,   'tabulated tx total does not match contract')
+  assert.ok(tx_vsize   === tab.tx_vsize,   'tabulated tx size does not match contract')
 }
 
-export function verify_execution (
+export function verify_activation (
   contract : ContractData,
-  receipt  : WitnessReceipt,
-  result   : VMData
+  vmstate  : VMData
 ) {
-  // Verify the activation of the vm.
-  verify_activation(contract, result)
-  // Verify the final vm state with the receipt.
-  verify_receipt(receipt, result)
+  const { activated, expires_at } = contract
+  assert.ok(activated !== null,              'contract activated date is null')
+  assert.ok(activated === vmstate.activated, 'contract activated date does not match vm')
+  const expires_chk = activated + contract.terms.duration
+  assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
 
 export function verify_settlement (
   contract   : ContractData,
-  result     : VMData,
-  utxos      : TxOutput[]
+  funds      : FundingData[],
+  result     : VMData
 ) {
   // Unpack the contract object.
   const { spent_at, spent_txid } = contract
   // Assert the spent timestamp and txid exists.
   assert.ok(spent_at !== null,   'contract spent_at is null')
   assert.ok(spent_txid !== null, 'contract spent_txid is null')
+  // Verify contract funds.
+  verify_funding(contract, funds)
   // Verify the activation of the vm.
   verify_activation(contract, result)
   // Run the vm up to the final timestamp.
-  assert.ok(result.stamp === spent_at, 'contract spent_at does not match vm result')
+  assert.ok(result.updated === spent_at, 'contract spent_at does not match vm result')
   // Assert the state output is not null.
   assert.ok(result.output !== null, 'result vm output is null')
   // Get the spend template for the provided output.
   const output = get_spend_template(result.output, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
+  // Collect utxos from funds.
+  const utxos = funds.map(e => e.utxo)
   // Add each utxo to the txdata object.
   for (const utxo of utxos) {
     const vin = create_txinput(utxo)

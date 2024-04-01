@@ -17,6 +17,7 @@ import {
 import contract_api  from '../api/client/contract.js'
 import deposit_api   from '../api/client/deposit.js'
 import oracle_api    from '../api/client/oracle.js'
+import proposal_api  from '../api/client/draft.js'
 import server_api    from '../api/client/server.js'
 import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
@@ -66,6 +67,7 @@ export class EscrowClient {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   oracle   = oracle_api(this)
+  proposal = proposal_api(this)
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)

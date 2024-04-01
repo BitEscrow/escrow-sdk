@@ -52,14 +52,17 @@ export interface ProgMethodAPI {
   verify : ProgramVerify
 }
 
-export interface VMState {
+interface VMData {
   activated : number          // Timestamp for when the VM was initialized.
   error     : string | null   // Error output of the VM.
   head      : string          // Current head of the commit-chain.
   output    : string | null   // Standard output of the VM.
-  stamp     : number          // Timestamp for when the VM was last updated.
   step      : number          // Counts the number of commits to the VM.
+  updated   : number          // Timestamp for when the VM was last updated.
   vmid      : string          // The virtual machine identifier.
+}
+
+export interface VMState extends VMData {
   commits   : CommitEntry[]   // List of commits to the VM.
   paths     : StateEntry[]    // List of spend paths and their current state.
   programs  : ProgramData[]   // List of programs available in the VM.
