@@ -8,7 +8,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 import { endorse_proposal } from '@scrow/sdk/proposal'
 import { assert, now }      from '@scrow/sdk/util'
-import { VirtualMachine }   from '@scrow/sdk/cvm'
+import { CVM }              from '@scrow/sdk/cvm'
 
 import {
   DepositData,
@@ -104,7 +104,7 @@ export default async function (
 
       const proposal   = await get_proposal(members)
       // Verify the proposal
-      verify_proposal(VirtualMachine, server_pol, proposal)
+      verify_proposal(CVM, server_pol, proposal)
       // Have each member endorse the proposal.
       const signatures = members.map(e => endorse_proposal(proposal, e.signer))
 
@@ -120,7 +120,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_contract_req(proposal, signatures)
       // Server: Verify contract request.
-      verify_contract_req(VirtualMachine, server_pol, pub_req)
+      verify_contract_req(CVM, server_pol, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, server_pol, pub_req, server_sd)
       // Client: Verify contract data.
@@ -203,7 +203,7 @@ export default async function (
       contract = activate_contract(contract)
 
       const vm_config = get_vm_config(contract)
-      let   vm_state  = VirtualMachine.init(vm_config)
+      let   vm_state  = CVM.init(vm_config)
 
       if (VERBOSE) {
         console.log(banner('active contract'))
@@ -240,7 +240,7 @@ export default async function (
         t.pass('witness ok')
       }
 
-      vm_state = VirtualMachine.eval(vm_state, witness)
+      vm_state = CVM.eval(vm_state, witness)
 
       if (vm_state.error !== null) {
         throw new Error(vm_state.error)
@@ -264,7 +264,7 @@ export default async function (
 
       const settled_at = now() + 8000
 
-      vm_state = VirtualMachine.run(vm_state, settled_at)
+      vm_state = CVM.run(vm_state, settled_at)
 
       assert.exists(vm_state.output)
 

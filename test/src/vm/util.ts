@@ -17,7 +17,7 @@ import {
   WitnessData,
 } from '@scrow/sdk/core'
 
-import { VirtualMachine } from '@scrow/sdk/cvm'
+import { CVM } from '@scrow/sdk/cvm'
 
 interface MemberSigner {
   alias  : string
@@ -89,12 +89,12 @@ export function run_vm (
   timeout    : number
 ) : VMData {
   const marker = config.activated + timeout
-  let   state  = VirtualMachine.init(config)
+  let   state  = CVM.init(config)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:
   for (const witness of statements) {
     // Evaluate the witness statement.
-    state = VirtualMachine.eval(state, witness)
+    state = CVM.eval(state, witness)
     // Unpack the current state results:
     const { error, output } = state
     // If there's an error or result, return.
@@ -103,5 +103,5 @@ export function run_vm (
     }
   }
   // If the vm is still running, eval the timestamp.
-  return VirtualMachine.run(state, marker)
+  return CVM.run(state, marker)
 }

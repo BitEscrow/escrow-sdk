@@ -101,6 +101,7 @@ export function verify_session (
   // verify enrollment
   // verify signatures
   console.log(session)
+  throw new Error('not implemented')
 }
 
 export function publish_session (
@@ -126,6 +127,9 @@ export const DraftUtil = {
   create  : create_session,
   decode  : decode_session,
   encode  : encode_session,
+  endorse : endorse_session,
+  join    : join_session,
+  leave   : leave_session,
   publish : publish_session,
   verify  : verify_session
 }
