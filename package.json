@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -25,25 +25,21 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./account": {
-      "import": "./dist/core/lib/account.js",
-      "types": "./dist/core/lib/account.d.ts"
-    },
-    "./assert": {
-      "import": "./dist/assert.js",
-      "types": "./dist/assert.d.ts"
+    "./client": {
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
     },
     "./core": {
       "import": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
     },
-    "./client": {
-      "import": "./dist/client/index.js",
-      "types": "./dist/client/index.d.ts"
-    },
     "./cvm": {
       "import": "./dist/vm/index.js",
       "types": "./dist/vm/index.d.ts"
+    },
+    "./account": {
+      "import": "./dist/core/lib/account.js",
+      "types": "./dist/core/lib/account.d.ts"
     },
     "./contract": {
       "import": "./dist/core/lib/contract.js",
@@ -57,21 +53,9 @@
       "import": "./dist/core/lib/deposit.js",
       "types": "./dist/core/lib/deposit.d.ts"
     },
-    "./member": {
-      "import": "./dist/client/lib/member.js",
-      "types": "./dist/client/lib/member.d.ts"
-    },
     "./oracle": {
       "import": "./dist/core/lib/oracle.js",
       "types": "./dist/core/lib/oracle.d.ts"
-    },
-    "./parse": {
-      "import": "./dist/core/lib/parse.js",
-      "types": "./dist/core/lib/parse.d.ts"
-    },
-    "./policy": {
-      "import": "./dist/client/lib/policy.js",
-      "types": "./dist/client/lib/policy.d.ts"
     },
     "./proposal": {
       "import": "./dist/core/lib/proposal.js",
@@ -89,21 +73,9 @@
       "import": "./dist/core/lib/session.js",
       "types": "./dist/core/lib/session.d.ts"
     },
-    "./settlement": {
-      "import": "./dist/core/lib/settlement.js",
-      "types": "./dist/core/lib/settlement.d.ts"
-    },
     "./tx": {
       "import": "./dist/core/lib/tx.js",
       "types": "./dist/core/lib/tx.d.ts"
-    },
-    "./util": {
-      "import": "./dist/core/util/index.js",
-      "types": "./dist/core/util/index.d.ts"
-    },
-    "./validate": {
-      "import": "./dist/core/validators/index.js",
-      "types": "./dist/core/validators/index.d.ts"
     },
     "./vm": {
       "import": "./dist/core/lib/vm.js",
@@ -112,6 +84,18 @@
     "./witness": {
       "import": "./dist/core/lib/witness.js",
       "types": "./dist/core/lib/witness.d.ts"
+    },
+    "./schema": {
+      "import": "./dist/core/schema/index.js",
+      "types": "./dist/core/schema/index.d.ts"
+    },
+    "./util": {
+      "import": "./dist/core/util/index.js",
+      "types": "./dist/core/util/index.d.ts"
+    },
+    "./validate": {
+      "import": "./dist/core/validators/index.js",
+      "types": "./dist/core/validators/index.d.ts"
     }
   },
   "scripts": {
