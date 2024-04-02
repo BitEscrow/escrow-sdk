@@ -27,9 +27,10 @@
     "MULTISIG_MAX"  : 27,
     "TIMEOUT_MIN"   : 3600,
     "TIMEOUT_MAX"   : 86400,
-    "TIMEOUT_DEF"   : 7200,
-    "VALID_ACTIONS" : [ "close", "dispute", "resolve", "lock", "unlock" ],
-    "VALID_METHODS" : [ "endorse" ]
+    "TIMEOUT_DEF"   : 7200
+  },
+  "vm" : {
+    "VALID_MACHINES" : [ "CVM" ]
   },
   "witness": {
     "UPDATE_IVAL"   : 512

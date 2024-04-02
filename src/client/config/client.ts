@@ -1,5 +1,5 @@
 import { ServerConfig } from '@/core/types/index.js'
-import { CVM }          from '@/vm/index.js'
+import CVM              from '@/vm/index.js'
 
 import { SignerConfig }   from '../types.js'
 import DefaultConfig      from '../config/server.json' assert { type : 'json' }

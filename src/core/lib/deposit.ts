@@ -28,7 +28,6 @@ import DepositSchema from '../schema/deposit.js'
 
 import { create_covenant }    from './covenant.js'
 import { create_return_psig } from './return.js'
-import { parse_timelock }     from './tx.js'
 
 import { get_account_ctx, get_deposit_hash } from './account.js'
 
@@ -187,17 +186,15 @@ export function get_deposit_id (
  * using transaction data from an oracle.
  */
 export function get_spend_state (
-  sequence : number,
+  locktime : number,
   txstatus : OracleTxStatus
 ) {
   // Initialize our spent state.
   let state : DepositState = GET_INIT_SPEND_STATE()
   // If transaction is confirmed:
   if (txstatus !== undefined && txstatus.confirmed) {
-    // Parse the sequence value back into a timelock.
-    const timelock   = parse_timelock(sequence)
     // Get the expiration date for the timelock.
-    const expires_at = txstatus.block_time + timelock
+    const expires_at = txstatus.block_time + locktime
     // Update the expiration date for the spend state.
     state  = { ...txstatus, expires_at }
   }

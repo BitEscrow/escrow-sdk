@@ -4,7 +4,7 @@ import { assert, sleep } from '@/core/util/index.js'
 
 import {
   broadcast_tx,
-  fee_estimates,
+  get_fee_estimates,
   get_fee_target,
   get_utxo_data,
   get_tx_data,
@@ -29,7 +29,7 @@ function broadcast_tx_api (client : EscrowClient) {
 
 function fee_estimates_api (client : EscrowClient) {
   return async () => {
-    return fee_estimates(client.oracle_url)
+    return get_fee_estimates(client.oracle_url)
   }
 }
 

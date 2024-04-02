@@ -170,7 +170,7 @@ export async function broadcast_tx (
 /**
  * Fetch a range of fee estimates from the oracle.
  */
-export async function fee_estimates (
+export async function get_fee_estimates (
   host : string
 ) : Promise<OracleFeeEstimate> {
   // Define the url to use for fetching.
@@ -196,7 +196,7 @@ export async function get_fee_target (
   target : number
 ) : Promise<number> {
   // Fetch an array of quotes from the oracle.
-  const quotes  = await fee_estimates(host)
+  const quotes  = await get_fee_estimates(host)
   // Convert target height to an index.
   const index   = String(target)
   // Retrieve a specific quote based on index.

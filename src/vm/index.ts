@@ -13,7 +13,7 @@ export * as VMSchema from './schema.js'
 
 export * from './types.js'
 
-export const CVM = {
+export default {
   VALID_ACTIONS,
   VALID_METHODS,
   check : check_params,

@@ -8,7 +8,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 import { endorse_proposal } from '@scrow/sdk/proposal'
 import { assert, now }      from '@scrow/sdk/util'
-import { CVM }              from '@scrow/sdk/cvm'
+import CVM                  from '@scrow/sdk/cvm'
 
 import {
   DepositData,

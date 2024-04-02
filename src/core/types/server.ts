@@ -17,19 +17,20 @@ export interface ServerPolicy {
     UPDATE_IVAL   : number
   }
   proposal : {
-    DEADLINE_MIN  : number
-    DEADLINE_MAX  : number
-    DEADLINE_DEF  : number
-    DURATION_MIN  : number
-    DURATION_MAX  : number
-    DURATION_DEF  : number
-    EFFECTIVE_MAX : number
-    MULTISIG_MAX  : number
-    TIMEOUT_MIN   : number
-    TIMEOUT_MAX   : number
-    TIMEOUT_DEF   : number
-    VALID_ACTIONS : string[]
-    VALID_METHODS : string[]
+    DEADLINE_MIN   : number
+    DEADLINE_MAX   : number
+    DEADLINE_DEF   : number
+    DURATION_MIN   : number
+    DURATION_MAX   : number
+    DURATION_DEF   : number
+    EFFECTIVE_MAX  : number
+    MULTISIG_MAX   : number
+    TIMEOUT_MIN    : number
+    TIMEOUT_MAX    : number
+    TIMEOUT_DEF    : number
+  }
+  vm : {
+    VALID_MACHINES : string[]
   }
   witness : {
     UPDATE_IVAL   : number

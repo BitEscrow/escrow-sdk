@@ -17,7 +17,7 @@ import {
   WitnessData,
 } from '@scrow/sdk/core'
 
-import { CVM } from '@scrow/sdk/cvm'
+import CVM from '@scrow/sdk/cvm'
 
 interface MemberSigner {
   alias  : string
