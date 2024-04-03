@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -90,8 +90,8 @@
       "types": "./dist/core/util/index.d.ts"
     },
     "./validate": {
-      "import": "./dist/core/validators/index.js",
-      "types": "./dist/core/validators/index.d.ts"
+      "import": "./dist/core/validation/index.js",
+      "types": "./dist/core/validation/index.d.ts"
     }
   },
   "scripts": {
