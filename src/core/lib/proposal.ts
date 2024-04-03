@@ -21,18 +21,22 @@ import {
   ProposalTemplate
 } from '../types/index.js'
 
+import * as CONST from '../const.js'
+
 type PathTotal = [ path: string, total : number ]
 
 const GET_DEFAULT_PROP = () => {
   return {
     content    : '',
     created_at : now(),
-    network    : 'signet',
-    members    : [],
+    deadline   : CONST.DEADLINE_DEFAULT,
+    duration   : CONST.DURATION_DEFAULT,
+    machine    : CONST.MACHINE_DEFAULT,
     paths      : [],
     payments   : [],
     programs   : [],
     schedule   : [],
+    txtimeout  : CONST.TXTIMEOUT_DEFAULT,
     version    : 1
   }
 }

@@ -10,27 +10,26 @@
     "UPDATE_IVAL"   : 512
   },
   "deposit": {
-    "FEERATE_MIN"   : 1,
-    "FEERATE_MAX"   : 500,
-    "GRACE_PERIOD"  : 86400,
-    "LOCK_FEE_FLAT" : 0,
-    "UPDATE_IVAL"   : 512
+    "FEERATE_MIN"    : 1,
+    "FEERATE_MAX"    : 500,
+    "FEE_TARGET_DEF" : 120,
+    "GRACE_PERIOD"   : 86400,
+    "UPDATE_IVAL"    : 512
   },
   "proposal": {
-    "DEADLINE_MIN"  : 7200,
-    "DEADLINE_MAX"  : 2592000,
-    "DEADLINE_DEF"  : 21600,
-    "DURATION_MIN"  : 7200,
-    "DURATION_MAX"  : 2592000,
-    "DURATION_DEF"  : 7200,
-    "EFFECTIVE_MAX" : 172800,
-    "MULTISIG_MAX"  : 27,
-    "TIMEOUT_MIN"   : 3600,
-    "TIMEOUT_MAX"   : 86400,
-    "TIMEOUT_DEF"   : 7200
+    "FEERATE_MIN"    : 1,
+    "FEERATE_MAX"    : 500,
+    "DEADLINE_MIN"   : 7200,
+    "DEADLINE_MAX"   : 2592000,
+    "DURATION_MIN"   : 7200,
+    "DURATION_MAX"   : 2592000,
+    "EFFECTIVE_MAX"  : 172800,
+    "MULTISIG_MAX"   : 27,
+    "TXTIMEOUT_MIN"  : 3600,
+    "TXTIMEOUT_MAX"  : 86400
   },
   "vm" : {
-    "VALID_MACHINES" : [ "CVM" ]
+    "VALID_MACHINES" : [ "cvm" ]
   },
   "witness": {
     "UPDATE_IVAL"   : 512

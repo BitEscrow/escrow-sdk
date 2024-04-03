@@ -51,6 +51,7 @@ const base_data = z.object({
   total      : num,
   tx_fees    : num,
   tx_total   : num,
+  tx_bsize   : num,
   tx_vsize   : num,
   updated_at : stamp
 })

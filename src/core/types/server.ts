@@ -13,21 +13,19 @@ export interface ServerPolicy {
     FEERATE_MIN   : number
     FEERATE_MAX   : number
     GRACE_PERIOD  : number
-    LOCK_FEE_FLAT : number
     UPDATE_IVAL   : number
   }
   proposal : {
-    DEADLINE_MIN   : number
-    DEADLINE_MAX   : number
-    DEADLINE_DEF   : number
-    DURATION_MIN   : number
-    DURATION_MAX   : number
-    DURATION_DEF   : number
-    EFFECTIVE_MAX  : number
-    MULTISIG_MAX   : number
-    TIMEOUT_MIN    : number
-    TIMEOUT_MAX    : number
-    TIMEOUT_DEF    : number
+    FEERATE_MIN   : number
+    FEERATE_MAX   : number
+    DEADLINE_MIN  : number
+    DEADLINE_MAX  : number
+    DURATION_MIN  : number
+    DURATION_MAX  : number
+    EFFECTIVE_MAX : number
+    MULTISIG_MAX  : number
+    TXTIMEOUT_MIN : number
+    TXTIMEOUT_MAX : number
   }
   vm : {
     VALID_MACHINES : string[]

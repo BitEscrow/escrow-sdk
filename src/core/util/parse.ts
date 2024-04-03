@@ -6,7 +6,8 @@ import {
   CovenantData,
   WitnessData,
   ProgramData,
-  FundingData
+  FundingData,
+  ServerPolicy
 } from '../types/index.js'
 
 import CoreSchema from '../schema/index.js'
@@ -57,6 +58,12 @@ export function parse_proposal (
   proposal : unknown
 ) : ProposalData {
   return CoreSchema.proposal.data.parse(proposal)
+}
+
+export function parse_server_policy (
+  policy : unknown
+) : ServerPolicy {
+  return CoreSchema.server.policy.parse(policy)
 }
 
 export function parse_witness (

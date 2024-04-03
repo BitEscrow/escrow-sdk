@@ -16,33 +16,33 @@ const contract = z.object({
 })
 
 const deposit = z.object({
-  FEERATE_MIN   : num,
-  FEERATE_MAX   : num,
-  GRACE_PERIOD  : num,
-  LOCK_FEE_FLAT : num,
-  UPDATE_IVAL   : num
+  FEERATE_MIN  : num,
+  FEERATE_MAX  : num,
+  GRACE_PERIOD : num,
+  UPDATE_IVAL  : num
 })
 
 const proposal = z.object({
+  FEERATE_MIN   : num,
+  FEERATE_MAX   : num,
   DEADLINE_MIN  : num,
   DEADLINE_MAX  : num,
-  DEADLINE_DEF  : num,
   DURATION_MIN  : num,
   DURATION_MAX  : num,
-  DURATION_DEF  : num,
   EFFECTIVE_MAX : num,
   MULTISIG_MAX  : num,
-  TIMEOUT_MIN   : num,
-  TIMEOUT_MAX   : num,
-  TIMEOUT_DEF   : num,
-  VALID_ACTIONS : str.array(),
-  VALID_METHODS : str.array()
+  TXTIMEOUT_MIN : num,
+  TXTIMEOUT_MAX : num
+})
+
+const vm = z.object({
+  VALID_MACHINES : str.array()
 })
 
 const witness = z.object({
   UPDATE_IVAL : num
 })
 
-const policy = z.object({ account, contract, deposit, proposal, witness })
+const policy = z.object({ account, contract, deposit, proposal, vm, witness })
 
 export default { account, contract, deposit, policy, proposal, witness }

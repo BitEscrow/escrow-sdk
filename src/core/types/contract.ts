@@ -67,6 +67,7 @@ export interface ContractBase {
   terms      : ProposalData
   tx_fees    : number
   tx_total   : number
+  tx_bsize   : number
   tx_vsize   : number
   updated_at : number
 }

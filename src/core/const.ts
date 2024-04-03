@@ -11,3 +11,8 @@ export const SPEND_TXIN_BASE_SIZE = 41
 export const SPEND_TXIN_WIT_VSIZE = 18 // 67 / 4
 //
 export const SPEND_TXIN_SIZE = SPEND_TXIN_BASE_SIZE + SPEND_TXIN_WIT_VSIZE
+//
+export const DEADLINE_DEFAULT  = 7200
+export const DURATION_DEFAULT  = 7200
+export const TXTIMEOUT_DEFAULT = 7200
+export const MACHINE_DEFAULT   = 'cvm'

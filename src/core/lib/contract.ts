@@ -17,7 +17,6 @@ import {
   FundingData,
   PaymentEntry,
   ProposalData,
-  ServerPolicy,
   SignerAPI,
   SpendTemplate
 } from '../types/index.js'
@@ -64,18 +63,15 @@ export function create_contract_req (
  */
 export function create_contract (
   config  : ContractConfig,
-  policy  : ServerPolicy,
   request : ContractRequest,
   signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.
   const { fees } = config
-  //
-  const { DEADLINE_DEF } = policy.proposal
   // Unpack request object.
   const { proposal, signatures = [] } = request
   // Define or create the contract outputs.
-  const feerate    = config.feerate   ?? request.proposal.feerate
+  const feerate    = config.feerate   ?? proposal.feerate
   // Define the funding input txfee.
   const fund_txfee = feerate * SPEND_TXIN_SIZE
   // Define or create the contract outputs.
@@ -89,15 +85,15 @@ export function create_contract (
   // Calculate the subtotal.
   const subtotal   = proposal.value + get_pay_total(fees)
   // Calculate the vout size of the tx output.
-  const tx_vsize   = get_max_vout_size(outputs)
-  // Calculate the transaction fee.
-  const tx_fees    =  tx_vsize * feerate
+  const tx_bsize   = get_max_vout_size(outputs)
+  // Calculate the fee rate of the contract tx.
+  const tx_fees    = tx_bsize * feerate
   // Return a completed contract.
   return sort_record({
     ...CONTRACT_DEFAULTS(),
     cid,
     fees,
-    deadline   : get_deadline(proposal, published, DEADLINE_DEF),
+    deadline   : get_deadline(proposal, published),
     feerate,
     fund_txfee,
     moderator  : request.proposal.moderator ?? null,
@@ -111,7 +107,8 @@ export function create_contract (
     subtotal,
     terms      : proposal,
     tx_fees,
-    tx_vsize,
+    tx_bsize,
+    tx_vsize   : tx_bsize,
     tx_total   : subtotal + tx_fees,
     updated_at : published
   })
@@ -181,11 +178,10 @@ export function get_contract_id (
  */
 function get_deadline (
   proposal  : ProposalData,
-  published : number,
-  defaults  : number
+  published : number
 ) {
   // Unpack the proposal object.
-  const { deadline = defaults, effective } = proposal
+  const { deadline, effective } = proposal
   // If an effective date is set:
   if (effective !== undefined) {
     // Return remaining time until effective date.

@@ -123,29 +123,29 @@ function check_stamps (
   proposal : ProposalData
 ) {
   const { effective, duration } = proposal
-  const pol      = policy.proposal
   const current  = now()
-  const deadline = proposal.deadline ?? pol.DEADLINE_DEF
+  const deadline = proposal.deadline
+  const terms    = policy.proposal
 
-  if (duration < pol.DURATION_MIN) {
-    throw new Error(`The specified contract duration is below the minimum allowed: ${duration} < ${pol.DURATION_MIN}`)
+  if (duration < terms.DURATION_MIN) {
+    throw new Error(`The specified contract duration is below the minimum allowed: ${duration} < ${terms.DURATION_MIN}`)
   }
 
-  if (duration > pol.DURATION_MAX) {
-    throw new Error(`The specified contract duration is above the maximum allowed: ${duration} > ${pol.DURATION_MAX}`)
+  if (duration > terms.DURATION_MAX) {
+    throw new Error(`The specified contract duration is above the maximum allowed: ${duration} > ${terms.DURATION_MAX}`)
   }
 
-  if (deadline < pol.DEADLINE_MIN) {
-    throw new Error(`The specified funding deadline is below the minimum allowed: ${deadline} < ${pol.DEADLINE_MIN}`)
+  if (deadline < terms.DEADLINE_MIN) {
+    throw new Error(`The specified funding deadline is below the minimum allowed: ${deadline} < ${terms.DEADLINE_MIN}`)
   }
 
-  if (deadline > pol.DEADLINE_MAX) {
-    throw new Error(`The specified funding deadline is above the maximum allowed: ${deadline} > ${pol.DEADLINE_MAX}`)
+  if (deadline > terms.DEADLINE_MAX) {
+    throw new Error(`The specified funding deadline is above the maximum allowed: ${deadline} > ${terms.DEADLINE_MAX}`)
   }
 
   if (typeof effective === 'number') {
-    const EFFECT_MIN = current + (deadline ?? pol.DEADLINE_DEF)
-    const EFFECT_MAX = current + pol.EFFECTIVE_MAX
+    const EFFECT_MIN = current + deadline
+    const EFFECT_MAX = current + terms.EFFECTIVE_MAX
     if (effective < EFFECT_MIN) {
       throw new Error(`The specified effective date does not leave enough time for the funding deadline: ${effective} < ${EFFECT_MIN}`)
     }

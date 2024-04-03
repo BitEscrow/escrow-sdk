@@ -14,11 +14,11 @@ const schedule = task.array()
 const data  = z.object({
   content    : str,
   created_at : stamp,
-  deadline   : num.optional(),
+  deadline   : num,
   duration   : num,
   effective  : stamp.optional(),
-  fallback   : str.optional(),
-  feerate    : num.optional(),
+  feerate    : num,
+  machine    : str,
   moderator  : hash.optional(),
   network,
   paths,
@@ -26,6 +26,7 @@ const data  = z.object({
   programs,
   schedule,
   title      : str,
+  txtimeout  : num,
   value      : num,
   version    : num
 })
