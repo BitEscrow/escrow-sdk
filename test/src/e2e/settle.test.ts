@@ -22,7 +22,7 @@ import {
 } from '@scrow/sdk/account'
 
 import {
-  create_contract_req,
+  create_publish_req,
   create_contract,
   activate_contract,
   settle_contract,
@@ -48,7 +48,10 @@ import {
   verify_receipt
 } from '@/core/validation/index.js'
 
-import { create_receipt, get_vm_config } from '@scrow/sdk/vm'
+import {
+  create_receipt,
+  get_vm_config
+} from '@scrow/sdk/vm'
 
 import {
   create_witness,
@@ -118,7 +121,7 @@ export default async function (
       /* ------------------- [ Create Contract ] ------------------- */
 
       // Client: Create a contract request.
-      const pub_req  = create_contract_req(proposal, signatures)
+      const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
       verify_contract_req(CVM, server_pol, pub_req)
       // Server: Create contract data.

@@ -43,7 +43,7 @@ export function verify_witness (
   witness  : WitnessData
 ) {
   // Unpack contract and witness objects.
-  const { expires_at, published, status, terms } = contract
+  const { active_at, expires_at, status, terms } = contract
   const { action, path, prog_id, method, stamp } = witness
   // Assert that contract is active.
   assert.ok(status === 'active',      'contract is not active')
@@ -63,7 +63,7 @@ export function verify_witness (
   assert.ok(regex(path, paths),        'path not allowed in program')
   assert.ok(pathnames.includes(path),  'path does not exist in contract')
   assert.exists(expires_at)
-  assert.ok(stamp >= published,        'stamp exists before published date')
+  assert.ok(stamp >= active_at,        'stamp exists before published date')
   assert.ok(stamp < expires_at,        'stamp exists on or after expiration date')
   // Verify id and signatures of witness statement.
   verify_witness_sigs(witness)

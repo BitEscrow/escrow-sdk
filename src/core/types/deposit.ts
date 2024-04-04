@@ -1,5 +1,5 @@
-import { Network }      from './base.js'
-import { CovenantData } from './covenant.js'
+import { Network }            from './base.js'
+import { CovenantData }       from './covenant.js'
 import { OracleTxRecvStatus } from './oracle.js'
 
 import {

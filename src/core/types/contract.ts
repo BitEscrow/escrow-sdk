@@ -21,12 +21,27 @@ export type ContractStatus =
   'expired'   |  // Active contract has expired and funds are released.
   'error'        // Something went wrong, may require manual intervention.
 
-export type ContractData = ContractBase & SettleState & SpendState
+export type ActiveState  = ContractIsActive | ContractIsInactive
+export type ContractData = ContractBase & ActiveState & SettleState & SpendState
 
 export type SpendTemplate = [
   label : string,
   txhex : string
 ]
+
+interface ContractIsActive {
+  activated  : true
+  active_at  : number
+  active_vm  : string
+  expires_at : number
+}
+
+interface ContractIsInactive {
+  activated  : false
+  active_at  : null
+  active_vm  : null
+  expires_at : null
+}
 
 export interface ContractRequest {
   proposal    : ProposalData
@@ -35,39 +50,35 @@ export interface ContractRequest {
 
 export interface ContractConfig {
   cid        ?: string
-  cseed      ?: string
+  created_at ?: number
   fees        : PaymentEntry[]
   feerate     : number
   outputs    ?: SpendTemplate[]
   prop_id    ?: string
-  published  ?: number
 }
 
 export interface ContractBase {
-  active_at  : null | number
-  cid        : string
-  created_at : number
-  deadline   : number
-  expires_at : null | number
-  fees       : PaymentEntry[]
-  feerate    : number
-  fund_count : number
-  fund_pend  : number
-  fund_txfee : number
-  fund_value : number
-  moderator  : string | null
-  outputs    : SpendTemplate[]
-  pubkeys    : string[]
-  prop_id    : string
-  server_pk  : string
-  server_sig : string
-  signatures : string[]
-  status     : ContractStatus
-  subtotal   : number
-  terms      : ProposalData
-  tx_fees    : number
-  tx_total   : number
-  tx_bsize   : number
-  tx_vsize   : number
-  updated_at : number
+  cid         : string
+  created_at  : number
+  deadline    : number
+  fees        : PaymentEntry[]
+  feerate     : number
+  fund_count  : number
+  fund_pend   : number
+  fund_txfee  : number
+  fund_value  : number
+  moderator   : string | null
+  outputs     : SpendTemplate[]
+  prop_id     : string
+  server_pk   : string
+  server_sig  : string
+  signatures  : string[]
+  status      : ContractStatus
+  subtotal    : number
+  terms       : ProposalData
+  tx_fees     : number
+  tx_total    : number
+  tx_bsize    : number
+  tx_vsize    : number
+  updated_at  : number
 }

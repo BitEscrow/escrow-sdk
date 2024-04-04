@@ -40,12 +40,21 @@ import {
   get_txid,
   get_vout_txhex
 } from './tx.js'
+import { get_vm_id } from './vm.js'
+
+export const GET_INIT_ACTIVE_STATE = () => {
+  return {
+    activated  : false as const,
+    active_at  : null,
+    active_vm  : null,
+    expires_at : null
+  }
+}
 
 const CONTRACT_DEFAULTS = () => {
   return {
+    ...GET_INIT_ACTIVE_STATE(),
     ...GET_INIT_SPEND_STATE(),
-    activated  : null,
-    expires_at : null,
     fund_count : 0,
     fund_pend  : 0,
     fund_value : 0,
@@ -53,11 +62,11 @@ const CONTRACT_DEFAULTS = () => {
   }
 }
 
-export function create_contract_req (
+export function create_publish_req (
   proposal    : ProposalData,
   signatures ?: string[]
 ) : ContractRequest {
-  return ContractSchema.req.parse({ proposal, signatures })
+  return ContractSchema.publish_req.parse({ proposal, signatures })
 }
 
 /**
@@ -92,15 +101,15 @@ export function create_contract (
   return sort_record({
     ...CONTRACT_DEFAULTS(),
     cid,
+    created_at,
     fees,
-    deadline   : get_deadline(proposal, published),
+    deadline   : get_deadline(proposal, created_at),
     feerate,
     fund_txfee,
     moderator  : request.proposal.moderator ?? null,
     outputs,
     prop_id,
     pubkeys    : signatures.map(e => e.slice(0, 64)),
-    published,
     server_pk  : signer.pubkey,
     server_sig : signer.sign(cid),
     signatures,
@@ -110,7 +119,7 @@ export function create_contract (
     tx_bsize,
     tx_vsize   : tx_bsize,
     tx_total   : subtotal + tx_fees,
-    updated_at : published
+    updated_at : created_at
   })
 }
 
@@ -137,13 +146,14 @@ export function fund_contract (
  */
 export function activate_contract (
   contract  : ContractData,
-  activated : number = now()
-) {
+  active_at : number = now()
+) : ContractData {
   // Define a hard expiration date.
-  const expires_at = activated + contract.terms.duration
+  const active_vm  = get_vm_id(active_at, contract.cid)
+  const expires_at = active_at + contract.terms.duration
   const status     = 'active' as ContractStatus
   // Return the new contract and vm config.
-  return { ...contract, activated, expires_at, status }
+  return { ...contract, activated: true, active_at, active_vm, expires_at, status }
 }
 
 export function settle_contract (

@@ -1,4 +1,4 @@
-import { VALID_ACTIONS, VALID_METHODS } from './const.js'
+import { ENGINE_LABEL, VALID_ACTIONS, VALID_METHODS } from './const.js'
 
 import { check_params } from './lib/program.js'
 
@@ -14,6 +14,7 @@ export * as VMSchema from './schema.js'
 export * from './types.js'
 
 export default {
+  ENGINE_LABEL,
   VALID_ACTIONS,
   VALID_METHODS,
   check : check_params,

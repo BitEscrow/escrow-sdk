@@ -41,6 +41,6 @@ export function get_statements (
 }
 
 export function get_vmdata (vmstate : VMState) : VMData {
-  const { activated, error, head, output, step, updated, vmid } = vmstate
-  return { activated, error, head, output, step, updated, vmid }
+  const { active_at, error, head, output, step, updated, vmid } = vmstate
+  return { active_at, error, head, output, step, updated, vmid }
 }

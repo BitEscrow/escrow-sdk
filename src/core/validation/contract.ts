@@ -68,9 +68,9 @@ export function verify_endorsements (
 }
 
 export function verify_contract (contract : ContractData) {
-  const { outputs, published, server_pk, server_sig, terms } = contract
+  const { created_at, outputs, server_pk, server_sig, terms } = contract
   const pid = get_proposal_id(terms)
-  const cid = get_contract_id(outputs, pid, published)
+  const cid = get_contract_id(outputs, pid, created_at)
   assert.ok(pid === contract.prop_id,         'computed terms id does not match contract')
   assert.ok(cid === contract.cid,             'computed cid id does not match contract')
   for (const [ label, txhex ] of outputs) {
@@ -87,7 +87,7 @@ export function verify_publishing (
 ) {
   const out = create_spend_templates(proposal, contract.fees)
   const pid = get_proposal_id(proposal)
-  const cid = get_contract_id(out, pid, contract.published)
+  const cid = get_contract_id(out, pid, contract.created_at)
   assert.ok(pid === contract.prop_id, 'computed proposal id does not match contract')
   assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
   verify_contract(contract)
@@ -111,10 +111,11 @@ export function verify_activation (
   contract : ContractData,
   vmstate  : VMData
 ) {
-  const { activated, expires_at } = contract
-  assert.ok(activated !== null,              'contract activated date is null')
-  assert.ok(activated === vmstate.activated, 'contract activated date does not match vm')
-  const expires_chk = activated + contract.terms.duration
+  const { activated, active_at, active_vm, expires_at } = contract
+  assert.ok(activated,                       'contract is not flagged as active')
+  assert.ok(active_at === vmstate.active_at, 'contract activated date does not match vm')
+  assert.ok(active_vm === vmstate.vmid,      'contract vmid does not match vm internal id')
+  const expires_chk = active_at + contract.terms.duration
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
 

@@ -62,7 +62,8 @@ export function get_config (vmconfig : unknown) {
 
 export function compile_witness (
   programs  : ProgramEntry[],
-  witnesses : WitnessVector[]
+  witnesses : WitnessVector[],
+  vmid      : string
 ) {
   const wit_data : WitnessData[] = []
   // For each witness statement: 
@@ -70,8 +71,9 @@ export function compile_witness (
     // Resolve signer aliases into their devices:
     const mbrs = signers.map(e => get_signer(e))
     const pub  = mbrs[0].signer.pubkey
+    const tmpl = { ...rest, vmid }
     // Create the witness template:
-    let witness = create_witness(programs, pub, rest)
+    let witness = create_witness(programs, pub, tmpl)
     // For each signer of the statement:
     for (const mbr of mbrs) {
       // Endorse the witness template.
@@ -88,7 +90,7 @@ export function run_vm (
   statements : WitnessData[],
   timeout    : number
 ) : VMData {
-  const marker = config.activated + timeout
+  const marker = config.active_at + timeout
   let   state  = CVM.init(config)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:

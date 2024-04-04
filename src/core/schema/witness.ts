@@ -11,6 +11,7 @@ const data = z.object({
   prog_id : hash,
   sigs    : hex.array(),
   stamp,
+  vmid    : hash,
   wid     : hash
 })
 

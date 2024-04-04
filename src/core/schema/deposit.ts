@@ -4,8 +4,7 @@ import base  from './base.js'
 import cov   from './covenant.js'
 import tx    from './tx.js'
 
-const { bool, hash, hex, network, num, stamp, str } = base
-const { close_state, settle_data, spend_data, spend_state, txout } = tx
+const { hash, hex, network, num, stamp, str } = base
 
 const locktime = z.union([ str, num ]).transform(e => Number(e))
 const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
@@ -16,7 +15,7 @@ const register_req = acct.request.extend({
   network,
   return_psig : hex,
   server_tkn  : cov.token,
-  utxo        : txout
+  utxo        : tx.txout
 })
 
 const commit_req = register_req.extend({
@@ -34,38 +33,12 @@ const close_req = z.object({
   return_psig : hex
 })
 
-const deposit_data = z.object({
-  confirmed    : bool,
-  block_hash   : hash.nullable(),
-  block_height : num.nullable(),
-  block_time   : stamp.nullable(),
-  expires_at   : stamp.nullable()
-})
-
-const confirmed = z.object({
-  confirmed    : z.literal(true),
-  block_hash   : hash,
-  block_height : num,
-  block_time   : stamp,
-  expires_at   : stamp
-})
-
-const unconfirmed = z.object({
-  confirmed    : z.literal(false),
-  block_hash   : z.null(),
-  block_height : z.null(),
-  block_time   : z.null(),
-  expires_at   : z.null()
-})
-
-const deposit_state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
-
 const fund = z.object({
   covenant   : cov.data.nullable(),
   status,
   updated_at : stamp,
-  utxo       : txout
-}).and(deposit_state).and(spend_state).and(close_state)
+  utxo       : tx.txout
+}).and(tx.deposit_state).and(tx.spend_state).and(tx.settle_state)
 
 const base_data = z.object({
   status,
@@ -86,18 +59,16 @@ const base_data = z.object({
   server_sig   : hex,
   server_tkn   : hex,
   updated_at   : stamp,
-  utxo         : txout
+  utxo         : tx.txout
 })
 
-const data  = base_data.and(deposit_state).and(spend_state).and(close_state)
-const shape = base_data.merge(deposit_data).merge(spend_data).merge(settle_data)
+const data  = base_data.and(tx.deposit_state).and(tx.spend_state).and(tx.settle_state)
+const shape = base_data.merge(tx.deposit_info).merge(tx.spend_info).merge(tx.settle_info)
 
 export default {
   commit_req,
   close_req,
   data,
-  deposit_data,
-  deposit_state,
   fund,
   locktime,
   lock_req,

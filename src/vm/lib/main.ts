@@ -94,12 +94,12 @@ export function eval_schedule (
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (config : VMConfig) : VMState {
-  const { activated, vmid } = config
+  const { active_at, vmid } = config
   const head     = config.vmid
   const paths    = init_paths(config.pathnames, config.programs)
   const programs = init_programs(config.programs)
   const store    = init_stores(programs.map(e => e.prog_id))
-  const updated  = config.activated
+  const updated  = config.active_at
   const tasks    = init_tasks(config.schedule)
-  return sort_record({ ...GET_INIT_STATE(), activated, head, paths, programs, store, tasks, updated, vmid })
+  return sort_record({ ...GET_INIT_STATE(), active_at, head, paths, programs, store, tasks, updated, vmid })
 }

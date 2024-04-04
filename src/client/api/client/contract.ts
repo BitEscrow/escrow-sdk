@@ -1,7 +1,7 @@
 /* Global Imports */
 
 import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_contract_req }    from '@/core/lib/contract.js'
+import { create_publish_req }     from '@/core/lib/contract.js'
 
 import {
   verify_endorsements,
@@ -39,7 +39,7 @@ function create_contract_api (
     // Verify any signatures.
     verify_endorsements(prop, signatures)
     // Create a contract publish request.
-    const req  = create_contract_req(proposal, signatures)
+    const req  = create_publish_req(proposal, signatures)
     // Formulate the request url.
     const host = client.server_url
     const url  = `${host}/api/contract/create`

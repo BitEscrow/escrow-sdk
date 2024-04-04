@@ -80,15 +80,18 @@ export function get_program_idx (
 export function get_vm_config (contract : ContractData) : VMConfig {
   assert.ok(contract.activated)
   const { active_at, cid, terms } = contract
-  const { paths, engine, programs, schedule } = terms
+  const { paths, programs, schedule } = terms
   const pathnames = get_path_names(paths)
-  const vmid      = get_vm_id(active_at, cid, engine)
-  return { active_at, engine, pathnames, programs, schedule, vmid }
+  const vmid      = get_vm_id(active_at, cid)
+  return { active_at, pathnames, programs, schedule, vmid }
 }
 
-export function get_vm_id (activated : number, cid : string) {
+export function get_vm_id (
+  active_at : number,
+  cid       : string
+) {
   const hash  = Buff.hex(cid)
-  const stamp = Buff.num(activated, 4)
+  const stamp = Buff.num(active_at, 4)
   return Buff.join([ hash, stamp ]).digest.hex
 }
 

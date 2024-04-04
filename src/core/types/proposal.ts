@@ -37,7 +37,7 @@ export interface ProposalData {
   deadline   : number
   duration   : number
   effective ?: number
-  engine    ?: string
+  engine     : string
   fee_rate  ?: number
   fee_trgt  ?: number
   moderator ?: string

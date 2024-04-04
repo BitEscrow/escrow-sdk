@@ -53,7 +53,7 @@ export interface ProgMethodAPI {
 }
 
 interface VMData {
-  activated : number          // Timestamp for when the VM was initialized.
+  active_at : number          // Timestamp for when the VM was initialized.
   error     : string | null   // Error output of the VM.
   head      : string          // Current head of the commit-chain.
   output    : string | null   // Standard output of the VM.

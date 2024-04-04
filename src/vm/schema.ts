@@ -13,7 +13,7 @@ const store   = z.tuple([ hash, str ]).array()
 const status  = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
 const data = z.object({
-  activated : stamp,
+  active_at : stamp,
   error     : str.nullable(),
   head      : hash,
   output    : label.nullable(),

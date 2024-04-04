@@ -3,35 +3,43 @@ import base     from './base.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
 
-const { hash, hex, label, num, payment, stamp } = base
-const { close_state, settle_data, spend_data, spend_state } = tx
+const { bool, hash, hex, label, num, payment, stamp } = base
 
 const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
 
-const req = z.object({
+const publish_req = z.object({
   proposal   : proposal.data,
   signatures : hex.array().optional()
 })
 
-const digest = z.object({
-  activated  : stamp.nullable(),
-  balance    : num,
-  est_txfee  : num,
-  est_txsize : num,
-  pending    : num,
-  status,
-  total      : num,
-  txin_count : num,
-  updated_at : stamp
-}).and(spend_state).and(close_state)
+const vm_info = z.object({
+  activated  : bool,
+  active_at  : stamp.nullable(),
+  active_vm  : hash.nullable(),
+  expires_at : stamp.nullable()
+})
+
+const vm_active = z.object({
+  activated  : z.literal(true),
+  active_at  : stamp,
+  active_vm  : hash,
+  expires_at : stamp
+})
+
+const vm_inactive = z.object({
+  activated  : z.literal(false),
+  active_at  : z.null(),
+  active_vm  : z.null(),
+  expires_at : z.null()
+})
+
+const vm_state = z.discriminatedUnion('activated', [ vm_active, vm_inactive ])
 
 const base_data = z.object({
-  active_at  : stamp.nullable(),
   cid        : hash,
   created_at : stamp,
   deadline   : stamp,
-  expires_at : stamp.nullable(),
   feerate    : num,
   fees       : payment.array(),
   fund_count : num,
@@ -56,7 +64,7 @@ const base_data = z.object({
   updated_at : stamp
 })
 
-const data  = base_data.and(spend_state).and(close_state)
-const shape = base_data.merge(settle_data).merge(spend_data)
+const data  = base_data.and(vm_state).and(tx.spend_state).and(tx.settle_state)
+const shape = base_data.merge(vm_info).merge(tx.spend_info).merge(tx.settle_info)
 
-export default { data, digest, output, req, shape, status }
+export default { data, output, publish_req, shape, status }

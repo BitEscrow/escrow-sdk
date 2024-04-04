@@ -17,7 +17,7 @@ import {
 import escrow_vec from './vectors/escrow.json' assert { type: 'json' }
 
 const vmid      = '00'.repeat(32)
-const activated = now()
+const active_at = now()
 
 export default function (tape : Test) {
   tape.test('Running VM test vectors', t => {
@@ -32,12 +32,12 @@ function run_test (t : Test, v : VMVector) {
   // Find and replace aliases with their relevant pubkeys.
   const progs  = resolve_aliases(members, programs as ProgramEntry[])
   // Configure the init state of the vm.
-  const config = { activated, pathnames, programs : progs, schedule, vmid } as VMConfig
+  const config = { active_at, pathnames, programs : progs, schedule, vmid } as VMConfig
   // For each test in the test set:
   t.plan(tests.length)
   for (const { comment, error, result, stamp, steps, witness } of tests) {
     try {
-      const wit_data = compile_witness(progs, witness)
+      const wit_data = compile_witness(progs, witness, vmid)
       const vm_state = run_vm(config, wit_data, stamp)
       assert.equal(vm_state.output, result, 'vm output matches expected result')
       assert.equal(vm_state.error,  error,  'vm error matches expected result')
