@@ -7,7 +7,6 @@ import { P2TR }       from '@scrow/tapscript/address'
 /* Package Imports */
 
 import { get_return_tx } from '@scrow/sdk/return'
-import { now }           from '@scrow/sdk/util'
 
 import {
   create_account,
@@ -25,7 +24,7 @@ import {
   verify_account,
   verify_deposit,
   verify_register_req
-} from '@scrow/sdk/verify'
+} from '@/core/validation/index.js'
 
 /* Local Imports */
 
@@ -93,7 +92,7 @@ export default async function (
       // Server: Verify the registration request.
       verify_register_req(server_pol, reg_req, server_sd)
       // Server: Create the deposit data.
-      const deposit  = create_deposit({}, reg_req, server_sd)
+      const deposit  = create_deposit(reg_req, server_sd)
       // Client: Verify the deposit data.
       verify_deposit(deposit, funder_sd)
 
@@ -108,9 +107,9 @@ export default async function (
 
       /* ------------------ [ Return Deposit ] ------------------ */
 
-      const txdata    = get_return_tx(deposit, server_sd)
-      const txid      = await client.publish_tx(txdata, true)
-      const dp_closed = close_deposit(deposit, now(), txid)
+      const txhex     = get_return_tx(deposit, server_sd)
+      const txid      = await client.publish_tx(txhex, true)
+      const dp_closed = close_deposit(deposit, txhex)
 
       if (VERBOSE) {
         console.log(banner('deposit closed'))
@@ -119,7 +118,7 @@ export default async function (
         t.pass('return ok')
       }
 
-      t.pass('completed with txid: ' + txid)
+      t.equal(txid, dp_closed.spent_txid, 'completed with txid: ' + txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

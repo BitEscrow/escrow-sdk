@@ -1,6 +1,6 @@
-import { verify_account }  from '@/core/validators/account.js'
-import { verify_contract } from '@/core/validators/contract.js'
-import { verify_deposit }  from '@/core/validators/deposit.js'
+import { verify_account }  from '@/core/validation/account.js'
+import { verify_contract } from '@/core/validation/contract.js'
+import { verify_deposit }  from '@/core/validation/deposit.js'
 
 import {
   create_close_req,

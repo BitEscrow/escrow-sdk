@@ -1,5 +1,5 @@
 import { ContractData }    from '@/core/types/index.js'
-import { verify_contract } from '@/core/validators/contract.js'
+import { verify_contract } from '@/core/validation/contract.js'
 import { EscrowSigner }    from '../../class/signer.js'
 
 export function request_contracts_api (esigner : EscrowSigner) {

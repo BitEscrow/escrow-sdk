@@ -12,6 +12,7 @@ const request = z.object({
 })
 
 const data = z.object({
+  acct_hash    : hash,
   acct_id      : hash,
   created_at   : stamp,
   deposit_pk   : hash,

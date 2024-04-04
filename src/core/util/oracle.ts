@@ -13,8 +13,8 @@ import {
   ApiResponse,
   OracleFeeEstimate,
   OracleQuery,
-  OracleSpendData,
-  OracleSpendState,
+  OracleTxSpendData,
+  OracleTxSpendState,
   OracleTxData,
   OracleUtxo
 } from '../types/index.js'
@@ -54,7 +54,7 @@ export async function get_utxo_state (
   host : string,
   txid : string,
   vout : number
-) : Promise<OracleSpendState | null> {
+) : Promise<OracleTxSpendState | null> {
   // Define the url to use for fetching.
   const url = `${host}/api/tx/${txid}/outspend/${vout}`
   // Fetch a response from the oracle.
@@ -62,7 +62,7 @@ export async function get_utxo_state (
   // If status is 404, return null.
   if (res.status === 404) return null
   // Resolve the response into json.
-  const json = await resolve_json<OracleSpendState>(res)
+  const json = await resolve_json<OracleTxSpendState>(res)
   // If the response failed, throw.
   if (!json.ok) throw new Error(json.error)
   // Parse the returned data.
@@ -80,7 +80,7 @@ export async function get_utxo_state (
 export async function get_utxo_data (
   host  : string,
   query : OracleQuery
-) : Promise<OracleSpendData | null> {
+) : Promise<OracleTxSpendData | null> {
   // Unpack the query object.
   const { txid, vout, address } = query
   // Fetch transaction data from the oracle.
@@ -101,28 +101,28 @@ export async function get_utxo_data (
   // If the index is -1, return null.
   if (idx === -1) return null
   // Set the txout based on the resulting index.
-  const txout = tx.vout.at(idx)
+  const txo = tx.vout.at(idx)
   // If txout is undefined, return null.
-  if (txout === undefined) return null
+  if (txo === undefined) return null
   // Get the spend state of the txout from the oracle.
   const state = await get_utxo_state(host, txid, idx)
   // If the spend state is null, return null.
   if (state === null) return null
   // Construct the returned txout.
-  const txspend = {
+  const txout = {
     txid,
     vout      : idx,
-    value     : txout.value,
-    scriptkey : txout.scriptpubkey
+    value     : txo.value,
+    scriptkey : txo.scriptpubkey
   }
   // Return the txout aling with its state and status.
-  return { txspend, status: tx.status, state }
+  return { txout, status: tx.status, state }
 }
 
 export async function get_address_utxos (
   host : string,
   addr : string
-) : Promise<OracleSpendData[]> {
+) : Promise<OracleTxSpendData[]> {
   // Define the url to use for fetching.
   const url = `${host}/api/address/${addr}/utxo`
   // Fetch a response from the oracle.
@@ -137,8 +137,8 @@ export async function get_address_utxos (
   return parsed.data.map(({ txid, status, value, vout }) => {
     const scriptkey = parse_addr(addr).hex
     const state     = { spent: false as const }
-    const txspend   = { txid, vout, value, scriptkey }
-    return { state, status, txspend }
+    const txout     = { txid, vout, value, scriptkey }
+    return { state, status, txout }
   })
 }
 

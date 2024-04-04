@@ -30,6 +30,7 @@ export interface AccountContext {
 }
 
 export interface AccountData {
+  acct_hash    : string
   acct_id      : string
   created_at   : number
   deposit_addr : string

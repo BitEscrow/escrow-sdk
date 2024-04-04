@@ -8,3 +8,4 @@ TODO.md
 NOTES.md
 *.log
 .env*
+.npmrc

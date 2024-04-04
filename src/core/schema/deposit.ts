@@ -5,17 +5,18 @@ import cov   from './covenant.js'
 import tx    from './tx.js'
 
 const { bool, hash, hex, network, num, stamp, str } = base
-const { close_state, settle_data, spend_data, spend_state, txspend } = tx
+const { close_state, settle_data, spend_data, spend_state, txout } = tx
 
 const locktime = z.union([ str, num ]).transform(e => Number(e))
 const status   = z.enum([ 'reserved', 'pending', 'stale', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
 const register_req = acct.request.extend({
+  covenant    : cov.data.optional(),
   feerate     : num,
   network,
   return_psig : hex,
   server_tkn  : cov.token,
-  utxo        : tx.txspend
+  utxo        : txout
 })
 
 const commit_req = register_req.extend({
@@ -63,11 +64,12 @@ const fund = z.object({
   covenant   : cov.data.nullable(),
   status,
   updated_at : stamp,
-  utxo       : tx.txspend
+  utxo       : txout
 }).and(deposit_state).and(spend_state).and(close_state)
 
 const base_data = z.object({
   status,
+  acct_hash    : hash,
   covenant     : cov.data.nullable(),
   created_at   : stamp,
   dpid         : hash,
@@ -79,11 +81,12 @@ const base_data = z.object({
   return_addr  : str,
   return_fee   : num,
   return_psig  : hex,
+  satpoint     : str,
   server_pk    : hash,
   server_sig   : hex,
   server_tkn   : hex,
   updated_at   : stamp,
-  utxo         : txspend
+  utxo         : txout
 })
 
 const data  = base_data.and(deposit_state).and(spend_state).and(close_state)

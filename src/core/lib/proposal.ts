@@ -25,13 +25,13 @@ import * as CONST from '../const.js'
 
 type PathTotal = [ path: string, total : number ]
 
-const GET_DEFAULT_PROP = () => {
+const PROPOSAL_DEFAULTS = () => {
   return {
     content    : '',
     created_at : now(),
     deadline   : CONST.DEADLINE_DEFAULT,
     duration   : CONST.DURATION_DEFAULT,
-    machine    : CONST.MACHINE_DEFAULT,
+    engine     : CONST.MACHINE_DEFAULT,
     paths      : [],
     payments   : [],
     programs   : [],
@@ -42,7 +42,7 @@ const GET_DEFAULT_PROP = () => {
 }
 
 export function create_proposal (template : ProposalTemplate) {
-  return parse_proposal({ ...GET_DEFAULT_PROP(), ...template })
+  return parse_proposal({ ...PROPOSAL_DEFAULTS(), ...template })
 }
 
 /**

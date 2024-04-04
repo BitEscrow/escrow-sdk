@@ -4,15 +4,17 @@ import base  from './base.js'
 const { hash, hex, num, stamp } = base
 
 const spent = z.object({
-  spent      : z.literal(true),
-  spent_at   : stamp,
-  spent_txid : hash
+  spent       : z.literal(true),
+  spent_at    : stamp,
+  spent_txhex : hex,
+  spent_txid  : hash
 })
 
 const unspent = z.object({
-  spent      : z.literal(false),
-  spent_at   : z.null(),
-  spent_txid : z.null()
+  spent       : z.literal(false),
+  spent_at    : z.null(),
+  spent_txhex : z.null(),
+  spent_txid  : z.null()
 })
 
 const settled = z.object({
@@ -39,11 +41,11 @@ const settle_data = z.object({
 const spend_state = z.discriminatedUnion('spent',   [ spent,   unspent   ])
 const close_state = z.discriminatedUnion('settled', [ settled, unsettled ])
 
-const txspend = z.object({
+const txout = z.object({
   txid      : hash,
   vout      : num,
   value     : num,
   scriptkey : hex
 })
 
-export default { close_state, settle_data, spend_data, spend_state, txspend }
+export default { close_state, settle_data, spend_data, spend_state, txout }

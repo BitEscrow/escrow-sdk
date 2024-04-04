@@ -1,28 +1,28 @@
 import { TxOutput } from './tx.js'
 
-export type OracleFeeEstimate = Record<string, number>
-export type OracleTxStatus    = OracleConfirmed | OracleUnconfirmed
-export type OracleSpendState  = OracleTxOutSpent | OracleTxOutUnspent
+export type OracleFeeEstimate  = Record<string, number>
+export type OracleTxRecvStatus = TxConfirmed | TxUnconfirmed
+export type OracleTxSpendState = TxOutSpent  | TxOutUnspent
 
-interface OracleConfirmed {
+interface TxConfirmed {
   confirmed    : true
   block_hash   : string
   block_height : number
   block_time   : number
 }
 
-interface OracleUnconfirmed {
+interface TxUnconfirmed {
   confirmed : false
 }
 
-interface OracleTxOutSpent {
+interface TxOutSpent {
   spent  : true
   txid   : string
   vin    : number
-  status : OracleTxStatus
+  status : OracleTxRecvStatus
 }
 
-interface OracleTxOutUnspent {
+interface TxOutUnspent {
   spent : false
 }
 
@@ -41,7 +41,7 @@ export interface OracleTxData {
   size     : number
   weight   : number
   fee      : number
-  status   : OracleTxStatus
+  status   : OracleTxRecvStatus
 }
 
 export interface OracleTxIn {
@@ -63,15 +63,15 @@ export interface OracleTxOut {
   value                 : number
 }
 
-export interface OracleSpendData {
-  txspend : TxOutput
-  status  : OracleTxStatus
-  state   : OracleSpendState
+export interface OracleTxSpendData {
+  txout  : TxOutput
+  status : OracleTxRecvStatus
+  state  : OracleTxSpendState
 }
 
 export interface OracleUtxo {
   txid   : string
   vout   : number
-  status : OracleTxStatus
+  status : OracleTxRecvStatus
   value  : number
 }

@@ -81,15 +81,15 @@ export function create_account (
   // Compute the deposit address from the account context.
   const deposit_addr = acct_ctx.deposit_addr
   // Compute the hash for the account request.
-  const hash         = get_account_hash(request)
+  const acct_hash    = get_account_hash(request)
   // Set the server pubkey.
   const server_pk    = signer.pubkey
   // Compute the id for the account data.
-  const acct_id      = get_account_id(deposit_addr, hash, server_pk, created_at, server_tkn)
+  const acct_id      = get_account_id(deposit_addr, acct_hash, server_pk, created_at, server_tkn)
   // Sign the account identifier.
   const server_sig   = signer.sign(acct_id)
   // Return the complete account data object.
-  return sort_record({ ...request, acct_id, created_at, deposit_addr, server_pk, server_sig, server_tkn })
+  return sort_record({ ...request, acct_hash, acct_id, created_at, deposit_addr, server_pk, server_sig, server_tkn })
 }
 
 /**

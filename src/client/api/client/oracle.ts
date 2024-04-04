@@ -13,7 +13,7 @@ import {
 
 import {
   OracleQuery,
-  OracleSpendData
+  OracleTxSpendData
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -67,7 +67,7 @@ function poll_address_api (client : EscrowClient) {
     verbose  = false
   ) => {
     let tries = 0,
-        utxos : OracleSpendData[] = []
+        utxos : OracleTxSpendData[] = []
     for (let i = 0; i < retries; i++) {
       if (utxos.length > 0) {
         return utxos

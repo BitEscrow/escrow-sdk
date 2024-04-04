@@ -6,7 +6,7 @@ import {
   validate_commit_req,
   validate_close_req,
   validate_lock_req
-} from '@/core/validators/index.js'
+} from '@/core/validation/index.js'
 
 import {
   ApiResponse,

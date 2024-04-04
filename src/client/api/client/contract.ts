@@ -6,7 +6,7 @@ import { create_contract_req }    from '@/core/lib/contract.js'
 import {
   verify_endorsements,
   verify_proposal
-} from '@/core/validators/index.js'
+} from '@/core/validation/index.js'
 
 import {
   ApiResponse,

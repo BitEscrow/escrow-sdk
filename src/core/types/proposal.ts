@@ -37,9 +37,10 @@ export interface ProposalData {
   deadline   : number
   duration   : number
   effective ?: number
-  feerate    : number
+  engine    ?: string
+  fee_rate  ?: number
+  fee_trgt  ?: number
   moderator ?: string
-  machine    : string
   network    : Network
   paths      : PathEntry[]
   payments   : PaymentEntry[]

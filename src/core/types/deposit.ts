@@ -1,5 +1,6 @@
 import { Network }      from './base.js'
 import { CovenantData } from './covenant.js'
+import { OracleTxRecvStatus } from './oracle.js'
 
 import {
   SettleState,
@@ -46,13 +47,12 @@ interface DepositUnconfirmed {
 }
 
 export interface DepositConfig {
-  created_at ?: number
-  dpid       ?: string
-  req_hash   ?: string
-  utxo_state ?: DepositState
+  created_at  ?: number
+  utxo_status ?: OracleTxRecvStatus
 }
 
 export interface DepositInfo {
+  acct_hash    : string
   covenant     : CovenantData | null
   created_at   : number
   deposit_pk   : string
@@ -63,6 +63,7 @@ export interface DepositInfo {
   network      : Network
   return_addr  : string
   return_psig  : string
+  satpoint     : string
   server_pk    : string
   server_sig   : string
   server_tkn   : string

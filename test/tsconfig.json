@@ -21,7 +21,7 @@
       "@scrow/sdk/witness"  : [ "src/core/lib/witness.js"       ],
       "@scrow/sdk/schema"   : [ "src/core/schema/index.js"      ],
       "@scrow/sdk/util"     : [ "src/core/util/index.js"        ],
-      "@scrow/sdk/verify"   : [ "src/core/validators/index.js"  ],
+      "@scrow/sdk/validate" : [ "src/core/validation/index.js"  ],
       "@scrow/sdk/vm"       : [ "src/core/lib/vm.js"            ],
     },
     "module": "NodeNext",

@@ -1,5 +1,5 @@
 import { create_account_req } from '@/core/lib/account.js'
-import { verify_account }     from '@/core/validators/account.js'
+import { verify_account }     from '@/core/validation/account.js'
 import { parse_err }          from '@/core/util/index.js'
 
 import {

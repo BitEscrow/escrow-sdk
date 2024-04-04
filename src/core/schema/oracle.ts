@@ -30,7 +30,7 @@ const unspent = z.object({
 
 const state = z.discriminatedUnion('spent', [ spent, unspent ])
 
-const spend = z.object({ state, status, txout: tx.txspend })
+const spend = z.object({ state, status, txout: tx.txout })
 
 const txout = z.object({
   scriptpubkey         : hex,

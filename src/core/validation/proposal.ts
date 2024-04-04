@@ -32,6 +32,7 @@ import {
   check_expires,
   check_regex
 } from './util.js'
+import { VALID_FEE_TARGETS } from '../const.js'
 
 export function validate_program (
   program : unknown
@@ -56,6 +57,8 @@ export function verify_proposal (
   policy   : ServerPolicy,
   proposal : ProposalData
 ) {
+  // Check if feerate is valid.
+  check_fee_rates(policy, proposal)
   // Check spending paths are valid.
   check_payments(proposal)
   // Check if timestamps are valid.
@@ -64,6 +67,24 @@ export function verify_proposal (
   check_programs(machine, proposal)
   // Check if schedule tasks are valid.
   check_schedule(machine, proposal)
+}
+
+function check_fee_rates (
+  policy   : ServerPolicy,
+  proposal : ProposalData
+) {
+  const { fee_rate, fee_trgt } = proposal
+  //
+  if (fee_trgt !== undefined) {
+    //
+    assert.ok(VALID_FEE_TARGETS.includes(fee_trgt), 'fee target value is invalid: ' + fee_trgt)
+  } else if (fee_rate !== undefined) {
+    //
+    const { FEERATE_MIN, FEERATE_MAX } = policy.proposal
+    // Assert that all terms are valid.
+    assert.ok(fee_rate >= FEERATE_MIN, `feerate is below threshold: ${fee_rate} < ${FEERATE_MIN}`)
+    assert.ok(fee_rate <= FEERATE_MAX, `feerate is above threshold: ${fee_rate} > ${FEERATE_MAX}`)
+  }
 }
 
 function check_payments (proposal : ProposalData) {

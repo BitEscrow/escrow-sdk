@@ -1,7 +1,7 @@
-import { verify_proposal }  from '@/core/validators/proposal.js'
+import { verify_proposal } from '@/core/validation/proposal.js'
 
 import { EscrowSigner } from '../../class/signer.js'
-import { DraftSession }  from '../../types.js'
+import { DraftSession } from '../../types.js'
 
 import {
   claim_credential,

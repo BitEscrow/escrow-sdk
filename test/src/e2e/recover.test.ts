@@ -3,19 +3,17 @@
 import { Test }       from 'tape'
 import { CoreClient } from '@cmdcode/core-cmd'
 import { P2TR }       from '@scrow/tapscript/address'
-import { parse_txid } from '@scrow/tapscript/tx'
 
 /* Package Imports */
+
+import { get_txid } from '@scrow/sdk/tx'
 
 import {
   create_account,
   create_account_req,
 } from '@scrow/sdk/account'
 
-import { now } from '@scrow/sdk/util'
-
 import {
-  close_deposit,
   create_deposit,
   create_register_req
 } from '@scrow/sdk/deposit'
@@ -31,7 +29,7 @@ import {
   verify_account,
   verify_deposit,
   verify_register_req
-} from '@scrow/sdk/verify'
+} from '@/core/validation/index.js'
 
 /* Local Imports */
 
@@ -100,7 +98,7 @@ export default async function (
       // Server: Verify the registration request.
       verify_register_req(server_pol, reg_req, server_sd)
       // Server: Create the deposit data.
-      const deposit  = create_deposit({}, reg_req, server_sd)
+      const deposit  = create_deposit(reg_req, server_sd)
       // Client: Verify the deposit data.
       verify_deposit(deposit, funder_sd)
 
@@ -118,15 +116,7 @@ export default async function (
       const rec_config = get_recovery_config(deposit)
       const template   = get_recovery_tx(rec_config, FEERATE, return_addr, utxo)
       const signed_tx  = sign_recovery_tx(rec_config, funder_sd, template, utxo)
-      const txid       = parse_txid(template)
-      const dp_closed  = close_deposit(deposit, now(), txid)
-
-      if (VERBOSE) {
-        console.log(banner('deposit closed'))
-        console.dir(dp_closed, { depth : null })
-      } else {
-        t.pass('closed ok')
-      }
+      const txid       = get_txid(signed_tx)
 
       let is_valid = false
 
@@ -142,7 +132,7 @@ export default async function (
         console.dir(signed_tx, { depth : null })
       }
 
-      t.true(is_valid, 'recovery tx rejected with non-BIP68-final')
+      t.true(is_valid, 'recovery tx rejected with non-BIP68-final: ' + txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

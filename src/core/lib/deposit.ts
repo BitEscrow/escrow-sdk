@@ -16,7 +16,7 @@ import {
   DepositState,
   DepositStatus,
   LockRequest,
-  OracleTxStatus,
+  OracleTxRecvStatus,
   RegisterRequest,
   SignerAPI,
   TxOutput
@@ -29,34 +29,28 @@ import DepositSchema from '../schema/deposit.js'
 import { create_covenant }    from './covenant.js'
 import { create_return_psig } from './return.js'
 
-import { get_account_ctx, get_deposit_hash } from './account.js'
+import {
+  get_account_ctx,
+  get_account_hash,
+  get_deposit_hash
+} from './account.js'
 
-/**
- * Initialization object for deposit state.
- */
-const GET_INIT_SPEND_STATE = () => {
-  return {
-    confirmed    : false as const,
-    block_hash   : null,
-    block_height : null,
-    block_time   : null,
-    expires_at   : null
-  }
-}
+import {
+  GET_INIT_RECV_STATE,
+  GET_INIT_SPEND_STATE,
+  get_satpoint,
+  get_txid
+} from './tx.js'
 
 /**
  * Initialization object for deposit data.
  */
 const GET_INIT_DEPOSIT = () => {
   return {
+    ...GET_INIT_RECV_STATE(),
     ...GET_INIT_SPEND_STATE(),
     covenant    : null,
-    return_psig : null,
-    settled     : false as const,
-    settled_at  : null,
-    spent       : false as const,
-    spent_at    : null,
-    spent_txid  : null
+    return_psig : null
   }
 }
 
@@ -64,10 +58,10 @@ const GET_INIT_DEPOSIT = () => {
  * Create a registration request object.
  */
 export function create_register_req (
-  feerate  : number,
-  request  : AccountTemplate,
-  signer   : SignerAPI,
-  utxo     : TxOutput
+  feerate   : number,
+  request   : AccountTemplate,
+  signer    : SignerAPI,
+  utxo      : TxOutput
 ) : RegisterRequest {
   const registration = { ...request, feerate, utxo }
   const return_psig  = create_return_psig(registration, signer)
@@ -124,25 +118,31 @@ export function create_close_req (
  * Returns a new DepositData object from a partial template.
  */
 export function create_deposit (
-  config  : DepositConfig,
   request : RegisterRequest | CommitRequest,
-  signer  : SignerAPI
+  signer  : SignerAPI,
+  options : DepositConfig = {}
 ) : DepositData {
   //
-  const { created_at = now(), utxo_state } = config
+  const { created_at = now(), utxo_status } = options
   // Get the deposit address from the account context.
   const { deposit_addr } = get_account_ctx(request)
-  //
-  const req_hash   = config.req_hash ?? get_deposit_hash(request)
-  //
+  // Compute the hash for the account request.
+  const acct_hash  = get_account_hash(request)
+  // Get the satpoint for the utxo.
+  const satpoint   = get_satpoint(request.utxo)
+  // Get the hash digest of the deposit request.
+  const dp_hash    = get_deposit_hash(request)
+  // Get the utxo receive state.
+  const recv_state = get_tx_recv_state(request.locktime, utxo_status)
+  // Get the pubkey of the server's signing device.
   const server_pk  = signer.pubkey
-  // Create our deposit id.
-  const dpid       = config.dpid ?? get_deposit_id(created_at, req_hash, server_pk)
-  //
+  // Get the deposit id.
+  const dpid       = get_deposit_id(created_at, dp_hash, server_pk)
+  // Sign the deposit id.
   const server_sig = signer.sign(dpid)
   // Unpack our data objects into a template.
-  const template   = { ...GET_INIT_DEPOSIT(), ...request, ...utxo_state }
-  //
+  const template   = { ...GET_INIT_DEPOSIT(), ...request, ...recv_state }
+  // Set the initial status of the deposit.
   const status     = (template.confirmed)
     ? (template.covenant !== null)
       ? 'locked' as DepositStatus
@@ -151,9 +151,11 @@ export function create_deposit (
   // Return a sorted object.
   return sort_record({
     ...template,
+    acct_hash,
     created_at,
     deposit_addr,
     dpid,
+    satpoint,
     server_pk,
     server_sig,
     status,
@@ -162,12 +164,13 @@ export function create_deposit (
 }
 
 export function close_deposit (
-  deposit    : DepositData,
-  spent_at   : number,
-  spent_txid : string
+  deposit     : DepositData,
+  spent_txhex : string,
+  spent_at    = now()
 ) {
-  const status = 'spent' as DepositStatus
-  return { ...deposit, spent_at, status, spent_txid, spent: true }
+  const spent_txid = get_txid(spent_txhex)
+  const status     = 'spent' as DepositStatus
+  return { ...deposit, spent_at, status, spent_txhex, spent_txid, spent: true }
 }
 
 export function get_deposit_id (
@@ -185,12 +188,12 @@ export function get_deposit_id (
  * Compute the spending state of a deposit,
  * using transaction data from an oracle.
  */
-export function get_spend_state (
-  locktime : number,
-  txstatus : OracleTxStatus
+export function get_tx_recv_state (
+  locktime  : number,
+  txstatus ?: OracleTxRecvStatus
 ) {
   // Initialize our spent state.
-  let state : DepositState = GET_INIT_SPEND_STATE()
+  let state : DepositState = GET_INIT_RECV_STATE()
   // If transaction is confirmed:
   if (txstatus !== undefined && txstatus.confirmed) {
     // Get the expiration date for the timelock.

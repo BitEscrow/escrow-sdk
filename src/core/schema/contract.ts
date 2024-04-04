@@ -27,8 +27,9 @@ const digest = z.object({
 }).and(spend_state).and(close_state)
 
 const base_data = z.object({
-  activated  : stamp.nullable(),
+  active_at  : stamp.nullable(),
   cid        : hash,
+  created_at : stamp,
   deadline   : stamp,
   expires_at : stamp.nullable(),
   feerate    : num,
@@ -41,7 +42,6 @@ const base_data = z.object({
   moderator  : hash.nullable(),
   prop_id    : hash,
   pubkeys    : hash.array(),
-  published  : stamp,
   server_pk  : hash,
   server_sig : hex,
   signatures : hex.array(),

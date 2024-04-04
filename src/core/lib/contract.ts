@@ -26,7 +26,6 @@ import ContractSchema from '../schema/contract.js'
 /* Local Imports */
 
 import { get_covenant_psig, settle_covenant } from './covenant.js'
-import { create_txinput, get_vout_txhex }     from './tx.js'
 
 import {
   get_path_names,
@@ -35,18 +34,21 @@ import {
   get_proposal_id
 } from './proposal.js'
 
+import {
+  GET_INIT_SPEND_STATE,
+  create_txinput,
+  get_txid,
+  get_vout_txhex
+} from './tx.js'
+
 const CONTRACT_DEFAULTS = () => {
   return {
+    ...GET_INIT_SPEND_STATE(),
     activated  : null,
     expires_at : null,
     fund_count : 0,
     fund_pend  : 0,
     fund_value : 0,
-    settled    : false as const,
-    settled_at : null,
-    spent      : false as const,
-    spent_at   : null,
-    spent_txid : null,
     status     : 'published' as ContractStatus
   }
 }
@@ -67,21 +69,19 @@ export function create_contract (
   signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.
-  const { fees } = config
+  const { feerate, fees } = config
   // Unpack request object.
   const { proposal, signatures = [] } = request
-  // Define or create the contract outputs.
-  const feerate    = config.feerate   ?? proposal.feerate
   // Define the funding input txfee.
   const fund_txfee = feerate * SPEND_TXIN_SIZE
   // Define or create the contract outputs.
-  const outputs    = config.outputs   ?? create_spend_templates(proposal, fees)
+  const outputs    = create_spend_templates(proposal, fees)
   // Define or compute the proposal id.
-  const prop_id    = config.prop_id   ?? get_proposal_id(proposal)
+  const prop_id    = get_proposal_id(proposal)
   // Define or compute the published date.
-  const published  = config.published ?? now()
+  const created_at = config.created_at ?? now()
   // Define or compute the contract id.
-  const cid        = config.cid       ?? get_contract_id(outputs, prop_id, published)
+  const cid        = config.cid        ?? get_contract_id(outputs, prop_id, created_at)
   // Calculate the subtotal.
   const subtotal   = proposal.value + get_pay_total(fees)
   // Calculate the vout size of the tx output.
@@ -147,12 +147,13 @@ export function activate_contract (
 }
 
 export function settle_contract (
-  contract   : ContractData,
-  spent_at   : number,
-  spent_txid : string
+  contract    : ContractData,
+  spent_txhex : string,
+  spent_at = now()
 ) : ContractData {
-  const status = 'spent' as ContractStatus
-  return { ...contract, spent_at, status, spent_txid, spent: true }
+  const spent_txid = get_txid(spent_txhex)
+  const status     = 'spent' as ContractStatus
+  return { ...contract, spent_at, status, spent_txhex, spent_txid, spent: true }
 }
 
 /**

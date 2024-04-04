@@ -1,5 +1,6 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
+import { Literal }     from '../types/index.js'
 
 export function exists <T> (
   value ?: T | null
@@ -41,17 +42,17 @@ export function is_hash (value : unknown) : value is string {
   return false
 }
 
-// export function is_literal (value : unknown) : value is Literal {
-//   if (
-//     typeof value === 'string'  ||
-//     typeof value === 'number'  ||
-//     typeof value === 'boolean' ||
-//     typeof value === null
-//   ) {
-//     return true
-//   }
-//   return false
-// }
+export function is_literal (value : unknown) : value is Literal {
+  if (
+    typeof value === 'string'  ||
+    typeof value === 'number'  ||
+    typeof value === 'boolean' ||
+    value === null
+  ) {
+    return true
+  }
+  return false
+}
 
 export function is_stamp (value : unknown) : value is number {
   return (

@@ -46,7 +46,7 @@ import {
   verify_proposal,
   verify_publishing,
   verify_receipt
-} from '@scrow/sdk/verify'
+} from '@/core/validation/index.js'
 
 import { create_receipt, get_vm_config } from '@scrow/sdk/vm'
 
@@ -122,7 +122,7 @@ export default async function (
       // Server: Verify contract request.
       verify_contract_req(CVM, server_pol, pub_req)
       // Server: Create contract data.
-      let contract = create_contract(ct_config, server_pol, pub_req, server_sd)
+      let contract = create_contract(ct_config, pub_req, server_sd)
       // Client: Verify contract data.
       verify_publishing(contract, proposal)
       
@@ -175,7 +175,7 @@ export default async function (
         // Server: Verify the registration request.
         verify_commit_req(contract, server_pol, commit_req, server_sd)
         // Server: Create the deposit data.
-        const deposit = create_deposit({}, commit_req, server_sd)
+        const deposit = create_deposit(commit_req, server_sd)
         // Client: Verify the deposit data.
         verify_deposit(deposit, funder_sd)
         // Deposit funds into contract.
@@ -221,13 +221,14 @@ export default async function (
         members[1].signer.pubkey
       ]
 
-      const config = {
+      const wit_template = {
         action : 'close',
         method : 'endorse',
         path   : 'payout',
+        vmid   : vm_state.vmid
       }
 
-      let witness = create_witness(proposal.programs, signers, config)
+      let witness = create_witness(proposal.programs, signers, wit_template)
           witness = endorse_witness(members[0].signer, witness)
           witness = endorse_witness(members[1].signer, witness)
 
@@ -268,21 +269,21 @@ export default async function (
 
       assert.exists(vm_state.output)
 
-      const txdata = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
-      const txid   = await client.publish_tx(txdata, true)
+      const txhex = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
+      const txid  = await client.publish_tx(txhex, true)
 
-      contract = settle_contract(contract, vm_state.updated, txid)
+      contract = settle_contract(contract, txhex, vm_state.updated)
 
       verify_settlement(contract, deposits, vm_state)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))
-        console.dir(txdata, { depth : null })
+        console.dir(txhex, { depth : null })
       } else {
         t.pass('settlement ok')
       }
 
-      t.pass('completed with txid: ' + txid)
+      t.equal(txid, contract.spent_txid, 'completed with txid: ' + txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

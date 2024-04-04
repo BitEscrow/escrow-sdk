@@ -44,8 +44,9 @@ export interface ContractConfig {
 }
 
 export interface ContractBase {
-  activated  : null | number
+  active_at  : null | number
   cid        : string
+  created_at : number
   deadline   : number
   expires_at : null | number
   fees       : PaymentEntry[]
@@ -58,7 +59,6 @@ export interface ContractBase {
   outputs    : SpendTemplate[]
   pubkeys    : string[]
   prop_id    : string
-  published  : number
   server_pk  : string
   server_sig : string
   signatures : string[]

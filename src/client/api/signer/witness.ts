@@ -1,5 +1,5 @@
-import { verify_contract } from '@/core/validators/contract.js'
-import { verify_witness }  from '@/core/validators/witness.js'
+import { verify_contract } from '@/core/validation/contract.js'
+import { verify_witness }  from '@/core/validation/witness.js'
 
 import {
   can_endorse,
