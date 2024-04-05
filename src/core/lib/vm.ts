@@ -1,6 +1,6 @@
-import { Buff }  from '@cmdcode/buff'
+import { Buff } from '@cmdcode/buff'
 
-import { assert, now, regex, sort_record } from '../util/index.js'
+import { now, regex, sort_record } from '../util/index.js'
 
 import {
   ProgramQuery,
@@ -77,13 +77,16 @@ export function get_program_idx (
   return (idx !== -1) ? idx : null
 }
 
-export function get_vm_config (contract : ContractData) : VMConfig {
-  assert.ok(contract.activated)
-  const { active_at, cid, expires_at, terms } = contract
-  const { paths, programs, schedule } = terms
-  const closes_at = expires_at
+export function get_vm_config (
+  contract  : ContractData,
+  timestamp = now()
+) : VMConfig {
+  const { cid, terms } = contract
+  const { duration, paths, programs, schedule } = terms
+  const active_at = contract.active_at  ?? timestamp
+  const closes_at = contract.expires_at ?? duration
   const pathnames = get_path_names(paths)
-  const vmid      = get_vm_id(active_at, cid, closes_at)
+  const vmid      = contract.active_vm  ?? get_vm_id(active_at, cid, closes_at)
   return { active_at, closes_at, pathnames, programs, schedule, vmid }
 }
 

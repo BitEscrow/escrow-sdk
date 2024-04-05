@@ -19,7 +19,8 @@ import {
   PaymentEntry,
   ProposalData,
   SignerAPI,
-  SpendTemplate
+  SpendTemplate,
+  VMData
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
@@ -43,6 +44,7 @@ import {
 import {
   GET_INIT_SPEND_STATE,
   create_txinput,
+  get_txid,
   get_vout_txhex
 } from './tx.js'
 
@@ -256,11 +258,26 @@ export function get_spend_template (
   return tmpl[1]
 }
 
+export function get_spend_config (
+  txhex    : string,
+  vmstate  : VMData
+) : ContractSpendConfig {
+  assert.exists(vmstate.output)
+  const txid = get_txid(txhex)
+  return {
+    spent_at    : vmstate.updated_at,
+    spent_hash  : vmstate.head,
+    spent_path  : vmstate.output,
+    spent_txhex : txhex,
+    spent_txid  : txid
+  }
+}
+
 export function get_settlement_tx (
   contract  : ContractData,
   deposits  : DepositData[],
   pathname  : string,
-  server_sd : SignerAPI
+  signer    : SignerAPI
 ) : string {
   const output = get_spend_template(pathname, contract.outputs)
   const txdata = decode_tx(output, false)
@@ -268,7 +285,7 @@ export function get_settlement_tx (
     assert.exists(deposit.covenant)
     const vin  = create_txinput(deposit.utxo)
     const psig = get_covenant_psig(pathname, deposit.covenant)
-    const sig  = settle_covenant(contract, deposit, output, psig, server_sd)
+    const sig  = settle_covenant(contract, deposit, output, psig, signer)
     txdata.vin.push({ ...vin, witness: [ sig ] })
   }
   return encode_tx(txdata).hex
