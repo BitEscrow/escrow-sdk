@@ -22,6 +22,10 @@ export function get_entry <T = string[]> (
   return ent[1]
 }
 
+export function is_bigint (value : unknown) : value is bigint {
+  return typeof value === 'bigint'
+}
+
 export function is_hex (
   value : unknown
 ) : value is string {

@@ -12,15 +12,21 @@ export function ok (
   }
 }
 
-export function is_hex (value : string) : asserts value is string {
-  if (!util.is_hex(value)) {
-    throw new TypeError(`Invalid hex: ${String(value)}`)
+export function is_bigint (value : unknown) : asserts value is bigint {
+  if (!util.is_bigint(value)) {
+    throw new TypeError(`invalid bigint: ${String(value)}`)
   }
 }
 
-export function is_hash (value : string) : asserts value is string {
+export function is_hex (value : unknown) : asserts value is string {
+  if (!util.is_hex(value)) {
+    throw new TypeError(`invalid hex: ${String(value)}`)
+  }
+}
+
+export function is_hash (value : unknown) : asserts value is string {
   if (!util.is_hash(value)) {
-    throw new TypeError(`Invalid hash: ${String(value)}`)
+    throw new TypeError(`invalid hash: ${String(value)}`)
   }
 }
 
