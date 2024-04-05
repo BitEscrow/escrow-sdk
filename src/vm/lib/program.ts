@@ -12,7 +12,7 @@ import {
 
 /* Module Imports */
 
-import { debug } from './util.js'
+import { debug } from '../util/base.js'
 
 import {
   VMState,
@@ -23,8 +23,8 @@ import {
 
 /* Local Imports */
 
-import { update_path } from './state.js'
-import EndorseMethod   from './methods/endorse.js'
+import { update_spend_state } from './state.js'
+import EndorseMethod          from './methods/endorse.js'
 
 export function call_method (method : string) : ProgMethodAPI | null {
   switch (method) {
@@ -63,10 +63,9 @@ export function run_program (
   witness : WitnessData
 ) {
   const { programs, store } = state
-  const { action, path, stamp, wid } = witness
   const exec = load_program(programs, store, witness)
   if (exec(witness)) {
-    update_path(action, wid, path, stamp, state)
+    update_spend_state(witness, state)
   }
 }
 

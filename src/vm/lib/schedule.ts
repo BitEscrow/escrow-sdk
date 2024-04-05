@@ -5,13 +5,13 @@ import { get_access_list } from '@/core/util/index.js'
 
 /* Module Imports */
 
-import { VALID_ACTIONS } from '../const.js'
-import { VMState }       from '../types.js'
+import { VALID_ACTIONS }      from '../const.js'
+import { TaskEntry, VMState } from '../types.js'
 
 /* Local Imports */
 
-import { update_path } from './state.js'
-import { debug }       from './util.js'
+import { update_spend_state } from './state.js'
+import { debug }              from '../util/base.js'
 
 export function init_tasks (
   schedule : ScheduleEntry[]
@@ -21,60 +21,59 @@ export function init_tasks (
 }
 
 export function run_schedule (
-  state  : VMState,
-  marker : number
+  state   : VMState,
+  stop_at : number
 ) {
   /**
    * Run all available tasks that fall
    * within the current vm schedule.
    */
-  debug('[vm] running tasks up to marker:', marker)
-  const tasks = get_tasks(state)
+  debug('[vm] running tasks up to date:', stop_at)
+  const tasks = get_tasks(state, stop_at)
   for (const task of tasks) {
-    const [ ts, actions, paths ] = task
-    const stamp = state.active_at + ts
-    const prev  = state.updated
-    if (prev <= stamp && stamp <= marker) {
-      debug('[vm] running task:', task)
-      run_task(actions, paths, stamp, state)
-      state.tasks.shift()
-      if (state.output !== null) return
-    }
+    run_task(state, task)
+    state.tasks.shift()
+    if (state.output !== null) return
   }
 }
 
+/**
+ * Run a task within the virtual machine.
+ */
 function run_task (
-  actsexp : string,
-  pathexp : string,
-  stamp   : number,
-  state   : VMState
+  state : VMState,
+  task  : TaskEntry
 ) {
-  /**
-   * Run a task within the virtual machine.
-   */
-  const paths = state.paths.map(e => e[0])
-  const alist = get_access_list(actsexp, VALID_ACTIONS).wlist
-  const plist = get_access_list(pathexp, paths).wlist
+  const [ ts, actions, paths ] = task
+  const PATHS = state.paths.map(e => e[0])
+  const alist = get_access_list(actions, VALID_ACTIONS).wlist
+  const plist = get_access_list(paths, PATHS).wlist
   for (const action of alist) {
     for (const path of plist) {
       try {
-        const hash = state.vmid
-        update_path(action, hash, path, stamp, state)
+        debug('[vm] running task:', task)
+        const stamp = state.active_at + ts
+        const input = { action, path, stamp, wid: state.vmid }
+        update_spend_state(input, state)
         if (state.output !== null) return
       } catch (err) {
-        debug('[vm] task failed to execute:' + String(err))
+        debug('[cvm] task failed to execute:' + String(err))
       }
     }
   }
 }
 
+/**
+ * Get tasks that fall within
+ * the current vm schedule.
+ */
 function get_tasks (
-  state : VMState
+  state   : VMState,
+  stop_at : number
 ) {
-  /**
-   * Filters tasks that fall within
-   * the current vm schedule.
-   */
-  const { active_at, updated } = state
-  return state.tasks.filter(e => e[0] + active_at > updated)
+  const { active_at, updated_at, tasks } = state
+  return tasks.filter(e => {
+    const stamp = e[0] + active_at
+    return (stamp >= updated_at && stamp <= stop_at)
+  })
 }

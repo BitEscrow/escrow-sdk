@@ -1,6 +1,7 @@
 /* Module Imports */
 
-import { create_program } from '../lib/vm.js'
+import { VALID_FEE_TARGETS } from '../const.js'
+import { create_program }    from '../lib/vm.js'
 
 import {
   get_pay_total,
@@ -32,7 +33,6 @@ import {
   check_expires,
   check_regex
 } from './util.js'
-import { VALID_FEE_TARGETS } from '../const.js'
 
 export function validate_program (
   program : unknown
@@ -112,13 +112,12 @@ function check_programs (
   machine  : VirtualMachineAPI,
   proposal : ProposalData
 ) {
-  const { VALID_ACTIONS } = machine
   const { paths, programs } = proposal
   const path_names = get_path_names(paths)
   for (const terms of programs) {
     const prog = create_program(terms)
     const { actions, params, paths, method } = prog
-    check_regex(VALID_ACTIONS, actions)
+    check_regex(machine.actions, actions)
     check_regex(path_names, paths)
     verify_program(machine, method, params)
   }
@@ -128,13 +127,12 @@ function check_schedule (
   machine  : VirtualMachineAPI,
   proposal : ProposalData
 ) {
-  const { VALID_ACTIONS } = machine
   const { duration, paths, schedule } = proposal
   const path_names = get_path_names(paths)
   schedule.forEach(task => {
     const [ timer, actions, paths ] = task
     check_expires(timer, duration)
-    check_regex(VALID_ACTIONS, actions)
+    check_regex(machine.actions, actions)
     check_regex(path_names, paths)
   })
 }

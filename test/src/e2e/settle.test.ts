@@ -25,7 +25,7 @@ import {
   create_publish_req,
   create_contract,
   activate_contract,
-  settle_contract,
+  spend_contract,
   get_settlement_tx,
   fund_contract
 } from '@scrow/sdk/contract'
@@ -270,23 +270,26 @@ export default async function (
 
       vm_state = CVM.run(vm_state, settled_at)
 
-      assert.exists(vm_state.output)
+      assert.exists(vm_state.output, 'vm_state.output is null')
 
-      const txhex = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
-      const txid  = await client.publish_tx(txhex, true)
+      const spent_hash   = vm_state.head
+      const spent_path   = vm_state.output
+      const spent_txhex  = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
+      const spent_txid   = await client.publish_tx(spent_txhex, true)
+      const spend_config = { spent_hash, spent_path, spent_txhex, spent_txid }
 
-      contract = settle_contract(contract, txhex, vm_state.updated)
+      contract = spend_contract(spend_config, contract)
 
       verify_settlement(contract, deposits, vm_state)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))
-        console.dir(txhex, { depth : null })
+        console.dir(spent_txhex, { depth : null })
       } else {
         t.pass('settlement ok')
       }
 
-      t.equal(txid, contract.spent_txid, 'completed with txid: ' + txid)
+      t.pass('completed with txid: ' + spent_txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

@@ -3,7 +3,7 @@ import base     from './base.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
 
-const { bool, hash, hex, label, num, payment, stamp } = base
+const { bool, hash, hex, label, num, payment, stamp, str } = base
 
 const status  = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
@@ -12,6 +12,23 @@ const publish_req = z.object({
   proposal   : proposal.data,
   signatures : hex.array().optional()
 })
+
+const spend_info = tx.spend_info.extend({
+  spent_hash : hash.nullable(),
+  spent_path : str.nullable()
+})
+
+const ct_spent = tx.tx_spent.extend({
+  spent_hash : hash,
+  spent_path : str
+})
+
+const ct_unspent = tx.tx_unspent.extend({
+  spent_hash : z.null(),
+  spent_path : z.null()
+})
+
+const spend_state = z.discriminatedUnion('spent', [ ct_spent, ct_unspent ])
 
 const vm_info = z.object({
   activated  : bool,
@@ -64,7 +81,7 @@ const base_data = z.object({
   updated_at : stamp
 })
 
-const data  = base_data.and(vm_state).and(tx.spend_state).and(tx.settle_state)
-const shape = base_data.merge(vm_info).merge(tx.spend_info).merge(tx.settle_info)
+const data  = base_data.and(vm_state).and(spend_state).and(tx.settle_state)
+const shape = base_data.merge(vm_info).merge(spend_info).merge(tx.settle_info)
 
 export default { data, output, publish_req, shape, status }

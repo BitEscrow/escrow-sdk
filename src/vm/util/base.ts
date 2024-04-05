@@ -1,9 +1,5 @@
-import {
-  VMData,
-  WitnessData
-} from '@/core/types/index.js'
-
-import { VMState } from '../types.js'
+import { WitnessData }  from '@/core/types/index.js'
+import { ENGINE_LABEL } from '../const.js'
 
 const DEBUG = false
 
@@ -14,8 +10,9 @@ export class VMError extends Error {
 }
 
 export function debug (...msg : unknown[]) {
+  const label = ENGINE_LABEL
   if (DEBUG) {
-    console.log('[vm]', ...msg)
+    console.log(`[${label}]`, ...msg)
   }
 }
 
@@ -38,9 +35,4 @@ export function get_statements (
 ) {
  const arr = (Array.isArray(witness)) ? witness : [ witness ]
  return arr.sort((a, b) => a.stamp - b.stamp)
-}
-
-export function get_vmdata (vmstate : VMState) : VMData {
-  const { active_at, error, head, output, step, updated, vmid } = vmstate
-  return { active_at, error, head, output, step, updated, vmid }
 }

@@ -80,5 +80,7 @@ export default {
   settle_state,
   spend_info,
   spend_state,
+  tx_spent,
+  tx_unspent,
   txout
 }

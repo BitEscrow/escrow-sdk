@@ -9,9 +9,10 @@ import { SPEND_TXIN_SIZE }          from '../const.js'
 import { assert, now, sort_record } from '../util/index.js'
 
 import {
-  ContractConfig,
+  ContractCreateConfig,
   ContractData,
   ContractRequest,
+  ContractSpendConfig,
   ContractStatus,
   DepositData,
   FundingData,
@@ -25,7 +26,12 @@ import ContractSchema from '../schema/contract.js'
 
 /* Local Imports */
 
-import { get_covenant_psig, settle_covenant } from './covenant.js'
+import { get_vm_id } from './vm.js'
+
+import {
+  get_covenant_psig,
+  settle_covenant
+} from './covenant.js'
 
 import {
   get_path_names,
@@ -37,10 +43,8 @@ import {
 import {
   GET_INIT_SPEND_STATE,
   create_txinput,
-  get_txid,
   get_vout_txhex
 } from './tx.js'
-import { get_vm_id } from './vm.js'
 
 export const GET_INIT_ACTIVE_STATE = () => {
   return {
@@ -58,6 +62,8 @@ const CONTRACT_DEFAULTS = () => {
     fund_count : 0,
     fund_pend  : 0,
     fund_value : 0,
+    spent_hash : null,
+    spent_path : null,
     status     : 'published' as ContractStatus
   }
 }
@@ -73,7 +79,7 @@ export function create_publish_req (
  * Returns a new ContractData object.
  */
 export function create_contract (
-  config  : ContractConfig,
+  config  : ContractCreateConfig,
   request : ContractRequest,
   signer  : SignerAPI
 ) : ContractData {
@@ -90,7 +96,7 @@ export function create_contract (
   // Define or compute the published date.
   const created_at = config.created_at ?? now()
   // Define or compute the contract id.
-  const cid        = config.cid        ?? get_contract_id(outputs, prop_id, created_at)
+  const cid        = get_contract_id(outputs, prop_id, created_at)
   // Calculate the subtotal.
   const subtotal   = proposal.value + get_pay_total(fees)
   // Calculate the vout size of the tx output.
@@ -149,21 +155,20 @@ export function activate_contract (
   active_at : number = now()
 ) : ContractData {
   // Define a hard expiration date.
-  const active_vm  = get_vm_id(active_at, contract.cid)
   const expires_at = active_at + contract.terms.duration
+  const active_vm  = get_vm_id(active_at, contract.cid, expires_at)
   const status     = 'active' as ContractStatus
   // Return the new contract and vm config.
   return { ...contract, activated: true, active_at, active_vm, expires_at, status }
 }
 
-export function settle_contract (
-  contract    : ContractData,
-  spent_txhex : string,
-  spent_at = now()
+export function spend_contract (
+  config   : ContractSpendConfig,
+  contract : ContractData
 ) : ContractData {
-  const spent_txid = get_txid(spent_txhex)
-  const status     = 'spent' as ContractStatus
-  return { ...contract, spent_at, status, spent_txhex, spent_txid, spent: true }
+  const spent_at = config.spent_at ?? now()
+  const status   = 'spent' as ContractStatus
+  return { ...contract, ...config, spent_at, status, spent: true }
 }
 
 /**

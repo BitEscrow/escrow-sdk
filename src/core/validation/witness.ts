@@ -29,7 +29,7 @@ export function verify_program (
   method  : string,
   params  : Literal[]
 ) {
-  if (!machine.VALID_METHODS.includes(method)) {
+  if (!machine.methods.includes(method)) {
     throw new Error('invalid program method: ' + method)
   }
 

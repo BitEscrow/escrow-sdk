@@ -1,25 +1,22 @@
 /* Module Imports */
 
 import { PathState, VMState } from '../types.js'
-import { VMError }            from './util.js'
+import { VMError }            from '../util/base.js'
 
-export function run_action (
+export function run_path_action (
   action : string,
-  path   : PathState,
+  pstate : PathState,
   state  : VMState
-) : PathState | null {
-  /**
-   * Run an action on a specified path.
-   */
+) : PathState {
   switch (action) {
     case 'close':
-      return exec_close(path)
+      return exec_close(pstate)
     case 'dispute':
-      return exec_dispute(path)
+      return exec_dispute(pstate)
     case 'lock':
-      return exec_lock(path)
+      return exec_lock(pstate)
     case 'unlock':
-      return exec_release(path)
+      return exec_release(pstate)
     case 'resolve':
       return exec_resolve(state)
     default:

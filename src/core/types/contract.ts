@@ -5,7 +5,8 @@ import {
 
 import {
   SettleState,
-  SpendState
+  Spent,
+  Unspent
 } from './tx.js'
 
 export type ContractStatus =
@@ -21,8 +22,14 @@ export type ContractStatus =
   'expired'   |  // Active contract has expired and funds are released.
   'error'        // Something went wrong, may require manual intervention.
 
-export type ActiveState  = ContractIsActive | ContractIsInactive
-export type ContractData = ContractBase & ActiveState & SettleState & SpendState
+export type ContractActiveState = ContractIsActive | ContractIsInactive
+export type ContractSpendState  = ContractIsSpent  | ContractIsUnspent
+
+export type ContractData =
+  ContractBase        &
+  ContractActiveState &
+  ContractSpendState  &
+  SettleState
 
 export type SpendTemplate = [
   label : string,
@@ -43,18 +50,33 @@ interface ContractIsInactive {
   expires_at : null
 }
 
+interface ContractIsSpent extends Spent {
+  spent_hash : string
+  spent_path : string
+}
+
+interface ContractIsUnspent extends Unspent {
+  spent_hash : null
+  spent_path : null
+}
+
 export interface ContractRequest {
   proposal    : ProposalData
   signatures ?: string[]
 }
 
-export interface ContractConfig {
-  cid        ?: string
+export interface ContractCreateConfig {
   created_at ?: number
   fees        : PaymentEntry[]
   feerate     : number
-  outputs    ?: SpendTemplate[]
-  prop_id    ?: string
+}
+
+export interface ContractSpendConfig {
+  spent_at   ?: number
+  spent_hash  : string
+  spent_path  : string
+  spent_txhex : string
+  spent_txid  : string
 }
 
 export interface ContractBase {

@@ -134,7 +134,7 @@ export function verify_settlement (
   // Verify the activation of the vm.
   verify_activation(contract, result)
   // Run the vm up to the final timestamp.
-  assert.ok(result.updated === spent_at, 'contract spent_at does not match vm result')
+  assert.ok(result.updated_at === spent_at, 'contract spent_at does not match vm result')
   // Assert the state output is not null.
   assert.ok(result.output !== null, 'result vm output is null')
   // Get the spend template for the provided output.

@@ -1,6 +1,7 @@
 import {
   Literal,
   ProgramData,
+  VMData,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -52,18 +53,26 @@ export interface ProgMethodAPI {
   verify : ProgramVerify
 }
 
-interface VMData {
-  active_at : number          // Timestamp for when the VM was initialized.
-  error     : string | null   // Error output of the VM.
-  head      : string          // Current head of the commit-chain.
-  output    : string | null   // Standard output of the VM.
-  step      : number          // Counts the number of commits to the VM.
-  updated   : number          // Timestamp for when the VM was last updated.
-  vmid      : string          // The virtual machine identifier.
+export interface VMInput {
+  action : string
+  path   : string
+  stamp  : number
+  wid    : string
 }
 
-export interface VMState extends VMData {
-  commits   : CommitEntry[]   // List of commits to the VM.
+// export interface VMData {
+//   active_at  : number          // Timestamp for when the VM was initialized.
+//   closes_at  : number
+//   error      : string | null   // Error output of the VM.
+//   head       : string          // Current head of the commit-chain.
+//   output     : string | null   // Standard output of the VM.
+//   state     ?: string
+//   step       : number          // Counts the number of commits to the VM.
+//   updated_at : number          // Timestamp for when the VM was last updated.
+//   vmid       : string          // The virtual machine identifier.
+// }
+
+export interface VMState extends Omit<VMData, 'state'> {
   paths     : StateEntry[]    // List of spend paths and their current state.
   programs  : ProgramData[]   // List of programs available in the VM.
   status    : PathStatus      // Current status of the VM.

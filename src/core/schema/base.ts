@@ -4,6 +4,7 @@ type Literal = z.infer<typeof literal>
 type Json    = Literal | { [key : string] : Json } | Json[]
 
 const address = z.string(),
+      big     = z.bigint(),
       bool    = z.boolean(),
       date    = z.date(),
       index   = z.number().max(1024),
@@ -65,6 +66,7 @@ export default {
   base64,
   base64url,
   bech32,
+  big,
   bool,
   date,
   entry,

@@ -14,11 +14,11 @@ export * as VMSchema from './schema.js'
 export * from './types.js'
 
 export default {
-  ENGINE_LABEL,
-  VALID_ACTIONS,
-  VALID_METHODS,
-  check : check_params,
-  eval  : eval_witness,
-  init  : init_vm,
-  run   : eval_schedule
+  actions : VALID_ACTIONS,
+  methods : VALID_METHODS,
+  tag     : ENGINE_LABEL,
+  check   : check_params,
+  eval    : eval_witness,
+  init    : init_vm,
+  run     : eval_schedule
 }

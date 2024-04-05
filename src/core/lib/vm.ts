@@ -79,20 +79,23 @@ export function get_program_idx (
 
 export function get_vm_config (contract : ContractData) : VMConfig {
   assert.ok(contract.activated)
-  const { active_at, cid, terms } = contract
+  const { active_at, cid, expires_at, terms } = contract
   const { paths, programs, schedule } = terms
+  const closes_at = expires_at
   const pathnames = get_path_names(paths)
-  const vmid      = get_vm_id(active_at, cid)
-  return { active_at, pathnames, programs, schedule, vmid }
+  const vmid      = get_vm_id(active_at, cid, closes_at)
+  return { active_at, closes_at, pathnames, programs, schedule, vmid }
 }
 
 export function get_vm_id (
   active_at : number,
-  cid       : string
+  cid       : string,
+  closes_at : number
 ) {
   const hash  = Buff.hex(cid)
-  const stamp = Buff.num(active_at, 4)
-  return Buff.join([ hash, stamp ]).digest.hex
+  const start = Buff.num(active_at, 4)
+  const stop  = Buff.num(closes_at, 4)
+  return Buff.join([ hash, start, stop ]).digest.hex
 }
 
 export function create_receipt (
@@ -100,21 +103,21 @@ export function create_receipt (
   signer : SignerAPI,
   created_at = now()
 ) : VMReceipt {
-  const hash       = get_receipt_hash(data)
+  const vm_hash    = get_vmdata_hash(data)
   const server_pk  = signer.pubkey
-  const receipt_id = get_receipt_id(hash, server_pk, created_at)
+  const receipt_id = get_receipt_id(vm_hash, server_pk, created_at)
   const server_sig = signer.sign(receipt_id)
   return sort_record({ ...data, created_at, receipt_id, server_pk, server_sig })
 }
 
-export function get_receipt_hash (data : VMData) {
+export function get_vmdata_hash (data : VMData) {
   const err   = Buff.str(data.error  ?? 'null')
   const head  = Buff.hex(data.head, 32)
   const out   = Buff.str(data.output ?? 'null')
-  const stamp = Buff.num(data.updated, 4)
   const step  = Buff.num(data.step, 4)
+  const uat   = Buff.num(data.updated_at, 4)
   const vmid  = Buff.hex(data.vmid, 32)
-  return Buff.join([ err, head, out, stamp, step, vmid ]).digest.hex
+  return Buff.join([ err, head, out, step, uat, vmid ]).digest.hex
 }
 
 export function get_receipt_id (

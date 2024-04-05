@@ -1,31 +1,26 @@
 /* Global Imports */
 
 import { Buff }         from '@cmdcode/buff'
-import { regex }        from '@/core/util/index.js'
 import { ProgramEntry } from '@/core/types/index.js'
-
-/* Module Imports */
-
-import { debug } from './util.js'
 
 import {
   PathState,
   PathStatus,
   StateEntry,
+  VMInput,
   VMState
 } from '../types.js'
 
 /* Local Imports */
 
-import { run_action } from './action.js'
+import { run_path_action } from './action.js'
 
-const INIT_TERMS = {
-  can_dispute : false,
-  can_lock    : false,
-  can_resolve : false
-}
+import {
+  get_path_state,
+  init_path_state
+} from './path.js'
 
-export function init_paths (
+export function init_spend_state (
   paths    : string[],
   programs : ProgramEntry[]
 ) {
@@ -37,62 +32,28 @@ export function init_paths (
   return states
 }
 
-export function update_path (
-  action : string,
-  hash   : string,
-  path   : string,
-  stamp  : number,
-  state  : VMState
+export function update_spend_state (
+  input : VMInput,
+  state : VMState
 ) {
-  const pst = get_path(state.paths, path)
-  const idx = pst[0]
-  const ret = run_action(action, pst[1], state)
+  check_update_stamp(input.stamp, state)
 
-  if (ret !== null) {
-    commit_action(action, hash, path, stamp, state)
-    state.paths[idx] = [ path, ret ]
-    state.status = update_status(state.status, ret)
-  }
+  const { action, path, stamp } = input
+  const [ pstate, idx ]  = get_path_state(state.paths, path)
+  const ret_path_state   = run_path_action(action, pstate, state)
 
-  if (ret === PathState.closed) {
+  state.paths[idx] = [ path, ret_path_state ]
+  state.status     = update_vm_status(state.status, ret_path_state)
+  state.step       = state.step + 1
+  state.updated_at = stamp
+  state.head       = get_commit_hash(input, state)
+
+  if (ret_path_state === PathState.closed) {
     state.output = path
   }
-
-  debug('[vm] new state:', state)
 }
 
-function get_path (
-  ent : StateEntry[],
-  key : string
-) : [ idx : number, state: PathState ] {
-  const idx   = ent.findIndex(e => e[0] === key)
-  const state = ent[idx][1]
-  if (state === undefined) {
-    throw new Error('path not found for label ' + key)
-  }
-  return [ idx, state ]
-}
-
-function init_path_state (
-  pathname : string,
-  programs : ProgramEntry[]
-) : PathState {
-  const terms = { ...INIT_TERMS }
-    let state : PathState = PathState.open
-  for (const prog of programs) {
-    const [ _, actexp, pathexp ] = prog.map(e => String(e))
-    if (regex(pathname, pathexp)) {
-      if (regex('dispute', actexp)) terms.can_dispute = true
-      if (regex('resolve', actexp)) terms.can_resolve = true
-      if (regex('lock',    actexp)) terms.can_lock    = true
-      if (regex('unlock',  actexp)) state = PathState.locked
-    }
-  }
-  validate_path_terms(pathname, terms)
-  return state
-}
-
-function update_status (
+function update_vm_status (
   status : PathStatus,
   state  : PathState
 ) : PathStatus {
@@ -105,47 +66,19 @@ function update_status (
   }
 }
 
-function get_hash_tip (
-  step  : number,
-  stamp : number,
-  head  : string,
-  hash  : string
+function get_commit_hash (
+  input : VMInput,
+  state : VMState
 ) {
-  return Buff.json([ step, stamp, head, hash ]).digest.hex
+  const { head, status, step, updated_at } = state
+  return Buff.json([ input.wid, head, status, step, updated_at ]).digest.hex
 }
 
-function commit_action (
-  action  : string,
-  hash    : string,
-  path    : string,
-  stamp   : number,
-  state   : VMState
-) {
-  const head  = state.head
-  const step  = state.step + 1
-  state.commits.push([ step, stamp, head, hash, action, path ])
-  state.head    = get_hash_tip(step, stamp, head, hash)
-  state.step    = step
-  state.updated = stamp
-}
-
-function validate_path_terms (
-  path  : string,
-  terms : typeof INIT_TERMS
-) {
-  if (terms.can_dispute && !terms.can_resolve) {
-    throw new Error('dispute action has no resolve action for path ' + path)
-  }
-  // if (terms.can_resolve && !terms.can_dispute) {
-  //   throw new Error('Resolve action has no dispute action: ' + path)
-  // }
-}
-
-export function check_stamp (
+function check_update_stamp (
   stamp : number,
   state : VMState
 ) {
-  if (stamp < state.updated) {
-    throw new Error(`timestamp occurs before latest update: ${stamp} <= ${state.updated}`)
+  if (stamp < state.updated_at) {
+    throw new Error(`timestamp occurs before latest update: ${stamp} < ${state.updated_at}`)
   }
 }

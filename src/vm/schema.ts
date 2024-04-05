@@ -3,27 +3,25 @@ import base  from '@/core/schema/base.js'
 import prop  from '@/core/schema/proposal.js'
 import vm    from '@/core/schema/vm.js'
 
-const { hash, label, literal, num, regex, stamp, str } = base
+const { hash, label, num, regex, stamp, str } = base
 
-const commit  = z.tuple([ num, stamp, hash, hash, label, label ])
-const entry   = z.tuple([ hash ]).rest(literal)
-const method  = z.enum([ 'endorse' ])
 const path    = z.tuple([ str, num ])
 const store   = z.tuple([ hash, str ]).array()
 const status  = z.enum([ 'init', 'open', 'disputed', 'closed' ])
 
 const data = z.object({
-  active_at : stamp,
-  error     : str.nullable(),
-  head      : hash,
-  output    : label.nullable(),
-  step      : num.max(255),
-  updated   : stamp,
-  vmid      : hash
+  active_at  : stamp,
+  closes_at  : stamp,
+  error      : str.nullable(),
+  head       : hash,
+  output     : label.nullable(),
+  state      : str.optional(),
+  step       : num,
+  updated_at : stamp,
+  vmid       : hash
 })
 
-const state = data.extend({
-  commits  : commit.array(),
+const int_state = z.object({
   paths    : path.array(),
   programs : vm.program.array(),
   store,
@@ -31,14 +29,14 @@ const state = data.extend({
   tasks    : prop.schedule
 })
 
+const vm_state = int_state.merge(data).omit({ state: true })
+
 export default {
-  commit,
   data,
-  entry,
-  method,
   path,
   regex,
   store,
-  state,
+  int_state,
+  vm_state,
   status
 }

@@ -5,8 +5,8 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
 /* Module Imports */
 
 import {
-  get_receipt_hash,
-  get_receipt_id
+  get_receipt_id,
+  get_vmdata_hash
 } from '../lib/vm.js'
 
 import {
@@ -20,7 +20,7 @@ export function verify_receipt (
 ) {
   const { created_at, receipt_id, server_pk, server_sig, ...data } = receipt
 
-  const int_hash = get_receipt_hash(data)
+  const int_hash = get_vmdata_hash(data)
   const int_id   = get_receipt_id(int_hash, server_pk, created_at)
 
   if (int_id !== receipt_id) {
@@ -39,8 +39,8 @@ export function verify_receipt (
     throw new Error('receipt does not match step: '   + result.step)
   } else if (receipt.head !== result.head) {
     throw new Error('receipt does not match head: '   + result.head)
-  } else if (receipt.updated !== result.updated) {
-    throw new Error('receipt does not match stamp: '  + result.updated)
+  } else if (receipt.updated_at !== result.updated_at) {
+    throw new Error('receipt does not match stamp: '  + result.updated_at)
   } else if (receipt.error !== result.error) {
     throw new Error('receipt does not match error: '  + result.error)
   } else if (receipt.output !== result.output) {
