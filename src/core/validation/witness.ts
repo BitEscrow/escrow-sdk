@@ -42,9 +42,9 @@ export function verify_witness (
   witness : WitnessData
 ) {
   // Unpack data objects.
-  const { active_at, closes_at, output, pathnames } = vmdata
-  const { sigs, wid, ...tmpl }                      = witness
-  const { action, path, prog_id, method, stamp }    = tmpl
+  const { active_at, commit_at, expires_at, output, pathnames } = vmdata
+  const { sigs, wid, ...tmpl }                   = witness
+  const { action, path, prog_id, method, stamp } = tmpl
   // Find the matching program from the list via prog_id.
   const program = vmdata.programs.find(e => e.prog_id === prog_id)
   // Assert that the program exists.
@@ -60,7 +60,8 @@ export function verify_witness (
   assert.ok(regex(path, paths),        'path not allowed in program')
   assert.ok(pathnames.includes(path),  'path does not exist in vm')
   assert.ok(stamp >= active_at,        'stamp exists before active date')
-  assert.ok(stamp < closes_at,         'stamp exists on or after close date')
+  assert.ok(stamp >= commit_at,        'stamp exists before latest commit')
+  assert.ok(stamp < expires_at,        'stamp exists on or after close date')
   assert.ok(output === null,           'vm has already closed on an output')
   verify_witness_sigs(program, witness)
 }

@@ -3,15 +3,15 @@ import base  from './base.js'
 import prop  from './proposal.js'
 import wit   from './witness.js'
 
-const { hash, literal, num, regex, stamp, signature, str } = base
+const { bool, hash, literal, num, regex, stamp, signature, str } = base
 
 const config = z.object({
-  active_at : stamp,
-  closes_at : stamp,
-  pathnames : str.array(),
-  programs  : prop.programs,
-  schedule  : prop.schedule,
-  vmid      : hash
+  active_at  : stamp,
+  expires_at : stamp,
+  pathnames  : str.array(),
+  programs   : prop.programs,
+  schedule   : prop.schedule,
+  vmid       : hash
 })
 
 const program = z.object({
@@ -22,12 +22,38 @@ const program = z.object({
   paths   : regex
 })
 
-const data = z.object({
+const receipt_data = z.object({
+  receipt_id : hash,
+  server_pk  : hash,
+  server_sig : signature
+})
+
+const close_info = z.object({
+  closed    : bool,
+  closed_at : stamp.nullable(),
+  output    : str.nullable()
+})
+
+const vm_open = z.object({
+  closed    : z.literal(false),
+  closed_at : z.null(),
+  output    : z.null()
+})
+
+const vm_closed = z.object({
+  closed    : z.literal(true),
+  closed_at : stamp,
+  output    : str
+})
+
+const close_state = z.discriminatedUnion('closed', [ vm_open, vm_closed ])
+
+const base_data = z.object({
   active_at  : stamp,
   commit_at  : stamp,
-  closes_at  : stamp,
   engine     : str,
   error      : str.nullable(),
+  expires_at : stamp,
   head       : hash,
   output     : str.nullable(),
   pathnames  : str.array(),
@@ -38,6 +64,10 @@ const data = z.object({
   updated_at : stamp,
   vmid       : hash
 })
+
+const data    = base_data.and(close_state)
+const shape   = base_data.merge(close_info)
+const receipt = data.and(receipt_data)
 
 const vm_check = z
   .function()
@@ -69,11 +99,4 @@ const api = z.object({
   run     : vm_run
 })
 
-const receipt = data.extend({
-  created_at : stamp,
-  receipt_id : hash,
-  server_pk  : hash,
-  server_sig : signature
-})
-
-export default { api, config, data, program, receipt }
+export default { api, config, data, shape, program, receipt }

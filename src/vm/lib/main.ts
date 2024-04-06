@@ -28,18 +28,16 @@ import {
 /* Local Imports */
 
 import { init_vm_state }            from './state.js'
+import { init_stores, run_program } from './program.js'
 import { init_tasks, run_schedule } from './schedule.js'
-
-import {
-  init_stores,
-  run_program
-} from './program.js'
 
 const GET_INIT_DATA = () => {
   return {
-    error  : null,
-    output : null,
-    step   : 0
+    closed    : false as const,
+    closed_at : null,
+    error     : null,
+    output    : null,
+    step      : 0
   }
 }
 
@@ -66,13 +64,13 @@ export function eval_witness (
       // Evaluate the schedule for due events.
       run_schedule(vm_state, wit.stamp)
       // If there is a result, return early.
-      if (vm_state.output !== null) {
+      if (vm_state.closed) {
         return serialize_vmstate(vm_state)
       }
       // Fetch the program by id, then run the program.
       run_program(vm_state, wit)
       // If there is a result, return early.
-      if (vm_state.error !== null || vm_state.output !== null) {
+      if (vm_state.closed) {
         return serialize_vmstate(vm_state)
       }
     }
@@ -105,7 +103,7 @@ export function eval_schedule (
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (config : VMConfig) : VMData {
-  const { active_at, closes_at, engine, pathnames, vmid } = config
+  const { active_at, expires_at, engine, pathnames, vmid } = config
   const programs = config.programs.map(e => create_program(e))
 
   const int_state : CVMState = {
@@ -118,8 +116,8 @@ export function init_vm (config : VMConfig) : VMData {
     ...GET_INIT_DATA(),
     active_at,
     commit_at  : active_at,
-    closes_at,
     engine,
+    expires_at,
     pathnames,
     programs,
     vmid,

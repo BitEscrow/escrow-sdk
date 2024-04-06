@@ -1,6 +1,10 @@
-import { Literal }       from './base.js'
+import { Literal }                     from './base.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
-import { WitnessData }   from './witness.js'
+import { WitnessData }                 from './witness.js'
+
+export type VMRunState = VMOpen | VMClosed
+export type VMData     = VMBase & VMRunState
+export type VMReceipt  = VMData & Receipt
 
 export interface VirtualMachineAPI {
   actions : string[]
@@ -10,6 +14,25 @@ export interface VirtualMachineAPI {
   eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
   init    : (config : VMConfig) => VMData
   run     : (data   : VMData, stop_at ?: number) => VMData
+}
+
+interface VMOpen {
+  closed    : false
+  closed_at : null
+  output    : null
+}
+
+interface VMClosed {
+  closed    : true
+  closed_at : number
+  output    : string
+}
+
+interface Receipt {
+  created_at : number
+  receipt_id : string
+  server_pk  : string
+  server_sig : string
 }
 
 export interface ProgramQuery {
@@ -29,23 +52,22 @@ export interface ProgramData {
 }
 
 export interface VMConfig {
-  active_at : number
-  closes_at : number
-  engine    : string
-  pathnames : string[]
-  programs  : ProgramEntry[]
-  schedule  : ScheduleEntry[]
-  vmid      : string
+  active_at  : number
+  engine     : string
+  expires_at : number
+  pathnames  : string[]
+  programs   : ProgramEntry[]
+  schedule   : ScheduleEntry[]
+  vmid       : string
 }
 
-export interface VMData {
+export interface VMBase {
   active_at  : number
   commit_at  : number
-  closes_at  : number
   engine     : string
   error      : string | null   // Error output of the VM.
+  expires_at : number
   head       : string          // Current head of the commit-chain.
-  output     : string | null   // Standard output of the VM.
   pathnames  : string[]
   programs   : ProgramData[]
   state      : string
@@ -53,11 +75,4 @@ export interface VMData {
   tasks      : ScheduleEntry[]
   updated_at : number          // Timestamp for when the VM was last updated.
   vmid       : string
-}
-
-export interface VMReceipt extends VMData {
-  created_at : number
-  receipt_id : string
-  server_pk  : string
-  server_sig : string
 }

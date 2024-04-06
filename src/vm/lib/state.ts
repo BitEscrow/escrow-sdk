@@ -1,7 +1,7 @@
-/* Global Imports */
-
-import { Buff }         from '@cmdcode/buff'
-import { ProgramEntry } from '@/core/types/index.js'
+import { Buff }            from '@cmdcode/buff'
+import { ProgramEntry }    from '@/core/types/index.js'
+import { VMError }         from '../util/base.js'
+import { run_path_action } from './action.js'
 
 import {
   CVMData,
@@ -10,10 +10,6 @@ import {
   StateEntry,
   VMInput
 } from '../types.js'
-
-/* Local Imports */
-
-import { run_path_action } from './action.js'
 
 import {
   get_path_state,
@@ -50,7 +46,9 @@ export function update_vm_state (
   data.head        = get_commit_hash(data, input)
 
   if (ret_path_state === PathState.closed) {
-    data.output = path
+    data.closed    = true
+    data.closed_at = stamp
+    data.output    = path
   }
 }
 
@@ -82,6 +80,8 @@ function check_update_stamp (
   stamp : number
 ) {
   if (stamp < data.commit_at) {
-    throw new Error(`timestamp occurs before latest commit: ${stamp} < ${data.commit_at}`)
+    throw new VMError(`timestamp occurs before latest commit: ${stamp} < ${data.commit_at}`)
+  } else if (stamp >= data.expires_at) {
+    throw new VMError(`timestamp occurs on or after expiration date: ${stamp} >= ${data.expires_at}`)
   }
 }

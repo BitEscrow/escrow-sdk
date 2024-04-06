@@ -267,7 +267,7 @@ export default async function (
 
       /* ------------------- [ Close Contract ] ------------------- */
 
-      vm_state = CVM.run(vm_state, vm_state.closes_at)
+      vm_state = CVM.run(vm_state, vm_state.expires_at)
 
       assert.exists(vm_state.output, 'vm_state output is null')
 

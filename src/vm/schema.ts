@@ -15,7 +15,7 @@ const int_state = z.object({
   status
 })
 
-const vm_state = data.extend({
+const vm_state = vm.shape.extend({
   state : int_state
 })
 

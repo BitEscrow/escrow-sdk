@@ -16,9 +16,9 @@ import {
 
 import escrow_vec from './vectors/escrow.json' assert { type: 'json' }
 
-const vmid      = '00'.repeat(32)
-const active_at = now()
-const closes_at = active_at + 9999
+const vmid       = '00'.repeat(32)
+const active_at  = now()
+const expires_at = active_at + 9999
 
 export default function (tape : Test) {
   tape.test('Running VM test vectors', t => {
@@ -33,7 +33,7 @@ function run_test (t : Test, v : VMVector) {
   // Find and replace aliases with their relevant pubkeys.
   const progs  = resolve_aliases(members, programs as ProgramEntry[])
   // Configure the init state of the vm.
-  const config = { active_at, closes_at, engine, pathnames, programs : progs, schedule, vmid } as VMConfig
+  const config = { active_at, expires_at, engine, pathnames, programs : progs, schedule, vmid } as VMConfig
   // For each test in the test set:
   for (const { comment, error, result, stamp, steps, witness } of tests) {
     try {

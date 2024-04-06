@@ -79,14 +79,11 @@ export function get_vm_config (
   contract : ContractData
 ) : VMConfig {
   assert.ok(contract.activated, 'contract is not active')
-  const active_at = contract.active_at
-  const closes_at = contract.expires_at
-  const engine    = contract.terms.engine
-  const pathnames = get_path_names(contract.terms.paths)
-  const programs  = contract.terms.programs
-  const schedule  = contract.terms.schedule
-  const vmid      = contract.active_vm
-  return { active_at, closes_at, engine, pathnames, programs, schedule, vmid }
+  const { active_at, active_vm, expires_at, terms } = contract
+  const { engine, paths, programs, schedule } = terms
+  const pathnames = get_path_names(paths)
+  const vmid      = active_vm
+  return { active_at, expires_at, engine, pathnames, programs, schedule, vmid }
 }
 
 export function get_vm_id (
