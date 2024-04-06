@@ -5,15 +5,13 @@ import {
 
 import {
   SettleState,
-  Spent,
-  Unspent
+  SpendState
 } from './tx.js'
 
 export type ContractStatus =
   'published' |  // Contract is published and awaiting funds.
   'funded'    |  // Contract is funded and awaiting confirmation.
   'secured'   |  // Contract funds are confirmed and awaiting activation.
-  'pending'   |  // Contract is in the process of being activated.
   'active'    |  // Contract is active and CVM is running.
   'closed'    |  // Contract is closed and awaiting settlement.
   'spent'     |  // Contract is settled and awaiting confirmation.
@@ -23,12 +21,13 @@ export type ContractStatus =
   'error'        // Something went wrong, may require manual intervention.
 
 export type ContractActiveState = ContractIsActive | ContractIsInactive
-export type ContractSpendState  = ContractIsSpent  | ContractIsUnspent
+export type ContractCloseState  = ContractIsOpen   | ContractIsClosed
 
 export type ContractData =
   ContractBase        &
   ContractActiveState &
-  ContractSpendState  &
+  ContractCloseState  &
+  SpendState          &
   SettleState
 
 export type SpendTemplate = [
@@ -50,14 +49,18 @@ interface ContractIsInactive {
   expires_at : null
 }
 
-interface ContractIsSpent extends Spent {
-  spent_hash : string
-  spent_path : string
+interface ContractIsClosed {
+  closed      : true
+  closed_at   : number
+  closed_hash : string
+  closed_path : string
 }
 
-interface ContractIsUnspent extends Unspent {
-  spent_hash : null
-  spent_path : null
+interface ContractIsOpen {
+  closed      : false
+  closed_at   : null
+  closed_hash : null
+  closed_path : null
 }
 
 export interface ContractRequest {
@@ -69,14 +72,6 @@ export interface ContractCreateConfig {
   created_at ?: number
   fees        : PaymentEntry[]
   feerate     : number
-}
-
-export interface ContractSpendConfig {
-  spent_at   ?: number
-  spent_hash  : string
-  spent_path  : string
-  spent_txhex : string
-  spent_txid  : string
 }
 
 export interface ContractBase {

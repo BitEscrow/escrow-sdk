@@ -1,18 +1,17 @@
 import { Network }            from './base.js'
 import { CovenantData }       from './covenant.js'
-import { OracleTxRecvStatus } from './oracle.js'
 
 import {
+  ConfirmState,
   SettleState,
   SpendState,
   TxOutput
 } from './tx.js'
 
-export type DepositData   = DepositInfo & DepositState & SettleState & SpendState
-export type DepositState  = DepositConfirmed | DepositUnconfirmed
-export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
+export type DepositData   = DepositInfo & ConfirmState & SettleState & SpendState
+export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
-export type FundingData = DepositState & SettleState & SpendState & {
+export type FundingData = ConfirmState & SettleState & SpendState & {
   covenant   : CovenantData | null
   status     : DepositStatus
   updated_at : number
@@ -30,25 +29,9 @@ export interface CloseRequest {
   return_psig : string
 }
 
-interface DepositConfirmed {
-  confirmed    : true
-  block_hash   : string
-  block_height : number
-  block_time   : number
-  expires_at   : number
-}
-
-interface DepositUnconfirmed {
-  confirmed    : false
-  block_hash   : null
-  block_height : null
-  block_time   : null
-  expires_at   : null
-}
-
 export interface DepositConfig {
-  created_at  ?: number
-  utxo_status ?: OracleTxRecvStatus
+  created_at ?: number
+  utxo_state ?: ConfirmState
 }
 
 export interface DepositInfo {

@@ -4,15 +4,18 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 import {
   decode_tx,
-  encode_tx,
-  parse_txid
+  encode_tx
 } from '@scrow/tapscript/tx'
 
 /* Module Imports */
 
 import { get_proposal_id } from '../lib/proposal.js'
-import { create_txinput }  from '../lib/tx.js'
 import { assert }          from '../util/index.js'
+
+import {
+  create_txinput,
+  get_txid
+} from '../lib/tx.js'
 
 import {
   create_spend_templates,
@@ -119,26 +122,31 @@ export function verify_activation (
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
 
+export function verify_closing (
+  contract : ContractData,
+  vmstate  : VMData
+) {
+  assert.ok(vmstate.updated_at === contract.closed_at,   'contract closed_at does not match vm result')
+  assert.ok(vmstate.head       === contract.closed_hash, 'contract closed_hash does not match vm result')
+  assert.ok(vmstate.output     === contract.closed_path, 'contract closed_path does not match vm result')
+}
+
 export function verify_settlement (
   contract   : ContractData,
   funds      : FundingData[],
-  result     : VMData
+  vmstate    : VMData
 ) {
-  // Unpack the contract object.
-  const { spent_at, spent_txid } = contract
-  // Assert the spent timestamp and txid exists.
-  assert.ok(spent_at !== null,   'contract spent_at is null')
-  assert.ok(spent_txid !== null, 'contract spent_txid is null')
+  assert.ok(contract.closed,         'contract is not closed')
+  assert.ok(contract.spent,          'contract is not settled')
+  assert.ok(vmstate.output !== null, 'vmstate is not closed')
   // Verify contract funds.
   verify_funding(contract, funds)
   // Verify the activation of the vm.
-  verify_activation(contract, result)
-  // Run the vm up to the final timestamp.
-  assert.ok(result.updated_at === spent_at, 'contract spent_at does not match vm result')
-  // Assert the state output is not null.
-  assert.ok(result.output !== null, 'result vm output is null')
+  verify_activation(contract, vmstate)
+  // Verify the closing of the vm.
+  verify_closing(contract, vmstate)
   // Get the spend template for the provided output.
-  const output = get_spend_template(result.output, contract.outputs)
+  const output = get_spend_template(vmstate.output, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
   // Collect utxos from funds.
@@ -151,7 +159,7 @@ export function verify_settlement (
   // Encode the new tx as a segwit transaction.
   const txhex = encode_tx(txdata)
   // Compute the final transaction id.
-  const txid  = parse_txid(txhex)
+  const txid  = get_txid(txhex)
   // Assert that the transaction id matches.
   assert.ok(txid === contract.spent_txid, 'settlement txid does not match contract')
 }

@@ -12,15 +12,13 @@ import {
   ContractCreateConfig,
   ContractData,
   ContractRequest,
-  ContractSpendConfig,
   ContractStatus,
   DepositData,
   FundingData,
   PaymentEntry,
   ProposalData,
   SignerAPI,
-  SpendTemplate,
-  VMData
+  SpendTemplate
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
@@ -44,7 +42,6 @@ import {
 import {
   GET_INIT_SPEND_STATE,
   create_txinput,
-  get_txid,
   get_vout_txhex
 } from './tx.js'
 
@@ -57,15 +54,23 @@ export const GET_INIT_ACTIVE_STATE = () => {
   }
 }
 
-const CONTRACT_DEFAULTS = () => {
+export const GET_INIT_CLOSE_STATE = () => {
+  return {
+    closed      : false as const,
+    closed_at   : null,
+    closed_hash : null,
+    closed_path : null
+  }
+}
+
+const GET_CONTRACT_DEFAULTS = () => {
   return {
     ...GET_INIT_ACTIVE_STATE(),
+    ...GET_INIT_CLOSE_STATE(),
     ...GET_INIT_SPEND_STATE(),
     fund_count : 0,
     fund_pend  : 0,
     fund_value : 0,
-    spent_hash : null,
-    spent_path : null,
     status     : 'published' as ContractStatus
   }
 }
@@ -107,27 +112,28 @@ export function create_contract (
   const tx_fees    = tx_bsize * feerate
   // Return a completed contract.
   return sort_record({
-    ...CONTRACT_DEFAULTS(),
+    ...GET_CONTRACT_DEFAULTS(),
     cid,
     created_at,
     fees,
-    deadline   : get_deadline(proposal, created_at),
+    deadline     : get_deadline(proposal, created_at),
+    effective_at : proposal.effective ?? null,
     feerate,
     fund_txfee,
-    moderator  : request.proposal.moderator ?? null,
+    moderator    : request.proposal.moderator ?? null,
     outputs,
     prop_id,
-    pubkeys    : signatures.map(e => e.slice(0, 64)),
-    server_pk  : signer.pubkey,
-    server_sig : signer.sign(cid),
+    pubkeys      : signatures.map(e => e.slice(0, 64)),
+    server_pk    : signer.pubkey,
+    server_sig   : signer.sign(cid),
     signatures,
     subtotal,
-    terms      : proposal,
+    terms        : proposal,
     tx_fees,
     tx_bsize,
-    tx_vsize   : tx_bsize,
-    tx_total   : subtotal + tx_fees,
-    updated_at : created_at
+    tx_vsize     : tx_bsize,
+    tx_total     : subtotal + tx_fees,
+    updated_at   : created_at
   })
 }
 
@@ -164,13 +170,26 @@ export function activate_contract (
   return { ...contract, activated: true, active_at, active_vm, expires_at, status }
 }
 
-export function spend_contract (
-  config   : ContractSpendConfig,
-  contract : ContractData
+export function close_contract (
+  contract    : ContractData,
+  closed_hash : string,
+  closed_path : string,
+  closed_at   = now()
 ) : ContractData {
-  const spent_at = config.spent_at ?? now()
-  const status   = 'spent' as ContractStatus
-  return { ...contract, ...config, spent_at, status, spent: true }
+  const status     = 'closed' as ContractStatus
+  const updated_at = closed_at
+  return { ...contract, closed_at, closed_hash, closed_path, status, updated_at, closed: true }
+}
+
+export function spend_contract (
+  contract    : ContractData,
+  spent_txhex : string,
+  spent_txid  : string,
+  spent_at    = now()
+) : ContractData {
+  const status     = 'spent' as ContractStatus
+  const updated_at = spent_at
+  return { ...contract, spent_txhex, spent_txid, spent_at, status, updated_at, spent: true }
 }
 
 /**
@@ -256,21 +275,6 @@ export function get_spend_template (
   }
 
   return tmpl[1]
-}
-
-export function get_spend_config (
-  txhex    : string,
-  vmstate  : VMData
-) : ContractSpendConfig {
-  assert.exists(vmstate.output)
-  const txid = get_txid(txhex)
-  return {
-    spent_at    : vmstate.updated_at,
-    spent_hash  : vmstate.head,
-    spent_path  : vmstate.output,
-    spent_txhex : txhex,
-    spent_txid  : txid
-  }
 }
 
 export function get_settlement_tx (

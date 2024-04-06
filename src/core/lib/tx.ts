@@ -34,8 +34,11 @@ import {
 import { assert } from '../util/index.js'
 
 import {
+  ConfirmState,
   Network,
+  SettleState,
   SignerAPI,
+  SpendState,
 //  OracleTxIn,
   TxOutput,
   TxVout
@@ -44,7 +47,7 @@ import {
 /**
  * Initialization object for tx receive state.
  */
-export const GET_INIT_RECV_STATE = () => {
+export function GET_INIT_RECV_STATE () : ConfirmState {
   return {
     confirmed    : false as const,
     block_hash   : null,
@@ -57,7 +60,7 @@ export const GET_INIT_RECV_STATE = () => {
 /**
  * Initialization object for tx spend state.
  */
-export const GET_INIT_SPEND_STATE = () => {
+export function GET_INIT_SPEND_STATE () : SpendState & SettleState {
   return {
     settled     : false as const,
     settled_at  : null,

@@ -7,7 +7,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 /* Package Imports */
 
 import { endorse_proposal } from '@scrow/sdk/proposal'
-import { assert, now }      from '@scrow/sdk/util'
+import { assert }           from '@scrow/sdk/util'
 import CVM                  from '@scrow/sdk/cvm'
 
 import {
@@ -27,7 +27,8 @@ import {
   activate_contract,
   spend_contract,
   get_settlement_tx,
-  fund_contract
+  fund_contract,
+  close_contract
 } from '@scrow/sdk/contract'
 
 import {
@@ -264,32 +265,31 @@ export default async function (
         t.pass('execution ok')
       }
 
+      /* ------------------- [ Close Contract ] ------------------- */
+
+      vm_state = CVM.run(vm_state, vm_state.closes_at)
+
+      assert.exists(vm_state.output, 'vm_state output is null')
+
+      contract = close_contract(contract, vm_state.head, vm_state.output)
+
       /* ------------------- [ Settle Contract ] ------------------- */
 
-      const settled_at = now() + 8000
+      const txhex = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
+      const txid  = await client.publish_tx(txhex, true)
 
-      vm_state = CVM.run(vm_state, settled_at)
-
-      assert.exists(vm_state.output, 'vm_state.output is null')
-
-      const spent_hash   = vm_state.head
-      const spent_path   = vm_state.output
-      const spent_txhex  = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
-      const spent_txid   = await client.publish_tx(spent_txhex, true)
-      const spend_config = { spent_hash, spent_path, spent_txhex, spent_txid }
-
-      contract = spend_contract(spend_config, contract)
+      contract = spend_contract(contract, txhex, txid)
 
       verify_settlement(contract, deposits, vm_state)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))
-        console.dir(spent_txhex, { depth : null })
+        console.dir(txhex, { depth : null })
       } else {
         t.pass('settlement ok')
       }
 
-      t.pass('completed with txid: ' + spent_txid)
+      t.pass('completed with txid: ' + txid)
     } catch (err) {
       const { message } = err as Error
       console.log(err)

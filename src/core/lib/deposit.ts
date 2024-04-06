@@ -4,7 +4,7 @@ import { Buff } from '@cmdcode/buff'
 
 /* Module Imports */
 
-import { now, sort_record } from '../util/index.js'
+import { assert, now, sort_record } from '../util/index.js'
 
 import {
   AccountTemplate,
@@ -13,13 +13,13 @@ import {
   ContractData,
   DepositConfig,
   DepositData,
-  DepositState,
   DepositStatus,
   LockRequest,
   OracleTxRecvStatus,
   RegisterRequest,
   SignerAPI,
-  TxOutput
+  TxOutput,
+  TxConfirmedState
 } from '../types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
@@ -123,7 +123,7 @@ export function create_deposit (
   options : DepositConfig = {}
 ) : DepositData {
   //
-  const { created_at = now(), utxo_status } = options
+  const { created_at = now(), utxo_state } = options
   // Get the deposit address from the account context.
   const { deposit_addr } = get_account_ctx(request)
   // Compute the hash for the account request.
@@ -132,8 +132,6 @@ export function create_deposit (
   const satpoint   = get_satpoint(request.utxo)
   // Get the hash digest of the deposit request.
   const dp_hash    = get_deposit_hash(request)
-  // Get the utxo receive state.
-  const recv_state = get_tx_recv_state(request.locktime, utxo_status)
   // Get the pubkey of the server's signing device.
   const server_pk  = signer.pubkey
   // Get the deposit id.
@@ -141,7 +139,7 @@ export function create_deposit (
   // Sign the deposit id.
   const server_sig = signer.sign(dpid)
   // Unpack our data objects into a template.
-  const template   = { ...GET_INIT_DEPOSIT(), ...request, ...recv_state }
+  const template   = { ...GET_INIT_DEPOSIT(), ...request, ...utxo_state }
   // Set the initial status of the deposit.
   const status     = (template.confirmed)
     ? (template.covenant !== null)
@@ -188,19 +186,11 @@ export function get_deposit_id (
  * Compute the spending state of a deposit,
  * using transaction data from an oracle.
  */
-export function get_tx_recv_state (
-  locktime  : number,
-  txstatus ?: OracleTxRecvStatus
-) {
-  // Initialize our spent state.
-  let state : DepositState = GET_INIT_RECV_STATE()
-  // If transaction is confirmed:
-  if (txstatus !== undefined && txstatus.confirmed) {
-    // Get the expiration date for the timelock.
-    const expires_at = txstatus.block_time + locktime
-    // Update the expiration date for the spend state.
-    state  = { ...txstatus, expires_at }
-  }
-  // Return the spend state.
-  return state
+export function get_confirm_state (
+  locktime : number,
+  txstatus : OracleTxRecvStatus
+) : TxConfirmedState {
+  assert.ok(txstatus.confirmed)
+  const expires_at = txstatus.block_time + locktime
+  return { ...txstatus, expires_at }
 }

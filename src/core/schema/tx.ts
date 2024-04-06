@@ -3,7 +3,7 @@ import base  from './base.js'
 
 const { bool, hash, hex, num, stamp } = base
 
-const deposit_info = z.object({
+const confirm_info = z.object({
   confirmed    : bool,
   block_hash   : hash.nullable(),
   block_height : num.nullable(),
@@ -62,7 +62,7 @@ const tx_unsettled = z.object({
   settled_at : z.null()
 })
 
-const deposit_state = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])
+const confirm_state = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])
 const spend_state   = z.discriminatedUnion('spent',     [ tx_spent,   tx_unspent       ])
 const settle_state  = z.discriminatedUnion('settled',   [ tx_settled, tx_unsettled     ])
 
@@ -74,8 +74,8 @@ const txout = z.object({
 })
 
 export default {
-  deposit_info,
-  deposit_state,
+  confirm_info,
+  confirm_state,
   settle_info,
   settle_state,
   spend_info,
