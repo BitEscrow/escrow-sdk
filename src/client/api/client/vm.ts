@@ -15,12 +15,12 @@ import { EscrowClient } from '../../class/client.js'
  * that are associated with the contract.
  */
 function list_witness_api (client : EscrowClient) {
-  return async (cid : string) : Promise<ApiResponse<VMStatementResponse>> => {
+  return async (vmid : string) : Promise<ApiResponse<VMStatementResponse>> => {
      // Validate the contract id.
-    assert.is_hash(cid)
+    assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/vm/${cid}/list`
+    const url  = `${host}/api/vm/${vmid}/list`
     // Return the response.
     return client.fetcher<VMStatementResponse>({ url })
   }

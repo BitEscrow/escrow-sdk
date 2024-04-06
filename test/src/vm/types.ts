@@ -1,5 +1,6 @@
 export interface VMVector {
   title     : string
+  engine    : string
   members   : string[]
   pathnames : string[]
   programs  : (string | number)[][]

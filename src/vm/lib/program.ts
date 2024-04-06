@@ -1,11 +1,9 @@
 /* Global Imports */
 
-import { create_program } from '@/core/lib/vm.js'
-import { regex }          from '@/core/util/index.js'
+import { regex } from '@/core/util/index.js'
 
 import {
   Literal,
-  ProgramEntry,
   ProgramData,
   WitnessData
 } from '@/core/types/index.js'
@@ -15,16 +13,16 @@ import {
 import { debug } from '../util/base.js'
 
 import {
-  VMState,
   StoreEntry,
   ProgramReturn,
-  ProgMethodAPI
+  ProgMethodAPI,
+  CVMData
 } from '../types.js'
 
 /* Local Imports */
 
-import { update_spend_state } from './state.js'
-import EndorseMethod          from './methods/endorse.js'
+import { update_vm_state } from './state.js'
+import EndorseMethod       from './methods/endorse.js'
 
 export function call_method (method : string) : ProgMethodAPI | null {
   switch (method) {
@@ -52,20 +50,14 @@ export function init_stores (
   return prog_ids.map(e => [ e, '[]' ])
 }
 
-export function init_programs (
-  terms : ProgramEntry[]
-) : ProgramData[] {
-  return terms.map(e => create_program(e))
-}
-
 export function run_program (
-  state   : VMState,
+  data    : CVMData,
   witness : WitnessData
 ) {
-  const { programs, store } = state
-  const exec = load_program(programs, store, witness)
+  const { programs, state } = data
+  const exec = load_program(programs, state.store, witness)
   if (exec(witness)) {
-    update_spend_state(witness, state)
+    update_vm_state(data, witness)
   }
 }
 

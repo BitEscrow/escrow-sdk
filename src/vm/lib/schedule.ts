@@ -5,13 +5,13 @@ import { get_access_list } from '@/core/util/index.js'
 
 /* Module Imports */
 
-import { VALID_ACTIONS }      from '../const.js'
-import { TaskEntry, VMState } from '../types.js'
+import { VALID_ACTIONS } from '../const.js'
+import { CVMData }       from '../types.js'
 
 /* Local Imports */
 
-import { update_spend_state } from './state.js'
-import { debug }              from '../util/base.js'
+import { update_vm_state } from './state.js'
+import { debug }           from '../util/base.js'
 
 export function init_tasks (
   schedule : ScheduleEntry[]
@@ -21,7 +21,7 @@ export function init_tasks (
 }
 
 export function run_schedule (
-  state   : VMState,
+  data    : CVMData,
   stop_at : number
 ) {
   /**
@@ -29,11 +29,11 @@ export function run_schedule (
    * within the current vm schedule.
    */
   debug('[vm] running tasks up to date:', stop_at)
-  const tasks = get_tasks(state, stop_at)
+  const tasks = get_tasks(data, stop_at)
   for (const task of tasks) {
-    run_task(state, task)
-    state.tasks.shift()
-    if (state.output !== null) return
+    run_task(data, task)
+    data.tasks.shift()
+    if (data.output !== null) return
   }
 }
 
@@ -41,21 +41,21 @@ export function run_schedule (
  * Run a task within the virtual machine.
  */
 function run_task (
-  state : VMState,
-  task  : TaskEntry
+  data : CVMData,
+  task : ScheduleEntry
 ) {
   const [ ts, actions, paths ] = task
-  const PATHS = state.paths.map(e => e[0])
+  const PATHS = data.state.paths.map(e => e[0])
   const alist = get_access_list(actions, VALID_ACTIONS).wlist
   const plist = get_access_list(paths, PATHS).wlist
   for (const action of alist) {
     for (const path of plist) {
       try {
         debug('[vm] running task:', task)
-        const stamp = state.active_at + ts
-        const input = { action, path, stamp, wid: state.vmid }
-        update_spend_state(input, state)
-        if (state.output !== null) return
+        const stamp = data.active_at + ts
+        const input = { action, path, stamp, wid: data.vmid }
+        update_vm_state(data, input)
+        if (data.output !== null) return
       } catch (err) {
         debug('[cvm] task failed to execute:' + String(err))
       }
@@ -68,10 +68,10 @@ function run_task (
  * the current vm schedule.
  */
 function get_tasks (
-  state   : VMState,
+  data    : CVMData,
   stop_at : number
 ) {
-  const { active_at, updated_at, tasks } = state
+  const { active_at, updated_at, tasks } = data
   return tasks.filter(e => {
     const stamp = e[0] + active_at
     return (stamp >= updated_at && stamp <= stop_at)

@@ -1,12 +1,12 @@
 /* Module Imports */
 
-import { PathState, VMState } from '../types.js'
-import { VMError }            from '../util/base.js'
+import { PathState, CVMState } from '../types.js'
+import { VMError }             from '../util/base.js'
 
 export function run_path_action (
   action : string,
   pstate : PathState,
-  state  : VMState
+  state  : CVMState
 ) : PathState {
   switch (action) {
     case 'close':
@@ -31,7 +31,7 @@ export function exec_dispute (state : PathState) {
   return PathState.disputed
 }
 
-export function exec_resolve (state : VMState) {
+export function exec_resolve (state : CVMState) {
   if (state.status !== 'disputed') {
     throw new VMError('path is not in a dispute')
   }

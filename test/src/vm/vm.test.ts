@@ -28,12 +28,12 @@ export default function (tape : Test) {
 
 function run_test (t : Test, v : VMVector) {
   // Unpack the vector object.
-  const { title, members, pathnames, programs, schedule, tests } = v
+  const { title, members, engine, pathnames, programs, schedule, tests } = v
   t.comment(title)
   // Find and replace aliases with their relevant pubkeys.
   const progs  = resolve_aliases(members, programs as ProgramEntry[])
   // Configure the init state of the vm.
-  const config = { active_at, closes_at, pathnames, programs : progs, schedule, vmid } as VMConfig
+  const config = { active_at, closes_at, engine, pathnames, programs : progs, schedule, vmid } as VMConfig
   // For each test in the test set:
   for (const { comment, error, result, stamp, steps, witness } of tests) {
     try {

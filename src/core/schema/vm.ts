@@ -24,12 +24,17 @@ const program = z.object({
 
 const data = z.object({
   active_at  : stamp,
+  commit_at  : stamp,
   closes_at  : stamp,
+  engine     : str,
   error      : str.nullable(),
   head       : hash,
   output     : str.nullable(),
-  state      : str.optional(),
+  pathnames  : str.array(),
+  programs   : program.array(),
+  state      : str,
   step       : num,
+  tasks      : prop.schedule,
   updated_at : stamp,
   vmid       : hash
 })

@@ -1,6 +1,6 @@
-import { Literal }                     from './base.js'
+import { Literal }       from './base.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
-import { WitnessData }                 from './witness.js'
+import { WitnessData }   from './witness.js'
 
 export interface VirtualMachineAPI {
   actions : string[]
@@ -31,6 +31,7 @@ export interface ProgramData {
 export interface VMConfig {
   active_at : number
   closes_at : number
+  engine    : string
   pathnames : string[]
   programs  : ProgramEntry[]
   schedule  : ScheduleEntry[]
@@ -38,15 +39,20 @@ export interface VMConfig {
 }
 
 export interface VMData {
-  active_at  : number          // Timestamp for when the VM was initialized.
+  active_at  : number
+  commit_at  : number
   closes_at  : number
+  engine     : string
   error      : string | null   // Error output of the VM.
   head       : string          // Current head of the commit-chain.
   output     : string | null   // Standard output of the VM.
-  state     ?: string
-  step       : number          // Counts the number of commits to the VM.
+  pathnames  : string[]
+  programs   : ProgramData[]
+  state      : string
+  step       : number          // Counts the number of commits to the VM.'
+  tasks      : ScheduleEntry[]
   updated_at : number          // Timestamp for when the VM was last updated.
-  vmid       : string          // The virtual machine identifier.
+  vmid       : string
 }
 
 export interface VMReceipt extends VMData {

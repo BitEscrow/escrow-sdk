@@ -236,7 +236,7 @@ export default async function (
           witness = endorse_witness(members[0].signer, witness)
           witness = endorse_witness(members[1].signer, witness)
 
-      verify_witness(vm_config, vm_state, witness)
+      verify_witness(vm_state, witness)
 
       if (VERBOSE) {
         console.log(banner('witness'))

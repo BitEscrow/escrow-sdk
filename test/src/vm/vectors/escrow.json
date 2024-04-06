@@ -1,5 +1,6 @@
 {
   "title"     : "Basic two-party sales agreement with dispute resolution.",
+  "engine"    : "cvm",
   "members"   : [ "alice", "bob", "carol" ],
   "pathnames" : [ "payout", "return" ],
   "programs"  : [

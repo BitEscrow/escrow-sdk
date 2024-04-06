@@ -4,11 +4,11 @@ import { Buff }         from '@cmdcode/buff'
 import { ProgramEntry } from '@/core/types/index.js'
 
 import {
+  CVMData,
   PathState,
   PathStatus,
   StateEntry,
-  VMInput,
-  VMState
+  VMInput
 } from '../types.js'
 
 /* Local Imports */
@@ -20,7 +20,7 @@ import {
   init_path_state
 } from './path.js'
 
-export function init_spend_state (
+export function init_vm_state (
   paths    : string[],
   programs : ProgramEntry[]
 ) {
@@ -32,24 +32,25 @@ export function init_spend_state (
   return states
 }
 
-export function update_spend_state (
-  input : VMInput,
-  state : VMState
+export function update_vm_state (
+  data  : CVMData,
+  input : VMInput
 ) {
-  check_update_stamp(input.stamp, state)
+  check_update_stamp(data, input.stamp)
 
   const { action, path, stamp } = input
-  const [ pstate, idx ]  = get_path_state(state.paths, path)
-  const ret_path_state   = run_path_action(action, pstate, state)
+  const { state, step } = data
+  const [ pstate, idx ] = get_path_state(state.paths, path)
+  const ret_path_state  = run_path_action(action, pstate, state)
 
   state.paths[idx] = [ path, ret_path_state ]
   state.status     = update_vm_status(state.status, ret_path_state)
-  state.step       = state.step + 1
-  state.updated_at = stamp
-  state.head       = get_commit_hash(input, state)
+  data.step        = step + 1
+  data.commit_at   = stamp
+  data.head        = get_commit_hash(data, input)
 
   if (ret_path_state === PathState.closed) {
-    state.output = path
+    data.output = path
   }
 }
 
@@ -67,18 +68,20 @@ function update_vm_status (
 }
 
 function get_commit_hash (
-  input : VMInput,
-  state : VMState
+  data  : CVMData,
+  input : VMInput
 ) {
-  const { head, status, step, updated_at } = state
-  return Buff.json([ input.wid, head, status, step, updated_at ]).digest.hex
+  const { head, step } = data
+  const { stamp, wid } = input
+  const output = data.output ?? 'null'
+  return Buff.json([ wid, head, output, step, stamp ]).digest.hex
 }
 
 function check_update_stamp (
-  stamp : number,
-  state : VMState
+  data  : CVMData,
+  stamp : number
 ) {
-  if (stamp < state.updated_at) {
-    throw new Error(`timestamp occurs before latest update: ${stamp} < ${state.updated_at}`)
+  if (stamp < data.commit_at) {
+    throw new Error(`timestamp occurs before latest commit: ${stamp} < ${data.commit_at}`)
   }
 }

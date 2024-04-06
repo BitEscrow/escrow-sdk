@@ -4,14 +4,12 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 /* Module Imports */
 
-import { create_program } from '../lib/vm.js'
 import { get_witness_id } from '../lib/witness.js'
 import { assert, regex }  from '../util/index.js'
 
 import {
   Literal,
   ProgramData,
-  VMConfig,
   VMData,
   VirtualMachineAPI,
   WitnessData
@@ -40,20 +38,15 @@ export function verify_program (
 }
 
 export function verify_witness (
-  config  : VMConfig,
   vmdata  : VMData,
   witness : WitnessData
 ) {
   // Unpack data objects.
-  const { active_at, closes_at, output }         = vmdata
-  const { sigs, wid, ...tmpl }                   = witness
-  const { action, path, prog_id, method, stamp } = tmpl
-  // Get available pathnames from the contract terms.
-  const pathnames = config.pathnames
-  // Get available programs from the contract terms.
-  const programs  = config.programs.map(e => create_program(e))
+  const { active_at, closes_at, output, pathnames } = vmdata
+  const { sigs, wid, ...tmpl }                      = witness
+  const { action, path, prog_id, method, stamp }    = tmpl
   // Find the matching program from the list via prog_id.
-  const program   = programs.find(e => e.prog_id === prog_id)
+  const program = vmdata.programs.find(e => e.prog_id === prog_id)
   // Assert that the program exists.
   assert.ok(program !== undefined,     'program not found: ' + prog_id)
   // Unpack the program data object.

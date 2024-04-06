@@ -46,11 +46,10 @@ export interface DepositInfo {
   network      : Network
   return_addr  : string
   return_psig  : string
-  satpoint     : string
   server_pk    : string
   server_sig   : string
   server_tkn   : string
   status       : DepositStatus
-  utxo         : TxOutput
   updated_at   : number
+  utxo         : TxOutput
 }

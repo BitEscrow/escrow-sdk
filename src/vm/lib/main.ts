@@ -1,6 +1,7 @@
 /* Global Imports */
 
-import { now } from '@/core/util/index.js'
+import { create_program } from '@/core/lib/vm.js'
+import { now }            from '@/core/util/index.js'
 
 import {
   VMConfig,
@@ -20,17 +21,16 @@ import {
 
 import {
   PathStatus,
-  CommitEntry,
-  VMState
+  CVMData,
+  CVMState
 } from '../types.js'
 
 /* Local Imports */
 
-import { init_spend_state }         from './state.js'
+import { init_vm_state }            from './state.js'
 import { init_tasks, run_schedule } from './schedule.js'
 
 import {
-  init_programs,
   init_stores,
   run_program
 } from './program.js'
@@ -40,13 +40,6 @@ const GET_INIT_DATA = () => {
     error  : null,
     output : null,
     step   : 0
-  }
-}
-
-const GET_INIT_STATE = () => {
-  return {
-    commits : [] as CommitEntry[],
-    status  : 'init' as PathStatus
   }
 }
 
@@ -112,22 +105,29 @@ export function eval_schedule (
  * Initializes the virtual machine with the given parameters.
  */
 export function init_vm (config : VMConfig) : VMData {
-  const { active_at, closes_at, vmid } = config
-  const programs = init_programs(config.programs)
+  const { active_at, closes_at, engine, pathnames, vmid } = config
+  const programs = config.programs.map(e => create_program(e))
 
-  const state : VMState = {
+  const int_state : CVMState = {
+    paths  : init_vm_state(pathnames, config.programs),
+    store  : init_stores(programs.map(e => e.prog_id)),
+    status : 'init' as PathStatus
+  }
+
+  const data : CVMData = {
     ...GET_INIT_DATA(),
-    ...GET_INIT_STATE(),
     active_at,
+    commit_at  : active_at,
     closes_at,
+    engine,
+    pathnames,
     programs,
     vmid,
-    head       : config.vmid,
-    paths      : init_spend_state(config.pathnames, config.programs),
-    store      : init_stores(programs.map(e => e.prog_id)),
+    head       : vmid,
+    state      : int_state,
     tasks      : init_tasks(config.schedule),
     updated_at : config.active_at
   }
 
-  return serialize_vmstate(state)
+  return serialize_vmstate(data)
 }

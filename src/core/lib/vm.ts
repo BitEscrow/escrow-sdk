@@ -1,6 +1,6 @@
-import { Buff } from '@cmdcode/buff'
-
-import { now, regex, sort_record } from '../util/index.js'
+import { Buff }                            from '@cmdcode/buff'
+import { assert, now, regex, sort_record } from '../util/index.js'
+import { get_path_names }                  from './proposal.js'
 
 import {
   ProgramQuery,
@@ -12,8 +12,6 @@ import {
   VMData,
   ContractData
 } from '../types/index.js'
-
-import { get_path_names } from './proposal.js'
 
 export function create_program (
   entry : ProgramEntry
@@ -78,16 +76,17 @@ export function get_program_idx (
 }
 
 export function get_vm_config (
-  contract  : ContractData,
-  timestamp = now()
+  contract : ContractData
 ) : VMConfig {
-  const { cid, terms } = contract
-  const { duration, paths, programs, schedule } = terms
-  const active_at = contract.active_at  ?? timestamp
-  const closes_at = contract.expires_at ?? duration
-  const pathnames = get_path_names(paths)
-  const vmid      = contract.active_vm  ?? get_vm_id(active_at, cid, closes_at)
-  return { active_at, closes_at, pathnames, programs, schedule, vmid }
+  assert.ok(contract.activated, 'contract is not active')
+  const active_at = contract.active_at
+  const closes_at = contract.expires_at
+  const engine    = contract.terms.engine
+  const pathnames = get_path_names(contract.terms.paths)
+  const programs  = contract.terms.programs
+  const schedule  = contract.terms.schedule
+  const vmid      = contract.active_vm
+  return { active_at, closes_at, engine, pathnames, programs, schedule, vmid }
 }
 
 export function get_vm_id (

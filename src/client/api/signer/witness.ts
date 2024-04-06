@@ -1,5 +1,6 @@
 import { verify_contract } from '@/core/validation/contract.js'
 import { verify_witness }  from '@/core/validation/witness.js'
+import { EscrowSigner }    from '../../class/signer.js'
 
 import {
   can_endorse,
@@ -9,11 +10,10 @@ import {
 
 import {
   ContractData,
+  VMReceipt,
   WitnessData,
   WitnessTemplate
 } from '@/core/types/index.js'
-
-import { EscrowSigner } from '../../class/signer.js'
 
 export function can_sign_api (esigner : EscrowSigner) {
   return (
@@ -41,12 +41,11 @@ export function create_witness_api (esigner : EscrowSigner) {
 
 export function endorse_witness_api (esigner : EscrowSigner) {
   return (
-    contract : ContractData,
-    witness  : WitnessData
+    vmdata  : VMReceipt,
+    witness : WitnessData
   ) => {
-    esigner.check_issuer(contract.server_pk)
-    verify_contract(contract)
-    verify_witness(contract, witness)
+    esigner.check_issuer(vmdata.server_pk)
+    verify_witness(vmdata, witness)
     return endorse_witness(esigner._signer, witness)
   }
 }
