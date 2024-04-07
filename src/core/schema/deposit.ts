@@ -52,7 +52,6 @@ const base_data = z.object({
   locktime     : num,
   network,
   return_addr  : str,
-  return_fee   : num,
   return_psig  : hex,
   satpoint     : str,
   server_pk    : hash,

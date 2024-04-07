@@ -36,17 +36,18 @@ export function verify_covenant (
   server_sd : SignerAPI
 ) {
   // Unpack contract object.
-  const { cid, outputs } = contract
-  //
+  const { activated, cid, outputs, status } = contract
+  // Get the account session agent.
   const agent   = get_account_agent(request, server_sd)
-  //
+  // Parse the session token from the request.
   const session = parse_session_token(request.server_tkn)
-  //
-  assert.ok(session.pk === agent.pubkey, 'session pubkey does not match account agent')
-  // Check if covenant exists from the current session.
+  // Make the following assertions.
+  assert.ok(!activated,                    'contract is already active')
+  assert.ok(status === 'published',        'contract is not in a fundable state')
+  assert.ok(session.pk === agent.pubkey,   'session pubkey does not match account agent')
   assert.ok(covenant.cid === contract.cid, 'Covenant cid does not match the contract!')
   // Compute covenant id.
-  const cvid     = get_covenant_id(cid, request, outputs)
+  const cvid = get_covenant_id(cid, request, outputs)
   // Assert the covenant id is correct.
   assert.ok(covenant.cvid === cvid, 'Covenant cvid does not match the server!')
   // Compute the musig context for each spending path.

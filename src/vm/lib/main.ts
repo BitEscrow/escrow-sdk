@@ -1,7 +1,8 @@
-/* Global Imports */
-
-import { create_program } from '@/core/lib/vm.js'
-import { now }            from '@/core/util/index.js'
+import { create_program }           from '@/core/lib/vm.js'
+import { now }                      from '@/core/util/index.js'
+import { init_vm_state }            from './state.js'
+import { init_stores, run_program } from './program.js'
+import { init_tasks, run_schedule } from './schedule.js'
 
 import {
   VMConfig,
@@ -24,12 +25,6 @@ import {
   CVMData,
   CVMState
 } from '../types.js'
-
-/* Local Imports */
-
-import { init_vm_state }            from './state.js'
-import { init_stores, run_program } from './program.js'
-import { init_tasks, run_schedule } from './schedule.js'
 
 const GET_INIT_DATA = () => {
   return {

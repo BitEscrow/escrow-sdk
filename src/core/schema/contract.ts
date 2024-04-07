@@ -39,22 +39,22 @@ const close_state = z.discriminatedUnion('closed', [ ct_open, ct_closed ])
 const vm_info = z.object({
   activated  : bool,
   active_at  : stamp.nullable(),
-  active_vm  : hash.nullable(),
-  expires_at : stamp.nullable()
+  expires_at : stamp.nullable(),
+  vmid       : hash.nullable()
 })
 
 const vm_active = z.object({
   activated  : z.literal(true),
   active_at  : stamp,
-  active_vm  : hash,
-  expires_at : stamp
+  expires_at : stamp,
+  vmid       : hash
 })
 
 const vm_inactive = z.object({
   activated  : z.literal(false),
   active_at  : z.null(),
-  active_vm  : z.null(),
-  expires_at : z.null()
+  expires_at : z.null(),
+  vmid       : z.null()
 })
 
 const vm_state = z.discriminatedUnion('activated', [ vm_active, vm_inactive ])
@@ -73,14 +73,12 @@ const base_data = z.object({
   outputs      : output.array(),
   moderator    : hash.nullable(),
   prop_id      : hash,
-  pubkeys      : hash.array(),
   server_pk    : hash,
   server_sig   : hex,
   signatures   : hex.array(),
   status,
   subtotal     : num,
   terms        : proposal.data,
-  total        : num,
   tx_fees      : num,
   tx_total     : num,
   tx_bsize     : num,

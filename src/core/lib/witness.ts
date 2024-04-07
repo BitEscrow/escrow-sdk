@@ -10,28 +10,31 @@ import {
 import {
   ProgramEntry,
   SignerAPI,
+  VMConfig,
+  VMData,
   WitnessData,
   WitnessPreImage,
   WitnessTemplate
 } from '../types/index.js'
 
 export function create_witness (
-  programs : ProgramEntry[],
-  pubkeys  : string | string[],
+  config   : VMConfig | VMData,
+  pubkeys  : string   | string[],
   template : WitnessTemplate
 ) : WitnessData {
   const { args = [], action, method, path, stamp = now() } = template
 
   const keys   = (Array.isArray(pubkeys)) ? pubkeys : [ pubkeys ]
   const query  = { method, action, path, includes: keys }
-  const pdata  = get_program(query, programs)
+  const pdata  = get_program(query, config.programs)
 
   if (pdata === undefined) {
     throw new Error('matching program not found')
   }
 
   const prog_id = pdata.prog_id
-  const tmpl    = { ...template, args, prog_id, stamp }
+  const vmid    = config.vmid
+  const tmpl    = { ...template, args, prog_id, stamp, vmid }
   const wid     = get_witness_id(tmpl)
   return sort_record({ ...tmpl, sigs: [], wid })
 }

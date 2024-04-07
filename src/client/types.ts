@@ -17,16 +17,18 @@ export interface SignerConfig {
   server_url : string
 }
 
-export interface SignerOptions extends Partial<SignerConfig> {
-  xpub ?: string
+export interface SignerOptions extends Partial<Omit<SignerConfig, 'network'>> {
+  network ?: string | Network
+  xpub    ?: string
 }
 
 export interface ClientConfig extends SignerConfig {
   oracle_url : string
 }
 
-export interface ClientOptions extends Partial<ClientConfig> {
-  fetcher ?: typeof fetch
+export interface ClientOptions extends SignerOptions {
+  fetcher    ?: typeof fetch
+  oracle_url ?: string
 }
 
 export interface FetchConfig {
@@ -39,8 +41,8 @@ export interface FetchConfig {
 export interface RoleTemplate {
   title      : string
   id        ?: string
-  min_slots ?: number
-  max_slots ?: number
+  min_num   ?: number
+  max_num   ?: number
   paths     ?: [ string, number ][]
   payment   ?: number
   programs  ?: ProgramEntry[]
@@ -49,29 +51,33 @@ export interface RoleTemplate {
 export interface RolePolicy {
   id        : string
   title     : string
-  min_slots : number
-  max_slots : number
+  min_num   : number
+  max_num   : number
   paths     : [ string, number ][]
   payment  ?: number
   programs  : ProgramEntry[]
 }
 
-export type MemberEntry = [
-  mship  : string,
-  pol_id : string,
-  sig   ?: string
-]
+export interface CredentialConfig {
+  hid ?: string
+  idx ?: number
+}
 
-export interface MemberData {
-  hid  : string
+export interface CredentialData {
   pub  : string
   xpub : string
 }
 
+export interface MemberData extends CredentialData {
+  pid  : string
+  sig ?: string
+}
+
 export interface DraftSession {
   proposal : ProposalData
-  members  : MemberEntry[]
+  members  : MemberData[]
   roles    : RolePolicy[]
+  terms    : string[]
 }
 
 export interface WalletAPI {

@@ -29,7 +29,6 @@ interface VMClosed {
 }
 
 interface Receipt {
-  created_at : number
   receipt_id : string
   server_pk  : string
   server_sig : string
@@ -73,6 +72,6 @@ export interface VMBase {
   state      : string
   step       : number          // Counts the number of commits to the VM.'
   tasks      : ScheduleEntry[]
-  updated_at : number          // Timestamp for when the VM was last updated.
+  updated_at : number
   vmid       : string
 }

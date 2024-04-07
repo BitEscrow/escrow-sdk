@@ -11,9 +11,9 @@ import { client }           from '@scrow/demo/01_create_client.js'
 import { settled_contract } from '@scrow/demo/09_settle_contract.js'
 
 // Define the contract id we will use.
-const cid = settled_contract.cid
+const vmid = settled_contract.active_vm
 // Fetch a contract from the server by cid.
-const res = await client.vm.list(cid)
+const res = await client.vm.list(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.

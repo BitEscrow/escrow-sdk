@@ -3,7 +3,6 @@ import { assert } from '@/core/util/index.js'
 import {
   validate_account_req,
   validate_register_req,
-  validate_commit_req,
   validate_close_req,
   validate_lock_req
 } from '@/core/validation/index.js'
@@ -16,7 +15,6 @@ import {
   DepositListResponse,
   FundingDataResponse,
   RegisterRequest,
-  CommitRequest,
   CloseRequest,
   LockRequest
 } from '@/core/types/index.js'
@@ -67,29 +65,6 @@ function register_deposit_api (client : EscrowClient) {
     }
     // Return the response.
     return client.fetcher<DepositDataResponse>({ url, init })
-  }
-}
-
-/**
- * Fund a contract directly using a deposit template.
- */
-function commit_deposit_api (client : EscrowClient) {
-  return async (
-    request : CommitRequest
-  ) : Promise<ApiResponse<FundingDataResponse>> => {
-    // Validate the request.
-    validate_commit_req(request)
-    // Formulate the request url.
-    const host = client.server_url
-    const url  = `${host}/api/deposit/commit`
-    // Forulate the request body.
-    const init = {
-      method  : 'POST',
-      body    : JSON.stringify(request),
-      headers : { 'content-type': 'application/json' }
-    }
-    // Return the response.
-    return client.fetcher<FundingDataResponse>({ url, init })
   }
 }
 
@@ -179,7 +154,6 @@ export default function (client : EscrowClient) {
   return {
     request  : request_account_api(client),
     register : register_deposit_api(client),
-    commit   : commit_deposit_api(client),
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     lock     : lock_deposit_api(client),

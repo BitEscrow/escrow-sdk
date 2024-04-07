@@ -1,15 +1,7 @@
-/* Global Imports */
-
 import { ScheduleEntry }   from '@/core/types/index.js'
 import { get_access_list } from '@/core/util/index.js'
-
-/* Module Imports */
-
-import { VALID_ACTIONS } from '../const.js'
-import { CVMData }       from '../types.js'
-
-/* Local Imports */
-
+import { VALID_ACTIONS }   from '../const.js'
+import { CVMData }         from '../types.js'
 import { update_vm_state } from './state.js'
 import { debug }           from '../util/base.js'
 
@@ -71,7 +63,7 @@ function get_tasks (
   data    : CVMData,
   stop_at : number
 ) {
-  const { active_at, updated_at, tasks } = data
+  const { active_at, tasks, updated_at } = data
   return tasks.filter(e => {
     const stamp = e[0] + active_at
     return (stamp >= updated_at && stamp <= stop_at)

@@ -9,9 +9,8 @@ import {
 } from '@scrow/sdk/core'
 
 import {
-  compile_witness,
   resolve_aliases,
-  run_vm
+  run_vm_vectors
 } from './util.js'
 
 import escrow_vec from './vectors/escrow.json' assert { type: 'json' }
@@ -37,8 +36,7 @@ function run_test (t : Test, v : VMVector) {
   // For each test in the test set:
   for (const { comment, error, result, stamp, steps, witness } of tests) {
     try {
-      const wit_data = compile_witness(progs, witness, vmid)
-      const vm_state = run_vm(config, wit_data, stamp)
+      const vm_state = run_vm_vectors(config, stamp, witness)
       assert.equal(vm_state.output, result, 'vm output matches expected result')
       assert.equal(vm_state.error,  error,  'vm error matches expected result')
       assert.equal(vm_state.step,   steps,  'vm commit count matches expected result')

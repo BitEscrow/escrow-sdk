@@ -19,10 +19,10 @@
       "@scrow/sdk/session"  : [ "src/core/lib/session.js"       ],
       "@scrow/sdk/tx"       : [ "src/core/lib/tx.js"            ],
       "@scrow/sdk/witness"  : [ "src/core/lib/witness.js"       ],
+      "@scrow/sdk/vm"       : [ "src/core/lib/vm.js"            ],
       "@scrow/sdk/schema"   : [ "src/core/schema/index.js"      ],
       "@scrow/sdk/util"     : [ "src/core/util/index.js"        ],
-      "@scrow/sdk/validate" : [ "src/core/validation/index.js"  ],
-      "@scrow/sdk/vm"       : [ "src/core/lib/vm.js"            ],
+      "@scrow/sdk/validate" : [ "src/core/validation/index.js"  ]
     },
     "module": "NodeNext",
     "target": "ESNext",

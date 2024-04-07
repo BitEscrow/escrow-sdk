@@ -3,7 +3,7 @@ import { assert } from '@/core/util/index.js'
 
 import {
   create_proposal,
-  get_proposal_id
+  endorse_proposal
 } from '@/core/lib/proposal.js'
 
 import {
@@ -14,24 +14,24 @@ import {
 
 import {
   RoleTemplate,
-  DraftSession
+  DraftSession,
+  CredentialData
 } from '../types.js'
 
 import ClientSchema from '../schema.js'
 
 import {
-  claim_credential,
+  claim_membership,
   get_signatures,
-  has_credential,
-  parse_credential,
-  update_credential
-} from './credential.js'
+  has_membership,
+  update_membership
+} from './membership.js'
 
 import {
   add_member_data,
   create_role_policy,
   get_role_policy,
-  has_open_slots,
+  has_open_roles,
   rem_member_data
 } from './enrollment.js'
 
@@ -42,36 +42,37 @@ export function create_session (
   return {
     members  : [],
     proposal : create_proposal(proposal),
-    roles    : roles.map(e => create_role_policy(e))
+    roles    : roles.map(e => create_role_policy(e)),
+    terms    : []
   }
 }
 
 export function join_session (
-  mship   : string,
-  pol_id  : string,
-  session : DraftSession
+  cred      : CredentialData,
+  policy_id : string,
+  session   : DraftSession
 ) : DraftSession {
   // Check if member already exists.
-  assert.ok(!has_credential(mship, session), 'membership already exists')
+  assert.ok(!has_membership(cred, session), 'membership already exists')
   // Check if role is available.
-  assert.ok(has_open_slots(pol_id, session), 'all slots are filled for policy id: ' + pol_id)
-  const members  = [ ...session.members, [ mship, pol_id ] ]
+  assert.ok(has_open_roles(policy_id, session), 'all slots are filled for policy id: ' + policy_id)
+  const members  = [ ...session.members, { ...cred, pid: policy_id } ]
   //
-  const policy   = get_role_policy(pol_id, session)
+  const policy   = get_role_policy(policy_id, session)
   // Add member to proposal.
-  const proposal = add_member_data(mship, policy, session.proposal)
+  const proposal = add_member_data(cred, policy, session.proposal)
   //
   return ClientSchema.session.parse({ ...session, members, proposal })
 }
 
 export function leave_session (
-  mship   : string,
+  cred    : CredentialData,
   session : DraftSession
 ) : DraftSession {
   //
-  const members  = session.members.filter(e => e[0] === mship)
+  const members  = session.members.filter(e => e.pub === cred.pub)
   // Add member to proposal.
-  const proposal = rem_member_data(mship, session.proposal)
+  const proposal = rem_member_data(cred, session.proposal)
   //
   return ClientSchema.session.parse({ ...session, members, proposal })
 }
@@ -80,28 +81,19 @@ export function endorse_session (
   session : DraftSession,
   signer  : SignerAPI
 ) : DraftSession {
-  // get and verify membership.
-  const mship = claim_credential(session.members, signer)
-  //
+  const mship = claim_membership(session.members, signer)
   assert.ok(mship !== null, 'signer is not a member of the session')
-  //
-  const { hid } = parse_credential(mship[0])
-  const prop_id = get_proposal_id(session.proposal)
-  const preimg  = Buff.join([ prop_id, hid ])
-  const sig     = signer.get_id(hid).sign(preimg)
-  const cred    = ClientSchema.mship.parse([ ...mship, sig ])
-  const members = update_credential(session.members, cred)
-  // add signature that signs proposal id.
+  const sig     = endorse_proposal(session.proposal, signer)
+  const members = update_membership(session.members, { ...mship, sig })
   return ClientSchema.session.parse({ ...session, members })
 }
 
 export function verify_session (
-  session : DraftSession
+  _session : DraftSession
 ) {
   // verify enrollment
   // verify signatures
-  console.log(session)
-  throw new Error('not implemented')
+  console.log('session verification not implemented')
 }
 
 export function publish_session (

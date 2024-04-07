@@ -207,13 +207,13 @@ export default async function (
       contract = activate_contract(contract)
 
       const vm_config = get_vm_config(contract)
-      let   vm_state  = CVM.init(vm_config)
+      let   vm_data   = CVM.init(vm_config)
 
       if (VERBOSE) {
         console.log(banner('active contract'))
         console.dir({ ...contract }, { depth : null })
-        console.log(banner('vm state'))
-        console.dir(vm_state, { depth : null })
+        console.log(banner('vm data'))
+        console.dir(vm_data, { depth : null })
       } else {
         t.pass('activation ok')
       }
@@ -229,14 +229,13 @@ export default async function (
         action : 'close',
         method : 'endorse',
         path   : 'payout',
-        vmid   : vm_state.vmid
       }
 
-      let witness = create_witness(proposal.programs, signers, wit_template)
+      let witness = create_witness(vm_data, signers, wit_template)
           witness = endorse_witness(members[0].signer, witness)
           witness = endorse_witness(members[1].signer, witness)
 
-      verify_witness(vm_state, witness)
+      verify_witness(vm_data, witness)
 
       if (VERBOSE) {
         console.log(banner('witness'))
@@ -245,16 +244,16 @@ export default async function (
         t.pass('witness ok')
       }
 
-      vm_state = CVM.eval(vm_state, witness)
+      vm_data = CVM.eval(vm_data, witness)
 
-      if (vm_state.error !== null) {
-        throw new Error(vm_state.error)
+      if (vm_data.error !== null) {
+        throw new Error(vm_data.error)
       }
 
       // Create a signed receipt for the latest commit.
-      const vm_receipt = create_receipt(vm_state, server_sd)
+      const vm_receipt = create_receipt(vm_data, server_sd)
       // Verify the latest commit matches the receipt.
-      verify_receipt(vm_receipt, vm_state)
+      verify_receipt(vm_receipt, vm_data)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))
@@ -267,20 +266,20 @@ export default async function (
 
       /* ------------------- [ Close Contract ] ------------------- */
 
-      vm_state = CVM.run(vm_state, vm_state.expires_at)
+      vm_data = CVM.run(vm_data, vm_data.expires_at)
 
-      assert.exists(vm_state.output, 'vm_state output is null')
+      assert.exists(vm_data.output, 'vm_state output is null')
 
-      contract = close_contract(contract, vm_state.head, vm_state.output)
+      contract = close_contract(contract, vm_data.head, vm_data.output)
 
       /* ------------------- [ Settle Contract ] ------------------- */
 
-      const txhex = get_settlement_tx(contract, deposits, vm_state.output, server_sd)
+      const txhex = get_settlement_tx(contract, deposits, vm_data.output, server_sd)
       const txid  = await client.publish_tx(txhex, true)
 
       contract = spend_contract(contract, txhex, txid)
 
-      verify_settlement(contract, deposits, vm_state)
+      verify_settlement(contract, deposits, vm_data)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))

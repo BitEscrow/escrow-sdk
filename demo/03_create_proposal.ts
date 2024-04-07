@@ -18,8 +18,7 @@ export const proposal : ProposalTemplate = {
   duration  : 14400,
   moderator : moderator.pubkey,
   network   : config.network,
-  paths     : [[ 'return', 10000, config.return ]],
-  schedule  : [[ 7200, 'close', '*' ]],
+  schedule  : [[ 7200, 'close|resolve', 'payout|refund' ]],
   value     : 10000,
 }
 
@@ -29,24 +28,18 @@ export const proposal : ProposalTemplate = {
 export const roles : RoleTemplate[] = [
   {
     title : 'buyer',
-    paths : [
-      [ 'heads', 10000 ],
-      [ 'draw',  5000  ]
-    ],
+    paths : [[ 'refund', 10000 ],],
     programs : [
-      [ 'endorse', 'close',   '*', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
+      [ 'endorse', 'close|resolve', '*', 2 ],
+      [ 'endorse', 'dispute', 'payout', 1  ]
     ]
   },
   {
     title : 'seller',
-    paths : [
-      [ 'tails', 10000 ],
-      [ 'draw',  5000  ]
-    ],
+    paths : [[ 'payout', 10000 ]],
     programs : [
-      [ 'endorse', 'close',   '*', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
+      [ 'endorse', 'close|resolve', '*', 2 ],
+      [ 'endorse', 'dispute', 'refund', 1  ]
     ]
   },
   {

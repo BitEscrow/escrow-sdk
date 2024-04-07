@@ -1,12 +1,12 @@
 import { verify_proposal } from '@/core/validation/proposal.js'
 
 import { EscrowSigner } from '../../class/signer.js'
-import { DraftSession } from '../../types.js'
+import { CredentialConfig, DraftSession } from '../../types.js'
 
 import {
-  claim_credential,
+  claim_membership,
   create_credential
-} from '../../lib/credential.js'
+} from '../../lib/membership.js'
 
 import {
   endorse_session,
@@ -18,20 +18,25 @@ export function join_session_api (esigner : EscrowSigner) {
   return (
     pol_id  : string,
     session : DraftSession,
-    idx    ?: number
+    options : CredentialConfig = {}
   ) : DraftSession => {
-    const stamp = idx ?? session.proposal.created_at
-    const cxpub = esigner._wallet.get_account(stamp).xpub
-    const mship = create_credential(esigner._signer, cxpub)
-    return join_session(mship, pol_id, session)
+    const { hid, idx } = options
+    const signer = (hid !== undefined)
+      ? esigner._signer.get_id(hid)
+      : esigner._signer
+    const xpub  = (idx !== undefined)
+      ? esigner._wallet.get_account(idx).xpub
+      : esigner._wallet.xpub
+    const cred  = create_credential(signer, xpub)
+    return join_session(cred, pol_id, session)
   }
 }
 
 export function leave_session_api (esigner : EscrowSigner) {
   return (session : DraftSession) : DraftSession => {
-    const mship = claim_credential(session.members, esigner._signer)
+    const mship = claim_membership(session.members, esigner._signer)
     if (mship === null) return session
-    return leave_session(mship[0], session)
+    return leave_session(mship, session)
   }
 }
 
@@ -46,7 +51,7 @@ export function endorse_session_api (esigner : EscrowSigner) {
 
 export function has_membership_api (esigner : EscrowSigner) {
   return (session : DraftSession) : boolean => {
-    const mship = claim_credential(session.members, esigner._signer)
+    const mship = claim_membership(session.members, esigner._signer)
     return mship !== null
   }
 }

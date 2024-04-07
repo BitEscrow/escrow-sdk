@@ -4,20 +4,19 @@ import { ProposalData }          from '@/core/types/index.js'
 import { get_program_idx }       from '@/core/lib/vm.js'
 
 import {
-  MemberEntry,
+  MemberData,
   RolePolicy,
   RoleTemplate,
-  DraftSession
+  DraftSession,
+  CredentialData
 } from '../types.js'
-
-import { parse_credential } from './credential.js'
 
 const GET_ROLE_DEFAULTS = () => {
   return {
-    min_slots : 1,
-    max_slots : 1,
-    paths     : [],
-    programs  : []
+    min_num  : 1,
+    max_num  : 1,
+    paths    : [],
+    programs : []
   }
 }
 
@@ -47,12 +46,12 @@ export function get_role_policy (
 }
 
 export function add_member_data (
-  mship    : string,
+  cred     : CredentialData,
   policy   : RolePolicy,
   proposal : ProposalData
 ) : ProposalData {
   const { network, paths, payments, programs } = proposal
-  const { pub, xpub } = parse_credential(mship)
+  const { pub, xpub } = cred
 
   const wallet = new Wallet(xpub)
 
@@ -83,10 +82,10 @@ export function add_member_data (
 }
 
 export function rem_member_data (
-  mship    : string,
+  cred     : CredentialData,
   proposal : ProposalData
 ) : ProposalData {
-  const { pub, xpub } = parse_credential(mship)
+  const { pub, xpub } = cred
   const wallet   = new Wallet(xpub)
 
   const paths    = proposal.paths
@@ -104,10 +103,10 @@ export function rem_member_data (
 }
 
 export function get_enrollment (
-  mship    : string,
+  cred     : CredentialData,
   proposal : ProposalData
 ) {
-  const { pub, xpub } = parse_credential(mship)
+  const { pub, xpub } = cred
   const wallet = new Wallet(xpub)
   const paths  = proposal.paths
     .filter(e => wallet.has_address(e[2]), proposal.paths.length)
@@ -121,15 +120,15 @@ export function get_enrollment (
 }
 
 export function tabulate_slots (
-  members : MemberEntry[],
+  members : MemberData[],
   roles   : RolePolicy[]
 ) {
   const slots = new Map(roles.map(e => [ e.id, 0 ]))
   for (const pol of roles) {
     const tab = slots.get(pol.id)
     assert.exists(tab)
-    for (const [ _, pol_id ] of members) {
-      if (pol_id === pol.id) {
+    for (const { pid } of members) {
+      if (pid === pol.id) {
         slots.set(pol.id, tab + 1)
       }
     }
@@ -137,29 +136,29 @@ export function tabulate_slots (
   return slots
 }
 
-export function has_open_slots (
-  pol_id  : string,
-  session : DraftSession
+export function has_open_roles (
+  policy_id : string,
+  session   : DraftSession
 ) {
   const { members, roles } = session
-  const policy = roles.find(e => e.id === pol_id)
-  assert.ok(policy !== undefined, 'role does not exists for policy id: ' + pol_id)
-  const slots = members.filter(e => e[1] === pol_id)
-  return slots.length < policy.max_slots
+  const policy = roles.find(e => e.id === policy_id)
+  assert.ok(policy !== undefined, 'role does not exists for policy id: ' + policy_id)
+  const slots = members.filter(e => e.pid === policy_id)
+  return slots.length < policy.max_num
 }
 
-export function has_full_slots (
-  members : MemberEntry[],
+export function has_full_roles (
+  members : MemberData[],
   roles   : RolePolicy[]
 ) {
   const tab = tabulate_slots(members, roles)
   return roles.every(e => {
-    const { id, min_slots, max_slots } = e
+    const { id, min_num, max_num } = e
     const count = tab.get(id)
     return (
       count !== undefined &&
-      count >= min_slots  &&
-      count <= max_slots
+      count >= min_num    &&
+      count <= max_num
     )
   })
 }

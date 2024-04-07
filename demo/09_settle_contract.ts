@@ -1,6 +1,8 @@
 import { print_banner }    from '@scrow/test'
-import { WitnessData }     from '@scrow/sdk'
+import { get_vm_config }   from '@scrow/sdk/vm'
+import { WitnessData }     from '@scrow/sdk/core'
 import { assert, sleep }   from '@scrow/sdk/util'
+import CVM                 from '@scrow/sdk/cvm'
 
 import { client }          from './01_create_client.js'
 import { signers }         from './02_create_signer.js'
@@ -13,21 +15,22 @@ const DEMO_MODE = process.env.DEMO_MODE === 'true'
 // Unpack our list of signers.
 const [ a_signer, b_signer ] = signers
 
+const config = get_vm_config(active_contract)
+const vmdata = CVM.init(config)
+
 // Create a statement template.
 const template = {
   action : 'close',
   method : 'endorse',
-  path   : 'return'
+  path   : 'payout'
 }
 
-// Define our contract as the active contract.
-const contract = active_contract
 // Initialize a variable for our witness data.
 let witness : WitnessData
 // Alice signs the initial statement.
-witness = a_signer.witness.create(contract, template)
+witness = a_signer.witness.create(vmdata, template)
 // Bob endoreses the statement from Alice.
-witness = b_signer.witness.endorse(contract, witness)
+witness = b_signer.witness.endorse(vmdata, witness)
 
 if (DEMO_MODE) {
   print_banner('witness statement')
@@ -37,19 +40,23 @@ if (DEMO_MODE) {
 /** ========== [ Submit Statement ] ========== **/
 
 // Submit the signed statement to the server.
-const res = await client.vm.submit(contract.cid, witness)
+const res = await client.vm.submit(vmdata.vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Assert that the settled contract exists.
-assert.ok(res.data.contract !== undefined, 'contract is not settled')
-// Unpack the settled contract from the response.
-const settled_contract = res.data.contract
+// Unpack the vm receipt.
+const vm_receipt = res.data.vmdata
 
-if (settled_contract === undefined) {
-  throw new Error('halp')
+if (DEMO_MODE) {
+  print_banner('vm receipt')
+  console.dir(vm_receipt, { depth : null })
 }
 
 /** ========== [ Review Settlement ] ========== **/
+
+// Assert that a settled contract exists.
+assert.exists(res.data.contract, 'settled contract was not returned')
+// Unpack the settled contract from the response.
+const settled_contract = res.data.contract
 
 if (DEMO_MODE) {
   print_banner('settled contract')
@@ -58,10 +65,10 @@ if (DEMO_MODE) {
 
 /** ========== [ Review Transaction ] ========== **/
 
+// Assert that the contract is spent.
+assert.ok(settled_contract.spent, 'contract has not been spent')
 // Unpack the txid from the settled contract.
 const txid = settled_contract.spent_txid
-// Assert that the txid exists.
-assert.ok(txid !== null, 'no tx broadcast')
 
 if (DEMO_MODE) {
   print_banner('final transaction')

@@ -38,15 +38,15 @@ export type SpendTemplate = [
 interface ContractIsActive {
   activated  : true
   active_at  : number
-  active_vm  : string
   expires_at : number
+  vmid       : string
 }
 
 interface ContractIsInactive {
   activated  : false
   active_at  : null
-  active_vm  : null
   expires_at : null
+  vmid       : null
 }
 
 interface ContractIsClosed {

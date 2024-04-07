@@ -18,33 +18,42 @@ const client_config = signer_config.extend({
   oracle_url : str
 })
 
-const mship = z.tuple([ str, hex, hex.optional() ])
+const cred = z.object({
+  pub  : hash,
+  xpub : str
+})
+
+const mship = cred.extend({
+  pid : hash,
+  sig : hex.optional()
+})
 
 const path  = z.tuple([ label, num ])
 
 const role = z.object({
-  title     : label,
-  min_slots : num.optional(),
-  max_slots : num.optional(),
-  paths     : path.array().optional(),
-  payment   : num.optional(),
-  programs  : prop.programs.optional()
+  title    : label,
+  min_num  : num.optional(),
+  max_num  : num.optional(),
+  paths    : path.array().optional(),
+  payment  : num.optional(),
+  programs : prop.programs.optional()
 })
 
 const policy = z.object({
-  id        : hash,
-  title     : label,
-  min_slots : num,
-  max_slots : num,
-  paths     : path.array(),
-  payment   : num.optional(),
-  programs  : prop.programs
+  id       : hash,
+  title    : label,
+  min_num  : num,
+  max_num  : num,
+  paths    : path.array(),
+  payment  : num.optional(),
+  programs : prop.programs
 })
 
 const session = z.object({
   members  : mship.array(),
   proposal : prop.data,
-  roles    : policy.array()
+  roles    : policy.array(),
+  terms    : str.array()
 })
 
-export default { client_config, mship, path, policy, role, session, signer_config }
+export default { client_config, cred, mship, path, policy, role, session, signer_config }

@@ -1,4 +1,3 @@
-import { verify_contract } from '@/core/validation/contract.js'
 import { verify_witness }  from '@/core/validation/witness.js'
 import { EscrowSigner }    from '../../class/signer.js'
 
@@ -10,7 +9,8 @@ import {
 
 import {
   ContractData,
-  VMReceipt,
+  VMConfig,
+  VMData,
   WitnessData,
   WitnessTemplate
 } from '@/core/types/index.js'
@@ -27,24 +27,22 @@ export function can_sign_api (esigner : EscrowSigner) {
 
 export function create_witness_api (esigner : EscrowSigner) {
   return (
-    contract : ContractData,
+    vmdata   : VMConfig | VMData,
     template : WitnessTemplate
   ) => {
-    esigner.check_issuer(contract.server_pk)
-    verify_contract(contract)
-    const programs = contract.terms.programs
+    // esigner.check_issuer(vmdata.server_pk)
     const pubkey   = esigner._signer.pubkey
-    const witness  = create_witness(programs, pubkey, template)
+    const witness  = create_witness(vmdata, pubkey, template)
     return endorse_witness(esigner._signer, witness)
   }
 }
 
 export function endorse_witness_api (esigner : EscrowSigner) {
   return (
-    vmdata  : VMReceipt,
+    vmdata  : VMData,
     witness : WitnessData
   ) => {
-    esigner.check_issuer(vmdata.server_pk)
+    // esigner.check_issuer(vmdata.server_pk)
     verify_witness(vmdata, witness)
     return endorse_witness(esigner._signer, witness)
   }

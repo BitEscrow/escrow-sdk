@@ -1,5 +1,3 @@
-/* Module Imports */
-
 import { PathState, CVMState } from '../types.js'
 import { VMError }             from '../util/base.js'
 

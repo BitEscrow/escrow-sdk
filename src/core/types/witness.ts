@@ -6,7 +6,6 @@ export interface WitnessTemplate {
   method : string
   path   : string
   stamp ?: number
-  vmid   : string
 }
 
 export interface WitnessPreImage {

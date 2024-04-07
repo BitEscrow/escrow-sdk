@@ -1,9 +1,5 @@
-import { FundingData }  from '../deposit.js'
 import { ContractData } from '../contract.js'
-
-export interface FundListResponse {
-  funds : FundingData[]
-}
+import { FundingData }  from '../deposit.js'
 
 export interface ContractDataResponse {
   contract : ContractData
@@ -11,4 +7,9 @@ export interface ContractDataResponse {
 
 export interface ContractListResponse {
   contracts : ContractData[]
+}
+
+export interface FundListResponse {
+  contract : ContractData
+  funds    : FundingData[]
 }

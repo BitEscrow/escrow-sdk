@@ -60,20 +60,18 @@ export function get_config (vmconfig : unknown) {
   return CoreSchema.vm.config.parse(vmconfig)
 }
 
-export function compile_witness (
-  programs  : ProgramEntry[],
-  witnesses : WitnessVector[],
-  vmid      : string
+export function compile_witness_vectors (
+  vmdata    : VMData,
+  witnesses : WitnessVector[]
 ) {
   const wit_data : WitnessData[] = []
   // For each witness statement: 
-  for (const { signers, ...rest } of witnesses) {
+  for (const { signers, ...tmpl } of witnesses) {
     // Resolve signer aliases into their devices:
     const mbrs = signers.map(e => get_signer(e))
     const pub  = mbrs[0].signer.pubkey
-    const tmpl = { ...rest, vmid }
     // Create the witness template:
-    let witness = create_witness(programs, pub, tmpl)
+    let witness = create_witness(vmdata, pub, tmpl)
     // For each signer of the statement:
     for (const mbr of mbrs) {
       // Endorse the witness template.
@@ -85,25 +83,26 @@ export function compile_witness (
   return wit_data
 }
 
-export function run_vm (
+export function run_vm_vectors (
   config     : VMConfig,
-  statements : WitnessData[],
-  timeout    : number
+  timeout    : number,
+  vectors    : WitnessVector[]
 ) : VMData {
   const marker = config.active_at + timeout
-  let   state  = CVM.init(config)
+  let   vmdata = CVM.init(config)
+  const stack  = compile_witness_vectors(vmdata, vectors)
   // console.log('vm_state:', vm_state)
   // For each signed witness statement:
-  for (const witness of statements) {
+  for (const witness of stack) {
     // Evaluate the witness statement.
-    state = CVM.eval(state, witness)
+    vmdata = CVM.eval(vmdata, witness)
     // Unpack the current state results:
-    const { error, output } = state
+    const { error, output } = vmdata
     // If there's an error or result, return.
     if (error !== null || output !== null) {
-      return state
+      return vmdata
     }
   }
   // If the vm is still running, eval the timestamp.
-  return CVM.run(state, marker)
+  return CVM.run(vmdata, marker)
 }

@@ -1,6 +1,7 @@
-/* Global Imports */
-
-import { regex } from '@/core/util/index.js'
+import { regex }           from '@/core/util/index.js'
+import { debug }           from '../util/base.js'
+import { update_vm_state } from './state.js'
+import EndorseMethod       from './methods/endorse.js'
 
 import {
   Literal,
@@ -8,21 +9,12 @@ import {
   WitnessData
 } from '@/core/types/index.js'
 
-/* Module Imports */
-
-import { debug } from '../util/base.js'
-
 import {
   StoreEntry,
   ProgramReturn,
   ProgMethodAPI,
   CVMData
 } from '../types.js'
-
-/* Local Imports */
-
-import { update_vm_state } from './state.js'
-import EndorseMethod       from './methods/endorse.js'
 
 export function call_method (method : string) : ProgMethodAPI | null {
   switch (method) {

@@ -4,6 +4,7 @@ import { assert, parse_proposal } from '@/core/util/index.js'
 import { create_publish_req }     from '@/core/lib/contract.js'
 
 import {
+  validate_commit_req,
   verify_endorsements,
   verify_proposal
 } from '@/core/validation/index.js'
@@ -13,7 +14,9 @@ import {
   ContractDataResponse,
   ContractListResponse,
   FundListResponse,
-  ContractRequest
+  ContractRequest,
+  FundingDataResponse,
+  CommitRequest
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -136,9 +139,34 @@ function cancel_contract_api (
   }
 }
 
+/**
+ * Fund a contract directly using a deposit template.
+ */
+function commit_funds_api (client : EscrowClient) {
+  return async (
+    request : CommitRequest
+  ) : Promise<ApiResponse<FundingDataResponse>> => {
+    // Validate the request.
+    validate_commit_req(request)
+    // Formulate the request url.
+    const cid  = request.covenant.cid
+    const host = client.server_url
+    const url  = `${host}/api/contract/${cid}/commit`
+    // Forulate the request body.
+    const init = {
+      method  : 'POST',
+      body    : JSON.stringify(request),
+      headers : { 'content-type': 'application/json' }
+    }
+    // Return the response.
+    return client.fetcher<FundingDataResponse>({ url, init })
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
     cancel : cancel_contract_api(client),
+    commit : commit_funds_api(client),
     create : create_contract_api(client),
     funds  : list_funds_api(client),
     list   : list_contract_api(client),

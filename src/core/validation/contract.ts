@@ -9,8 +9,12 @@ import {
 
 /* Module Imports */
 
-import { get_proposal_id } from '../lib/proposal.js'
-import { assert }          from '../util/index.js'
+import {
+  get_proposal_id,
+  verify_endorsement
+} from '../lib/proposal.js'
+
+import { assert } from '../util/index.js'
 
 import {
   create_txinput,
@@ -63,10 +67,10 @@ export function verify_endorsements (
 ) {
   // List all pubkeys in proposal.
   const prop_id = get_proposal_id(proposal)
-  for (const signature of signatures) {
-    const pub = signature.slice(0, 64)
-    const sig = signature.slice(64)
-    assert.ok(verify_sig(sig, prop_id, pub), 'signature is invalid for pubkey: ' + pub)
+  for (const sig of signatures) {
+    const pub = sig.slice(0, 64)
+    const is_valid = verify_endorsement(prop_id, sig)
+    assert.ok(is_valid, 'signature is invalid for pubkey: ' + pub)
   }
 }
 
@@ -114,10 +118,10 @@ export function verify_activation (
   contract : ContractData,
   vmstate  : VMData
 ) {
-  const { activated, active_at, active_vm, expires_at } = contract
+  const { activated, active_at, vmid, expires_at } = contract
   assert.ok(activated,                       'contract is not flagged as active')
   assert.ok(active_at === vmstate.active_at, 'contract activated date does not match vm')
-  assert.ok(active_vm === vmstate.vmid,      'contract vmid does not match vm internal id')
+  assert.ok(vmid      === vmstate.vmid,      'contract vmid does not match vm internal id')
   const expires_chk = active_at + contract.terms.duration
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
@@ -126,9 +130,11 @@ export function verify_closing (
   contract : ContractData,
   vmstate  : VMData
 ) {
-  assert.ok(vmstate.updated_at === contract.closed_at,   'contract closed_at does not match vm result')
-  assert.ok(vmstate.head       === contract.closed_hash, 'contract closed_hash does not match vm result')
-  assert.ok(vmstate.output     === contract.closed_path, 'contract closed_path does not match vm result')
+  assert.ok(vmstate.closed,  'vm state is not closed')
+  assert.ok(contract.closed, 'contract is not closed')
+  assert.ok(vmstate.closed_at === contract.closed_at,   'contract closed_at does not match vm result')
+  assert.ok(vmstate.head      === contract.closed_hash, 'contract closed_hash does not match vm result')
+  assert.ok(vmstate.output    === contract.closed_path, 'contract closed_path does not match vm result')
 }
 
 export function verify_settlement (

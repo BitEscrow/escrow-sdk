@@ -7,7 +7,7 @@ import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 /* Module Imports */
 
 import { get_deposit_id }  from '../lib/deposit.js'
-import { assert }          from '../util/index.js'
+import { assert, now }     from '../util/index.js'
 
 import {
   get_account_ctx,
@@ -21,6 +21,7 @@ import {
   DepositData,
   DepositStatus,
   LockRequest,
+  OracleTxRecvStatus,
   RegisterRequest,
   ServerPolicy,
   SignerAPI
@@ -171,4 +172,16 @@ export function verify_utxo (
   assert.ok(sdata.enabled,                  'sequence field timelock is not enabled.')
   assert.ok(sdata.type === 'stamp',         'sequence field is not configured for timelock.')
   assert.ok(tapkey === ctx.tap_data.tapkey, 'utxo scriptkey does not match tapkey')
+}
+
+export function verify_utxo_lock (
+  locktime : number,
+  policy   : ServerPolicy,
+  status   : OracleTxRecvStatus,
+  current = now()
+) {
+  const limit = current - policy.deposit.GRACE_PERIOD
+  if (status.confirmed && status.block_time + locktime <= limit) {
+    throw new Error('Deposit lock is expiring within the grace period.')
+  }
 }

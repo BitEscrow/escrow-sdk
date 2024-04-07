@@ -7,5 +7,5 @@ export function get_server_config (network : Network) {
 }
 
 export function print_banner (title : string) {
-  return `\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n'
+  console.log(`\n\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n\n')
 }

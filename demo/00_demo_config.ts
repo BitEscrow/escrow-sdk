@@ -10,7 +10,7 @@ const faucets = {
 
 const returns = {
   mutiny  : 'tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v',
-  regtest : 'bcrt1qvjnqnzuyt7je5rhrc0gpjlrm2zagjjq5c9fwkp',
+  regtest : 'bcrt1p6zxjm3wcugjxkn339etgmnytaeflzlzuruved30z3hk963jzfz5q5y0z7e',
   signet  : 'tb1q5tsjcyz7xmet07yxtumakt739y53hcttmntajq',
   testnet : 'tb1q5tsjcyz7xmet07yxtumakt739y53hcttmntajq'
 }
@@ -28,8 +28,8 @@ const client  = get_server_config(network as Network)
 export const config = {
   network,
   client,
-  faucet  : faucets[network as keyof typeof faucets],
-  members : [ 'alice', 'bob', 'carol' ],
-  poll    : poll_rates[network as keyof typeof poll_rates],
-  return  : returns[network as keyof typeof returns]
+  faucet      : faucets[network as keyof typeof faucets],
+  members     : [ 'alice', 'bob', 'carol' ],
+  poll        : poll_rates[network as keyof typeof poll_rates],
+  return_addr : returns[network as keyof typeof returns]
 }

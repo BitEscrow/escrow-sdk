@@ -27,12 +27,18 @@ export function create_program (
  */
 export function get_program (
   query    : ProgramQuery,
-  programs : ProgramEntry[]
+  programs : ProgramEntry[] | ProgramData[]
 ) : ProgramData | undefined {
   // Unpack all available terms from the query.
   const { action, includes, method, path, params } = query
   // Convert each ProgramTerm into ProgramData.
-  let progs = programs.map(e => create_program(e))
+  let progs = programs.map(e => {
+    return (Array.isArray(e)) ? create_program(e) : e
+  })
+
+  // console.log('query:', query)
+  // console.log('progs:', progs)
+
   // If defined, filter programs by method.
   if (method !== undefined) {
     progs = progs.filter(e => e.method === method)
@@ -79,10 +85,9 @@ export function get_vm_config (
   contract : ContractData
 ) : VMConfig {
   assert.ok(contract.activated, 'contract is not active')
-  const { active_at, active_vm, expires_at, terms } = contract
+  const { active_at, expires_at, terms, vmid } = contract
   const { engine, paths, programs, schedule } = terms
   const pathnames = get_path_names(paths)
-  const vmid      = active_vm
   return { active_at, expires_at, engine, pathnames, programs, schedule, vmid }
 }
 
@@ -100,32 +105,32 @@ export function get_vm_id (
 export function create_receipt (
   data   : VMData,
   signer : SignerAPI,
-  created_at = now()
+  updated_at = now()
 ) : VMReceipt {
   const vm_hash    = get_vmdata_hash(data)
   const server_pk  = signer.pubkey
-  const receipt_id = get_receipt_id(vm_hash, server_pk, created_at)
+  const receipt_id = get_receipt_id(vm_hash, server_pk, updated_at)
   const server_sig = signer.sign(receipt_id)
-  return sort_record({ ...data, created_at, receipt_id, server_pk, server_sig })
+  return sort_record({ ...data, receipt_id, server_pk, server_sig, updated_at })
 }
 
-export function get_vmdata_hash (data : VMData) {
+export function get_vmdata_hash (data : Omit<VMData, 'updated_at'>) {
+  const cat   = Buff.num(data.commit_at, 4)
   const err   = Buff.str(data.error  ?? 'null')
   const head  = Buff.hex(data.head, 32)
   const out   = Buff.str(data.output ?? 'null')
   const step  = Buff.num(data.step, 4)
-  const uat   = Buff.num(data.updated_at, 4)
   const vmid  = Buff.hex(data.vmid, 32)
-  return Buff.join([ err, head, out, step, uat, vmid ]).digest.hex
+  return Buff.join([ cat, err, head, out, step, vmid ]).digest.hex
 }
 
 export function get_receipt_id (
-  hash   : string,
-  pubkey : string,
-  stamp  : number
+  vmdata_hash : string,
+  server_pk   : string,
+  updated_at  : number
 ) {
-  const cat = Buff.num(stamp, 4)
-  const dig = Buff.hex(hash, 32)
-  const pub = Buff.hex(pubkey, 32)
-  return Buff.join([ cat, dig, pub ]).digest.hex
+  const dig = Buff.hex(vmdata_hash, 32)
+  const pub = Buff.hex(server_pk, 32)
+  const uat = Buff.num(updated_at, 4)
+  return Buff.join([ dig, pub, uat ]).digest.hex
 }

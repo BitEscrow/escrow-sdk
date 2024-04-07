@@ -4,7 +4,7 @@ import { DraftUtil }    from '@scrow/sdk/client'
 import { signers }         from './02_create_signer.js'
 import { proposal, roles } from './03_create_proposal.js'
 
-const DEMO_MODE = process.env.DEMO_MODE === 'true'
+const DEMO_MODE = process.env.VERBOSE === 'true'
 
 // Unpack our list of signers.
 const [ a_signer, b_signer, c_signer ] = signers
@@ -19,7 +19,9 @@ draft = b_signer.proposal.join(seats[1], draft)
 draft = c_signer.proposal.join(seats[2], draft)
 
 // For each member, collect an endorsement signature.
-signers.forEach(mbr => mbr.proposal.endorse(draft))
+signers.forEach(mbr => {
+  draft = mbr.proposal.endorse(draft)
+})
 
 DraftUtil.verify(draft)
 

@@ -1,9 +1,10 @@
 /* Global Imports */
 
-import { Buff }          from '@cmdcode/buff'
-import { parse_addr }    from '@scrow/tapscript/address'
-import { create_vout }   from '@scrow/tapscript/tx'
-import { TxOutput }      from '@scrow/tapscript'
+import { Buff }        from '@cmdcode/buff'
+import { verify_sig }  from '@cmdcode/crypto-tools/signer'
+import { parse_addr }  from '@scrow/tapscript/address'
+import { create_vout } from '@scrow/tapscript/tx'
+import { TxOutput }    from '@scrow/tapscript'
 
 /* Module Imports */
 
@@ -154,4 +155,15 @@ export function endorse_proposal (
   const pub  = signer.pubkey
   const sig  = signer.sign(msg)
   return Buff.join([ pub, sig ]).hex
+}
+
+export function verify_endorsement (
+  prop_id   : string,
+  signature : string
+) {
+  const bytes = Buff.hex(signature, 96)
+  const msg   = Buff.hex(prop_id, 32)
+  const pub   = bytes.subarray(0, 32)
+  const sig   = bytes.subarray(32)
+  return verify_sig(sig, msg, pub)
 }

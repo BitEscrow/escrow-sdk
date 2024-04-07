@@ -7,6 +7,7 @@ const { bool, hash, literal, num, regex, stamp, signature, str } = base
 
 const config = z.object({
   active_at  : stamp,
+  engine     : str,
   expires_at : stamp,
   pathnames  : str.array(),
   programs   : prop.programs,

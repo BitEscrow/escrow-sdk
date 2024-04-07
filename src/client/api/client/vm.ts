@@ -3,8 +3,7 @@ import { assert } from '@/core/util/index.js'
 import {
   ApiResponse,
   VMDataResponse,
-  VMReceiptResponse,
-  VMStatementResponse,
+  VMListResponse,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -15,14 +14,14 @@ import { EscrowClient } from '../../class/client.js'
  * that are associated with the contract.
  */
 function list_witness_api (client : EscrowClient) {
-  return async (vmid : string) : Promise<ApiResponse<VMStatementResponse>> => {
+  return async (vmid : string) : Promise<ApiResponse<VMListResponse>> => {
      // Validate the contract id.
     assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
     const url  = `${host}/api/vm/${vmid}/list`
     // Return the response.
-    return client.fetcher<VMStatementResponse>({ url })
+    return client.fetcher<VMListResponse>({ url })
   }
 }
 
@@ -31,14 +30,14 @@ function list_witness_api (client : EscrowClient) {
  */
 function submit_witness_api (client : EscrowClient) {
   return async (
-    cid     : string,
+    vmid    : string,
     witness : WitnessData
-  ) : Promise<ApiResponse<VMReceiptResponse>> => {
+  ) : Promise<ApiResponse<VMDataResponse>> => {
     // Validate the contract id.
-    assert.is_hash(cid)
+    assert.is_hash(vmid)
     // Formulate the request url.
     const host = client.server_url
-    const url  = `${host}/api/vm/${cid}/submit`
+    const url  = `${host}/api/vm/${vmid}/submit`
     // Formulate the request body.
     const init = {
       method  : 'POST',
@@ -46,7 +45,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<VMReceiptResponse>({ url, init })
+    return client.fetcher<VMDataResponse>({ url, init })
   }
 }
 
@@ -55,12 +54,12 @@ function submit_witness_api (client : EscrowClient) {
  * that are associated with the contract.
  */
 function read_vm_state_api (client : EscrowClient) {
-  return async (cid : string) : Promise<ApiResponse<VMDataResponse>> => {
+  return async (vmid : string) : Promise<ApiResponse<VMDataResponse>> => {
     // Validate the contract id.
-    assert.is_hash(cid)
+    assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/witness/{${cid}}`
+    const url  = `${host}/api/vm/${vmid}`
     // Return the response.
     return client.fetcher<VMDataResponse>({ url })
   }

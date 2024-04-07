@@ -18,10 +18,10 @@ export function verify_receipt (
   receipt : VMReceipt,
   result  : VMData
 ) {
-  const { created_at, receipt_id, server_pk, server_sig, ...data } = receipt
+  const { receipt_id, server_pk, server_sig, updated_at, ...data } = receipt
 
   const int_hash = get_vmdata_hash(data)
-  const int_id   = get_receipt_id(int_hash, server_pk, created_at)
+  const int_id   = get_receipt_id(int_hash, server_pk, updated_at)
 
   if (int_id !== receipt_id) {
     throw new Error('receipt id does not match internal id: ' + int_id)
@@ -34,16 +34,16 @@ export function verify_receipt (
   }
 
   if (receipt.vmid !== result.vmid) {
-    throw new Error('receipt does not match vmid: '   + result.vmid)
+    throw new Error('receipt does not match vmid: '      + result.vmid)
   } else if (receipt.step !== result.step) {
-    throw new Error('receipt does not match step: '   + result.step)
+    throw new Error('receipt does not match step: '      + result.step)
   } else if (receipt.head !== result.head) {
-    throw new Error('receipt does not match head: '   + result.head)
-  } else if (receipt.updated_at !== result.updated_at) {
-    throw new Error('receipt does not match stamp: '  + result.updated_at)
+    throw new Error('receipt does not match head: '      + result.head)
+  } else if (receipt.commit_at !== result.commit_at) {
+    throw new Error('receipt does not match commit_at: ' + result.commit_at)
   } else if (receipt.error !== result.error) {
-    throw new Error('receipt does not match error: '  + result.error)
+    throw new Error('receipt does not match error: '     + result.error)
   } else if (receipt.output !== result.output) {
-    throw new Error('receipt does not match output: ' + result.output)
+    throw new Error('receipt does not match output: '    + result.output)
   }
 }

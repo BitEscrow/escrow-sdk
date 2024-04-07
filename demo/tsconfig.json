@@ -2,11 +2,13 @@
   "compilerOptions": {
     "baseUrl": "..",
     "paths": {
+      "@/*"                 : [ "src/*" ],
       "@scrow/demo/*"       : [ "demo/*"                        ],
       "@scrow/test"         : [ "test/src/index.js"             ],
       "@scrow/sdk"          : [ "src/index.js"                  ],
       "@scrow/sdk/client"   : [ "src/client/index.js"           ],
       "@scrow/sdk/core"     : [ "src/core/index.js"             ],
+      "@scrow/sdk/cvm"      : [ "src/vm/index.js"               ],
       "@scrow/sdk/account"  : [ "src/core/lib/account.js"       ],
       "@scrow/sdk/contract" : [ "src/core/lib/contract.js"      ],
       "@scrow/sdk/covenant" : [ "src/core/lib/covenant.js"      ],
@@ -17,10 +19,10 @@
       "@scrow/sdk/session"  : [ "src/core/lib/session.js"       ],
       "@scrow/sdk/tx"       : [ "src/core/lib/tx.js"            ],
       "@scrow/sdk/witness"  : [ "src/core/lib/witness.js"       ],
+      "@scrow/sdk/vm"       : [ "src/core/lib/vm.js"            ],
       "@scrow/sdk/schema"   : [ "src/core/schema/index.js"      ],
       "@scrow/sdk/util"     : [ "src/core/util/index.js"        ],
-      "@scrow/sdk/verify"   : [ "src/core/validators/index.js"  ],
-      "@scrow/sdk/vm"       : [ "src/vm/index.js"               ]
+      "@scrow/sdk/validate" : [ "src/core/validation/index.js"  ]
     },
     "module": "NodeNext",
     "target": "ESNext",

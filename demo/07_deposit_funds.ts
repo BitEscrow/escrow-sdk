@@ -12,7 +12,7 @@ import {
   fund_mutiny_address
 } from './util.js'
 
-const DEMO_MODE = process.env.DEMO_MODE === 'true'
+const DEMO_MODE = process.env.VERBOSE === 'true'
 
 /** ========== [ Verify the Account ] ========== **/
 
@@ -26,9 +26,9 @@ funder.account.verify(new_account)
 // Unpack account address.
 const { deposit_addr } = new_account
 // Compute a txfee from the feerate.
-const vin_fee   = new_contract.feerate * 65
+const vin_fee   = new_contract.fund_txfee
 // Compute a total amount (in sats) with the txfee.
-const amt_total = new_contract.total + vin_fee
+const amt_total = new_contract.tx_total + vin_fee
 // Also compute a total amount in bitcoin.
 const btc_total = amt_total / 100_000_000
 
@@ -81,16 +81,16 @@ if (DEMO_MODE) {
 // Specify a feerate for the return tx.
 const feerate = 1
 // Get the output data from the utxo.
-const utxo    = utxos[0].txspend
+const utxo    = utxos[0].txout
 // Request the funders device to sign a covenant.
 const req     = funder.deposit.commit(new_account, new_contract, feerate, utxo)
 // Deliver our registration request to the server.
-const res     = await client.deposit.commit(req)
+const res     = await client.contract.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 
 /**
- * Define our deposit and funded contract.
+ * Define our locked deposit.
  */
 export const funded_contract = res.data.contract
 export const locked_deposit  = res.data.deposit
@@ -98,9 +98,8 @@ export const locked_deposit  = res.data.deposit
 /** ========== [ Export New Data ] ========== **/
 
 if (DEMO_MODE) {
-  print_banner('locked deposit')
-  console.dir(locked_deposit, { depth : null })
-
   print_banner('funded contract')
   console.dir(funded_contract, { depth : null })
+  print_banner('locked deposit')
+  console.dir(locked_deposit, { depth : null })
 }

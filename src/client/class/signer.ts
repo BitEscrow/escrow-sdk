@@ -1,14 +1,12 @@
-import { Buff, Bytes } from '@cmdcode/buff'
+import { Buff, Bytes }    from '@cmdcode/buff'
+import { SignerAPI }      from '@/core/types/index.js'
+import { DEFAULT_CONFIG } from '../config/client.js'
 
 import {
   Seed,
   Signer,
   Wallet
 } from '@cmdcode/signer'
-
-import { SignerAPI } from '@/core/types/index.js'
-
-import { DEFAULT_CONFIG } from '../config/client.js'
 
 import {
   SignerConfig,

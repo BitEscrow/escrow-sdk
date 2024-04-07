@@ -49,8 +49,8 @@ export const GET_INIT_ACTIVE_STATE = () => {
   return {
     activated  : false as const,
     active_at  : null,
-    active_vm  : null,
-    expires_at : null
+    expires_at : null,
+    vmid       : null
   }
 }
 
@@ -164,10 +164,10 @@ export function activate_contract (
 ) : ContractData {
   // Define a hard expiration date.
   const expires_at = active_at + contract.terms.duration
-  const active_vm  = get_vm_id(active_at, contract.cid, expires_at)
+  const vmid       = get_vm_id(active_at, contract.cid, expires_at)
   const status     = 'active' as ContractStatus
   // Return the new contract and vm config.
-  return { ...contract, activated: true, active_at, active_vm, expires_at, status }
+  return { ...contract, activated: true, active_at, expires_at, status, vmid }
 }
 
 export function close_contract (

@@ -1,15 +1,18 @@
 import { print_banner } from '@scrow/test'
+import { config }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
 import { signers }      from './02_create_signer.js'
 
-const DEMO_MODE = process.env.DEMO_MODE === 'true'
+const DEMO_MODE = process.env.VERBOSE === 'true'
 
 // Define our deposit locktime.
-const locktime = 60 * 60  // 1 hour locktime
+const locktime = 172800
 // Define our funder for the deposit.
 const funder   = signers[0]
+//
+const return_addr = config.return_addr
 // Get an account request from the funder device.
-const acct_req  = funder.account.create('', locktime)
+const acct_req  = funder.account.create(return_addr, locktime)
 // Submit the account request to the server
 const acct_res = await client.deposit.request(acct_req)
 // Check the response is valid.

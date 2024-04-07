@@ -1,6 +1,7 @@
 import { resolve_json } from '@/core/util/fetch.js'
 
 import {
+  ApiResponse,
   Network,
   ServerPolicy,
   VirtualMachineAPI
@@ -95,7 +96,9 @@ export function get_fetcher (
   fetcher : typeof fetch
 ) {
   // Return the wrapped fetch method.
-  return async <T> (config : FetchConfig) => {
+  return async <T> (
+    config : FetchConfig
+  ) : Promise<ApiResponse<T>> => {
     // Unpack the config.
     const { init = {}, token, url } = config
     // Initialize the options object.
