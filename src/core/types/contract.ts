@@ -75,27 +75,28 @@ export interface ContractCreateConfig {
 }
 
 export interface ContractBase {
-  cid         : string
-  created_at  : number
-  deadline    : number
-  fees        : PaymentEntry[]
-  feerate     : number
-  fund_count  : number
-  fund_pend   : number
-  fund_txfee  : number
-  fund_value  : number
-  moderator   : string | null
-  outputs     : SpendTemplate[]
-  prop_id     : string
-  server_pk   : string
-  server_sig  : string
-  signatures  : string[]
-  status      : ContractStatus
-  subtotal    : number
-  terms       : ProposalData
-  tx_fees     : number
-  tx_total    : number
-  tx_bsize    : number
-  tx_vsize    : number
-  updated_at  : number
+  cid          : string
+  created_at   : number
+  deadline     : number
+  effective_at : number | null
+  fees         : PaymentEntry[]
+  feerate      : number
+  fund_count   : number
+  fund_pend    : number
+  fund_txfee   : number
+  fund_value   : number
+  moderator    : string | null
+  outputs      : SpendTemplate[]
+  prop_id      : string
+  server_pk    : string
+  server_sig   : string
+  signatures   : string[]
+  status       : ContractStatus
+  subtotal     : number
+  terms        : ProposalData
+  tx_fees      : number
+  tx_total     : number
+  tx_bsize     : number
+  tx_vsize     : number
+  updated_at   : number
 }
