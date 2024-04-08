@@ -113,6 +113,12 @@ export class EscrowSigner {
     return this._config.server_pk
   }
 
+  get wallet () {
+    return {
+      newaddr : this._wallet.has_address
+    }
+  }
+
   get xpub () {
     return this._wallet.xpub
   }

@@ -11,9 +11,10 @@ import { client }              from '@scrow/demo/01_create_client.js'
 import { moderator as signer } from '@scrow/demo/03_create_proposal.js'
 
 // Define the contract id we will use.
-const cid = process.argv.slice(2).at(1)
+const cid = process.argv.slice(2).at(0)
 // If cid is not specified, throw an error
 if (cid === undefined) throw "must provide a 'cid' value as an argument"
+
 // Generate an auth token from the moderator's signer.
 const req = signer.contract.cancel(cid)
 // Send the cancel request, along with the auth token.

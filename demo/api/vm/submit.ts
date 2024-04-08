@@ -12,7 +12,7 @@ import { client }          from '@scrow/demo/01_create_client.js'
 import { signers }         from '@scrow/demo/02_create_signer.js'
 
 // Define the deposit id we will use.
-const vmid = process.argv.slice(2).at(1)
+const vmid = process.argv.slice(2).at(0)
 // If dpid is not specified, throw an error
 if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
 

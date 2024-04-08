@@ -10,7 +10,7 @@ import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
 
 // Define the deposit id we will use.
-const wid = process.argv.slice(2).at(1)
+const wid = process.argv.slice(2).at(0)
 // If dpid is not specified, throw an error
 if (wid === undefined) throw "must provide a 'wid' value as an argument"
 

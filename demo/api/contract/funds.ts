@@ -10,7 +10,7 @@ import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
 
 // Define the contract id we will use.
-const cid = process.argv.slice(2).at(1)
+const cid = process.argv.slice(2).at(0)
 // If cid is not specified, throw an error
 if (cid === undefined) throw "must provide a 'cid' value as an argument"
 // Fetch a contract from the server by cid.

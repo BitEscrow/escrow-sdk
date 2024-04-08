@@ -95,15 +95,18 @@
     }
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "demo": "./demo/run.sh",
-    "demo:vm": "yarn load demo/vm/eval.ts",
-    "lint": "eslint . --ext .ts",
-    "load": "tsx --tsconfig ./test/tsconfig.json",
-    "release": "yarn lint && yarn test && yarn build",
-    "run:regtest" : "NETWORK=regtest tsx --tsconfig ./test/tsconfig.json",
-    "scratch": "yarn load test/scratch.ts",
-    "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
+    "build"       : "./scripts/build.sh",
+    "demo"        : "./demo/run.sh",
+    "demo:vm"     : "yarn load demo/vm/eval.ts",
+    "lint"        : "eslint . --ext .ts",
+    "load"        : "tsx --tsconfig ./test/tsconfig.json",
+    "release"     : "yarn lint && yarn test && yarn build",
+    "run:regtest" : "NETWORK=regtest yarn load",
+    "run:mutiny"  : "NETWORK=mutiny  yarn load",
+    "run:signet"  : "NETWORK=signet  yarn load",
+    "run:testnet" : "NETWORK=testnet yarn load",
+    "scratch"     : "yarn load test/scratch.ts",
+    "test"        : "yarn tsc && yarn load test/tape.ts | tap-spec"
   },
   "devDependencies": {
     "@cmdcode/core-cmd": "1.5.2",

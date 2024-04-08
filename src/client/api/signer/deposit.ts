@@ -1,6 +1,8 @@
 import { verify_account }  from '@/core/validation/account.js'
 import { verify_contract } from '@/core/validation/contract.js'
 import { verify_deposit }  from '@/core/validation/deposit.js'
+import { assert }          from '@/core/util/index.js'
+import { EscrowSigner }    from '../../class/signer.js'
 
 import {
   create_close_req,
@@ -19,9 +21,6 @@ import {
   TxOutput,
   RegisterRequest
 } from '@/core/types/index.js'
-
-import { EscrowSigner }   from '../../class/signer.js'
-import { assert } from '@/core/util/index.js'
 
 export function request_deposits_api (esigner : EscrowSigner) {
   return () => {
