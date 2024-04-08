@@ -19,13 +19,11 @@ export interface VirtualMachineAPI {
 interface VMOpen {
   closed    : false
   closed_at : null
-  output    : null
 }
 
 interface VMClosed {
   closed    : true
   closed_at : number
-  output    : string
 }
 
 interface Receipt {
@@ -67,6 +65,7 @@ export interface VMBase {
   error      : string | null   // Error output of the VM.
   expires_at : number
   head       : string          // Current head of the commit-chain.
+  output     : string | null
   pathnames  : string[]
   programs   : ProgramData[]
   state      : string

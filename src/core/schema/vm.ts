@@ -31,20 +31,17 @@ const receipt_data = z.object({
 
 const close_info = z.object({
   closed    : bool,
-  closed_at : stamp.nullable(),
-  output    : str.nullable()
+  closed_at : stamp.nullable()
 })
 
 const vm_open = z.object({
   closed    : z.literal(false),
-  closed_at : z.null(),
-  output    : z.null()
+  closed_at : z.null()
 })
 
 const vm_closed = z.object({
   closed    : z.literal(true),
-  closed_at : stamp,
-  output    : str
+  closed_at : stamp
 })
 
 const close_state = z.discriminatedUnion('closed', [ vm_open, vm_closed ])

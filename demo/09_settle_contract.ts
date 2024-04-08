@@ -8,7 +8,7 @@ import { client }          from './01_create_client.js'
 import { signers }         from './02_create_signer.js'
 import { active_contract } from './08_check_contract.js'
 
-const DEMO_MODE = process.env.DEMO_MODE === 'true'
+const DEMO_MODE = process.env.VERBOSE === 'true'
 
 /** ========== [ Create Statement ] ========== **/
 
