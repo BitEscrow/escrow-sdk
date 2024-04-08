@@ -1,6 +1,4 @@
-import { ContractData }    from '@/core/types/index.js'
-import { verify_contract } from '@/core/validation/contract.js'
-import { EscrowSigner }    from '../../class/signer.js'
+import { EscrowSigner } from '../../class/signer.js'
 
 export function request_contracts_api (esigner : EscrowSigner) {
   return () => {
@@ -13,11 +11,9 @@ export function request_contracts_api (esigner : EscrowSigner) {
 }
 
 export function cancel_contract_api (esigner : EscrowSigner) {
-  return (contract : ContractData) => {
-    esigner.check_issuer(contract.server_pk)
-    verify_contract(contract)
+  return (cid : string) => {
     const host = esigner.server_url
-    const url  = `${host}/api/contract/${contract.cid}/cancel`
+    const url  = `${host}/api/contract/${cid}/cancel`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
   }

@@ -6,12 +6,14 @@
  * yarn load demo/api/deposit/read
  */
 
-import { print_banner }   from '@scrow/test'
-import { client }         from '@scrow/demo/01_create_client.js'
-import { locked_deposit } from '@scrow/demo/07_deposit_funds.js'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
 
 // Define the deposit id we will use.
-const dpid = locked_deposit.dpid
+const dpid = process.argv.slice(2).at(1)
+// If dpid is not specified, throw an error
+if (dpid === undefined) throw "must provide a 'dpid' value as an argument"
+
 // Request to read a deposit via dpid.
 const res = await client.deposit.read(dpid)
 // Check the response is valid.

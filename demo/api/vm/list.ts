@@ -6,12 +6,14 @@
  * yarn load demo/api/contract/witness
  */
 
-import { print_banner }     from '@scrow/test'
-import { client }           from '@scrow/demo/01_create_client.js'
-import { settled_contract } from '@scrow/demo/09_settle_contract.js'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
 
-// Define the contract id we will use.
-const vmid = settled_contract.active_vm
+// Define the deposit id we will use.
+const vmid = process.argv.slice(2).at(1)
+// If dpid is not specified, throw an error
+if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
+
 // Fetch a contract from the server by cid.
 const res = await client.vm.list(vmid)
 // Check the response is valid.

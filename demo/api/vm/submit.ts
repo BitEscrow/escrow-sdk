@@ -11,11 +11,14 @@ import { WitnessData }     from '@scrow/sdk'
 import { client }          from '@scrow/demo/01_create_client.js'
 import { signers }         from '@scrow/demo/02_create_signer.js'
 
-const vmid = 'c1c04cdde4a596879235a521f3185a6c56a318c92f9659b38a48fcc80a77d0b0'
+// Define the deposit id we will use.
+const vmid = process.argv.slice(2).at(1)
+// If dpid is not specified, throw an error
+if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
 
-const vm_res  = await client.vm.read(vmid)
+const vm_res = await client.vm.read(vmid)
 if (!vm_res.ok) throw new Error('unable to fetch vm')
-const vmdata  = vm_res.data.vmdata
+const vmdata = vm_res.data.vmdata
 
 // Unpack our list of signers.
 const [ a_signer, b_signer ] = signers

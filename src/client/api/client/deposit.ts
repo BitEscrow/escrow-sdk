@@ -107,16 +107,13 @@ function list_deposit_api (client : EscrowClient) {
 
 function lock_deposit_api (client : EscrowClient) {
   return async (
-    dpid    : string,
     request : LockRequest
   ) : Promise<ApiResponse<FundingDataResponse>> => {
-    // Validate the deposit id.
-    assert.is_hash(dpid)
     // Validate the request body.
     validate_lock_req(request)
     // Create the request url.
     const host = client.server_url
-    const url  = `${host}/api/deposit/${dpid}/lock`
+    const url  = `${host}/api/deposit/${request.dpid}/lock`
     // Create the request object.
     const init   = {
       body    : JSON.stringify(request),
@@ -128,18 +125,34 @@ function lock_deposit_api (client : EscrowClient) {
   }
 }
 
-function close_deposit_api (client : EscrowClient) {
+function cancel_deposit_api (client : EscrowClient) {
   return async (
-    dpid    : string,
-    request : CloseRequest
+    dpid  : string,
+    token : string
   ) : Promise<ApiResponse<DepositDataResponse>> => {
     // Validate the deposit id.
     assert.is_hash(dpid)
+    // Create the request url.
+    const host = client.server_url
+    const url  = `${host}/api/deposit/${dpid}/cancel`
+    // Create the request object.
+    const init = {
+      method  : 'GET',
+      headers : { Authorization: 'Bearer ' + token }
+    }
+    return client.fetcher<DepositDataResponse>({ url, init })
+  }
+}
+
+function close_deposit_api (client : EscrowClient) {
+  return async (
+    request : CloseRequest
+  ) : Promise<ApiResponse<DepositDataResponse>> => {
     // Validate the request body.
     validate_close_req(request)
     // Create the request url.
     const host = client.server_url
-    const url  = `${host}/api/deposit/${dpid}/close`
+    const url  = `${host}/api/deposit/${request.dpid}/close`
     // Create the request object.
     const init = {
       body    : JSON.stringify(request),
@@ -157,6 +170,7 @@ export default function (client : EscrowClient) {
     list     : list_deposit_api(client),
     read     : read_deposit_api(client),
     lock     : lock_deposit_api(client),
+    cancel   : cancel_deposit_api(client),
     close    : close_deposit_api(client)
   }
 }

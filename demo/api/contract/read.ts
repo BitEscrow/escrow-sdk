@@ -8,10 +8,11 @@
 
 import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
-// import { new_contract } from '@scrow/demo/05_create_contract.js'
 
 // Define the contract id we will use.
-const cid = '261f92ed4bbb488fbbad1753d0d39855058f94f92270c35dd089dc933f59c27e' //new_contract.cid
+const cid = process.argv.slice(2).at(1)
+// If cid is not specified, throw an error
+if (cid === undefined) throw "must provide a 'cid' value as an argument"
 // Fetch a contract from the server by cid.
 const res = await client.contract.read(cid)
 // Check the response is valid.

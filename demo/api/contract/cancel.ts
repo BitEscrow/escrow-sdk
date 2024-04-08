@@ -9,12 +9,15 @@
 import { print_banner }        from '@scrow/test'
 import { client }              from '@scrow/demo/01_create_client.js'
 import { moderator as signer } from '@scrow/demo/03_create_proposal.js'
-import { new_contract }        from '@scrow/demo/05_create_contract.js'
 
+// Define the contract id we will use.
+const cid = process.argv.slice(2).at(1)
+// If cid is not specified, throw an error
+if (cid === undefined) throw "must provide a 'cid' value as an argument"
 // Generate an auth token from the moderator's signer.
-const req = signer.contract.cancel(new_contract)
+const req = signer.contract.cancel(cid)
 // Send the cancel request, along with the auth token.
-const res = await client.contract.cancel(new_contract.cid, req)
+const res = await client.contract.cancel(cid, req)
 // If the request fails, throw an error.
 if (!res.ok) throw new Error(res.error)
 // Unwrap our response payload.

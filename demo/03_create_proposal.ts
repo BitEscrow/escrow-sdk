@@ -1,5 +1,6 @@
 import { ProposalTemplate } from '@scrow/sdk/core'
 import { RoleTemplate }     from '@scrow/sdk/client'
+import { now }              from '@scrow/sdk/util'
 
 import { config }  from './00_demo_config.js'
 import { signers } from './02_create_signer.js'
@@ -14,12 +15,13 @@ export const moderator = signers[2]
  * Define our proposal template.
  */
 export const proposal : ProposalTemplate = {
-  title     : 'Basic two-party contract with third-party arbitration.',
-  duration  : 14400,
-  moderator : moderator.pubkey,
-  network   : config.network,
-  schedule  : [[ 7200, 'close|resolve', 'payout|refund' ]],
-  value     : 10000,
+  title      : 'Basic two-party contract with third-party arbitration.',
+  created_at : now(),
+  duration   : 14400,
+  moderator  : moderator.pubkey,
+  network    : config.network,
+  schedule   : [[ 7200, 'close|resolve', 'payout|refund' ]],
+  value      : 10000,
 }
 
 /**

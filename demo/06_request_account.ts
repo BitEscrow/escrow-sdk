@@ -5,12 +5,13 @@ import { signers }      from './02_create_signer.js'
 
 const DEMO_MODE = process.env.VERBOSE === 'true'
 
-// Define our deposit locktime.
-const locktime = 172800
 // Define our funder for the deposit.
-const funder   = signers[0]
-//
+const funder      = signers[0]
+// Define our deposit locktime.
+const locktime    = config.locktime
+// Define a return address for the deposit.
 const return_addr = config.return_addr
+
 // Get an account request from the funder device.
 const acct_req  = funder.account.create(return_addr, locktime)
 // Submit the account request to the server

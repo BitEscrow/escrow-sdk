@@ -54,36 +54,34 @@ await sleep(2000)
 
 const [ ival, retries ] = config.poll
 
-let tries = 1,
-    utxos = await client.oracle.get_address_utxos(deposit_addr)
+let tries  = 1,
+    txdata = await client.oracle.get_latest_utxo(deposit_addr)
 
 // While there are no utxos (and we still have tries):
-while (utxos.length === 0 && tries < retries) {
+while (txdata === null && tries < retries) {
   // Print current status to console.
   console.log(`[${tries}/${retries}] checking address in ${ival} seconds...`)
   // Sleep for interval number of secords.
   await sleep(ival * 1000)
   // Check again for utxos at address.
-  utxos = await client.oracle.get_address_utxos(deposit_addr)
+  txdata = await client.oracle.get_latest_utxo(deposit_addr)
   // Increment our tries counter
   tries += 1
 }
 
 // If we still have no utxos, throw error.
-if (utxos.length === 0) throw new Error('utxo not found')
+if (txdata === null) throw new Error('utxo not found')
 
 if (DEMO_MODE) {
-  console.log('\nutxo:', utxos[0])
+  console.log('\nutxo:', txdata)
 }
 
 /** ========== [ Create Deposit Covenant ] ========== **/
 
-// Specify a feerate for the return tx.
-const feerate = 1
-// Get the output data from the utxo.
-const utxo    = utxos[0].txout
+// Define a feerate for the return transaction.
+const feerate = config.feerate
 // Request the funders device to sign a covenant.
-const req     = funder.deposit.commit(new_account, new_contract, feerate, utxo)
+const req     = funder.deposit.commit(new_account, new_contract, feerate, txdata.txout)
 // Deliver our registration request to the server.
 const res     = await client.contract.commit(req)
 // Check the response is valid.

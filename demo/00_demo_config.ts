@@ -22,12 +22,16 @@ const poll_rates = {
   testnet : [ 60, 30 ]
 }
 
-const network = process.argv.slice(2)[0] ?? 'mutiny'
-const client  = get_server_config(network as Network)
+const feerate  = 2
+const locktime = 172800
+const network  = process.env.NETWORK ?? 'mutiny'
+const client   = get_server_config(network as Network)
 
 export const config = {
-  network,
   client,
+  feerate,
+  locktime,
+  network,
   faucet      : faucets[network as keyof typeof faucets],
   members     : [ 'alice', 'bob', 'carol' ],
   poll        : poll_rates[network as keyof typeof poll_rates],

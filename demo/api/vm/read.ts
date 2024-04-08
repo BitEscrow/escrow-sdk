@@ -6,12 +6,14 @@
  * yarn load demo/api/contract/vmstate
  */
 
-import { print_banner }    from '@scrow/test'
-import { client }          from '@scrow/demo/01_create_client.js'
-// import { active_contract } from '@scrow/demo/08_check_contract.js'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
 
-// Define the contract id we will use.
-const vmid = 'c1c04cdde4a596879235a521f3185a6c56a318c92f9659b38a48fcc80a77d0b0'
+// Define the deposit id we will use.
+const vmid = process.argv.slice(2).at(1)
+// If dpid is not specified, throw an error
+if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
+
 // Fetch a contract's vm state from the server via cid.
 const res = await client.vm.read(vmid)
 // Check the response is valid.

@@ -6,12 +6,13 @@
  * yarn load demo/api/contract/funds
  */
 
-import { print_banner }    from '@scrow/test'
-import { client }          from '@scrow/demo/01_create_client.js'
-import { funded_contract } from '@scrow/demo/07_deposit_funds.js'
+import { print_banner } from '@scrow/test'
+import { client }       from '@scrow/demo/01_create_client.js'
 
 // Define the contract id we will use.
-const cid = funded_contract.cid
+const cid = process.argv.slice(2).at(1)
+// If cid is not specified, throw an error
+if (cid === undefined) throw "must provide a 'cid' value as an argument"
 // Fetch a contract from the server by cid.
 const res = await client.contract.funds(cid)
 // Check the response is valid.

@@ -21,6 +21,7 @@ import {
 } from '@/core/types/index.js'
 
 import { EscrowSigner }   from '../../class/signer.js'
+import { assert } from '@/core/util/index.js'
 
 export function request_deposits_api (esigner : EscrowSigner) {
   return () => {
@@ -70,7 +71,17 @@ export function lock_funds_api (esigner : EscrowSigner) {
   }
 }
 
-export function close_account_api (esigner : EscrowSigner) {
+export function cancel_deposit_api (esigner : EscrowSigner) {
+  return (dpid : string) => {
+    assert.is_hash(dpid)
+    const host = esigner.server_url
+    const url  = `${host}/api/deposit/${dpid}/cancel`
+    const content = 'GET' + url
+    return esigner._signer.gen_token(content)
+  }
+}
+
+export function close_deposit_api (esigner : EscrowSigner) {
   return (
     deposit : DepositData,
     feerate : number
@@ -83,7 +94,8 @@ export function close_account_api (esigner : EscrowSigner) {
 
 export default function (esigner : EscrowSigner) {
   return {
-    close    : close_account_api(esigner),
+    cancel   : cancel_deposit_api(esigner),
+    close    : close_deposit_api(esigner),
     commit   : commit_funds_api(esigner),
     list     : request_deposits_api(esigner),
     lock     : lock_funds_api(esigner),

@@ -8,7 +8,8 @@ import {
   get_fee_target,
   get_utxo_data,
   get_tx_data,
-  get_address_utxos
+  get_address_utxos,
+  get_latest_utxo
 } from '@/core/util/oracle.js'
 
 import {
@@ -59,18 +60,26 @@ function get_addr_utxos_api (client : EscrowClient) {
   }
 }
 
+function get_latest_utxo_api (client : EscrowClient) {
+  return async (address : string) => {
+    return get_latest_utxo(client.oracle_url, address)
+  }
+}
+
 function poll_address_api (client : EscrowClient) {
   return async (
     address  : string,
     interval : number,
     retries  : number,
     verbose  = false
-  ) => {
+  ) : Promise<OracleTxSpendData> => {
     let tries = 0,
         utxos : OracleTxSpendData[] = []
     for (let i = 0; i < retries; i++) {
       if (utxos.length > 0) {
-        return utxos
+        const utxo = utxos.at(-1)
+        assert.exists(utxo)
+        return utxo
       } else {
         utxos = await get_address_utxos(client.oracle_url, address)
         tries += 1
@@ -93,6 +102,7 @@ export default function (client : EscrowClient) {
     get_txdata        : get_txdata_api(client),
     get_utxo          : get_utxo_api(client),
     get_address_utxos : get_addr_utxos_api(client),
+    get_latest_utxo   : get_latest_utxo_api(client),
     poll_address      : poll_address_api(client)
   }
 }

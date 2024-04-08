@@ -19,12 +19,14 @@ import {
   fund_regtest_address,
 } from '@scrow/demo/util.js'
 
-// Unpack account details.
+// Unpack account address.
 const { deposit_addr } = new_account
-// Define how much sats we want to deposit
-const amt_total   = 20_000
+// Compute a txfee from the feerate.
+const vin_fee   = new_contract.fund_txfee
+// Compute a total amount (in sats) with the txfee.
+const amt_total = new_contract.tx_total + vin_fee
 // Also compute a total amount in bitcoin.
-const btc_total   = amt_total / 100_000_000
+const btc_total = amt_total / 100_000_000
 
 /** ========== [ Print Deposit Info ] ========== **/
 
@@ -49,24 +51,24 @@ await sleep(2000)
 // Define our polling interval and retries.
 const [ ival, retries ] = config.poll
 // Poll for utxos from the account address.
-const utxos = await client.oracle.poll_address(deposit_addr, ival, retries, true)
+const utxo = await client.oracle.poll_address(deposit_addr, ival, retries, true)
 
-print_banner('address utxos')
-console.log('utxos:', utxos)
+print_banner('address utxo')
+console.log('utxo:', utxo)
 
-// Get the output data from the utxo.
-const utxo   = utxos[0].txspend
 // Define our funder for the deposit.
 const funder = signers[0]
+// Define a feerate for the return transaction.
+const feerate = config.feerate
 // Generate a commit request from the depositor.
-const req = funder.deposit.commit(new_account, new_contract, 1, utxo)
+const req    = funder.deposit.commit(new_account, new_contract, feerate, utxo.txout)
 // Deliver our commit request to the server.
-const res = await client.deposit.commit(req)
+const res    = await client.contract.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
 const locked_deposit = res.data.deposit
 
-print_banner('open deposit')
+print_banner('locked deposit')
 console.dir(locked_deposit, { depth: null })
 console.log('\n')

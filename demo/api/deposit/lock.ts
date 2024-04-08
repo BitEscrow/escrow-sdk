@@ -14,12 +14,10 @@ import { open_deposit } from '@scrow/demo/api/deposit/register.js'
 
 // Define our funder for the deposit.
 const funder = signers[0]
-// Define the dpid for the deposit we are using.
-const dpid = open_deposit.dpid
 // Generate a lock request from the depositor.
 const req = funder.deposit.lock(new_contract, open_deposit)
 // Deliver the request and token.
-const res = await client.deposit.lock(dpid, req)
+const res = await client.deposit.lock(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our response data.
