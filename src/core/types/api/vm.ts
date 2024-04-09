@@ -8,6 +8,5 @@ export interface VMDataResponse {
 }
 
 export interface VMListResponse {
-  vmdata     : VMReceipt
   statements : WitnessData[]
 }
