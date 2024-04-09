@@ -1,26 +1,26 @@
 /**
  * Contract API Demo for endpoint:
- * /api/contract/:cid/witness
+ * /api/contract/:cid/list
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/contract/witness
+ * yarn load demo/api/contract/list
  */
 
 import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
 
-// Define the deposit id we will use.
-const vmid = process.argv.slice(2).at(0)
-// If dpid is not specified, throw an error
-if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
-
-// Fetch a contract from the server by cid.
-const res = await client.vm.list(vmid)
+// Select a signer to use.
+const signer = signers[0]
+// Generate a request token.
+const req = signer.vm.list()
+// Deliver the request and token.
+const res = await client.vm.list(signer.pubkey, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack the data object.
-const statements = res.data.statements
+// Unpack our data payload.
+const machines = res.data.machines
 
-print_banner('statements')
-console.dir(statements, { depth : null })
+print_banner('vm list')
+console.dir(machines, { depth : null })
 console.log('\n')

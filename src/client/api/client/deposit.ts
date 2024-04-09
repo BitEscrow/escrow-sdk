@@ -94,7 +94,7 @@ function list_deposit_api (client : EscrowClient) {
     assert.is_hash(pubkey)
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/deposit/list/${pubkey}`
+    const url  = `${host}/api/deposit/list?pk=${pubkey}`
     // Define the request config.
     const init = {
       method  : 'GET',

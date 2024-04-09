@@ -13,15 +13,23 @@ import { EscrowClient } from '../../class/client.js'
  * Return a list of verified witnesses
  * that are associated with the contract.
  */
-function list_witness_api (client : EscrowClient) {
-  return async (vmid : string) : Promise<ApiResponse<VMListResponse>> => {
-     // Validate the contract id.
-    assert.is_hash(vmid)
-    // Formulate the request.
+function list_machines_api (client : EscrowClient) {
+  return async (
+    pubkey : string,
+    token  : string
+  ) : Promise<ApiResponse<VMListResponse>> => {
+    // Validate the pubkey.
+    assert.is_hash(pubkey)
+    // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/vm/${vmid}/list`
+    const url  = `${host}/api/vm/list?pk=${pubkey}`
+    // Define the request config.
+    const init = {
+      method  : 'GET',
+      headers : { Authorization: 'Bearer ' + token }
+    }
     // Return the response.
-    return client.fetcher<VMListResponse>({ url })
+    return client.fetcher<VMListResponse>({ url, init })
   }
 }
 
@@ -67,7 +75,7 @@ function read_vm_state_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    list   : list_witness_api(client),
+    list   : list_machines_api(client),
     read   : read_vm_state_api(client),
     submit : submit_witness_api(client)
   }

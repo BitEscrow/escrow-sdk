@@ -85,7 +85,7 @@ function list_contract_api (client : EscrowClient) {
   ) : Promise<ApiResponse<ContractListResponse>> => {
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/contract/list/${pubkey}`
+    const url  = `${host}/api/contract/list?pk=${pubkey}`
     // Define the request config.
     const init = {
       method  : 'GET',

@@ -1,6 +1,5 @@
 import { ContractData } from '../contract.js'
 import { VMReceipt }    from '../vm.js'
-import { WitnessData }  from '../witness.js'
 
 export interface VMDataResponse {
   contract ?: ContractData
@@ -8,5 +7,5 @@ export interface VMDataResponse {
 }
 
 export interface VMListResponse {
-  statements : WitnessData[]
+  machines : VMReceipt[]
 }

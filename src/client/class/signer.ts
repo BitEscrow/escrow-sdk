@@ -18,6 +18,7 @@ import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import proposal_api from '../api/signer/draft.js'
+import vmachine_api from '../api/signer/vm.js'
 import witness_api  from '../api/signer/witness.js'
 
 import ClientSchema  from '../schema.js'
@@ -127,6 +128,7 @@ export class EscrowSigner {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   proposal = proposal_api(this)
+  vm       = vmachine_api(this)
   witness  = witness_api(this)
 
   backup (password : string) {
