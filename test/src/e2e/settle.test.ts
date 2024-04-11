@@ -8,6 +8,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 import { endorse_proposal } from '@scrow/sdk/proposal'
 import { assert }           from '@scrow/sdk/util'
+import { get_vm_config }    from '@scrow/sdk/vm'
 import CVM                  from '@scrow/sdk/cvm'
 
 import {
@@ -49,12 +50,9 @@ import {
   verify_receipt
 } from '@/core/validation/index.js'
 
-import {
-  create_receipt,
-  get_vm_config
-} from '@scrow/sdk/vm'
 
 import {
+  create_receipt,
   create_witness,
   endorse_witness
 } from '@scrow/sdk/witness'
@@ -251,9 +249,9 @@ export default async function (
       }
 
       // Create a signed receipt for the latest commit.
-      const vm_receipt = create_receipt(vm_data, server_sd)
+      const vm_receipt = create_receipt(vm_data, server_sd, witness)
       // Verify the latest commit matches the receipt.
-      verify_receipt(vm_receipt, vm_data)
+      verify_receipt(vm_receipt, vm_data, witness)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))

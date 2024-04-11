@@ -4,7 +4,6 @@ import { WitnessData }                 from './witness.js'
 
 export type VMRunState = VMOpen | VMClosed
 export type VMData     = VMBase & VMRunState
-export type VMReceipt  = VMData & Receipt
 
 export interface VirtualMachineAPI {
   actions : string[]
@@ -24,12 +23,6 @@ interface VMOpen {
 interface VMClosed {
   closed    : true
   closed_at : number
-}
-
-interface Receipt {
-  receipt_id : string
-  server_pk  : string
-  server_sig : string
 }
 
 export interface ProgramQuery {

@@ -1,11 +1,9 @@
-import { ContractData } from '../contract.js'
-import { VMReceipt }    from '../vm.js'
+import { VMData } from '../vm.js'
 
 export interface VMDataResponse {
-  contract ?: ContractData
-  vmdata    : VMReceipt
+  vmdata : VMData
 }
 
 export interface VMListResponse {
-  machines : VMReceipt[]
+  machines : VMData[]
 }

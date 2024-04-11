@@ -1,9 +1,9 @@
-import { WitnessData } from '../witness.js'
+import { WitnessReceipt } from '../witness.js'
 
 export interface WitnessDataResponse {
-  witness : WitnessData
+  witness : WitnessReceipt
 }
 
 export interface WitnessListResponse {
-  statements : WitnessData[]
+  statements : WitnessReceipt[]
 }

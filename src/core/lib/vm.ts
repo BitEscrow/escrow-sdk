@@ -1,15 +1,12 @@
-import { Buff }                            from '@cmdcode/buff'
-import { assert, now, regex, sort_record } from '../util/index.js'
-import { get_path_names }                  from './proposal.js'
+import { Buff }           from '@cmdcode/buff'
+import { assert, regex }  from '../util/index.js'
+import { get_path_names } from './proposal.js'
 
 import {
   ProgramQuery,
   ProgramData,
   ProgramEntry,
   VMConfig,
-  VMReceipt,
-  SignerAPI,
-  VMData,
   ContractData
 } from '../types/index.js'
 
@@ -35,10 +32,6 @@ export function get_program (
   let progs = programs.map(e => {
     return (Array.isArray(e)) ? create_program(e) : e
   })
-
-  // console.log('query:', query)
-  // console.log('progs:', progs)
-
   // If defined, filter programs by method.
   if (method !== undefined) {
     progs = progs.filter(e => e.method === method)
@@ -100,37 +93,4 @@ export function get_vm_id (
   const start = Buff.num(active_at, 4)
   const stop  = Buff.num(closes_at, 4)
   return Buff.join([ hash, start, stop ]).digest.hex
-}
-
-export function create_receipt (
-  data   : VMData,
-  signer : SignerAPI,
-  updated_at = now()
-) : VMReceipt {
-  const vm_hash    = get_vmdata_hash(data)
-  const server_pk  = signer.pubkey
-  const receipt_id = get_receipt_id(vm_hash, server_pk, updated_at)
-  const server_sig = signer.sign(receipt_id)
-  return sort_record({ ...data, receipt_id, server_pk, server_sig, updated_at })
-}
-
-export function get_vmdata_hash (data : Omit<VMData, 'updated_at'>) {
-  const cat   = Buff.num(data.commit_at, 4)
-  const err   = Buff.str(data.error  ?? 'null')
-  const head  = Buff.hex(data.head, 32)
-  const out   = Buff.str(data.output ?? 'null')
-  const step  = Buff.num(data.step, 4)
-  const vmid  = Buff.hex(data.vmid, 32)
-  return Buff.join([ cat, err, head, out, step, vmid ]).digest.hex
-}
-
-export function get_receipt_id (
-  vmdata_hash : string,
-  server_pk   : string,
-  updated_at  : number
-) {
-  const dig = Buff.hex(vmdata_hash, 32)
-  const pub = Buff.hex(server_pk, 32)
-  const uat = Buff.num(updated_at, 4)
-  return Buff.join([ dig, pub, uat ]).digest.hex
 }

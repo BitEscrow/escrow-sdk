@@ -10,7 +10,7 @@ const faucets = {
 
 const returns = {
   mutiny  : 'tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v',
-  regtest : 'bcrt1pucpcdwjrrnm3dah7jx92nlxlgfylepxka0uzehpg0ukg2d30n86qmfyza5',
+  regtest : 'bcrt1pdcfvw8ulj6qtr8mj8gjqgl76ff8l8q2fjmvect8m0p22ghl2dsgqzjk3hd',
   signet  : 'tb1q5tsjcyz7xmet07yxtumakt739y53hcttmntajq',
   testnet : 'tb1q5tsjcyz7xmet07yxtumakt739y53hcttmntajq'
 }

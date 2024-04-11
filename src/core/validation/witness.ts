@@ -4,15 +4,20 @@ import { verify_sig } from '@cmdcode/crypto-tools/signer'
 
 /* Module Imports */
 
-import { get_witness_id } from '../lib/witness.js'
 import { assert, regex }  from '../util/index.js'
+
+import {
+  get_receipt_id,
+  get_witness_id
+} from '../lib/witness.js'
 
 import {
   Literal,
   ProgramData,
   VMData,
   VirtualMachineAPI,
-  WitnessData
+  WitnessData,
+  WitnessReceipt
 } from '../types/index.js'
 
 import WitSchema from '../schema/witness.js'
@@ -80,4 +85,30 @@ export function verify_witness_sigs (
     const is_valid = verify_sig(sig, wid, pub)
     assert.ok(is_valid, 'signature verifcation failed')
   })
+}
+
+export function verify_receipt (
+  receipt : WitnessReceipt,
+  vmdata  : VMData,
+  witness : WitnessData
+) {
+  const { receipt_id, server_pk, server_sig } = receipt
+
+  // Don't forget to check that vm matches receipt.
+  assert.ok(witness.vmid === vmdata.vmid,        'provided vmdata and witness vmid does not match')
+  assert.ok(witness.stamp === vmdata.commit_at,  'provided vmdata and witness stamp does not match')
+  assert.ok(witness.vmid === receipt.vmid,       'receipt vmid does not match witness')
+  assert.ok(vmdata.head === receipt.vm_hash,     'receipt vm_hash does not match vmdata head')
+  assert.ok(vmdata.output === receipt.vm_output, 'receipt vm_output does not match vmdata output')
+  assert.ok(vmdata.step === receipt.vm_step,     'receipt vm_step does not match vmdata step count')
+
+  const int_wid  = get_witness_id(receipt)
+  const int_rid  = get_receipt_id(receipt)
+
+  assert.ok(int_wid === witness.wid,             'internal witness id does not match receipt')
+  assert.ok(int_rid === receipt.receipt_id,      'internal receipt id does not match receipt')
+
+  const is_valid = verify_sig(server_sig, receipt_id, server_pk)
+
+  assert.ok(is_valid, 'receipt signature is invalid')
 }
