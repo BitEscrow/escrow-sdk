@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
