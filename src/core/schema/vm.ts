@@ -3,7 +3,7 @@ import base  from './base.js'
 import prop  from './proposal.js'
 import wit   from './witness.js'
 
-const { bool, hash, literal, num, regex, stamp, signature, str } = base
+const { bool, hash, literal, num, regex, stamp, str } = base
 
 const config = z.object({
   active_at  : stamp,
@@ -21,12 +21,6 @@ const program = z.object({
   actions : regex,
   params  : literal.array(),
   paths   : regex
-})
-
-const receipt_data = z.object({
-  receipt_id : hash,
-  server_pk  : hash,
-  server_sig : signature
 })
 
 const close_info = z.object({
@@ -50,7 +44,7 @@ const base_data = z.object({
   active_at  : stamp,
   commit_at  : stamp,
   engine     : str,
-  error      : str.nullable(),
+  error      : str.nullable().default(null),
   expires_at : stamp,
   head       : hash,
   output     : str.nullable(),
@@ -65,7 +59,6 @@ const base_data = z.object({
 
 const data    = base_data.and(close_state)
 const shape   = base_data.merge(close_info)
-const receipt = data.and(receipt_data)
 
 const vm_check = z
   .function()
@@ -97,4 +90,4 @@ const api = z.object({
   run     : vm_run
 })
 
-export default { api, config, data, shape, program, receipt }
+export default { api, config, data, shape, program }
