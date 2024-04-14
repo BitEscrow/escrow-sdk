@@ -20,6 +20,7 @@ import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import proposal_api from '../api/signer/draft.js'
 import vmachine_api from '../api/signer/vm.js'
+import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
 import ClientSchema  from '../schema.js'
@@ -119,7 +120,7 @@ export class EscrowSigner {
 
   get wallet () {
     return {
-      newaddr : this._wallet.has_address
+      has : this._wallet.has_address
     }
   }
 
@@ -128,6 +129,7 @@ export class EscrowSigner {
   }
 
   account  = account_api(this)
+  address  = wallet_api(this)
   contract = contract_api(this)
   deposit  = deposit_api(this)
   proposal = proposal_api(this)

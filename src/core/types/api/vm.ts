@@ -11,7 +11,7 @@ export interface VMListResponse {
 }
 
 export interface VMSubmitResponse {
-  contract : ContractData
-  receipt  : WitnessReceipt
-  vmdata   : VMData
+  contract ?: ContractData
+  receipt   : WitnessReceipt
+  vmdata    : VMData
 }

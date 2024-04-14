@@ -1,3 +1,4 @@
+import { now }          from '@scrow/sdk/util'
 import { print_banner } from '@scrow/test'
 import { config }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
@@ -10,7 +11,7 @@ const funder      = signers[0]
 // Define our deposit locktime.
 const locktime    = config.locktime
 // Define a return address for the deposit.
-const return_addr = config.return_addr
+const return_addr = funder.address.new(now())
 
 // Get an account request from the funder device.
 const acct_req  = funder.account.create(return_addr, locktime)
