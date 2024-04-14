@@ -42,35 +42,10 @@
     "@cmdcode/buff" "^2.2.5"
     "@cmdcode/crypto-tools" "^2.7.6"
 
-"@cmdcode/nostr-sdk@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@cmdcode/nostr-sdk/-/nostr-sdk-0.1.6.tgz#328d09c763a9a26893dbc193c1444f451cb3efb0"
-  integrity sha512-6n+giRdT4zLJ1OD8f5B/WIHkdFOB7v4CsG/QDSIqSuZ/cjGblQMXzVihqTbPqZu+5DzUO0ZOfJy7SPpIt9/3SA==
-  dependencies:
-    "@cmdcode/buff" "2.2.5"
-    "@cmdcode/crypto-tools" "2.7.6"
-    "@cmdcode/signer" "^1.4.2"
-    isomorphic-ws "^5.0.0"
-    ws "^8.16.0"
-    zod "^3.22.4"
-
-"@cmdcode/signer@1.4.5":
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.5.tgz#d547ab710db061e6f7c19fbb5401244db0791f73"
-  integrity sha512-I1xvFGudnPkaZ5UyCY6NoePzmahCRPLxPhyn3u1EnyOkL9uW4w2LbJ84q9+7x2yBwGuVFY54+FyeJjqzVIzE1g==
-  dependencies:
-    "@cmdcode/buff" "^2.2.5"
-    "@cmdcode/crypto-tools" "^2.7.6"
-    "@cmdcode/musig2" "^2.4.3"
-    "@noble/ciphers" "^0.4.1"
-    "@scrow/tapscript" "^2.2.2"
-    "@scure/bip32" "^1.3.2"
-    "@scure/bip39" "^1.2.1"
-
-"@cmdcode/signer@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.2.tgz#02260c34777f784c46e7421e29362d5390abe358"
-  integrity sha512-9cu9mtqhvi5T/SCJTVcIePRsuMHicAY4E8gXBZvoUdKxawvFMZEx9YrXbpEw7hGROvwXC4rwdQn9DNXpw55Eow==
+"@cmdcode/signer@1.4.7":
+  version "1.4.7"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.4.7.tgz#528cc74bb89046ae6300024494d00b22b7539576"
+  integrity sha512-psI8ijo0EPjDBlWrWYp8rPZ+GYR3zHgZDR/5q1U1k74KpN3jnjSlBgl/sSDSHunvJUQ8Iev4zAmGaigqH+6MjA==
   dependencies:
     "@cmdcode/buff" "^2.2.5"
     "@cmdcode/crypto-tools" "^2.7.6"
@@ -1971,11 +1946,6 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-isomorphic-ws@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-5.0.0.tgz#e5529148912ecb9b451b46ed44d53dae1ce04bbf"
-  integrity sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==
-
 js-yaml@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
@@ -2883,11 +2853,6 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
-
-ws@^8.16.0:
-  version "8.16.0"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.16.0.tgz#d1cd774f36fbc07165066a60e40323eab6446fd4"
-  integrity sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==
 
 xtend@~4.0.1:
   version "4.0.2"

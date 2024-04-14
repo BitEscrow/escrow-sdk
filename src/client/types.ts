@@ -1,5 +1,6 @@
-import { ZodTypeAny } from 'zod'
-import { Bytes }      from '@cmdcode/buff'
+import { ZodTypeAny }    from 'zod'
+import { Bytes }         from '@cmdcode/buff'
+import { AddressConfig } from '@cmdcode/signer'
 
 import {
   Network,
@@ -85,5 +86,5 @@ export interface WalletAPI {
   has_account : (extkey : string) => boolean
   get_account : (id : Bytes) => WalletAPI
   has_address : (addr : string, limit ?: number) => boolean
-  new_address : () => string
+  new_address : (options ?: AddressConfig) => string
 }

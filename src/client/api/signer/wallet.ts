@@ -12,7 +12,10 @@ export function has_address_api (esigner : EscrowSigner) {
 
 export function new_address_api (esigner : EscrowSigner) {
   return (account : number) => {
-    return esigner._wallet.get_account(account).new_address()
+    const format  = 'p2tr'
+    const network = esigner.network
+    const config  = { format, network }
+    return esigner._wallet.get_account(account).new_address(config)
   }
 }
 
