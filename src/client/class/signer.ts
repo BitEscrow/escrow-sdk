@@ -1,6 +1,7 @@
-import { Buff, Bytes }    from '@cmdcode/buff'
-import { SignerAPI }      from '@/core/types/index.js'
-import { DEFAULT_CONFIG } from '../config/client.js'
+import { Buff, Bytes }        from '@cmdcode/buff'
+import { Network, SignerAPI } from '@/core/types/index.js'
+
+import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
 import {
   Seed,
@@ -82,7 +83,9 @@ export class EscrowSigner {
     signer  : SignerAPI,
     options : SignerOptions = {}
   ) {
-    const config = { ...DEFAULT_CONFIG, ...options }
+    const opt    = { ...DEFAULT_CONFIG, ...options }
+    const client = get_client_config(opt.network as Network)
+    const config = { ...client, ...opt }
     const xpub   = options.xpub ?? signer.xpub
 
     this._config = ClientSchema.signer_config.parse(config)

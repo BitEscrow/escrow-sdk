@@ -39,7 +39,7 @@ switch (config.network) {
     fund_mutiny_address(deposit_addr, amt_total)
     break
   case 'regtest':
-    fund_regtest_address(deposit_addr, amt_total)
+    fund_regtest_address(deposit_addr, amt_total, true)
     break
   default:
     print_banner('make a deposit')

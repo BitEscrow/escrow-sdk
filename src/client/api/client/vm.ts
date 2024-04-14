@@ -4,6 +4,7 @@ import {
   ApiResponse,
   VMDataResponse,
   VMListResponse,
+  VMSubmitResponse,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -40,7 +41,7 @@ function submit_witness_api (client : EscrowClient) {
   return async (
     vmid    : string,
     witness : WitnessData
-  ) : Promise<ApiResponse<VMDataResponse>> => {
+  ) : Promise<ApiResponse<VMSubmitResponse>> => {
     // Validate the contract id.
     assert.is_hash(vmid)
     // Formulate the request url.
@@ -53,7 +54,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<VMDataResponse>({ url, init })
+    return client.fetcher<VMSubmitResponse>({ url, init })
   }
 }
 

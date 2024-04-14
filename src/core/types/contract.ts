@@ -77,7 +77,7 @@ export interface ContractCreateConfig {
 export interface ContractBase {
   cid          : string
   created_at   : number
-  deadline     : number
+  deadline_at  : number
   effective_at : number | null
   fees         : PaymentEntry[]
   feerate      : number

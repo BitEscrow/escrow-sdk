@@ -18,6 +18,7 @@ export const proposal : ProposalTemplate = {
   title      : 'Basic two-party contract with third-party arbitration.',
   created_at : now(),
   duration   : 14400,
+  feerate    : 1,
   moderator  : moderator.pubkey,
   network    : config.network,
   schedule   : [[ 7200, 'close|resolve', 'payout|refund' ]],

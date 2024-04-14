@@ -73,17 +73,17 @@ function check_fee_rates (
   policy   : ServerPolicy,
   proposal : ProposalData
 ) {
-  const { fee_rate, fee_trgt } = proposal
+  const { feerate, fee_target } = proposal
   //
-  if (fee_trgt !== undefined) {
+  if (fee_target !== undefined) {
     //
-    assert.ok(VALID_FEE_TARGETS.includes(fee_trgt), 'fee target value is invalid: ' + fee_trgt)
-  } else if (fee_rate !== undefined) {
+    assert.ok(VALID_FEE_TARGETS.includes(fee_target), 'fee target value is invalid: ' + fee_target)
+  } else if (feerate !== undefined) {
     //
     const { FEERATE_MIN, FEERATE_MAX } = policy.proposal
     // Assert that all terms are valid.
-    assert.ok(fee_rate >= FEERATE_MIN, `feerate is below threshold: ${fee_rate} < ${FEERATE_MIN}`)
-    assert.ok(fee_rate <= FEERATE_MAX, `feerate is above threshold: ${fee_rate} > ${FEERATE_MAX}`)
+    assert.ok(feerate >= FEERATE_MIN, `feerate is below threshold: ${feerate} < ${FEERATE_MIN}`)
+    assert.ok(feerate <= FEERATE_MAX, `feerate is above threshold: ${feerate} > ${FEERATE_MAX}`)
   }
 }
 

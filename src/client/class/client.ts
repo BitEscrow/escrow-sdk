@@ -7,7 +7,7 @@ import {
   VirtualMachineAPI
 } from '@/core/types/index.js'
 
-import { DEFAULT_CONFIG } from '../config/client.js'
+import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
 import {
   ClientConfig,
@@ -32,7 +32,9 @@ export class EscrowClient {
   readonly _fetcher : Resolver
 
   constructor (opt : ClientOptions = {}) {
-    const config  = { ...DEFAULT_CONFIG, ...opt }
+    const options = { ...DEFAULT_CONFIG, ...opt }
+    const client  = get_client_config(opt.network as Network)
+    const config  = { ...client, ...options }
     this._config  = ClientSchema.client_config.parse(config)
     this._fetcher = get_fetcher(opt.fetcher ?? fetch)
   }

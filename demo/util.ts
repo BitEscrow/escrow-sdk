@@ -1,6 +1,8 @@
-import { CoreUtil } from '@scrow/test'
-import { config }   from './00_demo_config.js'
-import { client }   from './01_create_client.js'
+import { CoreUtil, print_banner } from '@scrow/test'
+import { sleep }                  from '@scrow/sdk/util'
+
+import { config } from './00_demo_config.js'
+import { client } from './01_create_client.js'
 
 export async function fund_address (
   address : string,
@@ -28,7 +30,7 @@ export async function fund_address (
   const [ ival, retries ] = config.poll
 
   let tries = 1,
-      utxos = await client.blockchain.get_address_utxos(address)
+      utxos = await client.oracle.get_address_utxos(address)
 
   // While there are no utxos (and we still have tries):
   while (utxos.length === 0 && tries < retries) {
@@ -37,7 +39,7 @@ export async function fund_address (
     // Sleep for interval number of secords.
     await sleep(ival * 1000)
     // Check again for utxos at address.
-    utxos = await client.blockchain.get_address_utxos(address)
+    utxos = await client.oracle.get_address_utxos(address)
     // Increment our tries counter
     tries += 1
   }
@@ -48,22 +50,23 @@ export async function fund_address (
   print_banner('payment utxo')
   console.dir(utxos[0], { depth : null })
 
-  return utxos[0].txspend
+  return utxos[0].txout
 }
 
 export async function fund_regtest_address (
   address : string,
-  amount  : number  
+  amount  : number,
+  confirm = false
 )  {
   const daemon = CoreUtil.get_daemon({
     network : 'regtest',
     spawn   : false,
-    verbose : false
+    verbose : true
   })
   console.log('\nfunding address :', address)
   console.log('sending amount  :', amount, '\n')
   return daemon.run(async client => {
-    await CoreUtil.fund_address(client, 'faucet', address, amount, true)
+    await CoreUtil.fund_address(client, 'faucet', address, amount, confirm)
     await daemon.shutdown()
   })
 }

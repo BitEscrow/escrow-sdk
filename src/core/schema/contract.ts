@@ -62,7 +62,7 @@ const vm_state = z.discriminatedUnion('activated', [ vm_active, vm_inactive ])
 const base_data = z.object({
   cid          : hash,
   created_at   : stamp,
-  deadline     : stamp,
+  deadline_at  : stamp,
   effective_at : stamp.nullable(),
   feerate      : num,
   fees         : payment.array(),

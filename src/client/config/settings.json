@@ -1,4 +1,11 @@
 {
+  "main" : {
+    "oracle_url" : "https://mempool.space",
+    "server_pk"  : "",
+    "server_url" : "https://bitescrow.vercel.app",
+    "network"    : "main"
+  },
+
   "mutiny" : {
     "oracle_url" : "https://mutinynet.com",
     "server_pk"  : "87897fe76aade014e160833e47fc257d11ac22e1fde2e42901e876ca7a640d02",

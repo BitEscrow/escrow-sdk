@@ -116,7 +116,7 @@ export function create_contract (
     cid,
     created_at,
     fees,
-    deadline     : get_deadline(proposal, created_at),
+    deadline_at  : get_deadline(proposal, created_at),
     effective_at : proposal.effective ?? null,
     feerate,
     fund_txfee,
