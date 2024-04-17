@@ -20,20 +20,32 @@ export type ContractStatus =
   'expired'   |  // Active contract has expired and funds are released.
   'error'        // Something went wrong, may require manual intervention.
 
-export type ContractActiveState = ContractIsActive | ContractIsInactive
-export type ContractCloseState  = ContractIsOpen   | ContractIsClosed
+export type ContractPublishState = ContractIsPublished | ContractIsCanceled
+export type ContractActiveState  = ContractIsActive    | ContractIsInactive
+export type ContractCloseState   = ContractIsOpen      | ContractIsClosed
 
 export type ContractData =
-  ContractBase        &
-  ContractActiveState &
-  ContractCloseState  &
-  SpendState          &
+  ContractBase         &
+  ContractPublishState &
+  ContractActiveState  &
+  ContractCloseState   &
+  SpendState           &
   SettleState
 
 export type SpendTemplate = [
   label : string,
   txhex : string
 ]
+
+interface ContractIsPublished {
+  canceled    : false
+  canceled_at : null
+}
+
+interface ContractIsCanceled {
+  canceled    : true
+  canceled_at : number
+}
 
 interface ContractIsActive {
   activated  : true

@@ -42,14 +42,12 @@ import {
   verify_account,
   verify_contract_req,
   verify_deposit,
-  verify_settlement,
   verify_witness,
   verify_commit_req,
   verify_proposal,
-  verify_publishing,
-  verify_receipt
+  verify_receipt,
+  verify_contract_settlement
 } from '@/core/validation/index.js'
-
 
 import {
   create_receipt,
@@ -125,8 +123,6 @@ export default async function (
       verify_contract_req(CVM, server_pol, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, server_sd)
-      // Client: Verify contract data.
-      verify_publishing(contract, proposal)
       
       if (VERBOSE) {
         console.log(banner('published contract'))
@@ -277,7 +273,7 @@ export default async function (
 
       contract = spend_contract(contract, txhex, txid)
 
-      verify_settlement(contract, deposits, vm_data)
+      verify_contract_settlement(contract, deposits, proposal, vm_data)
 
       if (VERBOSE) {
         console.log(banner('closing tx'))

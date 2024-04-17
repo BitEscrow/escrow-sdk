@@ -45,6 +45,13 @@ import {
   get_vout_txhex
 } from './tx.js'
 
+export const GET_INIT_CANCEL_STATE = () => {
+  return {
+    canceled    : false as const,
+    canceled_at : null
+  }
+}
+
 export const GET_INIT_ACTIVE_STATE = () => {
   return {
     activated  : false as const,
@@ -65,6 +72,7 @@ export const GET_INIT_CLOSE_STATE = () => {
 
 const GET_CONTRACT_DEFAULTS = () => {
   return {
+    ...GET_INIT_CANCEL_STATE(),
     ...GET_INIT_ACTIVE_STATE(),
     ...GET_INIT_CLOSE_STATE(),
     ...GET_INIT_SPEND_STATE(),

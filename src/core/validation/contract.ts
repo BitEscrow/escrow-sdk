@@ -88,19 +88,24 @@ export function verify_contract (contract : ContractData) {
   assert.ok(verify_sig(server_sig, cid, server_pk), 'signature is invalid for server pubkey: ' + server_pk)
 }
 
-export function verify_publishing (
+export function verify_contract_publishing (
   contract  : ContractData,
   proposal  : ProposalData
 ) {
-  const out = create_spend_templates(proposal, contract.fees)
+  const { created_at, fees } = contract
+  const out = create_spend_templates(proposal, fees)
   const pid = get_proposal_id(proposal)
-  const cid = get_contract_id(out, pid, contract.created_at)
+  const cid = get_contract_id(out, pid, created_at)
   assert.ok(pid === contract.prop_id, 'computed proposal id does not match contract')
   assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
-  verify_contract(contract)
+  for (const [ label, txhex ] of out) {
+    const tmpl = contract.outputs.find(e => e[0] === label)
+    assert.ok(tmpl !== undefined, 'output template does not exist for label: ' + label)
+    assert.ok(tmpl[1] === txhex,  'tx hex does not match output for label: ' + label)
+  }
 }
 
-export function verify_funding (
+export function verify_contract_funding (
   contract : ContractData,
   funds    : FundingData[]
 ) {
@@ -114,11 +119,12 @@ export function verify_funding (
   assert.ok(tx_vsize   === tab.tx_vsize,   'tabulated tx size does not match contract')
 }
 
-export function verify_activation (
+export function verify_contract_activation (
   contract : ContractData,
   vmstate  : VMData
 ) {
-  const { activated, active_at, vmid, expires_at } = contract
+  const { activated, active_at, canceled, expires_at, vmid } = contract
+  assert.ok(!canceled,                       'contract is flagged as canceled')
   assert.ok(activated,                       'contract is not flagged as active')
   assert.ok(active_at === vmstate.active_at, 'contract activated date does not match vm')
   assert.ok(vmid      === vmstate.vmid,      'contract vmid does not match vm internal id')
@@ -126,7 +132,7 @@ export function verify_activation (
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
 
-export function verify_closing (
+export function verify_contract_close (
   contract : ContractData,
   vmstate  : VMData
 ) {
@@ -137,7 +143,7 @@ export function verify_closing (
   assert.ok(vmstate.output    === contract.closed_path, 'contract closed_path does not match vm result')
 }
 
-export function verify_settlement (
+export function verify_contract_spending (
   contract   : ContractData,
   funds      : FundingData[],
   vmstate    : VMData
@@ -145,12 +151,6 @@ export function verify_settlement (
   assert.ok(contract.closed,         'contract is not closed')
   assert.ok(contract.spent,          'contract is not settled')
   assert.ok(vmstate.output !== null, 'vmstate is not closed')
-  // Verify contract funds.
-  verify_funding(contract, funds)
-  // Verify the activation of the vm.
-  verify_activation(contract, vmstate)
-  // Verify the closing of the vm.
-  verify_closing(contract, vmstate)
   // Get the spend template for the provided output.
   const output = get_spend_template(vmstate.output, contract.outputs)
   // Convert the output into a txdata object.
@@ -167,5 +167,19 @@ export function verify_settlement (
   // Compute the final transaction id.
   const txid  = get_txid(txhex)
   // Assert that the transaction id matches.
-  assert.ok(txid === contract.spent_txid, 'settlement txid does not match contract')
+  assert.ok(txid === contract.spent_txid, 'spent txid does not match contract')
+}
+
+export function verify_contract_settlement (
+  contract   : ContractData,
+  funds      : FundingData[],
+  proposal   : ProposalData,
+  vmstate    : VMData
+) {
+  verify_contract(contract)
+  verify_contract_publishing(contract, proposal)
+  verify_contract_funding(contract, funds)
+  verify_contract_activation(contract, vmstate)
+  verify_contract_close(contract, vmstate)
+  verify_contract_spending(contract, funds, vmstate)
 }

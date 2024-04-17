@@ -13,7 +13,22 @@ const publish_req = z.object({
   signatures : hex.array().optional()
 })
 
-const close_info = tx.spend_info.extend({
+const publish_info = z.object({
+  canceled    : bool,
+  canceled_at : stamp.nullable()
+})
+
+const ct_published = z.object({
+  canceled    : z.literal(false),
+  canceled_at : z.null()
+})
+
+const ct_canceled = z.object({
+  canceled    : z.literal(true),
+  canceled_at : stamp
+})
+
+const close_info = z.object({
   closed      : bool,
   closed_at   : stamp.nullable(),
   closed_hash : hash.nullable(),
@@ -34,7 +49,8 @@ const ct_closed = z.object({
   closed_path : str
 })
 
-const close_state = z.discriminatedUnion('closed', [ ct_open, ct_closed ])
+const publish_state = z.discriminatedUnion('canceled', [ ct_published, ct_canceled ])
+const close_state   = z.discriminatedUnion('closed', [ ct_open, ct_closed ])
 
 const vm_info = z.object({
   activated  : bool,
@@ -87,12 +103,14 @@ const base_data = z.object({
 })
 
 const data  = base_data
+  .and(publish_state)
   .and(close_state)
   .and(vm_state)
   .and(tx.spend_state)
   .and(tx.settle_state)
 
 const shape = base_data
+  .merge(publish_info)
   .merge(close_info)
   .merge(vm_info)
   .merge(tx.spend_info)
