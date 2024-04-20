@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, literal, num, payment, network, paypath, regex, stamp, str } = base
+const { address, hash, label, literal, num, network, regex, stamp, str } = base
 
+const payment   = z.tuple([ num, address ])
+const paypath   = z.tuple([ label, num, address ])
 const program = z.tuple([ str, regex, regex ]).rest(literal)
 const task    = z.tuple([ num, str, regex ])
 
@@ -41,7 +43,9 @@ const template = data.partial().extend({
 
 export default {
   data,
+  paypath,
   paths,
+  payment,
   payments,
   program,
   programs,

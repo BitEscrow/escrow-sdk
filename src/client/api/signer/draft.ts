@@ -1,7 +1,10 @@
 import { verify_proposal } from '@/core/validation/proposal.js'
+import { EscrowSigner }    from '../../class/signer.js'
 
-import { EscrowSigner } from '../../class/signer.js'
-import { CredentialConfig, DraftSession } from '../../types.js'
+import {
+  CredentialConfig,
+  DraftSession
+} from '../../types.js'
 
 import {
   claim_membership,
@@ -56,11 +59,32 @@ export function has_membership_api (esigner : EscrowSigner) {
   }
 }
 
+export function has_role_api (esigner : EscrowSigner) {
+  return (
+    role_id : string,
+    session : DraftSession
+  ) : boolean => {
+    const mship = claim_membership(session.members, esigner._signer)
+    return mship?.pid === role_id
+  }
+}
+
+export function has_signature_api (esigner : EscrowSigner) {
+  return (
+    session : DraftSession
+  ) : boolean => {
+    const mship = claim_membership(session.members, esigner._signer)
+    return mship?.sig !== undefined
+  }
+}
+
 export default function (esigner : EscrowSigner) {
   return {
-    endorse : endorse_session_api(esigner),
-    is_mbr  : has_membership_api(esigner),
-    join    : join_session_api(esigner),
-    leave   : leave_session_api(esigner)
+    endorse   : endorse_session_api(esigner),
+    is_member : has_membership_api(esigner),
+    is_role   : has_role_api(esigner),
+    is_signed : has_signature_api(esigner),
+    join      : join_session_api(esigner),
+    leave     : leave_session_api(esigner)
   }
 }

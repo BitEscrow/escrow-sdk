@@ -14,13 +14,13 @@ let draft = DraftUtil.create(proposal, roles),
     seats = draft.roles.map(e => e.id)
 
 // For each member, add their info to the proposal.
-draft = a_signer.proposal.join(seats[0], draft)
-draft = b_signer.proposal.join(seats[1], draft)
-draft = c_signer.proposal.join(seats[2], draft)
+draft = a_signer.draft.join(seats[0], draft)
+draft = b_signer.draft.join(seats[1], draft)
+draft = c_signer.draft.join(seats[2], draft)
 
 // For each member, collect an endorsement signature.
 signers.forEach(mbr => {
-  draft = mbr.proposal.endorse(draft)
+  draft = mbr.draft.endorse(draft)
 })
 
 DraftUtil.verify(draft)

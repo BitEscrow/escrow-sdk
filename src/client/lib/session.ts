@@ -70,7 +70,7 @@ export function leave_session (
   session : DraftSession
 ) : DraftSession {
   //
-  const members  = session.members.filter(e => e.pub === cred.pub)
+  const members  = session.members.filter(e => e.pub !== cred.pub)
   // Add member to proposal.
   const proposal = rem_member_data(cred, session.proposal)
   //
