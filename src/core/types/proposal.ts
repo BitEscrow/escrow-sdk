@@ -39,7 +39,6 @@ export interface ProposalData {
   effective  ?: number
   engine      : string
   feerate    ?: number
-  fee_target ?: number
   moderator  ?: string
   network     : Network
   paths       : PathEntry[]

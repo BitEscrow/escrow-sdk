@@ -28,11 +28,10 @@ type PathTotal = [ path: string, total : number ]
 
 const PROPOSAL_DEFAULTS = () => {
   return {
-    content    : '',
     created_at : now(),
     deadline   : CONST.DEADLINE_DEFAULT,
     duration   : CONST.DURATION_DEFAULT,
-    engine     : CONST.MACHINE_DEFAULT,
+    engine     : CONST.ENGINE_DEFAULT,
     paths      : [],
     payments   : [],
     programs   : [],

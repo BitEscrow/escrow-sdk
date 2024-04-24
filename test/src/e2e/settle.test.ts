@@ -264,7 +264,7 @@ export default async function (
 
       assert.exists(vm_data.output, 'vm_state output is null')
 
-      contract = close_contract(contract, vm_data.head, vm_data.output)
+      contract = close_contract(contract, vm_data)
 
       /* ------------------- [ Settle Contract ] ------------------- */
 

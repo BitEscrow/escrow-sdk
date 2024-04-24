@@ -18,7 +18,8 @@ import {
   PaymentEntry,
   ProposalData,
   SignerAPI,
-  SpendTemplate
+  SpendTemplate,
+  VMData
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
@@ -54,10 +55,11 @@ export const GET_INIT_CANCEL_STATE = () => {
 
 export const GET_INIT_ACTIVE_STATE = () => {
   return {
-    activated  : false as const,
-    active_at  : null,
-    expires_at : null,
-    vmid       : null
+    activated   : false as const,
+    active_at   : null,
+    active_head : null,
+    expires_at  : null,
+    vmid        : null
   }
 }
 
@@ -65,7 +67,6 @@ export const GET_INIT_CLOSE_STATE = () => {
   return {
     closed      : false as const,
     closed_at   : null,
-    closed_hash : null,
     closed_path : null
   }
 }
@@ -171,22 +172,26 @@ export function activate_contract (
   active_at : number = now()
 ) : ContractData {
   // Define a hard expiration date.
-  const expires_at = active_at + contract.terms.duration
-  const vmid       = get_vm_id(active_at, contract.cid, expires_at)
-  const status     = 'active' as ContractStatus
+  const expires_at  = active_at + contract.terms.duration
+  const vmid        = get_vm_id(active_at, contract.cid, expires_at)
+  const active_head = vmid
+  const status      = 'active' as ContractStatus
   // Return the new contract and vm config.
-  return { ...contract, activated: true, active_at, expires_at, status, vmid }
+  return { ...contract, activated: true, active_at, active_head, expires_at, status, vmid }
 }
 
 export function close_contract (
-  contract    : ContractData,
-  closed_hash : string,
-  closed_path : string,
-  closed_at   = now()
+  contract : ContractData,
+  vmdata   : VMData
 ) : ContractData {
-  const status     = 'closed' as ContractStatus
-  const updated_at = closed_at
-  return { ...contract, closed_at, closed_hash, closed_path, status, updated_at, closed: true }
+  assert.ok(contract.activated, 'contract is not active')
+  assert.ok(vmdata.closed,      'vm state is not closed')
+  const status      = 'closed' as ContractStatus
+  const active_head = vmdata.head
+  const closed_at   = vmdata.closed_at
+  const closed_path = vmdata.output
+  const updated_at  = closed_at
+  return { ...contract, active_head, closed_at, closed_path, status, updated_at, closed: true }
 }
 
 export function spend_contract (

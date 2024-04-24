@@ -1,7 +1,5 @@
 /* Module Imports */
-
-import { VALID_FEE_TARGETS } from '../const.js'
-import { create_program }    from '../lib/vm.js'
+import { create_program } from '../lib/vm.js'
 
 import {
   get_pay_total,
@@ -58,7 +56,7 @@ export function verify_proposal (
   proposal : ProposalData
 ) {
   // Check if feerate is valid.
-  check_fee_rates(policy, proposal)
+  check_feerate(policy, proposal)
   // Check spending paths are valid.
   check_payments(proposal)
   // Check if timestamps are valid.
@@ -69,16 +67,13 @@ export function verify_proposal (
   check_schedule(machine, proposal)
 }
 
-function check_fee_rates (
+function check_feerate (
   policy   : ServerPolicy,
   proposal : ProposalData
 ) {
-  const { feerate, fee_target } = proposal
+  const { feerate } = proposal
   //
-  if (fee_target !== undefined) {
-    //
-    assert.ok(VALID_FEE_TARGETS.includes(fee_target), 'fee target value is invalid: ' + fee_target)
-  } else if (feerate !== undefined) {
+  if (feerate !== undefined) {
     //
     const { FEERATE_MIN, FEERATE_MAX } = policy.proposal
     // Assert that all terms are valid.

@@ -43,7 +43,7 @@ const ct_open = z.object({
 const ct_closed = z.object({
   closed      : z.literal(true),
   closed_at   : stamp,
-  closed_path : str
+  closed_path : str.nullable()
 })
 
 const publish_state = z.discriminatedUnion('canceled', [ ct_published, ct_canceled ])

@@ -14,14 +14,13 @@ const programs = program.array()
 const schedule = task.array()
 
 const data  = z.object({
-  content    : str,
+  content    : str.optional(),
   created_at : stamp,
   deadline   : num,
   duration   : num,
   engine     : str,
   effective  : stamp.optional(),
   feerate    : num.optional(),
-  fee_target : num.optional(),
   moderator  : hash.optional(),
   network,
   paths,

@@ -14,12 +14,5 @@ export const SPEND_TXIN_SIZE = SPEND_TXIN_BASE_SIZE + SPEND_TXIN_WIT_VSIZE
 //
 export const DEADLINE_DEFAULT  = 7200
 export const DURATION_DEFAULT  = 7200
+export const ENGINE_DEFAULT    = 'cvm'
 export const TXTIMEOUT_DEFAULT = 7200
-export const MACHINE_DEFAULT   = 'cvm'
-
-export const VALID_FEE_TARGETS = [
-  ...Array.from({ length: 25 }, (_, i) => i + 1),
-  144,
-  504,
-  1008
- ]
