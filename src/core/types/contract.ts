@@ -48,30 +48,30 @@ interface ContractIsCanceled {
 }
 
 interface ContractIsActive {
-  activated  : true
-  active_at  : number
-  expires_at : number
-  vmid       : string
+  activated   : true
+  active_at   : number
+  active_hash : string
+  expires_at  : number
+  vmid        : string
 }
 
 interface ContractIsInactive {
-  activated  : false
-  active_at  : null
-  expires_at : null
-  vmid       : null
+  activated   : false
+  active_at   : null
+  active_hash : null
+  expires_at  : null
+  vmid        : null
 }
 
 interface ContractIsClosed {
   closed      : true
   closed_at   : number
-  closed_hash : string
   closed_path : string
 }
 
 interface ContractIsOpen {
   closed      : false
   closed_at   : null
-  closed_hash : null
   closed_path : null
 }
 

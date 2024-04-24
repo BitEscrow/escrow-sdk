@@ -139,7 +139,7 @@ export function verify_contract_close (
   assert.ok(vmstate.closed,  'vm state is not closed')
   assert.ok(contract.closed, 'contract is not closed')
   assert.ok(vmstate.closed_at === contract.closed_at,   'contract closed_at does not match vm result')
-  assert.ok(vmstate.head      === contract.closed_hash, 'contract closed_hash does not match vm result')
+  assert.ok(vmstate.head      === contract.active_hash, 'contract closed_hash does not match vm result')
   assert.ok(vmstate.output    === contract.closed_path, 'contract closed_path does not match vm result')
 }
 

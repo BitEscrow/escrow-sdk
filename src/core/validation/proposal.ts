@@ -89,8 +89,8 @@ function check_fee_rates (
 
 function check_payments (proposal : ProposalData) {
   const { network, paths, payments, value } = proposal
-  paths.forEach(e => { assert.valid_address(e[2], network) })
-  payments.forEach(e  => { assert.valid_address(e[1], network) })
+  paths.forEach(e => { assert.is_valid_address(e[2], network) })
+  payments.forEach(e  => { assert.is_valid_address(e[1], network) })
 
   // Get totals for fees and paths.
   const total_fees  = get_pay_total(payments)

@@ -1,15 +1,5 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
-import { Literal }     from '../types/index.js'
-
-export function exists <T> (
-  value ?: T | null
-) : value is NonNullable<T> {
-  if (typeof value === 'undefined' || value === null) {
-    return false
-  }
-  return true
-}
 
 export function get_entry <T = string[]> (
   label   : string,
@@ -20,69 +10,6 @@ export function get_entry <T = string[]> (
     throw new Error('Entry not found for label: ' + label)
   }
   return ent[1]
-}
-
-export function is_bigint (value : unknown) : value is bigint {
-  return typeof value === 'bigint'
-}
-
-export function is_hex (
-  value : unknown
-) : value is string {
-  if (
-    typeof value === 'string'            &&
-    value.match(/[^a-fA-F0-9]/) === null &&
-    value.length % 2 === 0
-  ) {
-    return true
-  }
-  return false
-}
-
-export function is_hash (value : unknown) : value is string {
-  if (is_hex(value) && value.length === 64) {
-    return true
-  }
-  return false
-}
-
-export function is_literal (value : unknown) : value is Literal {
-  if (
-    typeof value === 'string'  ||
-    typeof value === 'number'  ||
-    typeof value === 'boolean' ||
-    value === null
-  ) {
-    return true
-  }
-  return false
-}
-
-export function is_stamp (value : unknown) : value is number {
-  return (
-    typeof value === 'number' &&
-    value > 500_000_000       &&
-    value <= Number.MAX_SAFE_INTEGER
-  )
-}
-
-export function is_uint (
-  value : unknown,
-  max_val = Number.MAX_SAFE_INTEGER
-) : value is number {
-  if (typeof value === 'string') {
-    value = Number(value)
-  }
-  if (typeof value !== 'number') {
-    return false
-  }
-  return (
-    typeof value === 'number' &&
-    !isNaN(value)             &&
-    value >= 0                &&
-    value <= max_val          &&
-    Math.floor(value) === value
-  )
 }
 
 export function now () {

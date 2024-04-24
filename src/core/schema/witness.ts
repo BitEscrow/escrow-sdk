@@ -21,7 +21,7 @@ const receipt = data.extend({
   server_pk  : hash,
   server_sig : signature,
   vm_hash    : hash,
-  vm_output  : str,
+  vm_output  : str.nullable(),
   vm_step    : num
 })
 

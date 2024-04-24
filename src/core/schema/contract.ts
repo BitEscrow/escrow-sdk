@@ -3,7 +3,7 @@ import base     from './base.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
 
-const { bool, hash, hex, label, num, payment, stamp, str } = base
+const { bool, hash, hex, label, num, stamp, str } = base
 
 const status  = z.enum([ 'published', 'funded', 'secured', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
 const output  = z.tuple([ label, hex ])
@@ -31,21 +31,18 @@ const ct_canceled = z.object({
 const close_info = z.object({
   closed      : bool,
   closed_at   : stamp.nullable(),
-  closed_hash : hash.nullable(),
   closed_path : str.nullable()
 })
 
 const ct_open = z.object({
   closed      : z.literal(false),
   closed_at   : z.null(),
-  closed_hash : z.null(),
   closed_path : z.null()
 })
 
 const ct_closed = z.object({
   closed      : z.literal(true),
   closed_at   : stamp,
-  closed_hash : hash,
   closed_path : str
 })
 
@@ -53,24 +50,27 @@ const publish_state = z.discriminatedUnion('canceled', [ ct_published, ct_cancel
 const close_state   = z.discriminatedUnion('closed', [ ct_open, ct_closed ])
 
 const vm_info = z.object({
-  activated  : bool,
-  active_at  : stamp.nullable(),
-  expires_at : stamp.nullable(),
-  vmid       : hash.nullable()
+  activated   : bool,
+  active_at   : stamp.nullable(),
+  active_head : hash.nullable(),
+  expires_at  : stamp.nullable(),
+  vmid        : hash.nullable()
 })
 
 const vm_active = z.object({
-  activated  : z.literal(true),
-  active_at  : stamp,
-  expires_at : stamp,
-  vmid       : hash
+  activated   : z.literal(true),
+  active_at   : stamp,
+  active_head : hash,
+  expires_at  : stamp,
+  vmid        : hash
 })
 
 const vm_inactive = z.object({
-  activated  : z.literal(false),
-  active_at  : z.null(),
-  expires_at : z.null(),
-  vmid       : z.null()
+  activated   : z.literal(false),
+  active_at   : z.null(),
+  active_head : z.null(),
+  expires_at  : z.null(),
+  vmid        : z.null()
 })
 
 const vm_state = z.discriminatedUnion('activated', [ vm_active, vm_inactive ])
@@ -81,7 +81,7 @@ const base_data = z.object({
   deadline_at  : stamp,
   effective_at : stamp.nullable(),
   feerate      : num,
-  fees         : payment.array(),
+  fees         : proposal.payments,
   fund_count   : num,
   fund_pend    : num,
   fund_txfee   : num,

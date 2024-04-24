@@ -62,3 +62,10 @@ export function get_signatures (members : MemberData[]) {
     return mship.sig
   })
 }
+
+export function clear_signatures (members : MemberData[]) {
+  return members.map(mship => {
+    mship.sig = undefined
+    return mship
+  })
+}

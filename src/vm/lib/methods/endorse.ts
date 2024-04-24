@@ -48,7 +48,7 @@ function verify (params : Literal[]) {
       return 'threshold must not exceed pubkey count'
     }
 
-    pubs.forEach(e => { assert.valid_pubkey(e) })
+    pubs.forEach(e => { assert.is_valid_pubkey(e) })
 
     return null
   } catch (err) {

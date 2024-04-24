@@ -47,8 +47,8 @@ export function verify_account_req (
     ? 'testnet'
     : network
   // Assert that the pubkey and address are valid.
-  assert.valid_pubkey(deposit_pk)
-  assert.valid_address(return_addr, net)
+  assert.is_valid_pubkey(deposit_pk)
+  assert.is_valid_address(return_addr, net)
   // Assert that the address is a P2TR address.
   const addr_ctx = parse_addr(return_addr)
   assert.ok(addr_ctx.type === 'p2tr', 'the return address must be a taproot address')

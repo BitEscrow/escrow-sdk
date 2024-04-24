@@ -21,7 +21,7 @@ export function parse_network (
 export function parse_payments (
   payments : unknown[]
 ) : PaymentEntry[] {
-  return CoreSchema.base.payment.array().parse(payments)
+  return CoreSchema.proposal.payment.array().parse(payments)
 }
 
 export function parse_contract (

@@ -22,6 +22,7 @@ import ClientSchema from '../schema.js'
 
 import {
   claim_membership,
+  clear_signatures,
   get_signatures,
   has_membership,
   update_membership
@@ -77,6 +78,11 @@ export function leave_session (
   return ClientSchema.session.parse({ ...session, members, proposal })
 }
 
+export function reset_session (session : DraftSession) {
+  const members = clear_signatures(session.members)
+  return ClientSchema.session.parse({ ...session, members })
+}
+
 export function endorse_session (
   session : DraftSession,
   signer  : SignerAPI
@@ -123,5 +129,6 @@ export const DraftUtil = {
   join    : join_session,
   leave   : leave_session,
   publish : publish_session,
+  reset   : reset_session,
   verify  : verify_session
 }
