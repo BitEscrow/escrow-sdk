@@ -10,6 +10,5 @@ export interface ContractListResponse {
 }
 
 export interface FundListResponse {
-  contract : ContractData
-  funds    : FundingData[]
+  funds : FundingData[]
 }

@@ -1,4 +1,3 @@
-import { ContractData }   from '../contract.js'
 import { VMData }         from '../vm.js'
 import { WitnessReceipt } from '../witness.js'
 
@@ -11,7 +10,6 @@ export interface VMListResponse {
 }
 
 export interface VMSubmitResponse {
-  contract ?: ContractData
-  receipt   : WitnessReceipt
-  vmdata    : VMData
+  receipt : WitnessReceipt
+  vmdata  : VMData
 }

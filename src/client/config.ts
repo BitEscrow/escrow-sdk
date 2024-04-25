@@ -1,8 +1,8 @@
 import CVM         from '@/vm/index.js'
 import { Network } from '@/core/types/index.js'
 
-import ServerConfigs from './config/settings.json' assert { type : 'json' }
-import DefaultPolicy from './config/policy.json'   assert { type : 'json' }
+import ServerConfigs from './config/settings.js'
+import DefaultPolicy from './config/policy.js'
 
 const DEFAULT_NETWORK = 'mutiny'
 
