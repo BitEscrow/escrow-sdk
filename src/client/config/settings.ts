@@ -14,7 +14,7 @@ export default {
   },
 
   regtest : {
-    oracle_url : 'http://localhost:3300',
+    oracle_url : 'http://localhost:3002',
     server_pk  : '33f9d5a021afdffb864153eefa5d353d53e2d22053dadf8577c0e2b524bac794',
     server_url : 'http://localhost:3001',
     network    : 'regtest'

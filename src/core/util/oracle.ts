@@ -29,7 +29,7 @@ export async function get_tx_data (
   txid : string
 ) : Promise<OracleTxData | null> {
   // Define the url to use for fetching.
-  const url = `${host}/api/tx/${txid}`
+  const url = `${host}/tx/${txid}`
   // Fetch a response from the oracle.
   const res = await fetch(url)
   // If status is 404, return null.
@@ -56,7 +56,7 @@ export async function get_utxo_state (
   vout : number
 ) : Promise<OracleTxSpendState | null> {
   // Define the url to use for fetching.
-  const url = `${host}/api/tx/${txid}/outspend/${vout}`
+  const url = `${host}/tx/${txid}/outspend/${vout}`
   // Fetch a response from the oracle.
   const res = await fetch(url)
   // If status is 404, return null.
@@ -124,7 +124,7 @@ export async function get_address_utxos (
   addr : string
 ) : Promise<OracleTxSpendData[]> {
   // Define the url to use for fetching.
-  const url = `${host}/api/address/${addr}/utxo`
+  const url = `${host}/address/${addr}/utxo`
   // Fetch a response from the oracle.
   const res = await fetcher<OracleUtxo[]>(url)
   // If response failed, throw error.
@@ -158,7 +158,7 @@ export async function broadcast_tx (
   txhex : string
 ) : Promise<ApiResponse<string>> {
   // Define the url to use for fetching.
-  const url = `${host}/api/tx`
+  const url = `${host}/tx`
   // Configure the request.
   const req = {
     body    : txhex,
@@ -182,7 +182,7 @@ export async function get_fee_estimates (
   host : string
 ) : Promise<OracleFeeEstimate> {
   // Define the url to use for fetching.
-  const url = `${host}/api/fee-estimates`
+  const url = `${host}/fee-estimates`
   // Fetch a response from the oracle.
   const res = await fetch(url)
   // Resolve the response into json.
