@@ -141,11 +141,11 @@ export function create_deposit (
   // Unpack our data objects into a template.
   const template   = { ...GET_INIT_DEPOSIT(), ...request, ...utxo_state }
   // Set the initial status of the deposit.
-  const status     = (template.confirmed)
-    ? (template.covenant !== null)
-      ? 'locked' as DepositStatus
-      : 'open'   as DepositStatus
-    : 'pending'  as DepositStatus
+  const status     = (template.covenant !== null)
+    ? 'locked'     as DepositStatus
+    : (template.confirmed)
+      ? 'open'     as DepositStatus
+      : 'pending'  as DepositStatus
   // Return a sorted object.
   return sort_record({
     ...template,

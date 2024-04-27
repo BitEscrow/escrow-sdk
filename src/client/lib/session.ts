@@ -33,7 +33,8 @@ import {
   create_role_policy,
   get_role_policy,
   has_open_roles,
-  rem_member_data
+  rem_member_data,
+  verify_member_data
 } from './enrollment.js'
 
 export function create_session (
@@ -95,18 +96,21 @@ export function endorse_session (
 }
 
 export function verify_session (
-  _session : DraftSession
+  session : DraftSession
 ) {
-  // verify enrollment
-  // verify signatures
-  console.log('session verification not implemented')
+  const { members, proposal, roles } = session
+  members.forEach(mbr => {
+    const pol = roles.find(e => e.id === mbr.pid)
+    assert.exists(pol, 'policy does not exist for member: ' + mbr.pub)
+    verify_member_data(mbr, proposal, pol)
+  })
 }
 
 export function publish_session (
   session : DraftSession
 ) : ContractRequest {
   const { proposal } = session
-  const signatures   = get_signatures(session.members)
+  const signatures = get_signatures(session.members)
   return { proposal, signatures }
 }
 

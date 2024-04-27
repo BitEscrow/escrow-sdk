@@ -29,10 +29,14 @@ export function claim_membership (
 
 export function update_membership (
   members : MemberData[],
-  mship   : MemberData
+  mship   : Partial<MemberData>
 ) {
-  const ret = members.filter(e => e.pub !== mship.pub)
-  return [ ...ret, mship ]
+  const idx = members.findIndex(e => e.pub === mship.pub)
+  if (idx === -1) {
+    throw new Error('member does not exist')
+  }
+  members[idx] = { ...members[idx], ...mship }
+  return [ ...members ]
 }
 
 export function get_membership (

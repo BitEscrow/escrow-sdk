@@ -119,6 +119,36 @@ export function get_enrollment (
   return { paths, payment, programs }
 }
 
+export function verify_member_data (
+  cred     : CredentialData,
+  proposal : ProposalData,
+  role     : RolePolicy
+) {
+  const { paths, payment, programs } = role
+  const rdata  = get_enrollment(cred, proposal)
+  const rpaths = rdata.paths.map(e => e.toString())
+  const rprogs = programs.map(e => e.toString())
+  console.log('pay:', payment, rdata.payment)
+  if (
+    typeof payment === 'number' &&
+    payment > 0                 &&
+    payment < rdata.payment
+  ) {
+    throw new Error(`payment in "${role.title}" policy insufficient for member: ${cred.pub}`)
+  }
+  paths.forEach(e => {
+    if (!rpaths.includes(e.toString())) {
+      throw new Error(`"${e[0]}" path in "${role.title}" policy missing for member: ${cred.pub}`)
+    }
+  })
+  programs.forEach(tmpl => {
+    const exists = rprogs.find(e => e.startsWith(tmpl.toString()))
+    if (exists === undefined) {
+      throw new Error(`"${tmpl[0]}" method in "${role.title}" policy missing for member: ${cred.pub}`)
+    }
+  })
+}
+
 export function tabulate_slots (
   members : MemberData[],
   roles   : RolePolicy[]
