@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, hex, label, literal, num, signature, stamp, str } = base
+const { bool, hash, hex, label, literal, num, signature, stamp, str } = base
 
 const data = z.object({
   args    : literal.array(),
   action  : str,
+  content : str,
   method  : str,
   path    : label,
   prog_id : hash,
@@ -20,6 +21,7 @@ const receipt = data.extend({
   receipt_id : hash,
   server_pk  : hash,
   server_sig : signature,
+  vm_closed  : bool,
   vm_hash    : hash,
   vm_output  : str.nullable(),
   vm_step    : num

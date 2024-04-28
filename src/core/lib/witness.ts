@@ -23,7 +23,7 @@ export function create_witness (
   pubkeys  : string   | string[],
   template : WitnessTemplate
 ) : WitnessData {
-  const { args = [], action, method, path, stamp = now() } = template
+  const { args = [], action, content = '', method, path, stamp = now() } = template
 
   const keys   = (Array.isArray(pubkeys)) ? pubkeys : [ pubkeys ]
   const query  = { method, action, path, includes: keys }
@@ -35,7 +35,7 @@ export function create_witness (
 
   const prog_id = pdata.prog_id
   const vmid    = config.vmid
-  const tmpl    = { ...template, args, prog_id, stamp, vmid }
+  const tmpl    = { ...template, args, content, prog_id, stamp, vmid }
   const wid     = get_witness_id(tmpl)
   return sort_record({ ...tmpl, sigs: [], wid })
 }
@@ -75,10 +75,11 @@ export function create_receipt (
   receipt_at = now()
 ) : WitnessReceipt {
   const server_pk  = signer.pubkey
+  const vm_closed  = data.closed
   const vm_hash    = data.head
   const vm_output  = data.output
   const vm_step    = data.step
-  const preimg     = { ...witness, receipt_at, server_pk, vm_hash, vm_output, vm_step }
+  const preimg     = { ...witness, receipt_at, server_pk, vm_closed, vm_hash, vm_output, vm_step }
   const receipt_id = get_receipt_id(preimg)
   const server_sig = signer.sign(receipt_id)
   return sort_record({ ...preimg, receipt_id, server_sig })
@@ -91,9 +92,9 @@ export function create_receipt (
 export function get_witness_id (
   preimg : WitnessPreImage
 ) {
-  const { action, args, method, path, prog_id, stamp, vmid } = preimg
+  const { action, args, content, method, path, prog_id, stamp, vmid } = preimg
   const argstr = JSON.stringify(args)
-  return Buff.json([ action, argstr, method, path, prog_id, stamp, vmid ]).digest.hex
+  return Buff.json([ action, argstr, content, method, path, prog_id, stamp, vmid ]).digest.hex
 }
 
 export function get_receipt_id (
