@@ -114,10 +114,10 @@ export function tabualte_session (session : DraftSession) {
   const path_max_value = path_values.sort((a, b) => a - b).pop()
 
   return {
-    path_totals,
     path_max_value,
-    pay_total : prop_pay_total + role_pay_total,
-    proposal  : {
+    path_totals : [ ...path_totals.entries() ],
+    pay_total   : prop_pay_total + role_pay_total,
+    proposal    : {
       paths    : prop_path_totals,
       payments : prop_path_totals
     },
