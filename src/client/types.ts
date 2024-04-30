@@ -6,6 +6,7 @@ import {
   Network,
   ProgramEntry,
   ProposalData,
+  ProposalTemplate,
   ServerPolicy,
   VirtualMachineAPI
 } from '@/core/types/index.js'
@@ -42,21 +43,21 @@ export interface FetchConfig {
 export interface RoleTemplate {
   title      : string
   id        ?: string
-  min_num   ?: number
-  max_num   ?: number
+  moderator ?: boolean
   paths     ?: [ string, number ][]
   payment   ?: number
   programs  ?: ProgramEntry[]
+  seats     ?: number
 }
 
 export interface RolePolicy {
   id        : string
   title     : string
-  min_num   : number
-  max_num   : number
+  moderator : boolean
   paths     : [ string, number ][]
   payment  ?: number
   programs  : ProgramEntry[]
+  seats     : number
 }
 
 export interface CredentialConfig {
@@ -74,11 +75,15 @@ export interface MemberData extends CredentialData {
   sig ?: string
 }
 
+export interface DraftTemplate {
+  proposal : ProposalTemplate
+  roles    : RoleTemplate[]
+}
+
 export interface DraftSession {
   proposal : ProposalData
   members  : MemberData[]
   roles    : RolePolicy[]
-  terms    : string[]
 }
 
 export interface WalletAPI {

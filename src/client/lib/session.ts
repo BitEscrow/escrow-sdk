@@ -3,19 +3,20 @@ import { assert } from '@/core/util/index.js'
 
 import {
   create_proposal,
-  endorse_proposal
+  endorse_proposal,
+  get_path_total,
+  get_pay_total
 } from '@/core/lib/proposal.js'
 
 import {
   ContractRequest,
-  ProposalTemplate,
   SignerAPI
 } from '@/core/types/index.js'
 
 import {
-  RoleTemplate,
   DraftSession,
-  CredentialData
+  CredentialData,
+  DraftTemplate
 } from '../types.js'
 
 import ClientSchema from '../schema.js'
@@ -38,14 +39,13 @@ import {
 } from './enrollment.js'
 
 export function create_session (
-  proposal : ProposalTemplate,
-  roles    : RoleTemplate[]
+  template : DraftTemplate
 ) : DraftSession {
+  const { proposal, roles } = template
   return {
     members  : [],
     proposal : create_proposal(proposal),
-    roles    : roles.map(e => create_role_policy(e)),
-    terms    : []
+    roles    : roles.map(e => create_role_policy(e))
   }
 }
 
@@ -93,6 +93,14 @@ export function endorse_session (
   const sig     = endorse_proposal(session.proposal, signer)
   const members = update_membership(session.members, { ...mship, sig })
   return ClientSchema.session.parse({ ...session, members })
+}
+
+export function tabualte_session (session : DraftSession) {
+  const { paths, payments } = session.proposal
+  const path_totals = get_path_total(paths)
+  const pay_total   = get_pay_total(payments)
+  const path_max    = path_totals.sort((a, b) => a[1] - b[1]).pop()
+  return { path_totals, pay_total, path_max }
 }
 
 export function verify_session (

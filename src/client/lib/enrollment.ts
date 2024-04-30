@@ -13,10 +13,10 @@ import {
 
 const GET_ROLE_DEFAULTS = () => {
   return {
-    min_num  : 1,
-    max_num  : 1,
-    paths    : [],
-    programs : []
+    moderator : false,
+    paths     : [],
+    programs  : [],
+    seats     : 1
   }
 }
 
@@ -174,7 +174,7 @@ export function has_open_roles (
   const policy = roles.find(e => e.id === policy_id)
   assert.ok(policy !== undefined, 'role does not exists for policy id: ' + policy_id)
   const slots = members.filter(e => e.pid === policy_id)
-  return slots.length < policy.max_num
+  return slots.length < policy.seats
 }
 
 export function has_full_roles (
@@ -183,12 +183,8 @@ export function has_full_roles (
 ) {
   const tab = tabulate_slots(members, roles)
   return roles.every(e => {
-    const { id, min_num, max_num } = e
+    const { id, seats } = e
     const count = tab.get(id)
-    return (
-      count !== undefined &&
-      count >= min_num    &&
-      count <= max_num
-    )
+    return (count !== undefined && count === seats)
   })
 }

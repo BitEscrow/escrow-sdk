@@ -54,9 +54,10 @@ if (DEMO_MODE) {
 /** ========== [ Review Settlement ] ========== **/
 
 // Assert that a settled contract exists.
-assert.exists(res.data.contract, 'settled contract was not returned')
+const settled_res = await client.contract.read(active_contract.cid)
+if (!settled_res.ok) throw new Error(res.error)
 // Unpack the settled contract from the response.
-const settled_contract = res.data.contract
+const settled_contract = settled_res.data.contract
 
 if (DEMO_MODE) {
   print_banner('settled contract')
