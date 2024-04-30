@@ -96,5 +96,6 @@ export interface WalletAPI {
   has_account : (extkey : string) => boolean
   get_account : (id : Bytes) => WalletAPI
   has_address : (addr : string, limit ?: number) => boolean
+  get_address : (options ?: AddressConfig) => string
   new_address : (options ?: AddressConfig) => string
 }
