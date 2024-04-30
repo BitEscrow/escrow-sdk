@@ -45,6 +45,33 @@ export function get_role_policy (
   return policy
 }
 
+export function get_role_paths_totals (
+  roles : Array<RoleTemplate | RolePolicy>
+) {
+  const path_totals = new Map<string, number>()
+
+  for (const { paths } of roles) {
+    if (paths !== undefined) {
+      paths.forEach(([ label, value ]) => {
+        const curr = path_totals.get(label) ?? 0
+        path_totals.set(label, curr + value)
+      })
+    }
+  }
+
+  return path_totals
+}
+
+export function get_role_payment_totals (
+  roles : Array<RoleTemplate | RolePolicy>
+) {
+  let bal = 0
+  for (const role of roles) {
+    bal += role.payment ?? 0
+  }
+  return bal
+}
+
 export function add_member_data (
   cred     : CredentialData,
   policy   : RolePolicy,

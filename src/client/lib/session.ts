@@ -32,6 +32,8 @@ import {
 import {
   add_member_data,
   create_role_policy,
+  get_role_paths_totals,
+  get_role_payment_totals,
   get_role_policy,
   has_open_roles,
   rem_member_data,
@@ -97,10 +99,33 @@ export function endorse_session (
 
 export function tabualte_session (session : DraftSession) {
   const { paths, payments } = session.proposal
-  const path_totals = get_path_total(paths)
-  const pay_total   = get_pay_total(payments)
-  const path_max    = path_totals.sort((a, b) => a[1] - b[1]).pop()
-  return { path_totals, pay_total, path_max }
+  const prop_path_totals = get_path_total(paths)
+  const prop_pay_total   = get_pay_total(payments)
+  const role_path_totals = get_role_paths_totals(session.roles)
+  const role_pay_total   = get_role_payment_totals(session.roles)
+  const path_totals      = new Map(role_path_totals)
+
+  prop_path_totals.forEach(([ path, value ]) => {
+    const curr = path_totals.get(path) ?? 0
+    path_totals.set(path, curr + value)
+  })
+
+  const path_values    = [ ...path_totals.values() ]
+  const path_max_value = path_values.sort((a, b) => a - b).pop()
+
+  return {
+    path_totals,
+    path_max_value,
+    pay_total : prop_pay_total + role_pay_total,
+    proposal  : {
+      paths    : prop_path_totals,
+      payments : prop_path_totals
+    },
+    roles : {
+      paths    : [ ...role_path_totals.entries() ],
+      payments : role_pay_total
+    }
+  }
 }
 
 export function verify_session (

@@ -40,11 +40,16 @@ export interface FetchConfig {
   token  ?: string
 }
 
+export type PathTemplate = [
+  path   : string,
+  amount : number
+]
+
 export interface RoleTemplate {
   title      : string
   id        ?: string
   moderator ?: boolean
-  paths     ?: [ string, number ][]
+  paths     ?: PathTemplate[]
   payment   ?: number
   programs  ?: ProgramEntry[]
   seats     ?: number
