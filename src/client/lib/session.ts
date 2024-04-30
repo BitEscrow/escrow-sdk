@@ -159,13 +159,14 @@ export function decode_session (session_str : string) : DraftSession {
 }
 
 export const DraftUtil = {
-  create  : create_session,
-  decode  : decode_session,
-  encode  : encode_session,
-  endorse : endorse_session,
-  join    : join_session,
-  leave   : leave_session,
-  publish : publish_session,
-  reset   : reset_session,
-  verify  : verify_session
+  create   : create_session,
+  decode   : decode_session,
+  encode   : encode_session,
+  endorse  : endorse_session,
+  join     : join_session,
+  leave    : leave_session,
+  publish  : publish_session,
+  reset    : reset_session,
+  tabulate : tabualte_session,
+  verify   : verify_session
 }
