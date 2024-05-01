@@ -59,7 +59,7 @@ export function get_role_paths_totals (
     }
   }
 
-  return path_totals
+  return [ ...path_totals ]
 }
 
 export function get_role_payment_totals (

@@ -10,7 +10,7 @@ const DEMO_MODE = process.env.VERBOSE === 'true'
 const [ a_signer, b_signer, c_signer ] = signers
 
 // Define our negotiation session.
-let draft = DraftUtil.create(proposal, roles),
+let draft = DraftUtil.create({ proposal, roles }),
     seats = draft.roles.map(e => e.id)
 
 // For each member, add their info to the proposal.

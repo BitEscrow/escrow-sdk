@@ -99,31 +99,41 @@ export function endorse_session (
 
 export function tabualte_session (session : DraftSession) {
   const { paths, payments } = session.proposal
-  const prop_path_totals = get_path_total(paths)
-  const prop_pay_total   = get_pay_total(payments)
-  const role_path_totals = get_role_paths_totals(session.roles)
-  const role_pay_total   = get_role_payment_totals(session.roles)
-  const path_totals      = new Map(role_path_totals)
+  const prop_path_tabs  = get_path_total(paths)
+  const prop_path_total = prop_path_tabs.reduce((p, c) => p + c[1], 0)
+  const prop_pay_total  = get_pay_total(payments)
+  const role_path_tabs  = get_role_paths_totals(session.roles)
+  const role_path_total = role_path_tabs.reduce((p, c) => p + c[1], 0)
+  const role_pay_total  = get_role_payment_totals(session.roles)
+  const path_map        = new Map(role_path_tabs)
+  const path_total      = prop_path_total + role_path_total
+  const pay_total       = prop_pay_total + role_pay_total
 
-  prop_path_totals.forEach(([ path, value ]) => {
-    const curr = path_totals.get(path) ?? 0
-    path_totals.set(path, curr + value)
+  prop_path_tabs.forEach(([ path, value ]) => {
+    const curr = path_map.get(path) ?? 0
+    path_map.set(path, curr + value)
   })
 
-  const path_values    = [ ...path_totals.values() ]
-  const path_max_value = path_values.sort((a, b) => a - b).pop()
+  const path_values = [ ...path_map.values() ]
+  const max_value   = path_values
+    .sort((a, b) => a - b)
+    .pop() ?? 0
 
   return {
-    path_max_value,
-    path_totals : [ ...path_totals.entries() ],
-    pay_total   : prop_pay_total + role_pay_total,
+    max_value,
+    path_total,
+    pay_total,
+    total_value : path_total + pay_total,
+    path_tabs   : [ ...path_map.entries() ],
     proposal    : {
-      paths    : prop_path_totals,
-      payments : prop_path_totals
+      path_tabs  : prop_path_tabs,
+      path_total : prop_path_total,
+      pay_total  : prop_pay_total
     },
     roles : {
-      paths    : [ ...role_path_totals.entries() ],
-      payments : role_pay_total
+      path_tabs  : [ ...role_path_tabs.entries() ],
+      path_total : role_path_total,
+      pay_total  : role_pay_total
     }
   }
 }
