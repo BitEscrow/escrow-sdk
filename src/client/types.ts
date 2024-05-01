@@ -76,8 +76,7 @@ export interface CredentialData {
 }
 
 export interface MemberData extends CredentialData {
-  pid  : string
-  sig ?: string
+  pid : string
 }
 
 export interface DraftTemplate {
@@ -89,6 +88,7 @@ export interface DraftSession {
   proposal : ProposalData
   members  : MemberData[]
   roles    : RolePolicy[]
+  sigs     : string[]
 }
 
 export interface WalletAPI {

@@ -1,0 +1,12 @@
+{
+  "comment"    : "Basic payout, immediate execution", 
+  "duration"   : 9999,
+  "members"    : [],
+  "pathnames"  : [ "payout", "return" ],
+  "programs"   : [],
+  "schedule"   : [
+    [ 0,    "close", "payout" ],
+    [ 1000, "close", "return" ]
+  ],
+  "statements" : []
+}

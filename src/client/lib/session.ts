@@ -1,5 +1,6 @@
-import { Buff }   from '@cmdcode/buff'
-import { assert } from '@/core/util/index.js'
+import { Buff }           from '@cmdcode/buff'
+import { assert }         from '@/core/util/index.js'
+import { has_membership } from './membership.js'
 
 import {
   create_proposal,
@@ -22,14 +23,6 @@ import {
 import ClientSchema from '../schema.js'
 
 import {
-  claim_membership,
-  clear_signatures,
-  get_signatures,
-  has_membership,
-  update_membership
-} from './membership.js'
-
-import {
   add_member_data,
   create_role_policy,
   get_role_paths_totals,
@@ -47,7 +40,8 @@ export function create_session (
   return {
     members  : [],
     proposal : create_proposal(proposal),
-    roles    : roles.map(e => create_role_policy(e))
+    roles    : roles.map(e => create_role_policy(e)),
+    sigs     : []
   }
 }
 
@@ -82,56 +76,53 @@ export function leave_session (
 }
 
 export function reset_session (session : DraftSession) {
-  const members = clear_signatures(session.members)
-  return ClientSchema.session.parse({ ...session, members })
+  return ClientSchema.session.parse({ ...session, sigs: [] })
 }
 
 export function endorse_session (
   session : DraftSession,
   signer  : SignerAPI
 ) : DraftSession {
-  const mship = claim_membership(session.members, signer)
-  assert.ok(mship !== null, 'signer is not a member of the session')
-  const sig     = endorse_proposal(session.proposal, signer)
-  const members = update_membership(session.members, { ...mship, sig })
-  return ClientSchema.session.parse({ ...session, members })
+  const sig  = endorse_proposal(session.proposal, signer)
+  const sigs = [ ...session.sigs, sig ]
+  return ClientSchema.session.parse({ ...session, sigs })
 }
 
 export function tabualte_session (session : DraftSession) {
   const { paths, payments } = session.proposal
-  const prop_path_tabs  = get_path_total(paths)
-  const prop_path_total = prop_path_tabs.reduce((p, c) => p + c[1], 0)
-  const prop_pay_total  = get_pay_total(payments)
-  const role_path_tabs  = get_role_paths_totals(session.roles)
-  const role_path_total = role_path_tabs.reduce((p, c) => p + c[1], 0)
-  const role_pay_total  = get_role_payment_totals(session.roles)
-  const path_map        = new Map(role_path_tabs)
-  const path_total      = prop_path_total + role_path_total
-  const pay_total       = prop_pay_total + role_pay_total
+  const prop_path_tabs = get_path_total(paths)
+  const prop_pay_total = get_pay_total(payments)
+  const role_path_tabs = get_role_paths_totals(session.roles)
+  const role_pay_total = get_role_payment_totals(session.roles)
 
-  prop_path_tabs.forEach(([ path, value ]) => {
-    const curr = path_map.get(path) ?? 0
-    path_map.set(path, curr + value)
-  })
-
-  const path_values = [ ...path_map.values() ]
-  const max_value   = path_values
+  const prop_path_total = prop_path_tabs
+    .map(e => e[1])
     .sort((a, b) => a - b)
-    .pop() ?? 0
+    .at(-1) ?? 0
+  const role_path_total = role_path_tabs
+    .map(e => e[1])
+    .sort((a, b) => a - b)
+    .at(-1) ?? 0
+
+  const total_tabs = new Map(prop_path_tabs)
+
+  for (const [ label, value ] of role_path_tabs) {
+    const curr = total_tabs.get(label) ?? 0
+    total_tabs.set(label, curr + value)
+  }
+
+  const proj_paths = [ ...total_tabs.entries() ]
+    .sort((a, b) => b[1] - a[1])
 
   return {
-    max_value,
-    path_total,
-    pay_total,
-    total_value : path_total + pay_total,
-    path_tabs   : [ ...path_map.entries() ],
-    proposal    : {
+    proj_paths,
+    proposal : {
       path_tabs  : prop_path_tabs,
       path_total : prop_path_total,
       pay_total  : prop_pay_total
     },
     roles : {
-      path_tabs  : [ ...role_path_tabs.entries() ],
+      path_tabs  : role_path_tabs,
       path_total : role_path_total,
       pay_total  : role_pay_total
     }
@@ -152,8 +143,7 @@ export function verify_session (
 export function publish_session (
   session : DraftSession
 ) : ContractRequest {
-  const { proposal } = session
-  const signatures = get_signatures(session.members)
+  const { proposal, sigs: signatures } = session
   return { proposal, signatures }
 }
 

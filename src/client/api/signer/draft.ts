@@ -16,6 +16,7 @@ import {
   join_session,
   leave_session
 } from '../../lib/session.js'
+import { get_proposal_id, verify_endorsement } from '@/core/lib/proposal.js'
 
 export function join_session_api (esigner : EscrowSigner) {
   return (
@@ -70,11 +71,15 @@ export function has_role_api (esigner : EscrowSigner) {
 }
 
 export function has_signature_api (esigner : EscrowSigner) {
+  const pub = esigner.pubkey
   return (
     session : DraftSession
   ) : boolean => {
-    const mship = claim_membership(session.members, esigner._signer)
-    return mship?.sig !== undefined
+    const sig = session.sigs.find(e => e.slice(0, 64) === pub)
+    if (sig === undefined) return false
+    const prop_id = get_proposal_id(session.proposal)
+    verify_endorsement(prop_id, sig)
+    return true
   }
 }
 

@@ -52,7 +52,8 @@ const policy = z.object({
 const session = z.object({
   members  : mship.array(),
   proposal : prop.data,
-  roles    : policy.array()
+  roles    : policy.array(),
+  sigs     : hex.array()
 })
 
 export default { client_config, cred, mship, path, policy, role, session, signer_config }
