@@ -56,20 +56,10 @@ export function has_membership (
   return exists !== undefined
 }
 
-export function has_full_endorsement (members : MemberData[]) {
-  return members.every(e => typeof e.sig === 'string')
-}
-
-export function get_signatures (members : MemberData[]) {
-  return members.map(mship => {
-    assert.exists(mship.sig)
-    return mship.sig
-  })
-}
-
-export function clear_signatures (members : MemberData[]) {
-  return members.map(mship => {
-    mship.sig = undefined
-    return mship
-  })
+export function has_endorsements (
+  members    : MemberData[],
+  signatures : string[]
+) {
+  const pubkeys = signatures.map(e => e.slice(0, 64))
+  return members.every(e => pubkeys.includes(e.pub))
 }

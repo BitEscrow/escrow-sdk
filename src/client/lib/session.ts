@@ -1,36 +1,32 @@
-import { Buff }   from '@cmdcode/buff'
-import { assert } from '@/core/util/index.js'
+import { Buff }           from '@cmdcode/buff'
+import { assert }         from '@/core/util/index.js'
+import { has_membership } from './membership.js'
 
 import {
   create_proposal,
-  endorse_proposal
+  endorse_proposal,
+  get_path_total,
+  get_pay_total
 } from '@/core/lib/proposal.js'
 
 import {
   ContractRequest,
-  ProposalTemplate,
   SignerAPI
 } from '@/core/types/index.js'
 
 import {
-  RoleTemplate,
   DraftSession,
-  CredentialData
+  CredentialData,
+  DraftTemplate
 } from '../types.js'
 
 import ClientSchema from '../schema.js'
 
 import {
-  claim_membership,
-  clear_signatures,
-  get_signatures,
-  has_membership,
-  update_membership
-} from './membership.js'
-
-import {
   add_member_data,
   create_role_policy,
+  get_role_paths_totals,
+  get_role_payment_totals,
   get_role_policy,
   has_open_roles,
   rem_member_data,
@@ -38,14 +34,14 @@ import {
 } from './enrollment.js'
 
 export function create_session (
-  proposal : ProposalTemplate,
-  roles    : RoleTemplate[]
+  template : DraftTemplate
 ) : DraftSession {
+  const { proposal, roles } = template
   return {
     members  : [],
     proposal : create_proposal(proposal),
     roles    : roles.map(e => create_role_policy(e)),
-    terms    : []
+    sigs     : []
   }
 }
 
@@ -80,19 +76,57 @@ export function leave_session (
 }
 
 export function reset_session (session : DraftSession) {
-  const members = clear_signatures(session.members)
-  return ClientSchema.session.parse({ ...session, members })
+  return ClientSchema.session.parse({ ...session, sigs: [] })
 }
 
 export function endorse_session (
   session : DraftSession,
   signer  : SignerAPI
 ) : DraftSession {
-  const mship = claim_membership(session.members, signer)
-  assert.ok(mship !== null, 'signer is not a member of the session')
-  const sig     = endorse_proposal(session.proposal, signer)
-  const members = update_membership(session.members, { ...mship, sig })
-  return ClientSchema.session.parse({ ...session, members })
+  const sig  = endorse_proposal(session.proposal, signer)
+  const sigs = [ ...session.sigs, sig ]
+  return ClientSchema.session.parse({ ...session, sigs })
+}
+
+export function tabualte_session (session : DraftSession) {
+  const { paths, payments } = session.proposal
+  const prop_path_tabs = get_path_total(paths)
+  const prop_pay_total = get_pay_total(payments)
+  const role_path_tabs = get_role_paths_totals(session.roles)
+  const role_pay_total = get_role_payment_totals(session.roles)
+
+  const prop_path_total = prop_path_tabs
+    .map(e => e[1])
+    .sort((a, b) => a - b)
+    .at(-1) ?? 0
+  const role_path_total = role_path_tabs
+    .map(e => e[1])
+    .sort((a, b) => a - b)
+    .at(-1) ?? 0
+
+  const total_tabs = new Map(prop_path_tabs)
+
+  for (const [ label, value ] of role_path_tabs) {
+    const curr = total_tabs.get(label) ?? 0
+    total_tabs.set(label, curr + value)
+  }
+
+  const proj_paths = [ ...total_tabs.entries() ]
+    .sort((a, b) => b[1] - a[1])
+
+  return {
+    proj_paths,
+    proposal : {
+      path_tabs  : prop_path_tabs,
+      path_total : prop_path_total,
+      pay_total  : prop_pay_total
+    },
+    roles : {
+      path_tabs  : role_path_tabs,
+      path_total : role_path_total,
+      pay_total  : role_pay_total
+    }
+  }
 }
 
 export function verify_session (
@@ -109,8 +143,7 @@ export function verify_session (
 export function publish_session (
   session : DraftSession
 ) : ContractRequest {
-  const { proposal } = session
-  const signatures = get_signatures(session.members)
+  const { proposal, sigs: signatures } = session
   return { proposal, signatures }
 }
 
@@ -126,13 +159,14 @@ export function decode_session (session_str : string) : DraftSession {
 }
 
 export const DraftUtil = {
-  create  : create_session,
-  decode  : decode_session,
-  encode  : encode_session,
-  endorse : endorse_session,
-  join    : join_session,
-  leave   : leave_session,
-  publish : publish_session,
-  reset   : reset_session,
-  verify  : verify_session
+  create   : create_session,
+  decode   : decode_session,
+  encode   : encode_session,
+  endorse  : endorse_session,
+  join     : join_session,
+  leave    : leave_session,
+  publish  : publish_session,
+  reset    : reset_session,
+  tabulate : tabualte_session,
+  verify   : verify_session
 }

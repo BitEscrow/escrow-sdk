@@ -4,7 +4,7 @@ import prop  from '@/core/schema/proposal.js'
 import serv  from '@/core/schema/server.js'
 import vm    from '@/core/schema/vm.js'
 
-const { hash, hex, label, network, num, str } = base
+const { bool, hash, hex, label, network, num, str } = base
 
 const signer_config = z.object({
   machine    : vm.api,
@@ -31,29 +31,29 @@ const mship = cred.extend({
 const path  = z.tuple([ label, num ])
 
 const role = z.object({
-  title    : label,
-  min_num  : num.optional(),
-  max_num  : num.optional(),
-  paths    : path.array().optional(),
-  payment  : num.optional(),
-  programs : prop.programs.optional()
+  title     : label,
+  moderator : bool.optional(),
+  paths     : path.array().optional(),
+  payment   : num.optional(),
+  programs  : prop.programs.optional(),
+  seats     : num.optional()
 })
 
 const policy = z.object({
-  id       : hash,
-  title    : label,
-  min_num  : num,
-  max_num  : num,
-  paths    : path.array(),
-  payment  : num.optional(),
-  programs : prop.programs
+  id        : hash,
+  title     : label,
+  moderator : bool,
+  paths     : path.array(),
+  payment   : num.optional(),
+  programs  : prop.programs,
+  seats     : num
 })
 
 const session = z.object({
   members  : mship.array(),
   proposal : prop.data,
   roles    : policy.array(),
-  terms    : str.array()
+  sigs     : hex.array()
 })
 
 export default { client_config, cred, mship, path, policy, role, session, signer_config }

@@ -13,10 +13,10 @@ import {
 
 const GET_ROLE_DEFAULTS = () => {
   return {
-    min_num  : 1,
-    max_num  : 1,
-    paths    : [],
-    programs : []
+    moderator : false,
+    paths     : [],
+    programs  : [],
+    seats     : 1
   }
 }
 
@@ -43,6 +43,33 @@ export function get_role_policy (
   const policy = session.roles.find(e => e.id === pol_id)
   assert.ok(policy !== undefined, 'role policy not found for id: ' + pol_id)
   return policy
+}
+
+export function get_role_paths_totals (
+  roles : Array<RoleTemplate | RolePolicy>
+) {
+  const path_totals = new Map<string, number>()
+
+  for (const { paths } of roles) {
+    if (paths !== undefined) {
+      paths.forEach(([ label, value ]) => {
+        const curr = path_totals.get(label) ?? 0
+        path_totals.set(label, curr + value)
+      })
+    }
+  }
+
+  return [ ...path_totals ]
+}
+
+export function get_role_payment_totals (
+  roles : Array<RoleTemplate | RolePolicy>
+) {
+  let bal = 0
+  for (const role of roles) {
+    bal += role.payment ?? 0
+  }
+  return bal
 }
 
 export function add_member_data (
@@ -128,7 +155,6 @@ export function verify_member_data (
   const rdata  = get_enrollment(cred, proposal)
   const rpaths = rdata.paths.map(e => e.toString())
   const rprogs = programs.map(e => e.toString())
-  console.log('pay:', payment, rdata.payment)
   if (
     typeof payment === 'number' &&
     payment > 0                 &&
@@ -174,7 +200,7 @@ export function has_open_roles (
   const policy = roles.find(e => e.id === policy_id)
   assert.ok(policy !== undefined, 'role does not exists for policy id: ' + policy_id)
   const slots = members.filter(e => e.pid === policy_id)
-  return slots.length < policy.max_num
+  return slots.length < policy.seats
 }
 
 export function has_full_roles (
@@ -183,12 +209,8 @@ export function has_full_roles (
 ) {
   const tab = tabulate_slots(members, roles)
   return roles.every(e => {
-    const { id, min_num, max_num } = e
+    const { id, seats } = e
     const count = tab.get(id)
-    return (
-      count !== undefined &&
-      count >= min_num    &&
-      count <= max_num
-    )
+    return (count !== undefined && count === seats)
   })
 }

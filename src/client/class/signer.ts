@@ -118,22 +118,16 @@ export class EscrowSigner {
     return this._config.server_pk
   }
 
-  get wallet () {
-    return {
-      has : this._wallet.has_address
-    }
-  }
-
   get xpub () {
     return this._wallet.xpub
   }
 
   account  = account_api(this)
-  address  = wallet_api(this)
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
   vm       = vmachine_api(this)
+  wallet   = wallet_api(this)
   witness  = witness_api(this)
 
   backup (password : string) {
