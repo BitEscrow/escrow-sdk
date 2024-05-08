@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.12.15",
+  "version": "0.12.16",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -38,48 +38,24 @@
       "types": "./dist/vm/index.d.ts"
     },
     "./account": {
-      "import": "./dist/core/lib/account.js",
-      "types": "./dist/core/lib/account.d.ts"
+      "import": "./dist/core/module/account.js",
+      "types": "./dist/core/module/account.d.ts"
     },
     "./contract": {
-      "import": "./dist/core/lib/contract.js",
-      "types": "./dist/core/lib/contract.d.ts"
-    },
-    "./covenant": {
-      "import": "./dist/core/lib/covenant.js",
-      "types": "./dist/core/lib/covenant.d.ts"
+      "import": "./dist/core/module/contract.js",
+      "types": "./dist/core/module/contract.d.ts"
     },
     "./deposit": {
-      "import": "./dist/core/lib/deposit.js",
-      "types": "./dist/core/lib/deposit.d.ts"
-    },
-    "./proposal": {
-      "import": "./dist/core/lib/proposal.js",
-      "types": "./dist/core/lib/proposal.d.ts"
-    },
-    "./recovery": {
-      "import": "./dist/core/lib/recovery.js",
-      "types": "./dist/core/lib/recovery.d.ts"
-    },
-    "./return": {
-      "import": "./dist/core/lib/return.js",
-      "types": "./dist/core/lib/return.d.ts"
-    },
-    "./session": {
-      "import": "./dist/core/lib/session.js",
-      "types": "./dist/core/lib/session.d.ts"
-    },
-    "./tx": {
-      "import": "./dist/core/lib/tx.js",
-      "types": "./dist/core/lib/tx.d.ts"
-    },
-    "./vm": {
-      "import": "./dist/core/lib/vm.js",
-      "types": "./dist/core/lib/vm.d.ts"
+      "import": "./dist/core/module/deposit.js",
+      "types": "./dist/core/module/deposit.d.ts"
     },
     "./witness": {
-      "import": "./dist/core/lib/witness.js",
-      "types": "./dist/core/lib/witness.d.ts"
+      "import": "./dist/core/module/witness.js",
+      "types": "./dist/core/module/witness.d.ts"
+    },
+    "./lib/*.js": {
+      "import": "./dist/core/lib/*.js",
+      "types": "./dist/core/lib/*.d.ts"
     },
     "./schema": {
       "import": "./dist/core/schema/index.js",
