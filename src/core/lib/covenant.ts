@@ -10,7 +10,7 @@ import {
   get_nonce_ctx
 } from '@cmdcode/musig2'
 
-/* Module Imports */
+/* Local Imports */
 
 import { assert, sort_bytes } from '../util/index.js'
 
@@ -28,15 +28,13 @@ import {
   TxOutput
 } from '../types/index.js'
 
-/* Local Imports */
-
 import { create_sighash } from './tx.js'
 
 import {
   get_account_agent,
   get_account_ctx,
   get_deposit_hash
-} from './account.js'
+} from '../module/account/util.js'
 
 import {
   get_session_pnonce,

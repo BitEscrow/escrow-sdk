@@ -5,7 +5,7 @@ import {
   can_endorse,
   create_witness,
   endorse_witness
-} from '@/core/lib/witness.js'
+} from '@/core/module/witness/api.js'
 
 import {
   ContractData,

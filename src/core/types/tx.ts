@@ -1,10 +1,10 @@
 import { ScriptData } from '@scrow/tapscript'
 
-export type SpendState   = TxSpentState     | TxUnspentState
-export type SettleState  = TxSettledState   | TxUnsettledState
-export type ConfirmState = TxConfirmedState | TxUnconfirmedState
+export type SpendState   = TxSpentState   | TxUnspentState
+export type SettleState  = TxSettledState | TxUnsettledState
+export type ConfirmState = TxIsConfirmed  | TxIsUnconfirmed
 
-export interface TxConfirmedState {
+export interface TxIsConfirmed {
   confirmed    : true
   block_hash   : string
   block_height : number
@@ -12,7 +12,7 @@ export interface TxConfirmedState {
   expires_at   : number
 }
 
-export interface TxUnconfirmedState {
+export interface TxIsUnconfirmed {
   confirmed    : false
   block_hash   : null
   block_height : null

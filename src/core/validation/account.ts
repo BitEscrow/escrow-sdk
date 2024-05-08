@@ -11,7 +11,7 @@ import {
   get_account_ctx,
   get_account_hash,
   get_account_id
-} from '../lib/account.js'
+} from '../module/account/util.js'
 
 import {
   AccountData,

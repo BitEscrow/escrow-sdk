@@ -8,7 +8,8 @@ import {
   TxOutput
 } from './tx.js'
 
-export type DepositData   = DepositInfo & ConfirmState & SettleState & SpendState
+export type LockState     = DepositIsLocked | DepositIsUnlocked
+export type DepositData   = DepositInfo & ConfirmState & LockState & SettleState & SpendState
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
 export type FundingData = ConfirmState & SettleState & SpendState & {
@@ -21,6 +22,18 @@ export type FundingData = ConfirmState & SettleState & SpendState & {
 export interface LockRequest {
   dpid     : string
   covenant : CovenantData
+}
+
+export interface DepositIsLocked {
+  covenant  : CovenantData
+  locked    : true
+  locked_at : number
+}
+
+export interface DepositIsUnlocked {
+  covenant  : null
+  locked    : false
+  locked_at : null
 }
 
 export interface CloseRequest {

@@ -26,7 +26,7 @@ import {
   get_contract_id,
   get_spend_template,
   tabulate_funds
-} from '../lib/contract.js'
+} from '../module/contract/util.js'
 
 import {
   ContractData,

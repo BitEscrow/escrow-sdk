@@ -14,7 +14,7 @@ import {
 } from '@scrow/sdk/account'
 
 import {
-  close_deposit,
+  spend_deposit,
   create_deposit,
   create_register_req
 } from '@scrow/sdk/deposit'
@@ -109,7 +109,7 @@ export default async function (
 
       const txhex     = get_return_tx(deposit, server_sd)
       const txid      = await client.publish_tx(txhex, true)
-      const dp_closed = close_deposit(deposit, txhex)
+      const dp_closed = spend_deposit(deposit, txhex)
 
       if (VERBOSE) {
         console.log(banner('deposit closed'))

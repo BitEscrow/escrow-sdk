@@ -4,7 +4,7 @@ import { verify_psig } from '@cmdcode/musig2'
 
 /* Module Imports */
 
-import { get_account_agent }      from '../lib/account.js'
+import { get_account_agent }      from '../module/account/util.js'
 import { parse_session_token }    from '../lib/session.js'
 import { assert, parse_covenant } from '../util/index.js'
 

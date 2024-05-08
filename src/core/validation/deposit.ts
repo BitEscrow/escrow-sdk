@@ -6,13 +6,13 @@ import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 
 /* Module Imports */
 
-import { get_deposit_id }  from '../lib/deposit.js'
+import { get_deposit_id }  from '../module/deposit/util.js'
 import { assert, now }     from '../util/index.js'
 
 import {
   get_account_ctx,
   get_deposit_hash
-} from '../lib/account.js'
+} from '../module/account/util.js'
 
 import {
   CloseRequest,

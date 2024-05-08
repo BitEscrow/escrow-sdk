@@ -1,6 +1,6 @@
 /* Module Imports */
 
-import { get_account_agent } from '../lib/account.js'
+import { get_account_agent } from '../module/account/util.js'
 import { assert }            from '../util/index.js'
 
 import {

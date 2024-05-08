@@ -9,7 +9,7 @@ import {
   create_commit_req,
   create_lock_req,
   create_register_req
-} from '@/core/lib/deposit.js'
+} from '@/core/module/deposit/api.js'
 
 import {
   CloseRequest,

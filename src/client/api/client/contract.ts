@@ -1,7 +1,7 @@
 /* Global Imports */
 
 import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_publish_req }     from '@/core/lib/contract.js'
+import { create_publish_req }     from '@/core/module/contract/api.js'
 
 import {
   validate_commit_req,

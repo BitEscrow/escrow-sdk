@@ -27,9 +27,9 @@ import {
   create_contract,
   activate_contract,
   spend_contract,
-  get_settlement_tx,
   fund_contract,
-  close_contract
+  close_contract,
+  get_settlement_tx
 } from '@scrow/sdk/contract'
 
 import {

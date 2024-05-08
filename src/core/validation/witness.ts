@@ -9,7 +9,7 @@ import { assert, regex }  from '../util/index.js'
 import {
   get_receipt_id,
   get_witness_id
-} from '../lib/witness.js'
+} from '../module/witness/util.js'
 
 import {
   Literal,

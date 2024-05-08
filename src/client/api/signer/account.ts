@@ -1,4 +1,4 @@
-import { create_account_req } from '@/core/lib/account.js'
+import { create_account_req } from '@/core/module/account/api.js'
 import { verify_account }     from '@/core/validation/account.js'
 import { parse_err }          from '@/core/util/index.js'
 import { EscrowSigner }       from '../../class/signer.js'
