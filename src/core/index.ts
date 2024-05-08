@@ -1,3 +1,4 @@
+import CoreMods   from './module/index.js'
 import CoreSchema from './schema/index.js'
 
 export * as CONST      from './const.js'
@@ -7,4 +8,4 @@ export * as CoreVerify from './validation/index.js'
 
 export * from './types/index.js'
 
-export { CoreSchema }
+export { CoreMods, CoreSchema }

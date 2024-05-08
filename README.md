@@ -10,13 +10,13 @@ Key Features:
 
   * __100% private.__ All on-chain transactions appear as single-key spends. Participation is done through randomly generated credentials. Only requires a signing key (hot), and wallet xpub (cold) to participate.
 
-  * __100% non-custodial.__ Money is secured in a collaborative 2-of-2 contract. All payouts are pre-signed before deposit. Addresses are generated from a cold-stored xpub of your choice.
+  * __100% non-custodial.__ Money is secured in a collaborative 2-of-2 contract. All spending and refund transactions are pre-signed before deposit. Addresses are generated from a cold-stored xpub of your choice.
 
-  * __100% auditable.__ All contract terms, inputs, and operations are signed and recorded in a commit chain. Each settlement transaction is backed by an auditable commit history.
+  * __100% auditable.__ All contract terms and inputs are ditially signed. All contract operations are recorded into a hash-chain. Each settlement is backed by an auditable commit history.
 
-  * __Designed for trustless environments.__ Signing keys are disposable and have no capacity to sweep funds. Terms are signed up-front and verified before deposit.
+  * __Designed for trustless environments.__ Contract signing keys are segregated from address generation and have no capacity to sweep funds. All spending terms are verified up-front before a deposit is made.
 
-  * __Designed to be robust.__ Deposits are reusable when a contract cancels or expires. Credentials are recoverable via your xpub. Refunds are secured upfront and broadcast automatically on expiration.
+  * __Designed to be robust.__ Deposits are reusable when a contract cancels or expires. Credentials are recoverable via your xpub. Refund transactions are secured upfront and broadcast automatically on expiration.
 
 Package Features:
 
@@ -28,9 +28,8 @@ Package Features:
 Comimg Soon:
   
   * Full nostr integration for the API.
-  * Return receipts on all submissions.
   * Add raw tx `templates` to a proposal.
-  * New programs for virtual machine.
+  * New `hashlock` and `webhook` programs for the virtual machine.
 
 ---
 

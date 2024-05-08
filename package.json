@@ -76,6 +76,8 @@
     "demo:vm": "yarn load demo/vm/eval.ts",
     "lint": "eslint . --ext .ts",
     "load": "tsx --tsconfig ./test/tsconfig.json",
+    "pub:dev" : "yarn publish --tag dev",
+    "pub:rel" : "yarn publish --tag latest",
     "release": "yarn lint && yarn test && yarn build",
     "run:regtest": "NETWORK=regtest yarn load",
     "run:mutiny": "NETWORK=mutiny  yarn load",
