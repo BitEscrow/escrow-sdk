@@ -2,6 +2,11 @@ import { verify_proposal } from '@/core/validation/proposal.js'
 import { EscrowSigner }    from '../../class/signer.js'
 
 import {
+  get_proposal_id,
+  verify_endorsement
+} from '@/core/lib/proposal.js'
+
+import {
   CredentialConfig,
   DraftSession
 } from '../../types.js'
@@ -16,7 +21,6 @@ import {
   join_session,
   leave_session
 } from '../../lib/session.js'
-import { get_proposal_id, verify_endorsement } from '@/core/lib/proposal.js'
 
 export function join_session_api (esigner : EscrowSigner) {
   return (
@@ -71,10 +75,8 @@ export function has_role_api (esigner : EscrowSigner) {
 }
 
 export function has_signature_api (esigner : EscrowSigner) {
-  const pub = esigner.pubkey
-  return (
-    session : DraftSession
-  ) : boolean => {
+  return (session : DraftSession) : boolean => {
+    const pub = esigner.pubkey
     const sig = session.sigs.find(e => e.slice(0, 64) === pub)
     if (sig === undefined) return false
     const prop_id = get_proposal_id(session.proposal)

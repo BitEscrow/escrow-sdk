@@ -155,7 +155,6 @@ export function verify_member_data (
   const rdata  = get_enrollment(cred, proposal)
   const rpaths = rdata.paths.map(e => e.toString())
   const rprogs = programs.map(e => e.toString())
-  console.log('pay:', payment, rdata.payment)
   if (
     typeof payment === 'number' &&
     payment > 0                 &&
