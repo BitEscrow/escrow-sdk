@@ -39,20 +39,20 @@
       "types": "./dist/vm/index.d.ts"
     },
     "./account": {
-      "import": "./dist/core/module/account.js",
-      "types": "./dist/core/module/account.d.ts"
+      "import": "./dist/core/module/account/index.js",
+      "types": "./dist/core/module/account/index.d.ts"
     },
     "./contract": {
-      "import": "./dist/core/module/contract.js",
-      "types": "./dist/core/module/contract.d.ts"
+      "import": "./dist/core/module/contract/index.js",
+      "types": "./dist/core/module/contract/index.d.ts"
     },
     "./deposit": {
-      "import": "./dist/core/module/deposit.js",
-      "types": "./dist/core/module/deposit.d.ts"
+      "import": "./dist/core/module/deposit/index.js",
+      "types": "./dist/core/module/deposit/index.d.ts"
     },
     "./witness": {
-      "import": "./dist/core/module/witness.js",
-      "types": "./dist/core/module/witness.d.ts"
+      "import": "./dist/core/module/witness/index.js",
+      "types": "./dist/core/module/witness/index.d.ts"
     },
     "./lib/*.js": {
       "import": "./dist/core/lib/*.js",
