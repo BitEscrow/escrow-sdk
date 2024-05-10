@@ -6,15 +6,11 @@ import {
   Network,
   ProgramEntry,
   ProposalData,
-  ProposalTemplate,
-  ServerPolicy,
-  VirtualMachineAPI
+  ProposalTemplate
 } from '@/core/types/index.js'
 
 export interface SignerConfig {
-  machine    : VirtualMachineAPI
   network    : Network
-  server_pol : ServerPolicy
   server_pk  : string
   server_url : string
 }

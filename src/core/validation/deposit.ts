@@ -31,10 +31,15 @@ import DepositSchema from '../schema/deposit.js'
 
 /* Local Imports */
 
-import { verify_account_req }   from './account.js'
-import { verify_covenant }      from './covenant.js'
-import { verify_return_psig }   from './return.js'
-import { verify_session_token } from './session.js'
+import {
+  verify_account_req,
+  verify_session_token
+} from './account.js'
+
+import {
+  verify_covenant_data,
+  verify_return_psig
+} from './covenant.js'
 
 export function validate_register_req (
   request : unknown
@@ -60,7 +65,7 @@ export function validate_close_req (
   void DepositSchema.close_req.parse(request)
 }
 
-export function validate_deposit (
+export function validate_deposit_data (
   deposit : Record<string, any>
 ) : asserts deposit is DepositData {
   DepositSchema.data.parse(deposit)
@@ -91,7 +96,7 @@ export function verify_commit_req (
 ) {
   const covenant = request.covenant
   verify_register_req(policy, request, server_sd)
-  verify_covenant(contract, covenant, request, server_sd)
+  verify_covenant_data(contract, covenant, request, server_sd)
 }
 
 export function verify_lock_req (
@@ -104,7 +109,7 @@ export function verify_lock_req (
   assert.ok(deposit.covenant === null)
   const covenant = request.covenant
   verify_lockable(deposit.status)
-  verify_covenant(contract, covenant, deposit, server_sd)
+  verify_covenant_data(contract, covenant, deposit, server_sd)
 }
 
 export function verify_close_req (
@@ -120,7 +125,7 @@ export function verify_close_req (
   verify_return_psig(deposit, psig)
 }
 
-export function verify_deposit (
+export function verify_deposit_data (
   deposit : DepositData,
   signer  : SignerAPI
 ) {
@@ -183,5 +188,29 @@ export function verify_utxo_lock (
   const limit = current - policy.deposit.GRACE_PERIOD
   if (status.confirmed && status.block_time + locktime <= limit) {
     throw new Error('Deposit lock is expiring within the grace period.')
+  }
+}
+
+export default {
+  validate : {
+    request : {
+      register : validate_register_req,
+      commit   : validate_commit_req,
+      lock     : validate_lock_req,
+      close    : validate_close_req
+    },
+    data : validate_deposit_data
+  },
+  verify : {
+    request : {
+      register : verify_register_req,
+      commit   : verify_commit_req,
+      lock     : verify_lock_req,
+      close    : verify_close_req
+    },
+    data       : verify_deposit_data,
+    lock       : null,
+    spend      : null,
+    settlement : null
   }
 }

@@ -15,6 +15,12 @@ import {
 } from '../lib/covenant.js'
 
 import {
+  create_return_template,
+  get_return_session,
+  parse_return_psig
+} from '../lib/return.js'
+
+import {
   ContractData,
   CovenantData,
   CovenantSession,
@@ -23,13 +29,13 @@ import {
   SignerAPI
 } from '../types/index.js'
 
-export function validate_covenant (
+export function validate_covenant_data (
   covenant : unknown
 ) : asserts covenant is CovenantData {
   parse_covenant(covenant)
 }
 
-export function verify_covenant (
+export function verify_covenant_data (
   contract  : ContractData,
   covenant  : CovenantData,
   request   : RegisterTemplate,
@@ -81,4 +87,30 @@ export function verify_covenant_psig (
   psig    : string
 ) {
   return verify_psig(session.musig, psig)
+}
+
+export function verify_return_psig (
+  request     : RegisterTemplate,
+  return_psig : string
+) {
+  //
+  const [ pnonce, psig ] = parse_return_psig(return_psig)
+  // Create a return transaction using the provided params.
+  const txdata  = create_return_template(request)
+  //
+  const session = get_return_session(pnonce.hex, request, txdata)
+  //
+  verify_covenant_psig(session, psig.hex)
+}
+
+export default {
+  validate : {
+    data : validate_covenant_data
+  },
+  verify : {
+    data  : verify_covenant_data,
+    psigs : verify_covenant_psigs,
+    psig  : verify_covenant_psig,
+    rsig  : verify_return_psig
+  }
 }

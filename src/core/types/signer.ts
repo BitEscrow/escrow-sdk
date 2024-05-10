@@ -10,6 +10,8 @@ export type MusignDevice = (
   opt : SignOptions
 ) => Buff
 
+// TODO: Simplify this as much as possible.
+
 export interface SignerAPI {
   id        : string
   pubkey    : string

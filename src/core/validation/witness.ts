@@ -14,21 +14,29 @@ import {
 import {
   Literal,
   ProgramData,
+  ProgramEntry,
   VMData,
   VirtualMachineAPI,
   WitnessData,
   WitnessReceipt
 } from '../types/index.js'
 
-import WitSchema from '../schema/witness.js'
+import PropSchema from '../schema/proposal.js'
+import WitSchema  from '../schema/witness.js'
 
-export function validate_witness (
+export function validate_program_entry (
+  program : unknown
+) : asserts program is ProgramEntry {
+  PropSchema.program.parse(program)
+}
+
+export function validate_witness_data (
   witness : unknown
 ) : asserts witness is WitnessData {
   WitSchema.data.parse(witness)
 }
 
-export function verify_program (
+export function verify_program_entry (
   machine : VirtualMachineAPI,
   method  : string,
   params  : Literal[]
@@ -37,12 +45,12 @@ export function verify_program (
     throw new Error('invalid program method: ' + method)
   }
 
-  const err = machine.check(method, params)
+  const err = machine.verify(method, params)
 
   if (err !== null) throw new Error(err)
 }
 
-export function verify_witness (
+export function verify_witness_data (
   vmdata  : VMData,
   witness : WitnessData
 ) {
@@ -87,7 +95,7 @@ export function verify_witness_sigs (
   })
 }
 
-export function verify_receipt (
+export function verify_witness_receipt (
   receipt : WitnessReceipt,
   vmdata  : VMData,
   witness : WitnessData
@@ -111,4 +119,17 @@ export function verify_receipt (
   const is_valid = verify_sig(server_sig, receipt_id, server_pk)
 
   assert.ok(is_valid, 'receipt signature is invalid')
+}
+
+export default {
+  validate : {
+    program : validate_program_entry,
+    witness : validate_witness_data
+  },
+  verify : {
+    program    : verify_program_entry,
+    witness    : verify_witness_data,
+    receipt    : verify_witness_receipt,
+    signatures : verify_witness_sigs
+  }
 }

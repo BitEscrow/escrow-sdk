@@ -21,8 +21,8 @@ import {
 
 import {
   verify_account_req,
-  verify_account,
-  verify_deposit,
+  verify_account_data,
+  verify_deposit_data,
   verify_register_req
 } from '@/core/validation/index.js'
 
@@ -72,7 +72,7 @@ export default async function (
       // Server: Create account data.
       const account = create_account(acct_req, server_sd)
       // Client: Verify account data.
-      verify_account(account, funder_sd)
+      verify_account_data(account, funder_sd)
 
       if (VERBOSE) {
         console.log(banner('account'))
@@ -94,7 +94,7 @@ export default async function (
       // Server: Create the deposit data.
       const deposit  = create_deposit(reg_req, server_sd)
       // Client: Verify the deposit data.
-      verify_deposit(deposit, funder_sd)
+      verify_deposit_data(deposit, funder_sd)
 
       await client.mine_blocks(1)
 

@@ -8,11 +8,12 @@ export type VMData     = VMBase & VMRunState
 export interface VirtualMachineAPI {
   actions : string[]
   methods : string[]
-  tag     : string
-  check   : (method : string, params   : Literal[]) => string | null
+  states  : string[]
+  label   : string
   eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
   init    : (config : VMConfig) => VMData
   run     : (data   : VMData, stop_at ?: number) => VMData
+  verify  : (method : string, params   : Literal[]) => string | null
 }
 
 interface VMOpen {

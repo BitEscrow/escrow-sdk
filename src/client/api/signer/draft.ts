@@ -1,5 +1,4 @@
-import { verify_proposal } from '@/core/validation/proposal.js'
-import { EscrowSigner }    from '../../class/signer.js'
+import { EscrowSigner } from '../../class/signer.js'
 
 import {
   get_proposal_id,
@@ -19,7 +18,8 @@ import {
 import {
   endorse_session,
   join_session,
-  leave_session
+  leave_session,
+  verify_session
 } from '../../lib/session.js'
 
 export function join_session_api (esigner : EscrowSigner) {
@@ -50,8 +50,7 @@ export function leave_session_api (esigner : EscrowSigner) {
 
 export function endorse_session_api (esigner : EscrowSigner) {
   return (session : DraftSession) : DraftSession => {
-    const { machine, server_pol } = esigner
-    verify_proposal(machine, server_pol, session.proposal)
+    verify_session(session)
     // also need to verify mship and role.
     return endorse_session(session, esigner._signer)
   }

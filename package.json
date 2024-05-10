@@ -12,6 +12,7 @@
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
+  "unpkg": "./dist/script.js",
   "files": [
     "README.md",
     "LICENSE",

@@ -14,7 +14,6 @@ import {
 } from '../util/index.js'
 
 import {
-  ProgramEntry,
   ProposalData,
   ProposalTemplate,
   ServerPolicy,
@@ -25,32 +24,26 @@ import PropSchema from '../schema/proposal.js'
 
 /* Local Imports */
 
-import { verify_program } from './witness.js'
+import { verify_program_entry } from './witness.js'
 
 import {
   check_expires,
   check_regex
 } from './util.js'
 
-export function validate_program (
-  program : unknown
-) : asserts program is ProgramEntry {
-  PropSchema.program.parse(program)
-}
-
-export function validate_prop_template (
+export function validate_proposal_tmpl (
   proposal : unknown
 ) : asserts proposal is ProposalTemplate {
   void PropSchema.template.parse(proposal)
 }
 
-export function validate_proposal (
+export function validate_proposal_data (
   proposal : unknown
 ) : asserts proposal is ProposalData {
   parse_proposal(proposal)
 }
 
-export function verify_proposal (
+export function verify_proposal_data (
   machine  : VirtualMachineAPI,
   policy   : ServerPolicy,
   proposal : ProposalData
@@ -114,7 +107,7 @@ function check_programs (
     const { actions, params, paths, method } = prog
     check_regex(machine.actions, actions)
     check_regex(path_names, paths)
-    verify_program(machine, method, params)
+    verify_program_entry(machine, method, params)
   }
 }
 
@@ -166,5 +159,15 @@ function check_stamps (
     if (effective > EFFECT_MAX) {
       throw new Error(`The specified effective date is too far into the future: ${effective} > ${EFFECT_MAX}`)
     }
+  }
+}
+
+export default {
+  validate : {
+    template : validate_proposal_tmpl,
+    data     : validate_proposal_data
+  },
+  verify : {
+    data : verify_proposal_data
   }
 }

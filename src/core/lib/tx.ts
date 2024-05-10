@@ -39,7 +39,6 @@ import {
   SettleState,
   SignerAPI,
   SpendState,
-//  OracleTxIn,
   TxOutput,
   TxVout
 } from '../types/index.js'
@@ -107,24 +106,6 @@ export function get_satpoint (
 ) : string {
   return `${utxo.txid}:${String(utxo.vout)}`
 }
-
-// export function create_txspend (
-//   txin : OracleTxIn
-// ) : TxOutput {
-//   const { txid, vout, prevout } = txin
-//   assert.exists(prevout)
-//   const { value, scriptpubkey } = prevout
-//   return { txid, vout, value, scriptkey: scriptpubkey }
-// }
-
-// export function prevout_to_txspend (
-//   txinput : TxPrevout
-// ) : TxOutput {
-//   const { txid, vout, prevout } = txinput
-//   const { value, scriptPubKey } = prevout
-//   const script = parse_script(scriptPubKey).hex
-//   return { txid, vout, value: Number(value), scriptkey: script }
-// }
 
 export function create_txinput (
   txout : TxOutput

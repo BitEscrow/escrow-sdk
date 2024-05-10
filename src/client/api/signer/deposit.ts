@@ -1,15 +1,15 @@
-import { verify_account }  from '@/core/validation/account.js'
-import { verify_contract } from '@/core/validation/contract.js'
-import { verify_deposit }  from '@/core/validation/deposit.js'
-import { assert }          from '@/core/util/index.js'
-import { EscrowSigner }    from '../../class/signer.js'
+import { verify_account_data }  from '@/core/validation/account.js'
+import { verify_contract_data } from '@/core/validation/contract.js'
+import { verify_deposit_data }  from '@/core/validation/deposit.js'
+import { assert }               from '@/core/util/index.js'
+import { EscrowSigner }         from '../../class/signer.js'
 
 import {
   create_close_req,
   create_commit_req,
   create_lock_req,
   create_register_req
-} from '@/core/module/deposit/api.js'
+} from '@/core/module/deposit/index.js'
 
 import {
   CloseRequest,
@@ -38,9 +38,11 @@ export function register_funds_api (esigner : EscrowSigner) {
     feerate : number,
     utxo    : TxOutput
   ) : RegisterRequest => {
-    esigner.check_issuer(account.server_pk)
-    verify_account(account, esigner._signer)
-    return create_register_req(feerate, account, esigner._signer, utxo)
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
+    verify_account_data(account, _signer)
+    return create_register_req(feerate, account, _signer, utxo)
   }
 }
 
@@ -51,9 +53,11 @@ export function commit_funds_api (esigner : EscrowSigner) {
     feerate  : number,
     utxo     : TxOutput
   ) : CommitRequest => {
-    esigner.check_issuer(account.server_pk)
-    verify_account(account, esigner._signer)
-    return create_commit_req(feerate, contract, account, esigner._signer, utxo)
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
+    verify_account_data(account, _signer)
+    return create_commit_req(feerate, contract, account, _signer, utxo)
   }
 }
 
@@ -62,11 +66,13 @@ export function lock_funds_api (esigner : EscrowSigner) {
     contract : ContractData,
     deposit  : DepositData
   ) : LockRequest => {
-    esigner.check_issuer(contract.server_pk)
-    esigner.check_issuer(deposit.server_pk)
-    verify_contract(contract)
-    verify_deposit(deposit, esigner._signer)
-    return create_lock_req(contract, deposit, esigner._signer)
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    assert.ok(server_pk === contract.server_pk, 'invalid server pubkey')
+    assert.ok(server_pk === deposit.server_pk, 'invalid server pubkey')
+    verify_contract_data(contract)
+    verify_deposit_data(deposit, _signer)
+    return create_lock_req(contract, deposit, _signer)
   }
 }
 
@@ -85,9 +91,11 @@ export function close_deposit_api (esigner : EscrowSigner) {
     deposit : DepositData,
     feerate : number
   ) : CloseRequest => {
-    esigner.check_issuer(deposit.server_pk)
-    verify_deposit(deposit, esigner._signer)
-    return create_close_req(deposit, feerate, esigner._signer)
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    assert.ok(server_pk === deposit.server_pk, 'invalid server pubkey')
+    verify_deposit_data(deposit, _signer)
+    return create_close_req(deposit, feerate, _signer)
   }
 }
 

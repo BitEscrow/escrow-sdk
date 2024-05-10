@@ -9,12 +9,12 @@ import {
 
 /* Module Imports */
 
+import { assert } from '../util/index.js'
+
 import {
   get_proposal_id,
   verify_endorsement
 } from '../lib/proposal.js'
-
-import { assert } from '../util/index.js'
 
 import {
   create_txinput,
@@ -42,9 +42,18 @@ import ContractSchema from '../schema/contract.js'
 
 /* Local Imports */
 
-import { validate_proposal, verify_proposal } from './proposal.js'
+import {
+  validate_proposal_data,
+  verify_proposal_data
+} from './proposal.js'
 
-export function validate_contract (
+export function validate_publish_req (
+  contract : unknown
+) : asserts contract is ContractData {
+  void ContractSchema.publish_req.parse(contract)
+}
+
+export function validate_contract_data (
   contract : unknown
 ) : asserts contract is ContractData {
   void ContractSchema.data.parse(contract)
@@ -56,8 +65,8 @@ export function verify_contract_req (
   request : ContractRequest
 ) {
   const { proposal, signatures } = request
-  validate_proposal(proposal)
-  verify_proposal(machine, policy, proposal)
+  validate_proposal_data(proposal)
+  verify_proposal_data(machine, policy, proposal)
   verify_endorsements(proposal, signatures)
 }
 
@@ -74,7 +83,7 @@ export function verify_endorsements (
   }
 }
 
-export function verify_contract (contract : ContractData) {
+export function verify_contract_data (contract : ContractData) {
   const { created_at, outputs, server_pk, server_sig, terms } = contract
   const pid = get_proposal_id(terms)
   const cid = get_contract_id(outputs, pid, created_at)
@@ -176,10 +185,27 @@ export function verify_contract_settlement (
   proposal   : ProposalData,
   vmstate    : VMData
 ) {
-  verify_contract(contract)
+  verify_contract_data(contract)
   verify_contract_publishing(contract, proposal)
   verify_contract_funding(contract, funds)
   verify_contract_activation(contract, vmstate)
   verify_contract_close(contract, vmstate)
   verify_contract_spending(contract, funds, vmstate)
+}
+
+export default {
+  validate : {
+    request : validate_publish_req,
+    data    : validate_contract_data
+  },
+  verify : {
+    request    : verify_contract_req,
+    data       : verify_contract_data,
+    publish    : verify_contract_publishing,
+    funding    : verify_contract_funding,
+    activation : verify_contract_activation,
+    closing    : verify_contract_close,
+    spending   : verify_contract_spending,
+    settlement : verify_contract_settlement
+  }
 }

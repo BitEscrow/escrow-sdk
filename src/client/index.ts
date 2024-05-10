@@ -1,12 +1,9 @@
 export * from './class/client.js'
 export * from './class/signer.js'
-export * from './config.js'
 export * from './types.js'
 
-export * from './lib/enrollment.js'
-export * from './lib/membership.js'
-export * from './lib/session.js'
+export * as ClientConfig from './config.js'
+export * as ClientLib    from './lib/index.js'
+export * as ClientSchema from './schema.js'
 
 export { DraftUtil } from './lib/session.js'
-
-export * as ClientSchema from './schema.js'

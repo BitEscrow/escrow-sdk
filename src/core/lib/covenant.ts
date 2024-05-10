@@ -103,8 +103,8 @@ export function get_covenant_id (
   outputs : SpendTemplate[]
 ) {
   const dhash = get_deposit_hash(deposit)
-  const tdata = outputs.map(e => Buff.hex(e[1]))
-  const pimg  = Buff.join([ cid, dhash, ...tdata ])
+  const odata = outputs.map(e => Buff.hex(e[1]))
+  const pimg  = Buff.join([ cid, dhash, ...odata ])
   return sha512(pimg).hex
 }
 

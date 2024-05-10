@@ -19,7 +19,6 @@ import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import draft_api    from '../api/signer/draft.js'
-import vmachine_api from '../api/signer/vm.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
@@ -94,10 +93,6 @@ export class EscrowSigner {
     this._wallet = new Wallet(xpub)
   }
 
-  get machine () {
-    return this._config.machine
-  }
-
   get network () {
     return this._config.network
   }
@@ -108,10 +103,6 @@ export class EscrowSigner {
 
   get server_url () {
     return this._config.server_url
-  }
-
-  get server_pol () {
-    return this._config.server_pol
   }
 
   get server_pk () {
@@ -126,7 +117,6 @@ export class EscrowSigner {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
-  vm       = vmachine_api(this)
   wallet   = wallet_api(this)
   witness  = witness_api(this)
 
@@ -136,11 +126,5 @@ export class EscrowSigner {
     const xbytes  = Buff.b58chk(this._wallet.xpub)
     const payload = Buff.join([ encdata, xbytes ])
     return payload.to_bech32('cred')
-  }
-
-  check_issuer (pubkey : string) {
-    if (pubkey !== this.server_pk) {
-      throw new Error('issuer\'s pubkey is not recognized')
-    }
   }
 }

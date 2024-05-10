@@ -2,6 +2,8 @@ import { Buff }           from '@cmdcode/buff'
 import { assert }         from '@/core/util/index.js'
 import { has_membership } from './membership.js'
 
+import { validate_proposal_data } from '@/core/validation/proposal.js'
+
 import {
   create_proposal,
   endorse_proposal,
@@ -133,6 +135,7 @@ export function verify_session (
   session : DraftSession
 ) {
   const { members, proposal, roles } = session
+  validate_proposal_data(proposal)
   members.forEach(mbr => {
     const pol = roles.find(e => e.id === mbr.pid)
     assert.exists(pol, 'policy does not exist for member: ' + mbr.pub)

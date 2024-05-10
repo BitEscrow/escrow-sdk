@@ -12,6 +12,7 @@ import { get_vm_config }    from '@scrow/sdk/vm'
 import CVM                  from '@scrow/sdk/cvm'
 
 import {
+  CoreAssert,
   DepositData,
   PaymentEntry,
   TxOutput
@@ -38,15 +39,14 @@ import {
 } from '@scrow/sdk/deposit'
 
 import {
+  verify_account_data,
   verify_account_req,
-  verify_account,
-  verify_contract_req,
-  verify_deposit,
-  verify_witness,
+  verify_proposal_data,
   verify_commit_req,
-  verify_proposal,
-  verify_receipt,
-  verify_contract_settlement
+  verify_deposit_data,
+  verify_witness_receipt,
+  verify_contract_settlement,
+  verify_witness_data
 } from '@/core/validation/index.js'
 
 import {
@@ -104,7 +104,7 @@ export default async function (
 
       const proposal   = await get_proposal(members)
       // Verify the proposal
-      verify_proposal(CVM, server_pol, proposal)
+      verify_proposal_data(CVM, server_pol, proposal)
       // Have each member endorse the proposal.
       const signatures = members.map(e => endorse_proposal(proposal, e.signer))
 
@@ -120,7 +120,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
-      verify_contract_req(CVM, server_pol, pub_req)
+      CoreAssert.contract.verify.request(CVM, server_pol, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, server_sd)
       
@@ -147,7 +147,7 @@ export default async function (
         // Server: Create account data.
         const account = create_account(acct_req, server_sd)
         // Client: Verify account data.
-        verify_account(account, funder_sd)
+        verify_account_data(account, funder_sd)
         // Return account and signer as tuple.
 
 
@@ -175,7 +175,7 @@ export default async function (
         // Server: Create the deposit data.
         const deposit = create_deposit(commit_req, server_sd)
         // Client: Verify the deposit data.
-        verify_deposit(deposit, funder_sd)
+        verify_deposit_data(deposit, funder_sd)
         // Deposit funds into contract.
         contract = fund_contract(contract, deposit)
         // Add deposit to array.
@@ -229,7 +229,7 @@ export default async function (
           witness = endorse_witness(members[0].signer, witness)
           witness = endorse_witness(members[1].signer, witness)
 
-      verify_witness(vm_data, witness)
+      verify_witness_data(vm_data, witness)
 
       if (VERBOSE) {
         console.log(banner('witness'))
@@ -247,7 +247,7 @@ export default async function (
       // Create a signed receipt for the latest commit.
       const vm_receipt = create_receipt(vm_data, server_sd, witness)
       // Verify the latest commit matches the receipt.
-      verify_receipt(vm_receipt, vm_data, witness)
+      verify_witness_receipt(vm_receipt, vm_data, witness)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))

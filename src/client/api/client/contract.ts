@@ -1,12 +1,12 @@
 /* Global Imports */
 
 import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_publish_req }     from '@/core/module/contract/api.js'
+import { create_publish_req }     from '@/core/module/contract/index.js'
 
 import {
   validate_commit_req,
   verify_endorsements,
-  verify_proposal
+  verify_proposal_data
 } from '@/core/validation/index.js'
 
 import {
@@ -16,7 +16,9 @@ import {
   FundListResponse,
   ContractRequest,
   FundingDataResponse,
-  CommitRequest
+  CommitRequest,
+  ServerPolicy,
+  VirtualMachineAPI
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -30,15 +32,16 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
+    engine  : VirtualMachineAPI,
+    policy  : ServerPolicy,
     request : ContractRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
-    const { machine, server_pol }  = client
     const { proposal, signatures } = request
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
-    verify_proposal(machine, server_pol, prop)
+    verify_proposal_data(engine, policy, prop)
     // Verify any signatures.
     verify_endorsements(prop, signatures)
     // Create a contract publish request.

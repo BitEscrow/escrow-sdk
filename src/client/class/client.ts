@@ -1,12 +1,5 @@
-import { resolve_json } from '@/core/util/fetch.js'
-
-import {
-  ApiResponse,
-  Network,
-  ServerPolicy,
-  VirtualMachineAPI
-} from '@/core/types/index.js'
-
+import { resolve_json }                      from '@/core/util/fetch.js'
+import { ApiResponse, Network }              from '@/core/types/index.js'
 import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
 import {
@@ -43,10 +36,6 @@ export class EscrowClient {
     return this._fetcher
   }
 
-  get machine () : VirtualMachineAPI {
-    return this._config.machine
-  }
-
   get network ()  : Network {
     return this._config.network
   }
@@ -55,11 +44,7 @@ export class EscrowClient {
     return this._config.oracle_url
   }
 
-  get server_pol () : ServerPolicy {
-    return this._config.server_pol
-  }
-
-  get server_pk () {
+  get server_pk () : string {
     return this._config.server_pk
   }
 
@@ -74,12 +59,6 @@ export class EscrowClient {
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)
-
-  check_issuer (pubkey : string) {
-    if (pubkey !== this.server_pk) {
-      throw new Error('issuer\'s pubkey is not recognized')
-    }
-  }
 
   toJSON () {
     return this._config

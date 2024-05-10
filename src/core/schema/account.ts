@@ -1,8 +1,9 @@
 import { z } from 'zod'
 import base  from './base.js'
-import cov   from './covenant.js'
 
-const { hash, network, nonce, num, stamp, str } = base
+const { hash, hex, network, nonce, num, stamp, str } = base
+
+const token = hex.refine((e) => e.length === 264)
 
 const request = z.object({
   deposit_pk  : hash,
@@ -22,7 +23,7 @@ const data = z.object({
   return_addr  : str,
   server_pk    : hash,
   server_sig   : nonce,
-  server_tkn   : cov.token
+  server_tkn   : token
 })
 
-export default { data, request }
+export default { data, request, token }
