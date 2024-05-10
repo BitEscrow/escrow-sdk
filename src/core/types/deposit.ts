@@ -1,18 +1,18 @@
-import { Network }            from './base.js'
-import { CovenantData }       from './covenant.js'
+import { Network }      from './base.js'
+import { CovenantData } from './covenant.js'
 
 import {
-  ConfirmState,
-  SettleState,
-  SpendState,
+  TxConfirmState,
+  TxSettleState,
+  TxSpendState,
   TxOutput
 } from './tx.js'
 
 export type LockState     = DepositIsLocked | DepositIsUnlocked
-export type DepositData   = DepositInfo & ConfirmState & LockState & SettleState & SpendState
+export type DepositData   = DepositInfo & TxConfirmState & LockState & TxSettleState & TxSpendState
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
-export type FundingData = ConfirmState & SettleState & SpendState & {
+export type FundingData = TxConfirmState & TxSettleState & TxSpendState & {
   covenant   : CovenantData | null
   status     : DepositStatus
   updated_at : number
@@ -44,7 +44,7 @@ export interface CloseRequest {
 
 export interface DepositConfig {
   created_at ?: number
-  utxo_state ?: ConfirmState
+  utxo_state ?: TxConfirmState
 }
 
 export interface DepositInfo {

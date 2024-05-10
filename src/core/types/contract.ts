@@ -4,8 +4,8 @@ import {
 } from './proposal.js'
 
 import {
-  SettleState,
-  SpendState
+  TxSettleState,
+  TxSpendState
 } from './tx.js'
 
 export type ContractStatus =
@@ -29,8 +29,8 @@ export type ContractData =
   ContractPublishState &
   ContractActiveState  &
   ContractCloseState   &
-  SpendState           &
-  SettleState
+  TxSpendState         &
+  TxSettleState
 
 export type SpendTemplate = [
   label : string,

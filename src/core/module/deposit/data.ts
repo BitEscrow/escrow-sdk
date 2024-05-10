@@ -10,7 +10,7 @@ import {
   TxIsConfirmed,
   CovenantData,
   DepositIsLocked,
-  ConfirmState
+  TxConfirmState
 } from '../../types/index.js'
 
 import {
@@ -81,7 +81,7 @@ export function create_deposit (
 
 export function confirm_deposit (
   deposit : DepositData,
-  txstate : ConfirmState
+  txstate : TxConfirmState
 ) : DepositData & TxIsConfirmed {
   assert.ok(txstate.confirmed, 'transaction is not confirmed')
   const status = (!deposit.locked)

@@ -34,11 +34,11 @@ import {
 import { assert } from '../util/index.js'
 
 import {
-  ConfirmState,
+  TxConfirmState,
   Network,
-  SettleState,
+  TxSettleState,
   SignerAPI,
-  SpendState,
+  TxSpendState,
   TxOutput,
   TxVout
 } from '../types/index.js'
@@ -46,7 +46,7 @@ import {
 /**
  * Initialization object for tx receive state.
  */
-export function GET_INIT_RECV_STATE () : ConfirmState {
+export function GET_INIT_RECV_STATE () : TxConfirmState {
   return {
     confirmed    : false as const,
     block_hash   : null,
@@ -59,7 +59,7 @@ export function GET_INIT_RECV_STATE () : ConfirmState {
 /**
  * Initialization object for tx spend state.
  */
-export function GET_INIT_SPEND_STATE () : SpendState & SettleState {
+export function GET_INIT_SPEND_STATE () : TxSpendState & TxSettleState {
   return {
     settled     : false as const,
     settled_at  : null,
