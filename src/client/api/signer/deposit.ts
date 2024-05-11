@@ -1,4 +1,3 @@
-import { verify_account_data }  from '@/core/validation/account.js'
 import { verify_contract_data } from '@/core/validation/contract.js'
 import { verify_deposit_data }  from '@/core/validation/deposit.js'
 import { assert }               from '@/core/util/index.js'
@@ -6,20 +5,14 @@ import { EscrowSigner }         from '../../class/signer.js'
 
 import {
   create_close_req,
-  create_commit_req,
-  create_lock_req,
-  create_register_req
+  create_lock_req
 } from '@/core/module/deposit/index.js'
 
 import {
   CloseRequest,
-  CommitRequest,
   ContractData,
-  AccountData,
   DepositData,
-  LockRequest,
-  TxOutput,
-  RegisterRequest
+  LockRequest
 } from '@/core/types/index.js'
 
 export function request_deposits_api (esigner : EscrowSigner) {
@@ -29,35 +22,6 @@ export function request_deposits_api (esigner : EscrowSigner) {
     const url  = `${host}/api/deposit/list?pk=${pub}`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
-  }
-}
-
-export function register_funds_api (esigner : EscrowSigner) {
-  return (
-    account : AccountData,
-    feerate : number,
-    utxo    : TxOutput
-  ) : RegisterRequest => {
-    const { server_pk, _signer } = esigner
-    // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
-    verify_account_data(account, _signer)
-    return create_register_req(feerate, account, _signer, utxo)
-  }
-}
-
-export function commit_funds_api (esigner : EscrowSigner) {
-  return (
-    account  : AccountData,
-    contract : ContractData,
-    feerate  : number,
-    utxo     : TxOutput
-  ) : CommitRequest => {
-    const { server_pk, _signer } = esigner
-    // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
-    verify_account_data(account, _signer)
-    return create_commit_req(feerate, contract, account, _signer, utxo)
   }
 }
 
@@ -101,11 +65,9 @@ export function close_deposit_api (esigner : EscrowSigner) {
 
 export default function (esigner : EscrowSigner) {
   return {
-    cancel   : cancel_deposit_api(esigner),
-    close    : close_deposit_api(esigner),
-    commit   : commit_funds_api(esigner),
-    list     : request_deposits_api(esigner),
-    lock     : lock_funds_api(esigner),
-    register : register_funds_api(esigner)
+    cancel : cancel_deposit_api(esigner),
+    close  : close_deposit_api(esigner),
+    list   : request_deposits_api(esigner),
+    lock   : lock_funds_api(esigner)
   }
 }

@@ -81,9 +81,9 @@ if (DEMO_MODE) {
 // Define a feerate for the return transaction.
 const feerate = config.feerate
 // Request the funders device to sign a covenant.
-const req     = funder.deposit.commit(new_account, new_contract, feerate, txdata.txout)
+const req     = funder.account.commit(new_account, new_contract, feerate, txdata.txout)
 // Deliver our registration request to the server.
-const res     = await client.contract.commit(req)
+const res     = await client.account.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 

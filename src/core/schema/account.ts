@@ -1,16 +1,35 @@
 import { z } from 'zod'
 import base  from './base.js'
+import tx    from './tx.js'
 
 const { hash, hex, network, nonce, num, stamp, str } = base
 
 const token = hex.refine((e) => e.length === 264)
 
-const request = z.object({
+const covenant = z.object({
+  cid    : hash,
+  cvid   : nonce,
+  pnonce : nonce,
+  psigs  : z.tuple([ str, hex ]).array()
+})
+
+const account_req = z.object({
   deposit_pk  : hash,
   locktime    : num,
   network,
   return_addr : str
 })
+
+const register_req = account_req.extend({
+  covenant    : covenant.optional(),
+  feerate     : num,
+  network,
+  return_psig : hex,
+  server_tkn  : token,
+  utxo        : tx.txout
+})
+
+const commit_req = register_req.extend({ covenant })
 
 const data = z.object({
   acct_hash    : hash,
@@ -26,4 +45,4 @@ const data = z.object({
   server_tkn   : token
 })
 
-export default { data, request, token }
+export default { data, account_req, commit_req, covenant, register_req, token }

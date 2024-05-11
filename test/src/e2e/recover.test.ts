@@ -6,17 +6,14 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 /* Package Imports */
 
-import { get_txid } from '@scrow/sdk/tx'
+import { create_deposit } from '@scrow/sdk/deposit'
+import { get_txid }       from '@scrow/sdk/tx'
 
 import {
   create_account,
   create_account_req,
-} from '@scrow/sdk/account'
-
-import {
-  create_deposit,
   create_register_req
-} from '@scrow/sdk/deposit'
+} from '@scrow/sdk/account'
 
 import {
   get_recovery_config,

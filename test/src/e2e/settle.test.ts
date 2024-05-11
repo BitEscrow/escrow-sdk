@@ -6,6 +6,7 @@ import { P2TR }       from '@scrow/tapscript/address'
 
 /* Package Imports */
 
+import { create_deposit }   from '@scrow/sdk/deposit'
 import { endorse_proposal } from '@scrow/sdk/proposal'
 import { assert }           from '@scrow/sdk/util'
 import { get_vm_config }    from '@scrow/sdk/vm'
@@ -21,6 +22,7 @@ import {
 import {
   create_account,
   create_account_req,
+  create_commit_req
 } from '@scrow/sdk/account'
 
 import {
@@ -32,11 +34,6 @@ import {
   close_contract,
   get_settlement_tx
 } from '@scrow/sdk/contract'
-
-import {
-  create_commit_req,
-  create_deposit
-} from '@scrow/sdk/deposit'
 
 import {
   verify_account_data,

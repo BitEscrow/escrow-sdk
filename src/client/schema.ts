@@ -1,15 +1,11 @@
 import { z } from 'zod'
 import base  from '@/core/schema/base.js'
 import prop  from '@/core/schema/proposal.js'
-import serv  from '@/core/schema/server.js'
-import vm    from '@/core/schema/vm.js'
 
 const { bool, hash, hex, label, network, num, str } = base
 
 const signer_config = z.object({
-  machine    : vm.api,
   network,
-  server_pol : serv.policy,
   server_pk  : hash,
   server_url : str
 })

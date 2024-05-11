@@ -11,12 +11,12 @@ import { get_return_tx } from '@scrow/sdk/return'
 import {
   create_account,
   create_account_req,
+  create_register_req
 } from '@scrow/sdk/account'
 
 import {
   spend_deposit,
-  create_deposit,
-  create_register_req
+  create_deposit
 } from '@scrow/sdk/deposit'
 
 import {

@@ -3,32 +3,14 @@ import acct  from './account.js'
 import base  from './base.js'
 import tx    from './tx.js'
 
-const { bool, hash, hex, network, nonce, num, stamp, str } = base
+const { bool, hash, hex, network, num, stamp, str } = base
 
 const locktime = z.union([ str, num ]).transform(e => Number(e))
 const status   = z.enum([ 'pending', 'open', 'locked', 'spent', 'settled', 'expired', 'error' ])
 
-const covenant = z.object({
-  cid    : hash,
-  cvid   : nonce,
-  pnonce : nonce,
-  psigs  : z.tuple([ str, hex ]).array()
-})
-
-const register_req = acct.request.extend({
-  covenant    : covenant.optional(),
-  feerate     : num,
-  network,
-  return_psig : hex,
-  server_tkn  : acct.token,
-  utxo        : tx.txout
-})
-
-const commit_req = register_req.extend({ covenant })
-
 const lock_req = z.object({
-  dpid : hash,
-  covenant
+  dpid     : hash,
+  covenant : acct.covenant
 })
 
 const close_req = z.object({
@@ -40,7 +22,7 @@ const close_req = z.object({
 const lock_info = z.object({
   locked    : bool,
   locked_at : stamp.nullable(),
-  covenant  : covenant.nullable()
+  covenant  : acct.covenant.nullable()
 })
 
 const dp_unlocked = z.object({
@@ -52,13 +34,13 @@ const dp_unlocked = z.object({
 const dp_locked = z.object({
   locked    : z.literal(true),
   locked_at : stamp,
-  covenant
+  covenant  : acct.covenant
 })
 
 const lock_state = z.discriminatedUnion('locked', [ dp_locked, dp_unlocked ])
 
 const fund = z.object({
-  covenant   : covenant.nullable(),
+  covenant   : acct.covenant.nullable(),
   status,
   updated_at : stamp,
   utxo       : tx.txout
@@ -97,14 +79,11 @@ const shape = base_data
   .merge(tx.settle_info)
 
 export default {
-  commit_req,
-  covenant,
   close_req,
   data,
   fund,
   locktime,
   lock_req,
-  register_req,
   shape,
   status
 }

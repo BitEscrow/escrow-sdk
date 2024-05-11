@@ -23,17 +23,34 @@ import {
 import {
   AccountData,
   AccountRequest,
+  CommitRequest,
+  ContractData,
   RegisterRequest,
   ServerPolicy,
   SignerAPI
 } from '../types/index.js'
+
+import { verify_feerate, verify_utxo }              from './deposit.js'
+import { verify_covenant_data, verify_return_psig } from './covenant.js'
 
 import AcctSchema from '../schema/account.js'
 
 export function validate_account_req (
   request : unknown
 ) : asserts request is AccountRequest {
-  void AcctSchema.request.parse(request)
+  void AcctSchema.account_req.parse(request)
+}
+
+export function validate_register_req (
+  request : unknown
+) : asserts request is RegisterRequest {
+  void AcctSchema.register_req.parse(request)
+}
+
+export function validate_commit_req (
+  request : unknown
+) : asserts request is CommitRequest {
+  void AcctSchema.commit_req.parse(request)
 }
 
 export function validate_account_data (
@@ -69,6 +86,34 @@ export function verify_account_req (
   // Assert that the locktime is valid.
   assert.ok(locktime >= LOCKTIME_MIN, `locktime is below threshold: ${locktime} < ${LOCKTIME_MIN}`)
   assert.ok(locktime <= LOCKTIME_MAX, `locktime is above threshold: ${locktime} > ${LOCKTIME_MAX}`)
+}
+
+export function verify_register_req (
+  policy  : ServerPolicy,
+  request : RegisterRequest,
+  signer  : SignerAPI
+) {
+  const psig = request.return_psig
+  verify_feerate(request.feerate, policy)
+  // Verify the account details.
+  verify_account_req(policy, request)
+  // Verify the session token.
+  verify_session_token(request, signer)
+  // Verify the return psig.
+  verify_return_psig(request, psig)
+  // Verify the utxo.
+  verify_utxo(request)
+}
+
+export function verify_commit_req (
+  contract  : ContractData,
+  policy    : ServerPolicy,
+  request   : CommitRequest,
+  server_sd : SignerAPI
+) {
+  const covenant = request.covenant
+  verify_register_req(policy, request, server_sd)
+  verify_covenant_data(contract, covenant, request, server_sd)
 }
 
 export function verify_account_data (
@@ -108,13 +153,17 @@ export function verify_session_token (
 
 export default {
   validate : {
-    request : validate_account_req,
-    data    : validate_account_data,
-    token   : validate_session_token
+    request  : validate_account_req,
+    register : validate_register_req,
+    commit   : validate_commit_req,
+    data     : validate_account_data,
+    token    : validate_session_token
   },
   verify : {
-    request : verify_account_req,
-    data    : verify_account_data,
-    token   : verify_session_token
+    request  : verify_account_req,
+    register : verify_register_req,
+    commit   : verify_commit_req,
+    data     : verify_account_data,
+    token    : verify_session_token
   }
 }

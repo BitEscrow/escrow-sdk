@@ -32,26 +32,9 @@ import DepositSchema from '../schema/deposit.js'
 /* Local Imports */
 
 import {
-  verify_account_req,
-  verify_session_token
-} from './account.js'
-
-import {
   verify_covenant_data,
   verify_return_psig
 } from './covenant.js'
-
-export function validate_register_req (
-  request : unknown
-) : asserts request is RegisterRequest {
-  void DepositSchema.register_req.parse(request)
-}
-
-export function validate_commit_req (
-  request : unknown
-) : asserts request is CommitRequest {
-  void DepositSchema.commit_req.parse(request)
-}
 
 export function validate_lock_req (
   request : unknown
@@ -69,34 +52,6 @@ export function validate_deposit_data (
   deposit : Record<string, any>
 ) : asserts deposit is DepositData {
   DepositSchema.data.parse(deposit)
-}
-
-export function verify_register_req (
-  policy  : ServerPolicy,
-  request : RegisterRequest,
-  signer  : SignerAPI
-) {
-  const psig = request.return_psig
-  verify_feerate(request.feerate, policy)
-  // Verify the account details.
-  verify_account_req(policy, request)
-  // Verify the session token.
-  verify_session_token(request, signer)
-  // Verify the return psig.
-  verify_return_psig(request, psig)
-  // Verify the utxo.
-  verify_utxo(request)
-}
-
-export function verify_commit_req (
-  contract  : ContractData,
-  policy    : ServerPolicy,
-  request   : CommitRequest,
-  server_sd : SignerAPI
-) {
-  const covenant = request.covenant
-  verify_register_req(policy, request, server_sd)
-  verify_covenant_data(contract, covenant, request, server_sd)
 }
 
 export function verify_lock_req (
@@ -193,21 +148,13 @@ export function verify_utxo_lock (
 
 export default {
   validate : {
-    request : {
-      register : validate_register_req,
-      commit   : validate_commit_req,
-      lock     : validate_lock_req,
-      close    : validate_close_req
-    },
-    data : validate_deposit_data
+    lock_req  : validate_lock_req,
+    close_req : validate_close_req,
+    data      : validate_deposit_data
   },
   verify : {
-    request : {
-      register : verify_register_req,
-      commit   : verify_commit_req,
-      lock     : verify_lock_req,
-      close    : verify_close_req
-    },
+    lock_req   : verify_lock_req,
+    close_req  : verify_close_req,
     data       : verify_deposit_data,
     lock       : null,
     spend      : null,
