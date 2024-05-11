@@ -9,8 +9,8 @@ const status  = z.enum([ 'published', 'funded', 'secured', 'active', 'closed', '
 const output  = z.tuple([ label, hex ])
 
 const publish_req = z.object({
-  proposal   : proposal.data,
-  signatures : hex.array().optional()
+  endorsements : hex.array().optional(),
+  proposal     : proposal.data
 })
 
 const publish_info = z.object({
@@ -80,6 +80,7 @@ const base_data = z.object({
   created_at   : stamp,
   deadline_at  : stamp,
   effective_at : stamp.nullable(),
+  endorsements : hex.array(),
   feerate      : num,
   fees         : proposal.payments,
   fund_count   : num,
@@ -91,7 +92,6 @@ const base_data = z.object({
   prop_id      : hash,
   server_pk    : hash,
   server_sig   : hex,
-  signatures   : hex.array(),
   status,
   subtotal     : num,
   terms        : proposal.data,

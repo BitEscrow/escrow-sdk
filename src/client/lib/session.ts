@@ -146,8 +146,8 @@ export function verify_session (
 export function publish_session (
   session : DraftSession
 ) : ContractRequest {
-  const { proposal, sigs: signatures } = session
-  return { proposal, signatures }
+  const { proposal, sigs: endorsements } = session
+  return { endorsements, proposal }
 }
 
 export function encode_session (session : DraftSession) {

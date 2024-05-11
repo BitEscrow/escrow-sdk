@@ -74,7 +74,7 @@ export function create_contract (
   // Unpack config object.
   const { feerate, fees } = config
   // Unpack request object.
-  const { proposal, signatures = [] } = request
+  const { endorsements = [], proposal } = request
   // Define the funding input txfee.
   const fund_txfee = feerate * SPEND_TXIN_SIZE
   // Define or create the contract outputs.
@@ -99,15 +99,14 @@ export function create_contract (
     fees,
     deadline_at  : get_deadline(proposal, created_at),
     effective_at : proposal.effective ?? null,
+    endorsements,
     feerate,
     fund_txfee,
     moderator    : request.proposal.moderator ?? null,
     outputs,
     prop_id,
-    pubkeys      : signatures.map(e => e.slice(0, 64)),
     server_pk    : signer.pubkey,
     server_sig   : signer.sign(cid),
-    signatures,
     subtotal,
     terms        : proposal,
     tx_fees,

@@ -76,8 +76,8 @@ interface ContractIsOpen {
 }
 
 export interface ContractRequest {
-  proposal    : ProposalData
-  signatures ?: string[]
+  endorsements ?: string[]
+  proposal      : ProposalData
 }
 
 export interface ContractCreateConfig {
@@ -91,6 +91,7 @@ export interface ContractBase {
   created_at   : number
   deadline_at  : number
   effective_at : number | null
+  endorsements : string[]
   fees         : PaymentEntry[]
   feerate      : number
   fund_count   : number
@@ -102,7 +103,6 @@ export interface ContractBase {
   prop_id      : string
   server_pk    : string
   server_sig   : string
-  signatures   : string[]
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData

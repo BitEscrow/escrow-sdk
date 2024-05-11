@@ -64,10 +64,10 @@ export function verify_contract_req (
   policy  : ServerPolicy,
   request : ContractRequest
 ) {
-  const { proposal, signatures } = request
+  const { endorsements, proposal } = request
   validate_proposal_data(proposal)
   verify_proposal_data(machine, policy, proposal)
-  verify_endorsements(proposal, signatures)
+  verify_endorsements(proposal, endorsements)
 }
 
 export function verify_endorsements (

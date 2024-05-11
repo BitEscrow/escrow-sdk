@@ -37,15 +37,15 @@ function create_contract_api (
     request : ContractRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
-    const { proposal, signatures } = request
+    const { endorsements, proposal } = request
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
     verify_proposal_data(engine, policy, prop)
     // Verify any signatures.
-    verify_endorsements(prop, signatures)
+    verify_endorsements(prop, endorsements)
     // Create a contract publish request.
-    const req  = create_publish_req(proposal, signatures)
+    const req  = create_publish_req(proposal, endorsements)
     // Formulate the request url.
     const host = client.server_url
     const url  = `${host}/api/contract/create`
