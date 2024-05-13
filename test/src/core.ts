@@ -1,5 +1,7 @@
 import { Buff }           from '@cmdcode/buff'
 import { Signer, Wallet } from '@cmdcode/signer'
+import { get_utxo_state } from '@/core/module/deposit/index.js'
+import { TxOutput }       from '@/core/types/index.js'
 import { CoreSigner }     from './types.js'
 
 import {
@@ -93,4 +95,16 @@ export async function get_utxo (
 
   const { value, scriptPubKey } = tx.vout[vout]
   return { txid, vout, value, scriptkey : scriptPubKey.hex }
+}
+
+export async function get_spend_state (
+  client   : CoreClient,
+  locktime : number,
+  utxo     : TxOutput
+) {
+  const tx_input = await client.get_txinput(utxo.txid, utxo.vout)
+  if (tx_input === null)          throw new Error('utxo not found')
+  if (!tx_input.status.confirmed) throw new Error('utxo not confirmed')
+  const data = { txout : utxo, status : tx_input.status, state : { spent : false as const }}
+  return get_utxo_state(locktime, data)
 }

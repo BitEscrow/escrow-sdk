@@ -5,13 +5,13 @@ import { WitnessData }                 from './witness.js'
 export type VMRunState = VMOpen | VMClosed
 export type VMData     = VMBase & VMRunState
 
-export interface VirtualMachineAPI {
+export interface ScriptEngineAPI {
   actions : string[]
   methods : string[]
   states  : string[]
   label   : string
   eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
-  init    : (config : VMConfig) => VMData
+  init    : (config : EngineConfig) => VMData
   run     : (data   : VMData, stop_at ?: number) => VMData
   verify  : (method : string, params   : Literal[]) => string | null
 }
@@ -42,7 +42,7 @@ export interface ProgramData {
   paths   : string
 }
 
-export interface VMConfig {
+export interface EngineConfig {
   active_at  : number
   engine     : string
   expires_at : number

@@ -9,9 +9,11 @@ import { TxOutput }    from '@scrow/tapscript'
 /* Module Imports */
 
 import {
-  get_object_id,
+
+  get_record_id,
   now,
-  parse_proposal
+  parse_proposal,
+  sort_record
 } from '../util/index.js'
 
 import {
@@ -143,7 +145,8 @@ export function get_proposal_id (
   proposal : ProposalData
 ) {
   // Return object id of proposal.
-  return get_object_id(proposal).hex
+  const sorted = sort_record(proposal)
+  return get_record_id(sorted).hex
 }
 
 export function endorse_proposal (

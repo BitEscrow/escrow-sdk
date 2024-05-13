@@ -18,7 +18,7 @@ import {
   FundingDataResponse,
   CommitRequest,
   ServerPolicy,
-  VirtualMachineAPI
+  ScriptEngineAPI
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -32,7 +32,7 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    engine  : VirtualMachineAPI,
+    engine  : ScriptEngineAPI,
     policy  : ServerPolicy,
     request : ContractRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {

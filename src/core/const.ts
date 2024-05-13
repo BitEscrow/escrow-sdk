@@ -15,4 +15,10 @@ export const SPEND_TXIN_SIZE = SPEND_TXIN_BASE_SIZE + SPEND_TXIN_WIT_VSIZE
 export const DEADLINE_DEFAULT  = 7200
 export const DURATION_DEFAULT  = 7200
 export const ENGINE_DEFAULT    = 'cvm'
+
 export const TXTIMEOUT_DEFAULT = 7200
+
+export const CONTRACT_KIND = 8001
+export const DEPOSIT_KIND  = 8002
+export const VMDATA_KIND   = 8003
+export const WITNESS_KIND  = 8004

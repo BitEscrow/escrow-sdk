@@ -1,5 +1,4 @@
 import { Buff, Bytes } from '@cmdcode/buff'
-import { sha256 }      from '@cmdcode/crypto-tools/hash'
 
 export function get_entry <T = string[]> (
   label   : string,
@@ -91,20 +90,6 @@ export function stringify (content : any) : string {
     default:
       throw new TypeError('Content type not supported: ' + typeof content)
   }
-}
-
-export function get_object_id <T extends object> (
-  obj : T) : Buff {
-  if (Array.isArray(obj) || typeof obj !== 'object') {
-    throw new Error('not an object')
-  }
-
-  const ent = Object
-    .entries(obj)
-    .filter(([ _, val ]) => val !== undefined)
-    .sort()
-
-  return sha256(Buff.json(ent))
 }
 
 export function compare (a : unknown, b : unknown) {

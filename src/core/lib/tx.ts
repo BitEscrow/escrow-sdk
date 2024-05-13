@@ -46,7 +46,7 @@ import {
 /**
  * Initialization object for tx receive state.
  */
-export function GET_INIT_RECV_STATE () : TxConfirmState {
+export function INIT_RECV_STATE () : TxConfirmState {
   return {
     confirmed    : false as const,
     block_hash   : null,
@@ -59,14 +59,22 @@ export function GET_INIT_RECV_STATE () : TxConfirmState {
 /**
  * Initialization object for tx spend state.
  */
-export function GET_INIT_SPEND_STATE () : TxSpendState & TxSettleState {
+export function INIT_SPEND_STATE () : TxSpendState {
   return {
-    settled     : false as const,
-    settled_at  : null,
     spent       : false as const,
     spent_at    : null,
     spent_txhex : null,
     spent_txid  : null
+  }
+}
+
+/**
+ * Initialization object for tx settle state.
+ */
+export function INIT_SETTLE_STATE () : TxSettleState {
+  return {
+    settled    : false as const,
+    settled_at : null
   }
 }
 

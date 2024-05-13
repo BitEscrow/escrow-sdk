@@ -6,7 +6,7 @@ import {
   ProgramQuery,
   ProgramData,
   ProgramEntry,
-  VMConfig,
+  EngineConfig,
   ContractData
 } from '../types/index.js'
 
@@ -76,12 +76,12 @@ export function get_program_idx (
 
 export function get_vm_config (
   contract : ContractData
-) : VMConfig {
+) : EngineConfig {
   assert.ok(contract.activated, 'contract is not active')
-  const { active_at, expires_at, terms, vmid } = contract
+  const { active_at, expires_at, terms, engine_vmid } = contract
   const { engine, paths, programs, schedule } = terms
   const pathnames = get_path_names(paths)
-  return { active_at, expires_at, engine, pathnames, programs, schedule, vmid }
+  return { active_at, expires_at, engine, pathnames, programs, schedule, vmid: engine_vmid }
 }
 
 export function get_vm_id (

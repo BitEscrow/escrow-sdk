@@ -12,7 +12,7 @@ import {
   CoreSchema,
   ProgramEntry,
   SignerAPI,
-  VMConfig,
+  EngineConfig,
   VMData,
   WitnessData,
 } from '@scrow/sdk/core'
@@ -56,8 +56,8 @@ export function resolve_aliases (
   return progs
 }
 
-export function get_config (vmconfig : unknown) {
-  return CoreSchema.vm.config.parse(vmconfig)
+export function get_config (EngineConfig : unknown) {
+  return CoreSchema.vm.config.parse(EngineConfig)
 }
 
 export function compile_witness_vectors (
@@ -84,7 +84,7 @@ export function compile_witness_vectors (
 }
 
 export function run_vm_vectors (
-  config     : VMConfig,
+  config     : EngineConfig,
   timeout    : number,
   vectors    : WitnessVector[]
 ) : VMData {

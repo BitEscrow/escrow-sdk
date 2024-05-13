@@ -9,7 +9,7 @@ import {
 
 import {
   ContractData,
-  VMConfig,
+  EngineConfig,
   VMData,
   WitnessData,
   WitnessReceipt,
@@ -28,7 +28,7 @@ export function can_sign_api (esigner : EscrowSigner) {
 
 export function create_witness_api (esigner : EscrowSigner) {
   return (
-    vmdata   : VMConfig | VMData,
+    vmdata   : EngineConfig | VMData,
     template : WitnessTemplate
   ) => {
     // esigner.check_issuer(vmdata.server_pk)

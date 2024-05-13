@@ -1,3 +1,5 @@
+import { ProofEntry } from './signer.js'
+
 import {
   PaymentEntry,
   ProposalData
@@ -21,12 +23,14 @@ export type ContractStatus =
   'error'        // Something went wrong, may require manual intervention.
 
 export type ContractPublishState = ContractIsPublished | ContractIsCanceled
+export type ContractFundingState = ContractIsSecured   | ContractIsPending
 export type ContractActiveState  = ContractIsActive    | ContractIsInactive
 export type ContractCloseState   = ContractIsOpen      | ContractIsClosed
 
 export type ContractData =
   ContractBase         &
   ContractPublishState &
+  ContractFundingState &
   ContractActiveState  &
   ContractCloseState   &
   TxSpendState         &
@@ -47,32 +51,48 @@ interface ContractIsCanceled {
   canceled_at : number
 }
 
+interface ContractIsSecured {
+  secured      : true
+  effective_at : number
+  tx_fees      : number
+  tx_vsize     : number
+  tx_total     : number
+}
+
+interface ContractIsPending {
+  secured      : false
+  effective_at : null
+  tx_fees      : null
+  tx_vsize     : null
+  tx_total     : null
+}
+
 interface ContractIsActive {
   activated   : true
   active_at   : number
-  active_head : string
+  engine_vmid : string
   expires_at  : number
-  vmid        : string
 }
 
 interface ContractIsInactive {
   activated   : false
   active_at   : null
-  active_head : null
+  engine_vmid : null
   expires_at  : null
-  vmid        : null
 }
 
 interface ContractIsClosed {
   closed      : true
   closed_at   : number
-  closed_path : string | null
+  engine_head : string
+  engine_vout : string | null
 }
 
 interface ContractIsOpen {
   closed      : false
   closed_at   : null
-  closed_path : null
+  engine_head : null
+  engine_vout : null
 }
 
 export interface ContractRequest {
@@ -90,7 +110,6 @@ export interface ContractBase {
   cid          : string
   created_at   : number
   deadline_at  : number
-  effective_at : number | null
   endorsements : string[]
   fees         : PaymentEntry[]
   feerate      : number
@@ -102,13 +121,10 @@ export interface ContractBase {
   outputs      : SpendTemplate[]
   prop_id      : string
   server_pk    : string
-  server_sig   : string
+  sigs         : ProofEntry<ContractStatus>[]
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData
-  tx_fees      : number
-  tx_total     : number
   tx_bsize     : number
-  tx_vsize     : number
   updated_at   : number
 }

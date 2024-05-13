@@ -1,5 +1,6 @@
 import { Network }      from './base.js'
 import { CovenantData } from './covenant.js'
+import { ProofEntry }   from './signer.js'
 
 import {
   TxConfirmState,
@@ -9,8 +10,9 @@ import {
 } from './tx.js'
 
 export type LockState     = DepositIsLocked | DepositIsUnlocked
-export type DepositData   = DepositInfo & TxConfirmState & LockState & TxSettleState & TxSpendState
-export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
+export type CloseState    = DepositIsClosed | DepositIsOpen
+export type DepositData   = DepositInfo & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
+export type DepositStatus = 'registered' | 'confirmed' | 'closed' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
 export type FundingData = TxConfirmState & TxSettleState & TxSpendState & {
   covenant   : CovenantData | null
@@ -42,6 +44,18 @@ export interface CloseRequest {
   return_psig : string
 }
 
+export interface DepositIsClosed {
+  closed      : true
+  closed_at   : number
+  return_txid : string
+}
+
+export interface DepositIsOpen {
+  closed      : false
+  closed_at   : null
+  return_txid : null
+}
+
 export interface DepositConfig {
   created_at ?: number
   utxo_state ?: TxConfirmState
@@ -61,8 +75,8 @@ export interface DepositInfo {
   return_psig  : string
   satpoint     : string
   server_pk    : string
-  server_sig   : string
   server_tkn   : string
+  sigs         : ProofEntry<DepositStatus>[]
   status       : DepositStatus
   updated_at   : number
   utxo         : TxOutput

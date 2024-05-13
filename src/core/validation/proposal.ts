@@ -17,7 +17,7 @@ import {
   ProposalData,
   ProposalTemplate,
   ServerPolicy,
-  VirtualMachineAPI
+  ScriptEngineAPI
 } from '../types/index.js'
 
 import PropSchema from '../schema/proposal.js'
@@ -44,7 +44,7 @@ export function validate_proposal_data (
 }
 
 export function verify_proposal_data (
-  machine  : VirtualMachineAPI,
+  machine  : ScriptEngineAPI,
   policy   : ServerPolicy,
   proposal : ProposalData
 ) {
@@ -97,7 +97,7 @@ function check_payments (proposal : ProposalData) {
 }
 
 function check_programs (
-  machine  : VirtualMachineAPI,
+  machine  : ScriptEngineAPI,
   proposal : ProposalData
 ) {
   const { paths, programs } = proposal
@@ -112,7 +112,7 @@ function check_programs (
 }
 
 function check_schedule (
-  machine  : VirtualMachineAPI,
+  machine  : ScriptEngineAPI,
   proposal : ProposalData
 ) {
   const { duration, paths, schedule } = proposal

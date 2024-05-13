@@ -2,17 +2,20 @@
 
 import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
-import { verify_sig }     from '@cmdcode/crypto-tools/signer'
 
 /* Module Imports */
 
-import { get_deposit_id }  from '../module/deposit/util.js'
-import { assert, now }     from '../util/index.js'
+import { assert, now } from '../util/index.js'
 
 import {
   get_account_ctx,
   get_deposit_hash
 } from '../module/account/util.js'
+
+import {
+  get_deposit_id,
+  verify_deposit_sig
+} from '../module/deposit/util.js'
 
 import {
   CloseRequest,
@@ -84,20 +87,34 @@ export function verify_deposit_data (
   deposit : DepositData,
   signer  : SignerAPI
 ) {
-  const { created_at, deposit_addr, dpid, server_pk, server_sig } = deposit
+  const { created_at, deposit_addr, dpid } = deposit
   // Check that the deposit and server pubkeys are a match.
   assert.ok(deposit.deposit_pk === signer.pubkey)
-  assert.ok(deposit.server_pk  === server_pk)
   // Check that the deposit address is valid.
   const addr = get_account_ctx(deposit).deposit_addr
   assert.ok(deposit_addr === addr, 'deposit address does not match computed value')
   // Check that the deposit id is valid.
   const req_hash = get_deposit_hash(deposit)
-  const int_dpid = get_deposit_id(created_at, req_hash, server_pk)
+  const int_dpid = get_deposit_id(created_at, req_hash)
   assert.ok(int_dpid === dpid, 'deposit id does not match computed value')
-  // Check that the deposit signature is valid.
-  const is_valid = verify_sig(server_sig, dpid, server_pk)
-  assert.ok(is_valid, 'deposit signature is invalid')
+}
+
+export function verify_deposit_sigs (
+  deposit : DepositData,
+  pubkey  : string
+) {
+  const labels = deposit.sigs.map(e => e[0])
+
+  assert.ok(labels.includes('registered'),                      'deposit signature missing: registered')
+  assert.ok(!deposit.confirmed || labels.includes('confirmed'), 'deposit signature missing: confirmed')
+  assert.ok(!deposit.locked    || labels.includes('locked'),    'deposit signature missing: locked')
+  assert.ok(!deposit.closed    || labels.includes('closed'),    'deposit signature missing: closed')
+  assert.ok(!deposit.spent     || labels.includes('spent'),     'deposit signature missing: spent')
+  assert.ok(!deposit.settled   || labels.includes('settled'),   'deposit signature missing: settled')
+
+  deposit.sigs.forEach(sig => {
+    verify_deposit_sig(deposit, pubkey, sig)
+  })
 }
 
 export function verify_feerate (
@@ -112,7 +129,7 @@ export function verify_feerate (
 }
 
 export function verify_lockable (status : DepositStatus) {
-  if (status !== 'pending' && status !== 'open') {
+  if (status !== 'registered' && status !== 'confirmed') {
     throw new Error('deposit is not in a lockable state: ' + status)
   }
 }
@@ -156,6 +173,8 @@ export default {
     lock_req   : verify_lock_req,
     close_req  : verify_close_req,
     data       : verify_deposit_data,
+    sigs       : verify_deposit_sigs,
+    confirm    : null,
     lock       : null,
     spend      : null,
     settlement : null

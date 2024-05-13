@@ -1,5 +1,5 @@
-import { Buff, Bytes }        from '@cmdcode/buff'
-import { Network, SignerAPI } from '@/core/types/index.js'
+import { Buff, Bytes } from '@cmdcode/buff'
+import { Network }     from '@/core/types/index.js'
 
 import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
@@ -10,6 +10,7 @@ import {
 } from '@cmdcode/signer'
 
 import {
+  ClientSignerAPI,
   SignerConfig,
   SignerOptions,
   WalletAPI
@@ -76,11 +77,11 @@ export class EscrowSigner {
   }
 
   readonly _config : SignerConfig
-  readonly _signer : SignerAPI
+  readonly _signer : ClientSignerAPI
   readonly _wallet : WalletAPI
 
   constructor (
-    signer  : SignerAPI,
+    signer  : ClientSignerAPI,
     options : SignerOptions = {}
   ) {
     const opt    = { ...DEFAULT_CONFIG, ...options }

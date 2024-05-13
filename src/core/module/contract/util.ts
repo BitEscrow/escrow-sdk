@@ -1,13 +1,28 @@
 import { Buff }                 from '@cmdcode/buff'
 import { decode_tx, encode_tx } from '@scrow/tapscript/tx'
-import { SPEND_TXIN_SIZE }      from '../../const.js'
-import { assert }               from '../../util/index.js'
+import { verify_sig }           from '@cmdcode/crypto-tools/signer'
+import { assert, sort_record }               from '@/core/util/index.js'
+
+import { CONTRACT_KIND, SPEND_TXIN_SIZE } from '@/core/const.js'
+
+import {
+  get_proof_id,
+  parse_proof,
+  update_proof
+} from '@/core/util/notarize.js'
+
+import {
+  get_contract_stamp,
+  get_contract_state
+} from './state.js'
 
 import {
   ContractData,
+  ContractStatus,
   DepositData,
   FundingData,
   PaymentEntry,
+  ProofEntry,
   ProposalData,
   SignerAPI,
   SpendTemplate
@@ -116,15 +131,17 @@ export function get_spend_template (
 export function get_settlement_tx (
   contract  : ContractData,
   deposits  : DepositData[],
-  pathname  : string,
   signer    : SignerAPI
 ) : string {
-  const output = get_spend_template(pathname, contract.outputs)
+  assert.ok(contract.closed)
+  assert.exists(contract.engine_vout)
+  const vout   = contract.engine_vout
+  const output = get_spend_template(vout, contract.outputs)
   const txdata = decode_tx(output, false)
   for (const deposit of deposits) {
     assert.exists(deposit.covenant)
     const vin  = create_txinput(deposit.utxo)
-    const psig = get_covenant_psig(pathname, deposit.covenant)
+    const psig = get_covenant_psig(vout, deposit.covenant)
     const sig  = settle_covenant(contract, deposit, output, psig, signer)
     txdata.vin.push({ ...vin, witness: [ sig ] })
   }
@@ -152,4 +169,59 @@ export function tabulate_funds (
   const sats_vbyte = Math.floor(tx_total_size / tx_total_fee)
 
   return { fund_count, fund_value, sats_vbyte, tx_fees, tx_vsize, tx_total }
+}
+
+export function get_contract_value (contract : ContractData) {
+  const { feerate, fund_count, fund_txfee, subtotal, tx_bsize } = contract
+  return subtotal + (feerate * tx_bsize) + (fund_count * fund_txfee)
+}
+
+export function get_contract_balance (contract : ContractData) {
+  return get_contract_value(contract) - contract.fund_value
+}
+
+export function get_contract_digest (
+  contract : ContractData,
+  status   : ContractStatus
+) {
+  const { cid, server_pk } = contract
+  const stamp = get_contract_stamp(contract, status)
+  const state = get_contract_state(contract, status)
+  const tags  = [ [ 'i', cid ] ]
+  assert.exists(stamp, 'timestamp is null: ' + status)
+  return get_proof_id(state, CONTRACT_KIND, server_pk, stamp, tags)
+}
+
+export function notarize_contract (
+  contract : ContractData,
+  signer   : SignerAPI,
+  status   : ContractStatus
+) : ProofEntry<ContractStatus> {
+  const dig    = get_contract_digest(contract, status)
+  const sig    = signer.sign(dig)
+  return [ contract.status, Buff.join([ dig, sig ]).hex ]
+}
+
+export function update_contract (
+  contract : ContractData,
+  signer   : SignerAPI,
+  status   : ContractStatus
+) {
+  const proof  = notarize_contract(contract, signer, status)
+  contract.sigs = update_proof(contract.sigs, proof)
+  return sort_record(contract)
+}
+
+export function verify_contract_sig (
+  contract  : ContractData,
+  pubkey    : string,
+  signature : ProofEntry<ContractStatus>
+) {
+  const [ status, proof ] = signature
+  const [ id, sig ]       = parse_proof(proof)
+  const pub = contract.server_pk
+  const dig = get_contract_digest(contract, status)
+  assert.ok(pubkey === pub,           'pubkey does not match: ' + status)
+  assert.ok(dig === id,               'digest does not match: ' + status)
+  assert.ok(verify_sig(sig, id, pub), 'invalid signature: '     + status)
 }

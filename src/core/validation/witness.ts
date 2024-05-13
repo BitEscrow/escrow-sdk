@@ -16,7 +16,7 @@ import {
   ProgramData,
   ProgramEntry,
   VMData,
-  VirtualMachineAPI,
+  ScriptEngineAPI,
   WitnessData,
   WitnessReceipt
 } from '../types/index.js'
@@ -37,7 +37,7 @@ export function validate_witness_data (
 }
 
 export function verify_program_entry (
-  machine : VirtualMachineAPI,
+  machine : ScriptEngineAPI,
   method  : string,
   params  : Literal[]
 ) {

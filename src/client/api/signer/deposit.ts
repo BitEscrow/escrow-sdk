@@ -1,7 +1,15 @@
-import { verify_contract_data } from '@/core/validation/contract.js'
-import { verify_deposit_data }  from '@/core/validation/deposit.js'
-import { assert }               from '@/core/util/index.js'
-import { EscrowSigner }         from '../../class/signer.js'
+import { assert }       from '@/core/util/index.js'
+import { EscrowSigner } from '../../class/signer.js'
+
+import {
+  verify_contract_data,
+  verify_contract_sigs
+} from '@/core/validation/contract.js'
+
+import {
+  verify_deposit_data,
+  verify_deposit_sigs
+} from '@/core/validation/deposit.js'
 
 import {
   create_close_req,
@@ -31,10 +39,9 @@ export function lock_funds_api (esigner : EscrowSigner) {
     deposit  : DepositData
   ) : LockRequest => {
     const { server_pk, _signer } = esigner
-    // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === contract.server_pk, 'invalid server pubkey')
-    assert.ok(server_pk === deposit.server_pk, 'invalid server pubkey')
+    verify_contract_sigs(contract, server_pk)
     verify_contract_data(contract)
+    verify_deposit_sigs(deposit, server_pk)
     verify_deposit_data(deposit, _signer)
     return create_lock_req(contract, deposit, _signer)
   }
@@ -57,7 +64,7 @@ export function close_deposit_api (esigner : EscrowSigner) {
   ) : CloseRequest => {
     const { server_pk, _signer } = esigner
     // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === deposit.server_pk, 'invalid server pubkey')
+    verify_deposit_sigs(deposit, server_pk)
     verify_deposit_data(deposit, _signer)
     return create_close_req(deposit, feerate, _signer)
   }

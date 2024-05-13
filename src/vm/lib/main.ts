@@ -5,7 +5,7 @@ import { init_stores, run_program } from './program.js'
 import { init_tasks, run_schedule } from './schedule.js'
 
 import {
-  VMConfig,
+  EngineConfig,
   VMData,
   WitnessData
 } from '@/core/types/index.js'
@@ -97,7 +97,7 @@ export function eval_schedule (
 /**
  * Initializes the virtual machine with the given parameters.
  */
-export function init_vm (config : VMConfig) : VMData {
+export function init_vm (config : EngineConfig) : VMData {
   const { active_at, expires_at, engine, pathnames, vmid } = config
   const programs = config.programs.map(e => create_program(e))
 

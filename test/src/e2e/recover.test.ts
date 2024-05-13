@@ -60,22 +60,22 @@ export default async function (
 
       const [ server, funder ] = users
 
-      const funder_sd  = funder.signer
-      const server_sd  = server.signer
+      const funder_dev = funder.signer
+      const escrow_dev = server.signer
       const server_pol = ServerPolicy
 
       /* ------------------- [ Create Account ] ------------------ */
 
       //
-      const return_addr = P2TR.create(funder_sd.pubkey, NETWORK)
+      const return_addr = P2TR.create(funder_dev.pubkey, NETWORK)
       // Client: Create account request.
-      const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, return_addr)
+      const acct_req = create_account_req(funder_dev.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
       verify_account_req(server_pol, acct_req)
       // Server: Create account data.
-      const account = create_account(acct_req, server_sd)
+      const account = create_account(acct_req, escrow_dev)
       // Client: Verify account data.
-      verify_account_data(account, funder_sd)
+      verify_account_data(account, funder_dev)
 
       if (VERBOSE) {
         console.log(banner('account'))
@@ -91,13 +91,13 @@ export default async function (
       // Fetch the utxo for the funded address.
       const utxo     = await get_utxo(client, account.deposit_addr, dep_txid)
       // Client: Create the commit request.
-      const reg_req  = create_register_req(FEERATE, account, funder_sd, utxo)
+      const reg_req  = create_register_req(FEERATE, account, funder_dev, utxo)
       // Server: Verify the registration request.
-      verify_register_req(server_pol, reg_req, server_sd)
+      verify_register_req(server_pol, reg_req, escrow_dev)
       // Server: Create the deposit data.
-      const deposit  = create_deposit(reg_req, server_sd)
+      const deposit  = create_deposit(reg_req, escrow_dev)
       // Client: Verify the deposit data.
-      verify_deposit_data(deposit, funder_sd)
+      verify_deposit_data(deposit, funder_dev)
 
       await client.mine_blocks(1)
 
@@ -112,7 +112,7 @@ export default async function (
 
       const rec_config = get_recovery_config(deposit)
       const template   = get_recovery_tx(rec_config, FEERATE, return_addr, utxo)
-      const signed_tx  = sign_recovery_tx(rec_config, funder_sd, template, utxo)
+      const signed_tx  = sign_recovery_tx(rec_config, funder_dev, template, utxo)
       const txid       = get_txid(signed_tx)
 
       let is_valid = false
