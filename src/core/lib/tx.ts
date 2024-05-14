@@ -46,7 +46,7 @@ import {
 /**
  * Initialization object for tx receive state.
  */
-export function INIT_RECV_STATE () : TxConfirmState {
+export function INIT_CONF_STATE () : TxConfirmState {
   return {
     confirmed    : false as const,
     block_hash   : null,

@@ -1,7 +1,8 @@
 import { Buff }            from '@cmdcode/buff'
 import { verify_sig }      from '@cmdcode/crypto-tools/signer'
-import { INIT_RECV_STATE } from '@/core/lib/tx.js'
+import { INIT_CONF_STATE } from '@/core/lib/tx.js'
 import { DEPOSIT_KIND }    from '@/core/const.js'
+import { sort_record }     from '@/core/util/base.js'
 import * as assert         from '@/core/util/assert.js'
 
 import { get_deposit_stamp, get_deposit_state } from './state.js'
@@ -16,7 +17,6 @@ import {
   SignerAPI,
   TxConfirmState
 } from '@/core/types/index.js'
-import { sort_record } from '@/core/util/base.js'
 
 export function get_deposit_id (
   created_at : number,
@@ -31,7 +31,7 @@ export function get_deposit_id (
  * Compute the spending state of a deposit,
  * using transaction data from an oracle.
  */
-export function get_utxo_state (
+export function get_confirm_state (
   locktime  : number,
   utxo_data : OracleTxSpendData
 ) : TxConfirmState {
@@ -40,7 +40,7 @@ export function get_utxo_state (
       const expires_at = status.block_time + locktime
       return { ...status, expires_at }
   } else {
-    return INIT_RECV_STATE()
+    return INIT_CONF_STATE()
   }
 }
 

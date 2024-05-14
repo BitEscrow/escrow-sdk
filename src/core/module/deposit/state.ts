@@ -1,7 +1,7 @@
 import { DepositData, DepositStatus } from '@/core/types/index.js'
 
 import {
-  INIT_RECV_STATE,
+  INIT_CONF_STATE,
   INIT_SPEND_STATE,
   INIT_SETTLE_STATE
 } from '@/core/lib/tx.js'
@@ -25,7 +25,7 @@ export const INIT_CLOSE_STATE = () => {
 
 export const GET_REGISTER_STATE = () => {
   return {
-    ...INIT_RECV_STATE(),
+    ...INIT_CONF_STATE(),
     ...INIT_CLOSE_STATE(),
     ...INIT_LOCK_STATE(),
     ...INIT_SPEND_STATE(),
@@ -53,7 +53,7 @@ export const GET_LOCKED_STATE = () => {
   return {
     ...GET_SPEND_STATE(),
     ...INIT_SPEND_STATE(),
-    ...INIT_RECV_STATE(),
+    ...INIT_CONF_STATE(),
     status : 'locked' as DepositStatus
   }
 }
