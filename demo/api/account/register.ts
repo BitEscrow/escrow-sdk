@@ -62,9 +62,9 @@ const funder = signers[0]
 // Define a feerate for the return transaction.
 const feerate = config.feerate
 // Create a registration request.
-const req = funder.deposit.register(new_account, feerate, utxo.txout)
+const req = funder.account.register(new_account, feerate, utxo.txout)
 // Deliver our registration request to the server.
-const res = await client.deposit.register(req)
+const res = await client.account.register(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.

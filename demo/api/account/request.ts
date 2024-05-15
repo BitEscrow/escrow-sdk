@@ -19,9 +19,9 @@ const locktime    = config.locktime
 const return_addr = config.return_addr
 
 // Get an account request from the funder device.
-const acct_req    = funder.account.create(return_addr, locktime)
+const acct_req    = funder.account.request(locktime, return_addr)
 // Submit the account request to the server
-const acct_res    = await client.deposit.request(acct_req)
+const acct_res    = await client.account.request(acct_req)
 // Check the response is valid.
 if (!acct_res.ok) throw new Error(acct_res.error)
 // Unpack our data response.

@@ -172,12 +172,14 @@ export function tabulate_funds (
 }
 
 export function get_contract_value (contract : ContractData) {
-  const { feerate, fund_count, fund_txfee, subtotal, tx_bsize } = contract
-  return subtotal + (feerate * tx_bsize) + (fund_count * fund_txfee)
+  const { feerate, subtotal, tx_bsize } = contract
+  return subtotal + (feerate * tx_bsize)
 }
 
 export function get_contract_balance (contract : ContractData) {
-  return get_contract_value(contract) - contract.fund_value
+  const { fund_count, fund_txfee, fund_value } = contract
+  const total_value = (fund_count * fund_txfee) - fund_value
+  return get_contract_value(contract) + total_value
 }
 
 export function get_contract_digest (
