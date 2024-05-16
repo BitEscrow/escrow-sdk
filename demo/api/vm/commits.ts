@@ -15,7 +15,7 @@ const vmid = process.argv.slice(2).at(0)
 if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
 
 // Fetch a contract from the server by cid.
-const res = await client.witness.list(vmid)
+const res = await client.vm.commits(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.

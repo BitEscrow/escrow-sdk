@@ -31,6 +31,7 @@ export const INIT_ACTIVE_STATE = () => {
   return {
     activated   : false as const,
     active_at   : null,
+    engine_head : null,
     engine_vmid : null,
     expires_at  : null
   }
@@ -40,7 +41,6 @@ export const INIT_CLOSE_STATE = () => {
   return {
     closed      : false as const,
     closed_at   : null,
-    engine_head : null,
     engine_vout : null
   }
 }
@@ -75,7 +75,8 @@ export const GET_ACTIVE_STATE = () => {
   return {
     ...GET_CLOSE_STATE(),
     ...INIT_CLOSE_STATE(),
-    status : 'active' as ContractStatus
+    engine_head : null,
+    status      : 'active' as ContractStatus
   }
 }
 

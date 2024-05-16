@@ -25,9 +25,8 @@ import {
 
 export function request_deposits_api (esigner : EscrowSigner) {
   return () => {
-    const pub  = esigner.pubkey
     const host = esigner.server_url
-    const url  = `${host}/api/deposit/list?pk=${pub}`
+    const url  = `${host}/api/deposit/list`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
   }

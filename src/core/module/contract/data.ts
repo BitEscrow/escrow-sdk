@@ -152,10 +152,11 @@ export function activate_contract (
   const activated   = true as const
   const expires_at  = active_at + contract.terms.duration
   const engine_vmid = get_vm_id(active_at, contract.cid, expires_at)
+  const engine_head = engine_vmid
   const status      = 'active' as ContractStatus
   const updated_at  = active_at
   // Return the new contract and vm config.
-  const changes = { activated, active_at, expires_at, engine_vmid }
+  const changes = { activated, active_at, expires_at, engine_head, engine_vmid }
   const updated = { ...contract, ...changes, status, updated_at }
   return update_contract(updated, signer, status)
 }
@@ -168,8 +169,8 @@ export function close_contract (
   assert.ok(contract.activated, 'contract is not active')
   assert.ok(vmdata.closed,      'vm state is not closed')
   const closed      = true as const
-  const engine_head = vmdata.head
   const closed_at   = vmdata.closed_at
+  const engine_head = vmdata.head
   const engine_vout = vmdata.output
   const status      = 'closed' as ContractStatus
   const updated_at  = closed_at

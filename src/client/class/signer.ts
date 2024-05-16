@@ -20,6 +20,7 @@ import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import draft_api    from '../api/signer/draft.js'
+import machine_api  from '../api/signer/vm.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
@@ -118,6 +119,7 @@ export class EscrowSigner {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
+  vm       = machine_api(this)
   wallet   = wallet_api(this)
   witness  = witness_api(this)
 

@@ -73,7 +73,6 @@ export default function (esigner : EscrowSigner) {
     can_sign : can_sign_api(esigner),
     create   : create_witness_api(esigner),
     endorse  : endorse_witness_api(esigner),
-    list     : list_machines_api(esigner),
     verify   : verify_receipt_api(esigner)
   }
 }

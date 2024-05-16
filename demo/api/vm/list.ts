@@ -13,7 +13,7 @@ import { signers }      from '@scrow/demo/02_create_signer.js'
 // Select a signer to use.
 const signer = signers[0]
 // Generate a request token.
-const req = signer.witness.list()
+const req = signer.vm.list()
 // Deliver the request and token.
 const res = await client.vm.list(signer.pubkey, req)
 // Check the response is valid.

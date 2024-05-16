@@ -72,7 +72,7 @@ export function close_deposit (
   deposit : DepositData,
   signer  : SignerAPI,
   txhex   : string,
-  closed_at   = now()
+  closed_at = now()
 ) {
   assert.ok(deposit.confirmed, 'deposit is not confirmed')
   assert.ok(!deposit.locked,   'deposit is already locked')

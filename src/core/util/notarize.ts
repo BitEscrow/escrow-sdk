@@ -1,8 +1,12 @@
 import { Buff }        from '@cmdcode/buff'
 import { SignedEvent } from '@cmdcode/signer'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
-import { NoteTemplate, ProofEntry }  from '@/core/types/index.js'
 import * as assert     from '@/core/util/assert.js'
+
+import {
+  NoteTemplate,
+  ProofEntry
+} from '@/core/types/index.js'
 
 export function get_record_id <T extends object> (obj : T) : Buff {
   if (

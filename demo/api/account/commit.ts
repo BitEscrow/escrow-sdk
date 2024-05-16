@@ -24,7 +24,7 @@ import {
 // Unpack account address.
 const { deposit_addr } = new_account
 // Compute a total amount (in sats) with the txfee.
-const amt_total = get_contract_balance(new_contract) + new_contract.fund_txfee
+const amt_total = get_contract_balance(new_contract) + new_contract.vin_txfee
 // Also compute a total amount in bitcoin.
 const btc_total = amt_total / 100_000_000
 

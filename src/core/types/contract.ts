@@ -70,6 +70,7 @@ interface ContractIsPending {
 interface ContractIsActive {
   activated   : true
   active_at   : number
+  engine_head : string
   engine_vmid : string
   expires_at  : number
 }
@@ -77,6 +78,7 @@ interface ContractIsActive {
 interface ContractIsInactive {
   activated   : false
   active_at   : null
+  engine_head : null
   engine_vmid : null
   expires_at  : null
 }
@@ -84,14 +86,12 @@ interface ContractIsInactive {
 interface ContractIsClosed {
   closed      : true
   closed_at   : number
-  engine_head : string
   engine_vout : string | null
 }
 
 interface ContractIsOpen {
   closed      : false
   closed_at   : null
-  engine_head : null
   engine_vout : null
 }
 

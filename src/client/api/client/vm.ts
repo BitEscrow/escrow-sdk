@@ -5,7 +5,8 @@ import {
   VMDataResponse,
   VMListResponse,
   VMSubmitResponse,
-  WitnessData
+  WitnessData,
+  WitnessListResponse
 } from '@/core/types/index.js'
 
 import { EscrowClient } from '../../class/client.js'
@@ -23,7 +24,7 @@ function list_machines_api (client : EscrowClient) {
     assert.is_hash(pubkey)
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/vm/list?pk=${pubkey}`
+    const url  = `${host}/api/vm/list`
     // Define the request config.
     const init = {
       method  : 'GET',
@@ -74,10 +75,23 @@ function read_vm_state_api (client : EscrowClient) {
   }
 }
 
+function list_commits_api (client : EscrowClient) {
+  return async (vmid : string) : Promise<ApiResponse<WitnessListResponse>> => {
+     // Validate the contract id.
+    assert.is_hash(vmid)
+    // Formulate the request.
+    const host = client.server_url
+    const url  = `${host}/api/vm/${vmid}/commits`
+    // Return the response.
+    return client.fetcher<WitnessListResponse>({ url })
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
-    list   : list_machines_api(client),
-    read   : read_vm_state_api(client),
-    submit : submit_witness_api(client)
+    commits : list_commits_api(client),
+    list    : list_machines_api(client),
+    read    : read_vm_state_api(client),
+    submit  : submit_witness_api(client)
   }
 }

@@ -56,53 +56,53 @@ const ct_secured = z.object({
   tx_vsize     : num
 })
 
+const engine_info = z.object({
+  activated   : bool,
+  active_at   : stamp.nullable(),
+  engine_head : hash.nullable(),
+  engine_vmid : hash.nullable(),
+  expires_at  : stamp.nullable()
+})
+
+const ct_active = z.object({
+  activated   : z.literal(true),
+  active_at   : stamp,
+  engine_head : hash,
+  engine_vmid : hash,
+  expires_at  : stamp
+})
+
+const ct_inactive = z.object({
+  activated   : z.literal(false),
+  active_at   : z.null(),
+  engine_head : z.null(),
+  engine_vmid : z.null(),
+  expires_at  : z.null()
+})
+
 const close_info = z.object({
   closed      : bool,
   closed_at   : stamp.nullable(),
-  engine_head : hash.nullable(),
   engine_vout : str.nullable()
 })
 
 const ct_open = z.object({
   closed      : z.literal(false),
   closed_at   : z.null(),
-  engine_head : z.null(),
   engine_vout : z.null()
 })
 
 const ct_closed = z.object({
   closed      : z.literal(true),
   closed_at   : stamp,
-  engine_head : hash,
   engine_vout : str.nullable()
-})
-
-const engine_info = z.object({
-  activated   : bool,
-  active_at   : stamp.nullable(),
-  engine_vmid : hash.nullable(),
-  expires_at  : stamp.nullable()
-})
-
-const vm_active = z.object({
-  activated   : z.literal(true),
-  active_at   : stamp,
-  engine_vmid : hash,
-  expires_at  : stamp
-})
-
-const vm_inactive = z.object({
-  activated   : z.literal(false),
-  active_at   : z.null(),
-  engine_vmid : z.null(),
-  expires_at  : z.null()
 })
 
 /* ------------------- [ State Unions ] ------------------- */
 
 const publish_state = z.discriminatedUnion('canceled',  [ ct_published, ct_canceled ])
 const funding_state = z.discriminatedUnion('secured',   [ ct_secured,   ct_pending  ])
-const engine_state  = z.discriminatedUnion('activated', [ vm_active,    vm_inactive ])
+const engine_state  = z.discriminatedUnion('activated', [ ct_active,    ct_inactive ])
 const close_state   = z.discriminatedUnion('closed',    [ ct_open,      ct_closed   ])
 
 /* ------------------- [ Contract Schema ] ------------------- */
