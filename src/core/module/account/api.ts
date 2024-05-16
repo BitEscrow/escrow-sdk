@@ -31,12 +31,12 @@ export function create_account_req (
  * Create a registration request object.
  */
 export function create_register_req (
-  feerate   : number,
-  request   : AccountTemplate,
-  signer    : SignerAPI,
-  utxo      : TxOutput
+  feerate : number,
+  request : AccountTemplate,
+  signer  : SignerAPI,
+  utxo    : TxOutput
 ) : RegisterRequest {
-  const registration = { ...request, feerate, utxo }
+  const registration = { ...request, return_rate: feerate, utxo }
   const return_psig  = create_return_psig(registration, signer)
   // Parse and return a valid register request object.
   return AcctSchema.register_req.parse({ ...registration, return_psig })

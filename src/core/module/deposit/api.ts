@@ -39,5 +39,5 @@ export function create_close_req (
   const ctx  = { ...deposit, feerate }
   const return_psig = create_return_psig(ctx, signer)
   // Parse and return a valid register request object.
-  return DepositSchema.close_req.parse({ dpid, feerate, return_psig })
+  return DepositSchema.close_req.parse({ dpid, return_rate: feerate, return_psig })
 }

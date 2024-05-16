@@ -1,9 +1,9 @@
 /**
  * Deposit API Demo for endpoint:
- * /api/deposit/request
+ * /api/account/request
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/deposit/request
+ * yarn load demo/api//request
  */
 
 import { print_banner } from '@scrow/test'

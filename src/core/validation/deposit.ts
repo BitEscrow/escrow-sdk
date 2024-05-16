@@ -78,7 +78,7 @@ export function verify_close_req (
   const psig = request.return_psig
   assert.ok(request.dpid === deposit.dpid)
   assert.ok(deposit.covenant === null)
-  verify_feerate(request.feerate, policy)
+  verify_feerate(request.return_rate, policy)
   // Verify the return psig.
   verify_return_psig(deposit, psig)
 }
@@ -122,7 +122,7 @@ export function verify_feerate (
   policy  : ServerPolicy
 ) {
   //
-  const { FEERATE_MIN, FEERATE_MAX } = policy.deposit
+  const { FEERATE_MIN, FEERATE_MAX } = policy.account
   // Assert that all terms are valid.
   assert.ok(feerate >= FEERATE_MIN, `feerate is below threshold: ${feerate} < ${FEERATE_MIN}`)
   assert.ok(feerate <= FEERATE_MAX, `feerate is above threshold: ${feerate} > ${FEERATE_MAX}`)
@@ -157,7 +157,7 @@ export function verify_utxo_lock (
   status   : OracleTxRecvStatus,
   current = now()
 ) {
-  const limit = current - policy.deposit.GRACE_PERIOD
+  const limit = current - policy.account.GRACE_PERIOD
   if (status.confirmed && status.block_time + locktime <= limit) {
     throw new Error('Deposit lock is expiring within the grace period.')
   }

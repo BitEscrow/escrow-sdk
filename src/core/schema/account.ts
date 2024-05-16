@@ -22,9 +22,9 @@ const account_req = z.object({
 
 const register_req = account_req.extend({
   covenant    : covenant.optional(),
-  feerate     : num,
   network,
   return_psig : hex,
+  return_rate : num,
   server_tkn  : token,
   utxo        : tx.txout
 })
@@ -32,8 +32,8 @@ const register_req = account_req.extend({
 const commit_req = register_req.extend({ covenant })
 
 const data = z.object({
-  acct_hash    : hash,
-  acct_id      : hash,
+  account_hash : hash,
+  account_id   : hash,
   created_at   : stamp,
   deposit_pk   : hash,
   deposit_addr : str,

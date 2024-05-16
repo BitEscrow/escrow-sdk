@@ -11,7 +11,7 @@ export interface ScriptEngineAPI {
   states  : string[]
   label   : string
   eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
-  init    : (config : EngineConfig) => VMData
+  init    : (config : MachineConfig) => VMData
   run     : (data   : VMData, stop_at ?: number) => VMData
   verify  : (method : string, params   : Literal[]) => string | null
 }
@@ -42,7 +42,7 @@ export interface ProgramData {
   paths   : string
 }
 
-export interface EngineConfig {
+export interface MachineConfig {
   active_at  : number
   engine     : string
   expires_at : number
@@ -56,14 +56,14 @@ export interface VMBase {
   active_at  : number
   commit_at  : number
   engine     : string
-  error      : string | null   // Error output of the VM.
+  error      : string | null
   expires_at : number
-  head       : string          // Current head of the commit-chain.
+  head       : string
   output     : string | null
   pathnames  : string[]
   programs   : ProgramData[]
   state      : string
-  step       : number          // Counts the number of commits to the VM.'
+  step       : number
   tasks      : ScheduleEntry[]
   updated_at : number
   vmid       : string

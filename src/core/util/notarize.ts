@@ -1,7 +1,7 @@
 import { Buff }        from '@cmdcode/buff'
 import { SignedEvent } from '@cmdcode/signer'
 import { sha256 }      from '@cmdcode/crypto-tools/hash'
-import { ProofEntry }  from '@/core/types/index.js'
+import { NoteTemplate, ProofEntry }  from '@/core/types/index.js'
 import * as assert     from '@/core/util/assert.js'
 
 export function get_record_id <T extends object> (obj : T) : Buff {
@@ -14,13 +14,10 @@ export function get_record_id <T extends object> (obj : T) : Buff {
 }
 
 export function get_proof_id (
-  content : string,
-  kind    : number,
-  pubkey  : string,
-  stamp   : number,
-  tags    : string[][] = []
+  template : NoteTemplate
 ) {
-  const pimg = Buff.json([ 0, pubkey, stamp, kind, tags, content ])
+  const { pubkey, created_at, kind, tags, content } = template
+  const pimg = Buff.json([ 0, pubkey, created_at, kind, tags, content ])
   return sha256(pimg).hex
 }
 

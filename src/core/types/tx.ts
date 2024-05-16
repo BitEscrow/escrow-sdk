@@ -21,8 +21,8 @@ export interface TxIsUnconfirmed {
 }
 
 export interface TxIsSettled {
-  settled    : true
-  settled_at : number
+  settled     : true
+  settled_at  : number
 }
 
 export interface TxNotSettled {

@@ -6,7 +6,7 @@ import {
   ProgramQuery,
   ProgramData,
   ProgramEntry,
-  EngineConfig,
+  MachineConfig,
   ContractData
 } from '../types/index.js'
 
@@ -76,7 +76,7 @@ export function get_program_idx (
 
 export function get_vm_config (
   contract : ContractData
-) : EngineConfig {
+) : MachineConfig {
   assert.ok(contract.activated, 'contract is not active')
   const { active_at, expires_at, terms, engine_vmid } = contract
   const { engine, paths, programs, schedule } = terms

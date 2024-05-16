@@ -2,8 +2,8 @@
 
 Reference guide for the `EscrowClient` class API.
 
-- [EscrowClient Config](#escrowclient-config)
-- [EscrowClient Class](#escrowclient-class)
+- [Configuration](#configuration)
+- [Class Interface](#class-interface)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -11,7 +11,7 @@ Reference guide for the `EscrowClient` class API.
 
 ---
 
-## EscrowClient Config
+## Configuration
 
 Configuration infterface for the EscrowClient.
 
@@ -23,7 +23,7 @@ interface ClientConfig {
 }
 ```
 
-## EscrowClient Class
+## Class Interface
 
 Class interface for the EscrowClient.
 

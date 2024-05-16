@@ -6,6 +6,7 @@ import {
   INIT_SETTLE_STATE
 } from '@/core/lib/tx.js'
 import { sort_record } from '@/core/util/base.js'
+import { assert } from '@/core/util/index.js'
 
 export const INIT_LOCK_STATE = () => {
   return {
@@ -17,9 +18,10 @@ export const INIT_LOCK_STATE = () => {
 
 export const INIT_CLOSE_STATE = () => {
   return {
-    closed      : false as const,
-    closed_at   : null,
-    return_txid : null
+    closed       : false as const,
+    closed_at    : null,
+    return_txhex : null,
+    return_txid  : null
   }
 }
 
@@ -70,50 +72,35 @@ export function get_deposit_state (
   status  : DepositStatus
 ) {
   const { sigs, updated_at, ...rest } = deposit
-  let preimage
+  let state, stamp
   switch (status) {
     case 'registered':
-      preimage = { ...rest, ...GET_REGISTER_STATE() }
+      state = { ...rest, ...GET_REGISTER_STATE() }
+      stamp = deposit.created_at
       break
     case 'confirmed':
-      preimage = { ...rest, ...GET_CONFIRMED_STATE() }
+      state = { ...rest, ...GET_CONFIRMED_STATE() }
+      stamp = deposit.block_time
       break
     case 'locked':
-      preimage = { ...rest, ...GET_LOCKED_STATE() }
+      state = { ...rest, ...GET_LOCKED_STATE() }
+      stamp = deposit.locked_at
       break
     case 'closed':
-      preimage = { ...rest, ...GET_CLOSED_STATE() }
+      state = { ...rest, ...GET_CLOSED_STATE() }
+      stamp = deposit.closed_at
       break
     case 'spent':
-      preimage = { ...rest, ...GET_SPEND_STATE() }
+      state = { ...rest, ...GET_SPEND_STATE() }
+      stamp = deposit.spent_at
       break
     case 'settled':
-      preimage = rest
+      state = rest
+      stamp = deposit.settled_at
       break
     default:
       throw new Error('unrecognized signature status: ' + status)
   }
-  return JSON.stringify(sort_record(preimage))
-}
-
-export function get_deposit_stamp (
-  deposit : DepositData,
-  status  : DepositStatus
-) {
-  switch (status) {
-    case 'registered':
-      return deposit.created_at
-    case 'confirmed':
-      return deposit.block_time
-    case 'locked':
-      return deposit.locked_at
-    case 'closed':
-      return deposit.closed_at
-    case 'spent':
-      return deposit.spent_at
-    case 'settled':
-      return deposit.settled_at
-    default:
-      throw new Error('unrecognized signature status: ' + status)
-  }
+  assert.exists(stamp)
+  return { content: JSON.stringify(sort_record(state)), created_at: stamp }
 }

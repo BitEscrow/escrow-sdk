@@ -114,10 +114,8 @@ const base_data = z.object({
   endorsements : hex.array(),
   feerate      : num,
   fees         : proposal.payments,
-  fund_count   : num,
-  fund_pend    : num,
-  fund_txfee   : num,
-  fund_value   : num,
+  funds_pend   : num,
+  funds_conf   : num,
   outputs      : output.array(),
   moderator    : hash.nullable(),
   prop_id      : hash,
@@ -127,7 +125,9 @@ const base_data = z.object({
   subtotal     : num,
   terms        : proposal.data,
   tx_bsize     : num,
-  updated_at   : stamp
+  updated_at   : stamp,
+  vin_count    : num,
+  vin_txfee    : num
 })
 
 const data  = base_data

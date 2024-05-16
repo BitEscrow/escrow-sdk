@@ -38,8 +38,6 @@ export function create_contract (
   const { created_at = now(), feerate, fees } = config
   // Unpack request object.
   const { endorsements = [], proposal } = request
-  // Define the funding input txfee.
-  const fund_txfee = feerate * SPEND_TXIN_SIZE
   // Define or create the contract outputs.
   const outputs    = create_spend_templates(proposal, fees)
   // Define or compute the proposal id.
@@ -59,7 +57,6 @@ export function create_contract (
     deadline_at : get_deadline(proposal, created_at),
     endorsements,
     feerate,
-    fund_txfee,
     moderator   : request.proposal.moderator ?? null,
     outputs,
     prop_id,
@@ -68,7 +65,8 @@ export function create_contract (
     subtotal,
     terms       : sort_record(proposal),
     tx_bsize,
-    updated_at  : created_at
+    updated_at  : created_at,
+    vin_txfee   : feerate * SPEND_TXIN_SIZE
   }
   return update_contract(template, signer, 'published')
 }
@@ -89,28 +87,28 @@ export function add_contract_funds (
   contract : ContractData,
   deposit  : DepositData
 ) {
-  let { fund_count, fund_pend, fund_value } = contract
+  let { funds_pend, funds_conf, vin_count } = contract
   if (deposit.confirmed) {
-    fund_value += deposit.utxo.value
-    fund_count += 1
+    funds_conf += deposit.utxo.value
+    vin_count  += 1
   } else {
-    fund_pend += deposit.utxo.value
+    funds_pend += deposit.utxo.value
   }
-  return sort_record({ ...contract, fund_count, fund_pend, fund_value })
+  return sort_record({ ...contract, funds_pend, funds_conf, vin_count })
 }
 
 export function rem_contract_funds (
   contract : ContractData,
   deposit  : DepositData
 ) {
-  let { fund_count, fund_pend, fund_value } = contract
+  let { funds_pend, funds_conf, vin_count } = contract
   if (deposit.confirmed) {
-    fund_value -= deposit.utxo.value
-    fund_count -= 1
+    funds_conf -= deposit.utxo.value
+    vin_count  -= 1
   } else {
-    fund_pend -= deposit.utxo.value
+    funds_pend -= deposit.utxo.value
   }
-  return sort_record({ ...contract, fund_count, fund_pend, fund_value })
+  return sort_record({ ...contract, funds_pend, funds_conf, vin_count })
 }
 
 export function secure_contract (
@@ -122,20 +120,20 @@ export function secure_contract (
   assert.ok(!contract.canceled,               'contract has been canceled')
   assert.ok(deposits.every(e => e.confirmed), 'not all deposits are confirmed')
 
-  const { feerate, fund_txfee, subtotal, tx_bsize } = contract
+  const { feerate, subtotal, tx_bsize, vin_txfee } = contract
 
-  const fund_count = deposits.length
-  const fund_value = deposits.reduce((acc, nxt) => acc + nxt.utxo.value, 0)
-  const tx_fees    = (feerate * tx_bsize) + (fund_txfee * deposits.length)
+  const funds_conf = deposits.reduce((acc, nxt) => acc + nxt.utxo.value, 0)
+  const tx_fees    = (feerate * tx_bsize) + (vin_txfee * deposits.length)
   const tx_vsize   = tx_bsize + (deposits.length * SPEND_TXIN_SIZE)
   const tx_total   = subtotal + tx_fees
+  const vin_count  = deposits.length
 
-  assert.ok(fund_value >= tx_total, `contract is under-funded: ${fund_value} < ${tx_total}`)
+  assert.ok(funds_conf >= tx_total, `contract is under-funded: ${funds_conf} < ${tx_total}`)
 
   const secured      = true as const
   const status       = 'secured' as ContractStatus
   const effective_at = contract.terms.effective ?? updated_at
-  const tabs         = { fund_count, fund_pend: 0, fund_value }
+  const tabs         = { vin_count, funds_pend: 0, funds_conf }
   const changes      = { secured, effective_at, tx_fees, tx_total, tx_vsize }
   const updated      = { ...contract, ...tabs, ...changes, status, updated_at }
   return update_contract(updated, signer, status)

@@ -6,7 +6,7 @@ import tx    from './tx.js'
 const { bool, hash, hex, network, num, stamp, str } = base
 
 const locktime = z.union([ str, num ]).transform(e => Number(e))
-const status   = z.enum([ 'registered', 'confirmed', 'locked', 'spent', 'settled', 'expired', 'error' ])
+const status   = z.enum([ 'registered', 'confirmed', 'locked', 'spent', 'settled', 'closed', 'expired', 'error' ])
 
 const lock_req = z.object({
   dpid     : hash,
@@ -15,26 +15,29 @@ const lock_req = z.object({
 
 const close_req = z.object({
   dpid        : hash,
-  feerate     : num,
+  return_rate : num,
   return_psig : hex
 })
 
 const close_info = z.object({
-  closed      : bool,
-  closed_at   : stamp.nullable(),
-  return_txid : hash.nullable()
+  closed       : bool,
+  closed_at    : stamp.nullable(),
+  return_txhex : hex.nullable(),
+  return_txid  : hash.nullable()
 })
 
 const dp_open = z.object({
-  closed      : z.literal(false),
-  closed_at   : z.null(),
-  return_txid : z.null()
+  closed       : z.literal(false),
+  closed_at    : z.null(),
+  return_txhex : z.null(),
+  return_txid  : z.null()
 })
 
 const dp_closed = z.object({
-  closed      : z.literal(true),
-  closed_at   : stamp,
-  return_txid : hash
+  closed       : z.literal(true),
+  closed_at    : stamp,
+  return_txhex : hex,
+  return_txid  : hash
 })
 
 const lock_info = z.object({
@@ -67,16 +70,16 @@ const fund = z.object({
 
 const base_data = z.object({
   status,
-  acct_hash    : hash,
+  account_hash : hash,
   created_at   : stamp,
   dpid         : hash,
   deposit_pk   : hash,
   deposit_addr : str,
-  feerate      : num,
   locktime     : num,
   network,
   return_addr  : str,
   return_psig  : hex,
+  return_rate  : num,
   satpoint     : str,
   server_pk    : hash,
   server_tkn   : hex,

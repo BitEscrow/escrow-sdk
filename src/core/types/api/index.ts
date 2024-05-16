@@ -1,3 +1,4 @@
+export * from './account.js'
 export * from './contract.js'
 export * from './deposit.js'
 export * from './server.js'

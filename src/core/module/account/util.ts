@@ -101,7 +101,7 @@ export function get_deposit_hash (
 ) {
   const hash = get_account_hash(request)
   const agnt = Buff.hex(request.server_tkn)
-  const rate = Buff.num(request.feerate, 4)
+  const rate = Buff.num(request.return_rate, 4)
   const utxo = get_utxo_bytes(request.utxo)
   const pimg = Buff.join([ hash, agnt, rate, utxo ])
   return sha512(pimg).hex

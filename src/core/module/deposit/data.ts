@@ -36,26 +36,20 @@ export function create_deposit (
 ) : DepositData {
   // Get the deposit address from the account context.
   const { deposit_addr } = get_account_ctx(request)
-  // Compute the hash for the account request.
-  const acct_hash = get_account_hash(request)
-  // Get the satpoint for the utxo.
-  const satpoint  = get_satpoint(request.utxo)
   // Get the hash digest of the deposit request.
-  const dp_hash   = get_deposit_hash(request)
-  // Get the deposit id.
-  const dpid      = get_deposit_id(created_at, dp_hash)
+  const dp_hash  = get_deposit_hash(request)
   // Return a sorted object.
   const template = {
     ...GET_REGISTER_STATE(),
     ...request,
-    acct_hash,
+    account_hash : get_account_hash(request),
     created_at,
     deposit_addr,
-    dpid,
-    satpoint,
-    server_pk  : signer.pubkey,
-    sigs       : [],
-    updated_at : created_at
+    dpid         : get_deposit_id(created_at, dp_hash),
+    satpoint     : get_satpoint(request.utxo),
+    server_pk    : signer.pubkey,
+    sigs         : [],
+    updated_at   : created_at
   }
   return update_deposit(template, signer, 'registered')
 }
@@ -75,18 +69,19 @@ export function confirm_deposit (
 }
 
 export function close_deposit (
-  deposit     : DepositData,
-  return_txid : string,
-  signer      : SignerAPI,
+  deposit : DepositData,
+  signer  : SignerAPI,
+  txhex   : string,
   closed_at   = now()
 ) {
   assert.ok(deposit.confirmed, 'deposit is not confirmed')
   assert.ok(!deposit.locked,   'deposit is already locked')
   assert.ok(!deposit.closed,   'deposit is already closed')
   assert.ok(!deposit.spent,    'deposit is already spent')
+  const return_txid = get_txid(txhex)
   const closed  = true as const
   const status  = 'closed' as DepositStatus
-  const changes = { closed, closed_at, return_txid }
+  const changes = { closed, closed_at, return_txid, return_txhex: txhex }
   const updated = { ...deposit, ...changes, status, updated_at: closed_at }
   return update_deposit(updated, signer, status)
 }

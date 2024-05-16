@@ -134,10 +134,10 @@ export function verify_contract_funding (
   contract : ContractData,
   funds    : FundingData[]
 ) {
-  const { fund_count, fund_pend, fund_value, tx_fees, tx_total, tx_vsize } = contract
+  const { funds_pend, funds_conf, tx_fees, tx_total, tx_vsize, vin_count } = contract
   const tab    = tabulate_funds(contract, funds)
-  const vtotal = fund_pend + fund_value
-  assert.ok(fund_count === tab.fund_count, 'tabulated funds count does not match contract')
+  const vtotal = funds_pend + funds_conf
+  assert.ok(vin_count  === tab.vin_count,  'tabulated funds count does not match contract')
   assert.ok(vtotal     === tab.fund_value, 'tabulated funds value does not match contract')
   assert.ok(tx_fees    === tab.tx_fees,    'tabulated tx fees does not match contract')
   assert.ok(tx_total   === tab.tx_total,   'tabulated tx total does not match contract')

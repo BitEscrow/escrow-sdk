@@ -12,7 +12,7 @@ Reference guide for the BitEscrow Witness API. Click on the links below to navig
 
 ---
 
-## Read a Statement By Id
+## Read a Statement By WID
 
 Fetch a witness statement from the server by id (wid).
 

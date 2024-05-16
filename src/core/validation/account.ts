@@ -94,7 +94,7 @@ export function verify_register_req (
   signer  : SignerAPI
 ) {
   const psig = request.return_psig
-  verify_feerate(request.feerate, policy)
+  verify_feerate(request.return_rate, policy)
   // Verify the account details.
   verify_account_req(policy, request)
   // Verify the session token.
@@ -120,22 +120,22 @@ export function verify_account_data (
   account : AccountData,
   signer  : SignerAPI
 ) {
-  const { acct_id, created_at, deposit_addr, server_pk, server_sig, server_tkn } = account
+  const { account_id, created_at, deposit_addr, server_pk, server_sig, server_tkn } = account
   // Create a context object for the account.
   const ctx = get_account_ctx(account)
   //
   const hash = get_account_hash(account)
   // Compute the id for the account data.
   const id  = get_account_id(deposit_addr, hash, server_pk, created_at, server_tkn)
-  //
+  // Define the deposit address
   const addr = account.deposit_addr
-  //
+  // Define the deposit pubkey.
   const pk = account.deposit_pk
-  //
-  assert.ok(signer.pubkey === pk)
-  assert.ok(ctx.deposit_addr === addr)
-  assert.ok(id === acct_id)
-  assert.ok(verify_sig(server_sig, id, server_pk))
+  // Assert the following is valid.
+  assert.ok(signer.pubkey === pk,      'deposit pubkey does not match signing device')
+  assert.ok(ctx.deposit_addr === addr, 'deposit address does not match signing device')
+  assert.ok(id === account_id,         'account id does not match computed id')
+  assert.ok(verify_sig(server_sig, id, server_pk), 'server signature is invalid')
 }
 
 export function verify_session_token (

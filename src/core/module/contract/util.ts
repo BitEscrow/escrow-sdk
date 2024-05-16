@@ -1,7 +1,8 @@
 import { Buff }                 from '@cmdcode/buff'
 import { decode_tx, encode_tx } from '@scrow/tapscript/tx'
 import { verify_sig }           from '@cmdcode/crypto-tools/signer'
-import { assert, sort_record }               from '@/core/util/index.js'
+import { assert, sort_record }  from '@/core/util/index.js'
+import { get_contract_state }   from './state.js'
 
 import { CONTRACT_KIND, SPEND_TXIN_SIZE } from '@/core/const.js'
 
@@ -12,15 +13,11 @@ import {
 } from '@/core/util/notarize.js'
 
 import {
-  get_contract_stamp,
-  get_contract_state
-} from './state.js'
-
-import {
   ContractData,
   ContractStatus,
   DepositData,
   FundingData,
+  NoteTemplate,
   PaymentEntry,
   ProofEntry,
   ProposalData,
@@ -152,23 +149,24 @@ export function tabulate_funds (
   contract : ContractData,
   funds    : FundingData[]
 ) {
-  const { feerate, fund_txfee, outputs, subtotal } = contract
+  const { feerate, outputs, subtotal, vin_txfee } = contract
   const base_size  = get_max_vout_size(outputs)
   const base_fee   = base_size * feerate
-  const fund_count = funds.length
-  const fund_value = funds.reduce((val, fund) => val + fund.utxo.value, 0)
+  const confirmed  = funds.filter(e => e.confirmed)
+  const vin_count  = confirmed.length
+  const fund_value = confirmed.reduce((val, fund) => val + fund.utxo.value, 0)
 
-  const tx_txin_size  = SPEND_TXIN_SIZE * fund_count
+  const tx_txin_size  = SPEND_TXIN_SIZE * vin_count
   const tx_txin_fee   = tx_txin_size * feerate
   const tx_total_size = base_fee  + tx_txin_fee
   const tx_total_fee  = base_size + tx_txin_size
 
-  const tx_fees    = base_fee  + (fund_count * fund_txfee)
-  const tx_vsize   = base_size + (fund_count * SPEND_TXIN_SIZE)
+  const tx_fees    = base_fee  + (vin_count * vin_txfee)
+  const tx_vsize   = base_size + (vin_count * SPEND_TXIN_SIZE)
   const tx_total   = subtotal  + tx_fees
   const sats_vbyte = Math.floor(tx_total_size / tx_total_fee)
 
-  return { fund_count, fund_value, sats_vbyte, tx_fees, tx_vsize, tx_total }
+  return { vin_count, fund_value, sats_vbyte, tx_fees, tx_vsize, tx_total }
 }
 
 export function get_contract_value (contract : ContractData) {
@@ -177,21 +175,32 @@ export function get_contract_value (contract : ContractData) {
 }
 
 export function get_contract_balance (contract : ContractData) {
-  const { fund_count, fund_txfee, fund_value } = contract
-  const total_value = (fund_count * fund_txfee) - fund_value
+  const { funds_conf, vin_count, vin_txfee } = contract
+  const total_value = (vin_count * vin_txfee) - funds_conf
   return get_contract_value(contract) + total_value
 }
 
-export function get_contract_digest (
+export function get_contract_preimg (
+  contract : ContractData,
+  status   : ContractStatus
+) : NoteTemplate {
+  const { cid, server_pk: pubkey } = contract
+  const { content, created_at }    = get_contract_state(contract, status)
+  const kind  = CONTRACT_KIND
+  const tags  = [ [ 'i', cid ] ]
+  return { content, created_at, kind, pubkey, tags }
+}
+
+export function get_contract_note (
   contract : ContractData,
   status   : ContractStatus
 ) {
-  const { cid, server_pk } = contract
-  const stamp = get_contract_stamp(contract, status)
-  const state = get_contract_state(contract, status)
-  const tags  = [ [ 'i', cid ] ]
-  assert.exists(stamp, 'timestamp is null: ' + status)
-  return get_proof_id(state, CONTRACT_KIND, server_pk, stamp, tags)
+  const tmpl  = get_contract_preimg(contract, status)
+  const proof = contract.sigs.find(e => e[0] === status)
+  assert.exists(proof, 'signature no found for status: ' + status)
+  const id  = proof[1].slice(0, 64)
+  const sig = proof[1].slice(64)
+  return { ...tmpl, id, sig }
 }
 
 export function notarize_contract (
@@ -199,8 +208,9 @@ export function notarize_contract (
   signer   : SignerAPI,
   status   : ContractStatus
 ) : ProofEntry<ContractStatus> {
-  const dig    = get_contract_digest(contract, status)
-  const sig    = signer.sign(dig)
+  const img = get_contract_preimg(contract, status)
+  const dig = get_proof_id(img)
+  const sig = signer.sign(dig)
   return [ contract.status, Buff.join([ dig, sig ]).hex ]
 }
 
@@ -209,7 +219,7 @@ export function update_contract (
   signer   : SignerAPI,
   status   : ContractStatus
 ) {
-  const proof  = notarize_contract(contract, signer, status)
+  const proof   = notarize_contract(contract, signer, status)
   contract.sigs = update_proof(contract.sigs, proof)
   return sort_record(contract)
 }
@@ -222,7 +232,8 @@ export function verify_contract_sig (
   const [ status, proof ] = signature
   const [ id, sig ]       = parse_proof(proof)
   const pub = contract.server_pk
-  const dig = get_contract_digest(contract, status)
+  const img = get_contract_preimg(contract, status)
+  const dig = get_proof_id(img)
   assert.ok(pubkey === pub,           'pubkey does not match: ' + status)
   assert.ok(dig === id,               'digest does not match: ' + status)
   assert.ok(verify_sig(sig, id, pub), 'invalid signature: '     + status)

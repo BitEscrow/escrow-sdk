@@ -96,8 +96,6 @@ interface DraftTemplate {
 
 ```ts
 interface DraftData {
-  // Signed approvals from each member, to signal readiness.
-  approvals  : string[]    
   // A list of active members of the proposal, and their credentials.  
   members    : MemberData[]  
   // The main proposal document being negotiated.
@@ -106,7 +104,5 @@ interface DraftData {
   roles      : RolePolicy[]  
   // Non-member endorsements of the proposal, used for indexing.
   signatures : string[]      
-  // A list of terms in the proposal which are negotiable.
-  terms      : string[]      
 }
 ```

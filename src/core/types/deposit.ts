@@ -11,7 +11,7 @@ import {
 
 export type LockState     = DepositIsLocked | DepositIsUnlocked
 export type CloseState    = DepositIsClosed | DepositIsOpen
-export type DepositData   = DepositInfo & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
+export type DepositData   = DepositBase & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
 export type DepositStatus = 'registered' | 'confirmed' | 'closed' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
 export type FundingData = TxConfirmState & TxSettleState & TxSpendState & {
@@ -33,27 +33,29 @@ export interface DepositIsLocked {
 }
 
 export interface DepositIsUnlocked {
-  covenant  : null
-  locked    : false
-  locked_at : null
+  covenant   : null
+  locked     : false
+  locked_at  : null
 }
 
 export interface CloseRequest {
   dpid        : string
-  feerate     : number
+  return_rate : number
   return_psig : string
 }
 
 export interface DepositIsClosed {
-  closed      : true
-  closed_at   : number
-  return_txid : string
+  closed       : true
+  closed_at    : number
+  return_txid  : string
+  return_txhex : string
 }
 
 export interface DepositIsOpen {
-  closed      : false
-  closed_at   : null
-  return_txid : null
+  closed       : false
+  closed_at    : null
+  return_txid  : null
+  return_txhex : null
 }
 
 export interface DepositConfig {
@@ -61,17 +63,16 @@ export interface DepositConfig {
   utxo_state ?: TxConfirmState
 }
 
-export interface DepositInfo {
-  acct_hash    : string
-  covenant     : CovenantData | null
+export interface DepositBase {
+  account_hash : string
   created_at   : number
   deposit_pk   : string
   deposit_addr : string
   dpid         : string
-  feerate      : number
   locktime     : number
   network      : Network
   return_addr  : string
+  return_rate  : number
   return_psig  : string
   satpoint     : string
   server_pk    : string

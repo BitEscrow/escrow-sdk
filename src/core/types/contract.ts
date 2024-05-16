@@ -25,14 +25,14 @@ export type ContractStatus =
 export type ContractPublishState = ContractIsPublished | ContractIsCanceled
 export type ContractFundingState = ContractIsSecured   | ContractIsPending
 export type ContractActiveState  = ContractIsActive    | ContractIsInactive
-export type ContractCloseState   = ContractIsOpen      | ContractIsClosed
+export type ContractExecState    = ContractIsOpen      | ContractIsClosed
 
 export type ContractData =
   ContractBase         &
   ContractPublishState &
   ContractFundingState &
   ContractActiveState  &
-  ContractCloseState   &
+  ContractExecState    &
   TxSpendState         &
   TxSettleState
 
@@ -113,10 +113,8 @@ export interface ContractBase {
   endorsements : string[]
   fees         : PaymentEntry[]
   feerate      : number
-  fund_count   : number
-  fund_pend    : number
-  fund_txfee   : number
-  fund_value   : number
+  funds_pend   : number
+  funds_conf   : number
   moderator    : string | null
   outputs      : SpendTemplate[]
   prop_id      : string
@@ -126,5 +124,7 @@ export interface ContractBase {
   subtotal     : number
   terms        : ProposalData
   tx_bsize     : number
+  vin_count    : number
+  vin_txfee    : number
   updated_at   : number
 }

@@ -1,12 +1,12 @@
 import { ContractData, ContractStatus }        from '@/core/types/index.js'
 import { INIT_SPEND_STATE, INIT_SETTLE_STATE } from '@/core/lib/tx.js'
-import { sort_record } from '@/core/util/base.js'
+import { assert, sort_record }                 from '@/core/util/index.js'
 
 export const INIT_PUBLISH_STATE = () => {
   return {
-    fund_count : 0,
-    fund_pend  : 0,
-    fund_value : 0
+    funds_conf : 0,
+    funds_pend : 0,
+    vin_count  : 0
   }
 }
 
@@ -99,55 +99,39 @@ export function get_contract_state (
   status   : ContractStatus
 ) {
   const { sigs, updated_at, ...rest } = contract
-  let preimage
+  let state, stamp
   switch (status) {
     case 'published':
-     preimage = { ...rest, ...GET_PUBLISH_STATE() }
+     state = { ...rest, ...GET_PUBLISH_STATE() }
+     stamp = contract.created_at
      break
     case 'canceled':
-      preimage = rest
+      state = rest
+      stamp = contract.canceled_at
       break
     case 'secured':
-      preimage = { ...rest, ...GET_FUNDING_STATE() }
+      state = { ...rest, ...GET_FUNDING_STATE() }
+      stamp = contract.effective_at
       break
     case 'active':
-      preimage = { ...rest, ...GET_ACTIVE_STATE() }
+      state = { ...rest, ...GET_ACTIVE_STATE() }
+      stamp = contract.active_at
       break
     case 'closed':
-      preimage = { ...rest, ...GET_CLOSE_STATE() }
+      state = { ...rest, ...GET_CLOSE_STATE() }
+      stamp = contract.closed_at
       break
     case 'spent':
-      preimage = { ...rest, ...GET_SPEND_STATE() }
+      state = { ...rest, ...GET_SPEND_STATE() }
+      stamp = contract.spent_at
       break
     case 'settled':
-      preimage = rest
+      state = rest
+      stamp = contract.settled_at
       break
     default:
       throw new Error('unrecognized signature status: ' + status)
   }
-  return JSON.stringify(sort_record(preimage))
-}
-
-export function get_contract_stamp (
-  contract : ContractData,
-  status   : ContractStatus
-) {
-  switch (status) {
-    case 'published':
-      return contract.created_at
-    case 'canceled':
-      return contract.canceled_at
-    case 'secured':
-      return contract.effective_at
-    case 'active':
-      return contract.active_at
-    case 'closed':
-      return contract.closed_at
-    case 'spent':
-      return contract.spent_at
-    case 'settled':
-      return contract.settled_at
-    default:
-      throw new Error('invalid signature status: ' + status)
-  }
+  assert.exists(stamp)
+  return { content: JSON.stringify(sort_record(state)), created_at: stamp }
 }

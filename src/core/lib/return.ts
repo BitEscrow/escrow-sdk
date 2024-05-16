@@ -83,13 +83,13 @@ export function create_return_psig (
 export function create_return_template (
   request : RegisterTemplate
 ) : TxData {
-  const { feerate, return_addr, utxo } = request
-  // Get transaction fee.
-  const txfee  = get_return_txfee(feerate)
+  const { return_addr, return_rate, utxo } = request
+  // Get fee amount.
+  const txfees = get_return_txfee(return_rate)
   // Create locking script.
   const script = get_lock_script(return_addr)
   // Create a return transaction using the provided params.
-  return create_utxo_template(script, utxo.value - txfee)
+  return create_utxo_template(script, utxo.value - txfees)
 }
 
 /**

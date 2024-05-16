@@ -166,7 +166,7 @@ export default async function (
         /* ------------------- [ Create Deposits ] ------------------- */
 
         // Calculate the funding amount required for the contract.
-        const fund_amt = (Math.ceil(get_contract_value(contract) / 2)) + contract.fund_txfee
+        const fund_amt = (Math.ceil(get_contract_value(contract) / 2)) + contract.vin_txfee
         // Fund deposit address and get txid.
         const dep_txid = await fund_address(client, 'faucet', account.deposit_addr, fund_amt, false)
         // Fetch the utxo for the funded address.

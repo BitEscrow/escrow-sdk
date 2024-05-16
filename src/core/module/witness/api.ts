@@ -10,14 +10,14 @@ import {
 import {
   ProgramEntry,
   SignerAPI,
-  EngineConfig,
+  MachineConfig,
   VMData,
   WitnessData,
   WitnessTemplate
 } from '../../types/index.js'
 
 export function create_witness (
-  config   : EngineConfig | VMData,
+  config   : MachineConfig | VMData,
   pubkeys  : string   | string[],
   template : WitnessTemplate
 ) : WitnessData {
