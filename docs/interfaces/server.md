@@ -17,8 +17,8 @@ The data interface for additional terms and restrictions that are defined by the
 ```ts
 interface ServerPolicy {
   account : {
-    RET_FEE_MIN   : number  // Minimun tx fees required on a return tx.
-    RET_FEE_MAX   : number  // Maximum tx fees allowed on a return tx.
+    FEERATE_MIN   : number  // Minimun feerate required on a return tx.
+    FEERATE_MAX   : number  // Maximum feerate allowed on a return tx.
     GRACE_PERIOD  : number  // Time (in seconds) required between contract and deposit expiration.
     LOCKTIME_MIN  : number  // Minimum locktime duration (in seconds) for a deposit.
     LOCKTIME_MAX  : number  // Maximum locktime duration (in seconds) for a deposit.
