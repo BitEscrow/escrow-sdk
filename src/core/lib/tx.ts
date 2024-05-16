@@ -34,12 +34,11 @@ import {
 import { assert } from '../util/index.js'
 
 import {
-  ConfirmState,
+  TxConfirmState,
   Network,
-  SettleState,
+  TxSettleState,
   SignerAPI,
-  SpendState,
-//  OracleTxIn,
+  TxSpendState,
   TxOutput,
   TxVout
 } from '../types/index.js'
@@ -47,7 +46,7 @@ import {
 /**
  * Initialization object for tx receive state.
  */
-export function GET_INIT_RECV_STATE () : ConfirmState {
+export function INIT_CONF_STATE () : TxConfirmState {
   return {
     confirmed    : false as const,
     block_hash   : null,
@@ -60,14 +59,22 @@ export function GET_INIT_RECV_STATE () : ConfirmState {
 /**
  * Initialization object for tx spend state.
  */
-export function GET_INIT_SPEND_STATE () : SpendState & SettleState {
+export function INIT_SPEND_STATE () : TxSpendState {
   return {
-    settled     : false as const,
-    settled_at  : null,
     spent       : false as const,
     spent_at    : null,
     spent_txhex : null,
     spent_txid  : null
+  }
+}
+
+/**
+ * Initialization object for tx settle state.
+ */
+export function INIT_SETTLE_STATE () : TxSettleState {
+  return {
+    settled    : false as const,
+    settled_at : null
   }
 }
 
@@ -107,24 +114,6 @@ export function get_satpoint (
 ) : string {
   return `${utxo.txid}:${String(utxo.vout)}`
 }
-
-// export function create_txspend (
-//   txin : OracleTxIn
-// ) : TxOutput {
-//   const { txid, vout, prevout } = txin
-//   assert.exists(prevout)
-//   const { value, scriptpubkey } = prevout
-//   return { txid, vout, value, scriptkey: scriptpubkey }
-// }
-
-// export function prevout_to_txspend (
-//   txinput : TxPrevout
-// ) : TxOutput {
-//   const { txid, vout, prevout } = txinput
-//   const { value, scriptPubKey } = prevout
-//   const script = parse_script(scriptPubKey).hex
-//   return { txid, vout, value: Number(value), scriptkey: script }
-// }
 
 export function create_txinput (
   txout : TxOutput

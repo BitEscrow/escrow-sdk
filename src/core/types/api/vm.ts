@@ -1,4 +1,4 @@
-import { VMData }         from '../vm.js'
+import { VMData }         from '../machine.js'
 import { WitnessReceipt } from '../witness.js'
 
 export interface VMDataResponse {

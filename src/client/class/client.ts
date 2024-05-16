@@ -1,12 +1,5 @@
-import { resolve_json } from '@/core/util/fetch.js'
-
-import {
-  ApiResponse,
-  Network,
-  ServerPolicy,
-  VirtualMachineAPI
-} from '@/core/types/index.js'
-
+import { resolve_json }                      from '@/core/util/fetch.js'
+import { ApiResponse, Network }              from '@/core/types/index.js'
 import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
 import {
@@ -15,10 +8,11 @@ import {
   FetchConfig
 } from '../types.js'
 
+import account_api   from '../api/client/account.js'
 import contract_api  from '../api/client/contract.js'
 import deposit_api   from '../api/client/deposit.js'
+import draft_api     from '../api/client/draft.js'
 import oracle_api    from '../api/client/oracle.js'
-import proposal_api  from '../api/client/draft.js'
 import server_api    from '../api/client/server.js'
 import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
@@ -43,10 +37,6 @@ export class EscrowClient {
     return this._fetcher
   }
 
-  get machine () : VirtualMachineAPI {
-    return this._config.machine
-  }
-
   get network ()  : Network {
     return this._config.network
   }
@@ -55,11 +45,7 @@ export class EscrowClient {
     return this._config.oracle_url
   }
 
-  get server_pol () : ServerPolicy {
-    return this._config.server_pol
-  }
-
-  get server_pk () {
+  get server_pk () : string {
     return this._config.server_pk
   }
 
@@ -67,19 +53,14 @@ export class EscrowClient {
     return this._config.server_url
   }
 
+  account  = account_api(this)
   contract = contract_api(this)
   deposit  = deposit_api(this)
+  draft    = draft_api(this)
   oracle   = oracle_api(this)
-  proposal = proposal_api(this)
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)
-
-  check_issuer (pubkey : string) {
-    if (pubkey !== this.server_pk) {
-      throw new Error('issuer\'s pubkey is not recognized')
-    }
-  }
 
   toJSON () {
     return this._config

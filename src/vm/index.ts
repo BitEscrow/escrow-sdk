@@ -1,4 +1,4 @@
-import { ENGINE_LABEL, VALID_ACTIONS, VALID_METHODS } from './const.js'
+import { ENGINE_LABEL, VALID_ACTIONS, VALID_METHODS, VALID_STATES } from './const.js'
 
 import { check_params } from './lib/program.js'
 
@@ -16,9 +16,10 @@ export * from './types.js'
 export default {
   actions : VALID_ACTIONS,
   methods : VALID_METHODS,
-  tag     : ENGINE_LABEL,
-  check   : check_params,
+  states  : VALID_STATES,
+  label   : ENGINE_LABEL,
   eval    : eval_witness,
   init    : init_vm,
-  run     : eval_schedule
+  run     : eval_schedule,
+  verify  : check_params
 }

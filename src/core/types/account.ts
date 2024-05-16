@@ -1,12 +1,11 @@
 import { KeyContext } from '@cmdcode/musig2'
+import { Network }    from './base.js'
+import { TxOutput }   from './tx.js'
 
 import {
   ScriptWord,
   TapContext
 } from '@scrow/tapscript'
-
-import { Network }  from './base.js'
-import { TxOutput } from './tx.js'
 
 import { CovenantData, SessionToken } from './covenant.js'
 
@@ -30,8 +29,8 @@ export interface AccountContext {
 }
 
 export interface AccountData {
-  acct_hash    : string
-  acct_id      : string
+  account_hash : string
+  account_id   : string
   created_at   : number
   deposit_addr : string
   deposit_pk   : string
@@ -52,8 +51,8 @@ export interface AccountTemplate {
 }
 
 export interface RegisterTemplate extends AccountTemplate {
-  feerate : number
-  utxo    : TxOutput
+  return_rate : number
+  utxo        : TxOutput
 }
 
 export interface RegisterRequest extends RegisterTemplate {

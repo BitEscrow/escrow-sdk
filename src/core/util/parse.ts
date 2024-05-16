@@ -33,7 +33,7 @@ export function parse_contract (
 export function parse_covenant (
   covenant : unknown
 ) : CovenantData {
-  return CoreSchema.covenant.data.parse(covenant as CovenantData)
+  return CoreSchema.account.covenant.parse(covenant as CovenantData)
 }
 
 export function parse_deposit (

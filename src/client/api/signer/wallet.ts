@@ -1,5 +1,5 @@
 import { AddressConfig } from '@cmdcode/signer'
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner }  from '../../class/signer.js'
 
 export function has_address_api (esigner : EscrowSigner) {
   return (

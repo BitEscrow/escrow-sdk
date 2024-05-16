@@ -1,6 +1,9 @@
 import { Network }           from '@scrow/sdk'
 import { get_server_config } from '@scrow/test'
 
+import DefaultEngine from '@/vm/index.js'
+import DefaultPolicy from '@/client/config/policy.js'
+
 const faucets = {
   mutiny  : 'https://faucet.mutinynet.com',
   regtest : 'none',
@@ -32,8 +35,10 @@ export const config = {
   feerate,
   locktime,
   network,
+  engine      : DefaultEngine,
   faucet      : faucets[network as keyof typeof faucets],
   members     : [ 'alice', 'bob', 'carol' ],
+  policy      : DefaultPolicy,
   poll        : poll_rates[network as keyof typeof poll_rates],
   return_addr : returns[network as keyof typeof returns]
 }

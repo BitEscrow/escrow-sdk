@@ -1,59 +1,34 @@
-import { verify_account }  from '@/core/validation/account.js'
-import { verify_contract } from '@/core/validation/contract.js'
-import { verify_deposit }  from '@/core/validation/deposit.js'
-import { assert }          from '@/core/util/index.js'
-import { EscrowSigner }    from '../../class/signer.js'
+import { assert }       from '@/core/util/index.js'
+import { EscrowSigner } from '../../class/signer.js'
+
+import {
+  verify_contract_data,
+  verify_contract_sigs
+} from '@/core/validation/contract.js'
+
+import {
+  verify_deposit_data,
+  verify_deposit_sigs
+} from '@/core/validation/deposit.js'
 
 import {
   create_close_req,
-  create_commit_req,
-  create_lock_req,
-  create_register_req
-} from '@/core/lib/deposit.js'
+  create_lock_req
+} from '@/core/module/deposit/index.js'
 
 import {
   CloseRequest,
-  CommitRequest,
   ContractData,
-  AccountData,
   DepositData,
-  LockRequest,
-  TxOutput,
-  RegisterRequest
+  LockRequest
 } from '@/core/types/index.js'
 
 export function request_deposits_api (esigner : EscrowSigner) {
   return () => {
-    const pub  = esigner.pubkey
     const host = esigner.server_url
-    const url  = `${host}/api/deposit/list?pk=${pub}`
+    const url  = `${host}/api/deposit/list`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
-  }
-}
-
-export function register_funds_api (esigner : EscrowSigner) {
-  return (
-    account : AccountData,
-    feerate : number,
-    utxo    : TxOutput
-  ) : RegisterRequest => {
-    esigner.check_issuer(account.server_pk)
-    verify_account(account, esigner._signer)
-    return create_register_req(feerate, account, esigner._signer, utxo)
-  }
-}
-
-export function commit_funds_api (esigner : EscrowSigner) {
-  return (
-    account  : AccountData,
-    contract : ContractData,
-    feerate  : number,
-    utxo     : TxOutput
-  ) : CommitRequest => {
-    esigner.check_issuer(account.server_pk)
-    verify_account(account, esigner._signer)
-    return create_commit_req(feerate, contract, account, esigner._signer, utxo)
   }
 }
 
@@ -62,11 +37,12 @@ export function lock_funds_api (esigner : EscrowSigner) {
     contract : ContractData,
     deposit  : DepositData
   ) : LockRequest => {
-    esigner.check_issuer(contract.server_pk)
-    esigner.check_issuer(deposit.server_pk)
-    verify_contract(contract)
-    verify_deposit(deposit, esigner._signer)
-    return create_lock_req(contract, deposit, esigner._signer)
+    const { server_pk, _signer } = esigner
+    verify_contract_sigs(contract, server_pk)
+    verify_contract_data(contract)
+    verify_deposit_sigs(deposit, server_pk)
+    verify_deposit_data(deposit, _signer)
+    return create_lock_req(contract, deposit, _signer)
   }
 }
 
@@ -85,19 +61,19 @@ export function close_deposit_api (esigner : EscrowSigner) {
     deposit : DepositData,
     feerate : number
   ) : CloseRequest => {
-    esigner.check_issuer(deposit.server_pk)
-    verify_deposit(deposit, esigner._signer)
-    return create_close_req(deposit, feerate, esigner._signer)
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    verify_deposit_sigs(deposit, server_pk)
+    verify_deposit_data(deposit, _signer)
+    return create_close_req(deposit, feerate, _signer)
   }
 }
 
 export default function (esigner : EscrowSigner) {
   return {
-    cancel   : cancel_deposit_api(esigner),
-    close    : close_deposit_api(esigner),
-    commit   : commit_funds_api(esigner),
-    list     : request_deposits_api(esigner),
-    lock     : lock_funds_api(esigner),
-    register : register_funds_api(esigner)
+    cancel : cancel_deposit_api(esigner),
+    close  : close_deposit_api(esigner),
+    list   : request_deposits_api(esigner),
+    lock   : lock_funds_api(esigner)
   }
 }

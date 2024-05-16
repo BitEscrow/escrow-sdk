@@ -14,12 +14,12 @@ import {
 
 import * as assert from '@/assert.js'
 
-interface ContractVMConfig {
+interface ContractMachineConfig {
   refresh_ival : number
   verbose      : boolean
 }
 
-const DEFAULT_CONFIG : ContractVMConfig = {
+const DEFAULT_CONFIG : ContractMachineConfig = {
   refresh_ival : 10,
   verbose      : true
 }
@@ -32,7 +32,7 @@ export class ContractVM extends EventEmitter <{
   static async fetch (
     client  : EscrowClient,
     cid     : string,
-    config ?: Partial<ContractVMConfig>
+    config ?: Partial<ContractMachineConfig>
   ) {
     const res_state = await client.contract.read(cid)
     if (!res_state.ok) throw new Error(res_state.error)
@@ -42,7 +42,7 @@ export class ContractVM extends EventEmitter <{
 
   readonly _client   : EscrowClient
   readonly _contract : ContractData
-  readonly _opt      : ContractVMConfig
+  readonly _opt      : ContractMachineConfig
 
   _data    : StateData
   _updated : number
@@ -50,7 +50,7 @@ export class ContractVM extends EventEmitter <{
   constructor (
     client   : EscrowClient,
     contract : ContractData,
-    config  ?: Partial<ContractVMConfig>
+    config  ?: Partial<ContractMachineConfig>
   ) {
     assert.ok(contract.vm_state !== null, 'contract vm is not active')
     super()

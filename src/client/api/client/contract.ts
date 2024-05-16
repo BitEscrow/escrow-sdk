@@ -1,12 +1,11 @@
 /* Global Imports */
 
 import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_publish_req }     from '@/core/lib/contract.js'
+import { create_publish_req }     from '@/core/module/contract/index.js'
 
 import {
-  validate_commit_req,
   verify_endorsements,
-  verify_proposal
+  verify_proposal_data
 } from '@/core/validation/index.js'
 
 import {
@@ -15,8 +14,8 @@ import {
   ContractListResponse,
   FundListResponse,
   ContractRequest,
-  FundingDataResponse,
-  CommitRequest
+  ServerPolicy,
+  ScriptEngineAPI
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -30,19 +29,20 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
+    engine  : ScriptEngineAPI,
+    policy  : ServerPolicy,
     request : ContractRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
-    const { machine, server_pol }  = client
-    const { proposal, signatures } = request
+    const { endorsements, proposal } = request
     // Parse and validate the proposal.
     const prop = parse_proposal(proposal)
     // Verify the proposal's terms.
-    verify_proposal(machine, server_pol, prop)
+    verify_proposal_data(engine, policy, prop)
     // Verify any signatures.
-    verify_endorsements(prop, signatures)
+    verify_endorsements(prop, endorsements)
     // Create a contract publish request.
-    const req  = create_publish_req(proposal, signatures)
+    const req  = create_publish_req(proposal, endorsements)
     // Formulate the request url.
     const host = client.server_url
     const url  = `${host}/api/contract/create`
@@ -139,34 +139,9 @@ function cancel_contract_api (
   }
 }
 
-/**
- * Fund a contract directly using a deposit template.
- */
-function commit_funds_api (client : EscrowClient) {
-  return async (
-    request : CommitRequest
-  ) : Promise<ApiResponse<FundingDataResponse>> => {
-    // Validate the request.
-    validate_commit_req(request)
-    // Formulate the request url.
-    const cid  = request.covenant.cid
-    const host = client.server_url
-    const url  = `${host}/api/contract/${cid}/commit`
-    // Forulate the request body.
-    const init = {
-      method  : 'POST',
-      body    : JSON.stringify(request),
-      headers : { 'content-type': 'application/json' }
-    }
-    // Return the response.
-    return client.fetcher<FundingDataResponse>({ url, init })
-  }
-}
-
 export default function (client : EscrowClient) {
   return {
     cancel : cancel_contract_api(client),
-    commit : commit_funds_api(client),
     create : create_contract_api(client),
     funds  : list_funds_api(client),
     list   : list_contract_api(client),

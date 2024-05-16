@@ -60,7 +60,7 @@ const base_data = z.object({
 const data    = base_data.and(close_state)
 const shape   = base_data.merge(close_info)
 
-const vm_check = z
+const vm_verify = z
   .function()
   .args(str, literal.array())
   .returns(str.nullable())
@@ -83,11 +83,12 @@ const vm_run = z
 const api = z.object({
   actions : str.array(),
   methods : str.array(),
+  states  : str.array(),
   tag     : str,
-  check   : vm_check,
   eval    : vm_eval,
   init    : vm_init,
-  run     : vm_run
+  run     : vm_run,
+  verify  : vm_verify
 })
 
 export default { api, config, data, shape, program }

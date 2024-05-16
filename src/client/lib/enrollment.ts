@@ -1,5 +1,5 @@
 import { Wallet }                from '@cmdcode/signer'
-import { assert, get_object_id } from '@/core/util/index.js'
+import { assert, get_record_id } from '@/core/util/index.js'
 import { ProposalData }          from '@/core/types/index.js'
 import { get_program_idx }       from '@/core/lib/vm.js'
 
@@ -24,7 +24,7 @@ export function create_role_policy (
   template : RoleTemplate
 ) : RolePolicy {
   const pol = { ...GET_ROLE_DEFAULTS(), ...template }
-  const id  = get_object_id(pol).hex
+  const id  = get_record_id(pol).hex
   return { ...pol, id }
 }
 

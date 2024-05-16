@@ -7,14 +7,11 @@ import {
   ProgramEntry,
   ProposalData,
   ProposalTemplate,
-  ServerPolicy,
-  VirtualMachineAPI
+  SignerAPI
 } from '@/core/types/index.js'
 
 export interface SignerConfig {
-  machine    : VirtualMachineAPI
   network    : Network
-  server_pol : ServerPolicy
   server_pk  : string
   server_url : string
 }
@@ -89,6 +86,12 @@ export interface DraftSession {
   members  : MemberData[]
   roles    : RolePolicy[]
   sigs     : string[]
+}
+
+export interface ClientSignerAPI extends SignerAPI {
+  xpub      : string
+  backup    : (password : Bytes) => Bytes
+  gen_token : (content : string) => string
 }
 
 export interface WalletAPI {

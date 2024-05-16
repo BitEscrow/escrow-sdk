@@ -1,7 +1,5 @@
 /* Global Imports */
 
-import { verify_sig } from '@cmdcode/crypto-tools/signer'
-
 import {
   decode_tx,
   encode_tx
@@ -9,12 +7,12 @@ import {
 
 /* Module Imports */
 
+import { assert } from '../util/index.js'
+
 import {
   get_proposal_id,
   verify_endorsement
 } from '../lib/proposal.js'
-
-import { assert } from '../util/index.js'
 
 import {
   create_txinput,
@@ -25,8 +23,9 @@ import {
   create_spend_templates,
   get_contract_id,
   get_spend_template,
-  tabulate_funds
-} from '../lib/contract.js'
+  tabulate_funds,
+  verify_contract_sig
+} from '../module/contract/util.js'
 
 import {
   ContractData,
@@ -35,30 +34,39 @@ import {
   ProposalData,
   ServerPolicy,
   VMData,
-  VirtualMachineAPI
+  ScriptEngineAPI
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
 
 /* Local Imports */
 
-import { validate_proposal, verify_proposal } from './proposal.js'
+import {
+  validate_proposal_data,
+  verify_proposal_data
+} from './proposal.js'
 
-export function validate_contract (
+export function validate_publish_req (
+  contract : unknown
+) : asserts contract is ContractData {
+  void ContractSchema.publish_req.parse(contract)
+}
+
+export function validate_contract_data (
   contract : unknown
 ) : asserts contract is ContractData {
   void ContractSchema.data.parse(contract)
 }
 
 export function verify_contract_req (
-  machine : VirtualMachineAPI,
+  machine : ScriptEngineAPI,
   policy  : ServerPolicy,
   request : ContractRequest
 ) {
-  const { proposal, signatures } = request
-  validate_proposal(proposal)
-  verify_proposal(machine, policy, proposal)
-  verify_endorsements(proposal, signatures)
+  const { endorsements, proposal } = request
+  validate_proposal_data(proposal)
+  verify_proposal_data(machine, policy, proposal)
+  verify_endorsements(proposal, endorsements)
 }
 
 export function verify_endorsements (
@@ -74,18 +82,35 @@ export function verify_endorsements (
   }
 }
 
-export function verify_contract (contract : ContractData) {
-  const { created_at, outputs, server_pk, server_sig, terms } = contract
+export function verify_contract_data (contract : ContractData) {
+  const { created_at, outputs, terms } = contract
   const pid = get_proposal_id(terms)
   const cid = get_contract_id(outputs, pid, created_at)
-  assert.ok(pid === contract.prop_id,         'computed terms id does not match contract')
-  assert.ok(cid === contract.cid,             'computed cid id does not match contract')
+  assert.ok(pid === contract.prop_id, 'computed terms id does not match contract')
+  assert.ok(cid === contract.cid,     'computed cid id does not match contract')
   for (const [ label, txhex ] of outputs) {
     const tmpl = contract.outputs.find(e => e[0] === label)
-    assert.ok(tmpl !== undefined, 'output template does not exist for label: ' + label)
-    assert.ok(tmpl[1] === txhex,  'tx hex does not match output for label: ' + label)
+    assert.ok(tmpl !== undefined,     'output template does not exist for label: ' + label)
+    assert.ok(tmpl[1] === txhex,      'tx hex does not match output for label: ' + label)
   }
-  assert.ok(verify_sig(server_sig, cid, server_pk), 'signature is invalid for server pubkey: ' + server_pk)
+}
+
+export function verify_contract_sigs (
+  contract : ContractData,
+  pubkey   : string
+) {
+  const labels = contract.sigs.map(e => e[0])
+
+  assert.ok(labels.includes('published'),                       'contract signature missing: published')
+  assert.ok(!contract.canceled  || labels.includes('canceled'), 'contract signature missing: canceled')
+  assert.ok(!contract.activated || labels.includes('active'),   'contract signature missing: active')
+  assert.ok(!contract.closed    || labels.includes('closed'),   'contract signature missing: closed')
+  assert.ok(!contract.spent     || labels.includes('spent'),    'contract signature missing: spent')
+  assert.ok(!contract.settled   || labels.includes('settled'),  'contract signature missing: settled')
+
+  contract.sigs.forEach(sig => {
+    verify_contract_sig(contract, pubkey, sig)
+  })
 }
 
 export function verify_contract_publishing (
@@ -100,8 +125,8 @@ export function verify_contract_publishing (
   assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
   for (const [ label, txhex ] of out) {
     const tmpl = contract.outputs.find(e => e[0] === label)
-    assert.ok(tmpl !== undefined, 'output template does not exist for label: ' + label)
-    assert.ok(tmpl[1] === txhex,  'tx hex does not match output for label: ' + label)
+    assert.ok(tmpl !== undefined,     'output template does not exist for label: ' + label)
+    assert.ok(tmpl[1] === txhex,      'tx hex does not match output for label: ' + label)
   }
 }
 
@@ -109,10 +134,10 @@ export function verify_contract_funding (
   contract : ContractData,
   funds    : FundingData[]
 ) {
-  const { fund_count, fund_pend, fund_value, tx_fees, tx_total, tx_vsize } = contract
+  const { funds_pend, funds_conf, tx_fees, tx_total, tx_vsize, vin_count } = contract
   const tab    = tabulate_funds(contract, funds)
-  const vtotal = fund_pend + fund_value
-  assert.ok(fund_count === tab.fund_count, 'tabulated funds count does not match contract')
+  const vtotal = funds_pend + funds_conf
+  assert.ok(vin_count  === tab.vin_count,  'tabulated funds count does not match contract')
   assert.ok(vtotal     === tab.fund_value, 'tabulated funds value does not match contract')
   assert.ok(tx_fees    === tab.tx_fees,    'tabulated tx fees does not match contract')
   assert.ok(tx_total   === tab.tx_total,   'tabulated tx total does not match contract')
@@ -123,11 +148,11 @@ export function verify_contract_activation (
   contract : ContractData,
   vmstate  : VMData
 ) {
-  const { activated, active_at, canceled, expires_at, vmid } = contract
+  const { activated, active_at, canceled, expires_at, engine_vmid } = contract
   assert.ok(!canceled,                       'contract is flagged as canceled')
   assert.ok(activated,                       'contract is not flagged as active')
   assert.ok(active_at === vmstate.active_at, 'contract activated date does not match vm')
-  assert.ok(vmid      === vmstate.vmid,      'contract vmid does not match vm internal id')
+  assert.ok(engine_vmid === vmstate.vmid,    'contract vmid does not match vm internal id')
   const expires_chk = active_at + contract.terms.duration
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
@@ -139,8 +164,8 @@ export function verify_contract_close (
   assert.ok(vmstate.closed,  'vm state is not closed')
   assert.ok(contract.closed, 'contract is not closed')
   assert.ok(vmstate.closed_at === contract.closed_at,   'contract closed_at does not match vm result')
-  assert.ok(vmstate.head      === contract.active_head, 'contract active_head does not match vm result')
-  assert.ok(vmstate.output    === contract.closed_path, 'contract closed_path does not match vm result')
+  assert.ok(vmstate.head      === contract.engine_head, 'contract active_head does not match vm result')
+  assert.ok(vmstate.output    === contract.engine_vout, 'contract closed_path does not match vm result')
 }
 
 export function verify_contract_spending (
@@ -176,10 +201,28 @@ export function verify_contract_settlement (
   proposal   : ProposalData,
   vmstate    : VMData
 ) {
-  verify_contract(contract)
+  verify_contract_data(contract)
   verify_contract_publishing(contract, proposal)
   verify_contract_funding(contract, funds)
   verify_contract_activation(contract, vmstate)
   verify_contract_close(contract, vmstate)
   verify_contract_spending(contract, funds, vmstate)
+}
+
+export default {
+  validate : {
+    request : validate_publish_req,
+    data    : validate_contract_data
+  },
+  verify : {
+    request    : verify_contract_req,
+    data       : verify_contract_data,
+    publish    : verify_contract_publishing,
+    funding    : verify_contract_funding,
+    activation : verify_contract_activation,
+    closing    : verify_contract_close,
+    spending   : verify_contract_spending,
+    settlement : verify_contract_settlement,
+    signatures : verify_contract_sigs
+  }
 }

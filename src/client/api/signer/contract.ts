@@ -2,9 +2,8 @@ import { EscrowSigner } from '../../class/signer.js'
 
 export function request_contracts_api (esigner : EscrowSigner) {
   return () => {
-    const pub  = esigner.pubkey
     const host = esigner.server_url
-    const url  = `${host}/api/contract/list?pk=${pub}`
+    const url  = `${host}/api/contract/list`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
   }

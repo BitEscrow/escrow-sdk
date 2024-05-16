@@ -4,6 +4,11 @@ import { MusigContext } from '@cmdcode/musig2'
 export type HmacTypes  = '256' | '512'
 export type SignDevice = (msg : Bytes) => string
 
+export type ProofEntry<T> = [
+  label : T,
+  proof : string
+]
+
 export type MusignDevice = (
   ctx : MusigContext,
   aux : Bytes,
@@ -11,15 +16,12 @@ export type MusignDevice = (
 ) => Buff
 
 export interface SignerAPI {
-  id        : string
   pubkey    : string
-  xpub      : string
-  backup    : (password : Bytes) => Bytes
-  gen_nonce : (data : Bytes) => Buff
-  gen_token : (content : string) => string
+  id        : string
   has_id    : (id : Bytes, pubkey : Bytes) => boolean
   get_id    : (id : Bytes) => SignerAPI
-  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Buff
+  hmac      : (size : '256' | '512', ...bytes : Bytes[]) => Bytes
+  gen_nonce : (data : Bytes) => Buff
   musign    : MusignDevice
   sign      : SignDevice
 }

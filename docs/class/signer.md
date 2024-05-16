@@ -2,8 +2,8 @@
 
 Reference guide for the `EscrowSigner` API.
 
-- [EscrowSigner Config](#escrowsigner-config)
-- [EscrowSigner Class](#escrowsigner-class)
+- [Configuration](#configuration)
+- [Class Interface](#class-interface)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -11,7 +11,7 @@ Reference guide for the `EscrowSigner` API.
 
 ---
 
-## EscrowSigner Config
+## Configuration
 
 Configuration infterface for the EscrowSigner.
 
@@ -32,7 +32,7 @@ interface SignerConfig extends ClientConfig {
 }
 ```
 
-## EscrowSigner Class
+## Class Interface
 
 Class interface for the EscrowSigner.
 

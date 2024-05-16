@@ -28,9 +28,10 @@ const tx_unconfirmed = z.object({
 })
 
 const spend_info  = z.object({
-  spent      : z.boolean(),
-  spent_at   : stamp.nullable(),
-  spent_txid : hash.nullable()
+  spent       : z.boolean(),
+  spent_at    : stamp.nullable(),
+  spent_txhex : hex.nullable(),
+  spent_txid  : hash.nullable()
 })
 
 const tx_spent = z.object({

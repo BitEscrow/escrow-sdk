@@ -10,7 +10,7 @@ import { print_banner } from '@scrow/test'
 import { client }       from '@scrow/demo/01_create_client.js'
 import { signers }      from '@scrow/demo/02_create_signer.js'
 import { new_contract } from '@scrow/demo/05_create_contract.js'
-import { open_deposit } from '@scrow/demo/api/deposit/register.js'
+import { open_deposit } from '@scrow/demo/api/account/register.js'
 
 // Define our funder for the deposit.
 const funder = signers[0]

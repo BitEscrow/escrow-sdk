@@ -45,8 +45,8 @@ const res = await client.vm.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the contract from the response.
-const updated_contract = res.data.contract
+const updated = res.data
 
-print_banner('updated contract')
-console.dir(updated_contract, { depth : null })
+print_banner('updated machine')
+console.dir(updated, { depth : null })
 console.log('\n')

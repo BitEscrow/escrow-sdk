@@ -5,9 +5,10 @@ import { combine_psigs } from '@cmdcode/musig2'
 import { TxData }        from '@scrow/tapscript'
 import { encode_tx }     from '@scrow/tapscript/tx'
 
-/* Module Imports */
+/* Local Imports */
 
-import { RETURN_TX_VSIZE } from '../const.js'
+import { RETURN_TX_VSIZE }    from '../const.js'
+import { get_session_pnonce } from './session.js'
 
 import {
   CovenantSession,
@@ -16,15 +17,11 @@ import {
   SignerAPI
 } from '../types/index.js'
 
-/* Local Imports */
-
-import { get_session_pnonce } from './session.js'
-
 import {
   get_account_agent,
   get_account_ctx,
   get_deposit_hash
-} from './account.js'
+} from '../module/account/util.js'
 
 import {
   create_covenant_psig,
@@ -86,13 +83,13 @@ export function create_return_psig (
 export function create_return_template (
   request : RegisterTemplate
 ) : TxData {
-  const { feerate, return_addr, utxo } = request
-  // Get transaction fee.
-  const txfee  = get_return_txfee(feerate)
+  const { return_addr, return_rate, utxo } = request
+  // Get fee amount.
+  const txfees = get_return_txfee(return_rate)
   // Create locking script.
   const script = get_lock_script(return_addr)
   // Create a return transaction using the provided params.
-  return create_utxo_template(script, utxo.value - txfee)
+  return create_utxo_template(script, utxo.value - txfees)
 }
 
 /**

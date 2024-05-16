@@ -1,11 +1,13 @@
+import { ProofEntry } from './signer.js'
+
 import {
   PaymentEntry,
   ProposalData
 } from './proposal.js'
 
 import {
-  SettleState,
-  SpendState
+  TxSettleState,
+  TxSpendState
 } from './tx.js'
 
 export type ContractStatus =
@@ -21,16 +23,18 @@ export type ContractStatus =
   'error'        // Something went wrong, may require manual intervention.
 
 export type ContractPublishState = ContractIsPublished | ContractIsCanceled
+export type ContractFundingState = ContractIsSecured   | ContractIsPending
 export type ContractActiveState  = ContractIsActive    | ContractIsInactive
-export type ContractCloseState   = ContractIsOpen      | ContractIsClosed
+export type ContractExecState    = ContractIsOpen      | ContractIsClosed
 
 export type ContractData =
   ContractBase         &
   ContractPublishState &
+  ContractFundingState &
   ContractActiveState  &
-  ContractCloseState   &
-  SpendState           &
-  SettleState
+  ContractExecState    &
+  TxSpendState         &
+  TxSettleState
 
 export type SpendTemplate = [
   label : string,
@@ -47,37 +51,53 @@ interface ContractIsCanceled {
   canceled_at : number
 }
 
+interface ContractIsSecured {
+  secured      : true
+  effective_at : number
+  tx_fees      : number
+  tx_vsize     : number
+  tx_total     : number
+}
+
+interface ContractIsPending {
+  secured      : false
+  effective_at : null
+  tx_fees      : null
+  tx_vsize     : null
+  tx_total     : null
+}
+
 interface ContractIsActive {
   activated   : true
   active_at   : number
-  active_head : string
+  engine_head : string
+  engine_vmid : string
   expires_at  : number
-  vmid        : string
 }
 
 interface ContractIsInactive {
   activated   : false
   active_at   : null
-  active_head : null
+  engine_head : null
+  engine_vmid : null
   expires_at  : null
-  vmid        : null
 }
 
 interface ContractIsClosed {
   closed      : true
   closed_at   : number
-  closed_path : string | null
+  engine_vout : string | null
 }
 
 interface ContractIsOpen {
   closed      : false
   closed_at   : null
-  closed_path : null
+  engine_vout : null
 }
 
 export interface ContractRequest {
-  proposal    : ProposalData
-  signatures ?: string[]
+  endorsements ?: string[]
+  proposal      : ProposalData
 }
 
 export interface ContractCreateConfig {
@@ -90,25 +110,21 @@ export interface ContractBase {
   cid          : string
   created_at   : number
   deadline_at  : number
-  effective_at : number | null
+  endorsements : string[]
   fees         : PaymentEntry[]
   feerate      : number
-  fund_count   : number
-  fund_pend    : number
-  fund_txfee   : number
-  fund_value   : number
+  funds_pend   : number
+  funds_conf   : number
   moderator    : string | null
   outputs      : SpendTemplate[]
   prop_id      : string
   server_pk    : string
-  server_sig   : string
-  signatures   : string[]
+  sigs         : ProofEntry<ContractStatus>[]
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData
-  tx_fees      : number
-  tx_total     : number
   tx_bsize     : number
-  tx_vsize     : number
+  vin_count    : number
+  vin_txfee    : number
   updated_at   : number
 }

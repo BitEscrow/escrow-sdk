@@ -1,10 +1,9 @@
 import { EscrowSigner } from '../../class/signer.js'
 
-export function request_machines_api (esigner : EscrowSigner) {
+export function list_machines_api (esigner : EscrowSigner) {
   return () => {
-    const pub  = esigner.pubkey
-    const host = esigner.server_url
-    const url  = `${host}/api/vm/list?pk=${pub}`
+    const host    = esigner.server_url
+    const url     = `${host}/api/vm/list`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
   }
@@ -12,6 +11,6 @@ export function request_machines_api (esigner : EscrowSigner) {
 
 export default function (esigner : EscrowSigner) {
   return {
-    list : request_machines_api(esigner)
+    list : list_machines_api(esigner)
   }
 }

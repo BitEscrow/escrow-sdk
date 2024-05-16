@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.12.15",
+  "version": "0.12.31-dev",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -12,6 +12,7 @@
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
+  "unpkg": "./dist/script.js",
   "files": [
     "README.md",
     "LICENSE",
@@ -38,48 +39,24 @@
       "types": "./dist/vm/index.d.ts"
     },
     "./account": {
-      "import": "./dist/core/lib/account.js",
-      "types": "./dist/core/lib/account.d.ts"
+      "import": "./dist/core/module/account/index.js",
+      "types": "./dist/core/module/account/index.d.ts"
     },
     "./contract": {
-      "import": "./dist/core/lib/contract.js",
-      "types": "./dist/core/lib/contract.d.ts"
-    },
-    "./covenant": {
-      "import": "./dist/core/lib/covenant.js",
-      "types": "./dist/core/lib/covenant.d.ts"
+      "import": "./dist/core/module/contract/index.js",
+      "types": "./dist/core/module/contract/index.d.ts"
     },
     "./deposit": {
-      "import": "./dist/core/lib/deposit.js",
-      "types": "./dist/core/lib/deposit.d.ts"
-    },
-    "./proposal": {
-      "import": "./dist/core/lib/proposal.js",
-      "types": "./dist/core/lib/proposal.d.ts"
-    },
-    "./recovery": {
-      "import": "./dist/core/lib/recovery.js",
-      "types": "./dist/core/lib/recovery.d.ts"
-    },
-    "./return": {
-      "import": "./dist/core/lib/return.js",
-      "types": "./dist/core/lib/return.d.ts"
-    },
-    "./session": {
-      "import": "./dist/core/lib/session.js",
-      "types": "./dist/core/lib/session.d.ts"
-    },
-    "./tx": {
-      "import": "./dist/core/lib/tx.js",
-      "types": "./dist/core/lib/tx.d.ts"
-    },
-    "./vm": {
-      "import": "./dist/core/lib/vm.js",
-      "types": "./dist/core/lib/vm.d.ts"
+      "import": "./dist/core/module/deposit/index.js",
+      "types": "./dist/core/module/deposit/index.d.ts"
     },
     "./witness": {
-      "import": "./dist/core/lib/witness.js",
-      "types": "./dist/core/lib/witness.d.ts"
+      "import": "./dist/core/module/witness/index.js",
+      "types": "./dist/core/module/witness/index.d.ts"
+    },
+    "./lib": {
+      "import": "./dist/core/lib/index.js",
+      "types": "./dist/core/lib/index.d.ts"
     },
     "./schema": {
       "import": "./dist/core/schema/index.js",
@@ -100,6 +77,8 @@
     "demo:vm": "yarn load demo/vm/eval.ts",
     "lint": "eslint . --ext .ts",
     "load": "tsx --tsconfig ./test/tsconfig.json",
+    "pub:dev": "yarn publish --tag dev",
+    "pub:rel": "yarn publish --tag latest",
     "release": "yarn lint && yarn test && yarn build",
     "run:regtest": "NETWORK=regtest yarn load",
     "run:mutiny": "NETWORK=mutiny  yarn load",

@@ -1,5 +1,6 @@
-import { print_banner } from '@scrow/test'
-import { sleep }        from '@scrow/sdk/util'
+import { print_banner }         from '@scrow/test'
+import { get_contract_balance } from '@scrow/sdk/contract'
+import { sleep }                from '@scrow/sdk/util'
 
 import { config }       from './00_demo_config.js'
 import { client }       from './01_create_client.js'
@@ -25,10 +26,8 @@ funder.account.verify(new_account)
 
 // Unpack account address.
 const { deposit_addr } = new_account
-// Compute a txfee from the feerate.
-const vin_fee   = new_contract.fund_txfee
 // Compute a total amount (in sats) with the txfee.
-const amt_total = new_contract.tx_total + vin_fee
+const amt_total = get_contract_balance(new_contract) + new_contract.vin_txfee
 // Also compute a total amount in bitcoin.
 const btc_total = amt_total / 100_000_000
 
@@ -81,9 +80,9 @@ if (DEMO_MODE) {
 // Define a feerate for the return transaction.
 const feerate = config.feerate
 // Request the funders device to sign a covenant.
-const req     = funder.deposit.commit(new_account, new_contract, feerate, txdata.txout)
+const req     = funder.account.commit(new_account, new_contract, feerate, txdata.txout)
 // Deliver our registration request to the server.
-const res     = await client.contract.commit(req)
+const res     = await client.account.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 

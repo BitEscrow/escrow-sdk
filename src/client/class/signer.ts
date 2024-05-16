@@ -1,5 +1,5 @@
-import { Buff, Bytes }        from '@cmdcode/buff'
-import { Network, SignerAPI } from '@/core/types/index.js'
+import { Buff, Bytes } from '@cmdcode/buff'
+import { Network }     from '@/core/types/index.js'
 
 import { DEFAULT_CONFIG, get_client_config } from '../config.js'
 
@@ -10,6 +10,7 @@ import {
 } from '@cmdcode/signer'
 
 import {
+  ClientSignerAPI,
   SignerConfig,
   SignerOptions,
   WalletAPI
@@ -19,7 +20,7 @@ import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import draft_api    from '../api/signer/draft.js'
-import vmachine_api from '../api/signer/vm.js'
+import machine_api  from '../api/signer/vm.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
@@ -77,11 +78,11 @@ export class EscrowSigner {
   }
 
   readonly _config : SignerConfig
-  readonly _signer : SignerAPI
+  readonly _signer : ClientSignerAPI
   readonly _wallet : WalletAPI
 
   constructor (
-    signer  : SignerAPI,
+    signer  : ClientSignerAPI,
     options : SignerOptions = {}
   ) {
     const opt    = { ...DEFAULT_CONFIG, ...options }
@@ -92,10 +93,6 @@ export class EscrowSigner {
     this._config = ClientSchema.signer_config.parse(config)
     this._signer = signer
     this._wallet = new Wallet(xpub)
-  }
-
-  get machine () {
-    return this._config.machine
   }
 
   get network () {
@@ -110,10 +107,6 @@ export class EscrowSigner {
     return this._config.server_url
   }
 
-  get server_pol () {
-    return this._config.server_pol
-  }
-
   get server_pk () {
     return this._config.server_pk
   }
@@ -126,7 +119,7 @@ export class EscrowSigner {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
-  vm       = vmachine_api(this)
+  vm       = machine_api(this)
   wallet   = wallet_api(this)
   witness  = witness_api(this)
 
@@ -136,11 +129,5 @@ export class EscrowSigner {
     const xbytes  = Buff.b58chk(this._wallet.xpub)
     const payload = Buff.join([ encdata, xbytes ])
     return payload.to_bech32('cred')
-  }
-
-  check_issuer (pubkey : string) {
-    if (pubkey !== this.server_pk) {
-      throw new Error('issuer\'s pubkey is not recognized')
-    }
   }
 }

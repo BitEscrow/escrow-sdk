@@ -25,10 +25,10 @@ export interface CovenantSession {
 }
 
 export interface CovenantData {
-  cid      : string
-  cvid     : string
-  pnonce   : string
-  psigs    : [ string, string ][]
+  cid    : string
+  cvid   : string
+  pnonce : string
+  psigs  : [ string, string ][]
 }
 
 export interface CovenantStatus {

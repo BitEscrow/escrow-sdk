@@ -2,35 +2,35 @@
 
 # escrow-core
 
-A private, non-custodial protocol for using Bitcoin in a smart contract.
+A secure, private protocol for locking Bitcoin into a smart contract, with non-custodial escrow of funds.
 
 > If you are looking to use the BitEscrow API, check out our [Developer Documentation](https://bitescrow.dev) resources and [Replit Container](https://replit.com/@cscottdev/escrow-core).
 
 Key Features:
 
-  * __100% private.__ All on-chain transactions appear as single-key spends. Participation is done through randomly generated credentials. Only requires a signing key (hot), and wallet xpub (cold) to participate.
+  * __100% private.__ Users only need a random signing key (hot), and wallet xpub (cold) to participate. All on-chain transactions are script-less key spends. No meta-data is exposed.
 
-  * __100% non-custodial.__ Money is secured in a collaborative 2-of-2 contract. All payouts are pre-signed before deposit. Addresses are generated from a cold-stored xpub of your choice.
+  * __100% auditable.__ All contract operations are committed into a hash-chain, signed by the escrow agent, and provided as receipt. All contract execution is independently verifiable.
 
-  * __100% auditable.__ All contract terms, inputs, and operations are signed and recorded in a commit chain. Each settlement transaction is backed by an auditable commit history.
+  * __100% non-custodial.__ Money is secured in a time-locked 2-of-2 contract that returns to sender. All spending transactions are signed up-front. The escrow agent has zero discretion over spending.
 
-  * __Designed for trustless environments.__ Signing keys are disposable and have no capacity to sweep funds. Terms are signed up-front and verified before deposit.
+  * __Designed for trustless environments.__ Signing keys are separated from address generation, with zero capacity to sweep funds. Keys can be made ephemeral, and recoverable from the user's xpub.
 
-  * __Designed to be robust.__ Deposits are reusable when a contract cancels or expires. Credentials are recoverable via your xpub. Refunds are secured upfront and broadcast automatically on expiration.
+  * __Designed to be robust.__ Deposits can be reused whenever a contract cancels or expires. Refund transactions are secured upfront and broadcast automatically on expiration.
 
 Package Features:
 
-  * Method libraries for every part of the protocol.
-  * Multi-platform client with minimal dependencies.
-  * Run-time schema validation (using zod).
-  * E2E demo and test suite for signet, testnet, and mutiny.
+  * Full suite of methods and tools for every part of the protocol.
+  * A multi-platform client and signing device with minimal dependencies.
+  * Strict type interfaces, plus run-time schema validation (using zod).
+  * E2E demo and test suite for signet, testnet, and mutiny networks.
 
-Comimg Soon:
-  
-  * Full nostr integration for the API.
-  * Return receipts on all submissions.
-  * Add raw tx `templates` to a proposal.
-  * New programs for virtual machine.
+Roadmap:
+
+  * Direct integration with the Nostr network for message delivery.
+  * Layer-2 deposits with adjustable balance and no timeout.
+  * New `hashlock` and `webhook` programs for the virtual machine.
+  * Support for running a federation of escrow servers (via FROST).
 
 ---
 
@@ -39,9 +39,11 @@ Comimg Soon:
 1. [Protocol Overview](#protocol-overview)  
   a. [Negotiation](#negotiation)  
   b. [Funding](#funding)  
-  c. [Settlement](#settlement)  
-  d. [Protocol Flow](#protocol-flow)  
-  e. [Security Model](#security-model)  
+  c. [Covenant](#covenant)  
+  d. [Execution](#execution)  
+  e. [Settlement](#settlement)  
+  f. [Protocol Flow](#protocol-flow)  
+  g. [Security Model](#security-model)  
 2. [How to Use](#how-to-use)  
   a. [Create a Client](#create-a-client)  
   b. [Create a Signer](#create-a-signer)  
@@ -66,13 +68,15 @@ Comimg Soon:
 
 ## Protocol Overview
 
+This SDK implements a trust-less protocol for locking Bitcoin in escrow, without requiring a custodian for the funds. Instead, the funds are deposited into a smart contract on the Bitcoin block-chain, with a chosen escrow agent listed as a co-signer.
+
 The complete protocol involves three rounds of communication, split between three parties:
 
-`Members`  : Those participating within the contract.
-`Funders`  : Those depositing funds into the contract.
-`Provider` : The server hosting the contract (BitEscrow API).
+`Members` : Those participating within the contract.
+`Funders` : Those depositing funds into the contract.
+`Server`  : The server co-signing on deposits (i.e BitEscrow).
 
-The three rounds of communication are _negotiation_, _funding_, and _settlement_.
+The three rounds of communication are _negotiation_, _funding_, and _execution_.
 
 ---
 
@@ -87,6 +91,7 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
   title    : 'Basic two-party contract with third-party dispute resolution.',
   content  : '{}',
   duration : 14400,  // 4 hours.
+  engine   : 'cvm',  // Default interpreter, provides basic features.
   network  : 'regtest',
   paths: [
     [ 'payout', 90000, 'bcrt1qhlm6uva0q2m5dq4kjd9uzsankkxe9pza5uylcs' ],
@@ -107,17 +112,23 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
 }
 ```
 
-You can share this document peer-to-peer, or use a third-party for collaboration. The protocol is designed for third-party platforms to assist with negotiation and offer their own services (such as arbitration).
+The interface for a smart-contract can be defined through the use of `programs`. Each program describes a way to interact with the smart contract, plus additional terms and restrictions.
 
-Once the terms have been decided, any member can deliver the final proposal to the escrow server. The server will validate all terms, then publish an open [contract](wiki/contract.md) for funding.
+The `engine` field defines the interpreter that will be used to evaluate the smart contract, while the `schedule` field defines which actions will happen over time.
 
-> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the server being involved.
+> The Proposal API is designed to interface with and support any kind of smart-contract system.
+
+You can share this document peer-to-peer, or use a third-party for collaboration. Third-party platforms may assist with negotiation and offer their own services (such as arbitration).
+
+Once the terms have been decided, any party can deliver the final proposal to the escrow server. The server will validate the proposal, then publish an open [contract](wiki/contract.md) for funding.
+
+> Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the escrow server being involved.
 
 ---
 
 ### Funding
 
-To deposit funds into a contract, each funder requests a [Deposit Account](data/deposit.md#depositaccount) from the server. This account uses a 2-of-2 multi-signature address with a time-locked refund path.
+To deposit funds into a contract, each funder requests a [Deposit Account](data/deposit.md#depositaccount) from the escrow server. This account sets up a 2-of-2 multi-signature address, with a time-locked return path for the funder.
 
 ```ts
 interface DepositAccount {
@@ -133,9 +144,13 @@ interface DepositAccount {
 }
 ```
 
-The funder independently verifies the account information, then sends their funds into the account address. Once the transaction is available in the mempool, the funder can register their deposit with the server.
+The funder independently verifies this information, then sends their funds to the account address. Once the transaction is available in the mempool, the funder can register their deposit with the server.
 
-To lock funds to a contract, the funder produces a batch of signatures, one for each spending path in the contract. These signatures authorize the contract to spend the deposit based on the contract terms. The combination of these signatures form a [Covenant](data/deposit.md#covenantdata) with the contract.
+### Covenant
+
+To commit funds to a contract, the funder must produce a signature for each spending requirement in the contract. These signatures are tweaked with the contract terms, then delivered to the escrow agent.
+
+This batch of tweaked signatures forms a [Covenant](data/deposit.md#covenantdata) between the deposit and contract. The escrow server must explicitly agree to this contract (by reciprocating the tweak) in order to co-sign a transaction and spend the funds.
 
 ```ts
 interface CovenantData {
@@ -146,15 +161,15 @@ interface CovenantData {
 }
 ```
 
-Once a covenant is made, the funds are locked to the contract. When enough funds have been confirmed, the contract becomes active.
+A covenant may be provided during the registration of a deposit, or at a later time. Once a covenant is made, the funds are considered locked to the contract. When enough funds have been confirmed, the contract becomes active.
 
 ---
 
-### Settlement
+### Execution
 
-The final round of the protocol is the `settlement`. This is the most exciting round, as members get to decide how the money shall be spent.
+Each contract specifies a "script engine" or interpreter to use when evaluating user inputs to the contract. By default we provide a basic engine called the `cvm`, though any interpreter could be used.
 
-Each contract comes with a tiny virtual machine called a CVM. When the contract activates, this machine is initialized with the terms of the proposal:
+When the contract activates, a virtual machine is created using the specified engine. A hash-chain is also created, starting with the machine's identifier (vmid).
 
 ```ts
 vm_state: {
@@ -176,11 +191,9 @@ vm_state: {
 }
 ```
 
-A git-style hash chain is also created, starting with the contract's identifier (cid).
+Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witnessdata). These witness statements provide instructions to the virtual machine and execute programs.
 
-Members of the contract can interact with the CVM by submitting a signed statement, called a [witness](data/witness.md#witnessdata). Members use these statements to instruct the CVM to perform a basic set of operations.
-
-Each operation targets a spending path in the contract. Operations include `lock`, `release`, `close` and `dispute`:
+Each statement calls upon a `method`, an `action` to perform on success, and a target spending `path` in the contract.
 
 ```ts
 // An example witness statement, endorsed with two signatures.
@@ -199,7 +212,9 @@ Each operation targets a spending path in the contract. Operations include `lock
 }
 ```
 
-Every statement that updates the CVM is recorded into the hash-chain. This chain validates the full execution history of the machine, from activation to settlement:
+Every statement that updates the machine is recorded into the hash-chain. This chain validates the full execution history of the machine, from activation to settlement.
+
+When the chain is updated, the new "head" is signed by the escrow agent and returned to provider of the witness statement as a form of receipt. This receipt proves that the escrow agent received the statement, and evaluated it in the virtual machine.
 
 ```ts
 vm_state: {
@@ -222,50 +237,64 @@ vm_state: {
 }
 ```
 
-Once the CVM has evaluated a spending path, the server will complete the signatutes for the selected path, then settle the contract with a final transaction. Each member runs their own execution of the CVM and verifies that the contract settled correctly.
+It 
+
+### Settlement
+
+Once the machine has settled on a final outcome, the escrow agent will close the contract. If the machine specifies a spending path, the escrow agent will co-sign the relevant transaction and broadcast it to the Bitcoin network.
+
+If the machine specifies a `null` output, then the escrow agent will erase the covenant from each deposit in the contract, freeing those funds for use in a new contract.
+
+> Note: This "lock" and "release" mechanism is the foundation of our layer-2 protocol.
+
+The settlement process is designed so that anyone with the contract and witness statements can run their own instance of the virtual machine, and verify that the contract has been executed fairly.
 
 ---
 
 ### Protocol Flow
 
-To demonstrate the flow of the protocol through various paths and outcomes, we'll walk through a sales agreement between three parties: **Alice** (the *buyer*), **Bob** (the *seller*), and **Carol** (third-party *arbitrator*).
+To demonstrate the flow of the protocol through various paths and outcomes, we will walk through a sales agreement between three parties: **Alice** (the *buyer*), **Bob** (the *seller*), and **Carol** (third-party *arbitrator*).
 
-**Negotiation and Funding**
+**Negotiation**  
 
-1. Alice and Bob prepare a proposal, and agree on terms / arbitration.
-2. Alice submits the proposal to the agent and receives a contract.
-3. Alice deposits her funds with the contract agent, along with a covenant.
-4. Once the deposit is confirmed on-chain, the contract becomes active.
+1. Alice and Bob prepare a proposal, and agree on terms / arbitration.  
+2. Alice submits the proposal to escrow the agent and receives a contract.  
+
+**Funding**  
+
+3. Alice requests a deposit account from the escrow agent.  
+4. Alice deposits her funds, then delivers a covenant for spending.  
+5. Once the deposit is confirmed on-chain, the contract becomes active.  
 
 **Settle on Payout (happy path)**  
 
-5. Alice receives her widget and forgets about Bob.  
-6. The contract schedule closes automatically on 'payout'.  
-7. Bob gets the funds, Alice can verify the CVM execution.  
+6. Alice receives her widget and forgets about Bob.  
+7. The contract schedule closes automatically on 'payout'.  
+8. Bob gets the funds, Alice can verify the CVM execution.  
 
 **Settle on Refund (neutral path)**  
 
-5. Alice doesn't like her widget.  
-6. Alice and Bob both agree to sign the 'refund' path.  
-7. Alice gets a partial refund, Bob still keeps his fees.  
+6. Alice doesn't like her widget.  
+7. Alice and Bob both agree to sign the 'refund' path.  
+8. Alice gets a partial refund, Bob still keeps his fees.  
 
 **Settle a Dispute (unhappy path)**  
 
-5. Alice didn't get the right widget, and disputes the payout.  
-6. Carol steps in, and decides on the 'refund' path.  
-7. Alice gets a partial refund, Bob still keeps his fees.  
+6. Alice didn't get the right widget, and disputes the payout.  
+7. Carol steps in, and decides on the 'refund' path.  
+8. Alice gets a partial refund, Bob still keeps his fees.  
 
 **Contract Expires (ugly path)**  
 
-5. Alice claims she didn't get a widget, and disputes the payout.  
-6. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
-7. The contract expires, all deposits are released.  
+6. Alice claims she didn't get a widget, and disputes the payout.  
+7. Carol is on a two-week cruise in the bahamas. No auto-settlement terms were set.  
+8. The contract expires, all deposits are released.  
 
 **Deposits Expire (ugliest path)**  
 
-5. Everything above happens, except the last part.  
-6. The entire escrow platform goes down in flames.  
-7. The timelock on deposits expire, Alice can spend via the refund path.
+6. Everything above happens, except the last part.  
+7. The entire escrow platform goes down in flames.  
+8. The timelock on deposits expire, Alice can spend via the refund path.
 
 Even in a worst-case scenario, deposits are recoverable by the time-locked refund path.
 
@@ -275,35 +304,46 @@ Even in a worst-case scenario, deposits are recoverable by the time-locked refun
 
 A brief description of the security model:
 
-  * Each member participates using an anonymous credential. Credentials can be verified and claimed without revealing the owner to the escrow server.
+  * The escrow agent is not required in any part of the negotiation process. Contracts are provided to the agent as-is, and the agent can only approve or reject the offer to publish the contract.
   
-  * Members decide the terms of the proposal and all spending paths. The escrow server is not involved until the terms have already been finalized.
+  * The smart contract cannot be changed after it has been presented for publishing. The escrow agent can only provide additional payment outputs to the contract (for collecting fees).
 
-  * Anyone can choose to endorse a proposal to publicize their support. Members do not reveal their credential by making an endorsement.
+  * Funders decide what transactions to sign and deliver to the escrow agent. Covenants are provided to the agent as-is, and the agent can only approve or reject the offer to co-sign the covenant.
 
-  * Funders decide what transactions to sign and deliver to the escrow server. If there's a disagreement, funders can refund a deposit collaboratively or wait out the timelock.
+  * The escrow agent has zero discretion with the spending of funds. The smart contract decides how the funds will be spent. The agent may only decide to cooperate with the contract, or decline.
 
-  * The escrow server cannot link funders to a member of the contract.
+  * If the escrow agent declines to cooperate, they can co-sign the return of funds back to the funding party. If the agent refuses to cooperate at all, the funds can be retrieved by the funding party after the time-lock has expired.
 
-  * The escrow server can only settle using transactions provided by funders.
+  * Even if the escrow agent were hacked, and their keys were compromised, the adversary would not be able to spend funds in any manner that is outside the terms of the covenant and contract.
   
-  * All parites independently verify the progression of the contract and final settlement. If the server settles a contract without a valid proof, their reputation is burned.
+  * All parites can independently verify contract execution. If a contract is settled without a valid or complete proof, the transaction + contract + receipts can be used to prove fraud.
 
 Some challenges with the current model:
 
-  * The escrow server has an ability to censor members of a contract by ignoring their statements. In the short term, we plan to mitigate this using time-stamped delivery receipts. In the long-term, we plan to support open platforms (such as nostr) where delivery can be independently verified.
+  * The escrow agent has the ability to censor members of a contract by ignoring their statements. While the use of receipts forces the agent to censor in real-time, this is still an issue.
+  
+  In the future, we will be leveraging the Nostr network in order to provide a proof-of-delivery system that will force to escrow agent to censor everyone, or no-one.
 
-  * Even with the covenant restrictions, the burning of reputation may not be considered strong enough incentive. We are exploring additional options, such as the server staking some collateral.
+  * Even with the covenant restrictions and fraud-proofs, the escrow agent may still act malicious and settle the contract unfairly. This is a risk inhereit with any escrow system.
 
-In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin.
+  While the protocol attempts to both disincentivize and marginalize this risk as much as possible, it is still an issue in certain cases (for example, if the escrow agent is hacked or coerced).
+  
+  In the future, we plan to mitigate these risks even further, using two mechanisms:
+    - Splitting the escrow agent role into a federation, using threshold signatures (FROST).
+    - Using a proof-of-stake system to punish agents if proof of fraud is presented.
+
+
+By leveraging modern cryptography, and the programmable nature of Bitcoin, we have developed an escrow system that makes it uneventful and grossly unfavorable for the escrow agent to act as a malicious party.
+
+In terms of security, speed, and simplicity, we believe this is the best non-custodial solution for providing programmable escrow contracts on Bitcoin today.
 
 ---
 
-## How to Use
+## Getting Started
 
-Below is a step-by-step guide on how to `negotiate`, `fund`, and `settle` a contract in an example scenario. This guide includes a live demo that you can run on your own machine, with no special software required.
+Check out the [Get Started](./docs/get-started.md) page for a step-by-step guide on how to `negotiate`, `fund`, and `execute` a contract.
 
-To run the demo, simply clone this repository, then run the following commands:
+This repo also includes a live demo that you can run on your own machine, with no special software required. To run the demo, simply clone this repository, then run the following commands:
 
 ```sh
 npm install           # Install all package dependencies.
@@ -313,291 +353,6 @@ npm run demo {chain}  # Run the demo using the provided chain.
 The current chains available are `mutiny`, `signet`, and `testnet`. The default chain is `mutiny`.
 
 You can read more info about the demo [here](demo/README.md).
-
-### Create a Client
-
-The `EscrowClient` is a basic client for consuming our API. It is designed for tasks which do not require providing an identity or signature.
-
-Configuring a client requires specifying a `network`, a provider `hostname`, plus an `oracle` server for checking the blockchain.
-
-```ts
-import { EscrowClient } from '@scrow/core'
-
-const client_config = {
-  // The URL to our escrow server.
-  hostname : 'https://bitescrow-signet.vercel.app',
-  // The URL to an electrum-based indexer of your choice.
-  oracle   : 'https://mempool.space/signet',
-  // The network you are using.
-  network  : 'signet'
-}
-
-// Create an EscrowClient using the above config.
-const client = new EscrowClient(client_config)
-```
-
-For more detailed information on the `EscrowClient` class, check out the [EscrowClient Wiki](docs/client.md).
-
-### Create a Signer
-
-The `EscrowSigner` represents a member or depositor of a contract. It's used for negotiating a proposal, managing deposits and interacting with a contract's CVM.
-
-For development, the fastest way to setup a new signer is to generate one randomly:
-
-```ts
-import { EscrowSigner } from '@scrow/core/client'
-
-// Generate a new EscrowSigner from scratch.
-const signer = EscrowSigner.generate(client_config, xpub)
-```
-
-For production, you may wish to import a key-pair using a raw seed or BIP39 seed words:
-
-```ts
-// Create an EscrowSigner using a raw seed.
-const signer = EscrowSigner.create(client_config, seed, xpub)
-
-// Import an EscrowSigner using a word list.
-const signer = EscrowSigner
-  .import(client_config, xpub)
-  .from_words(seed_words, optional_password)
-```
-
-The `EscrowSigner` is built for insecure environments. All addresses are derived from the xpub, and all signed transactions are verified before deposit. The signing key has no direct access to funds, and can be tossed from memory once the contract and covenant are in place. All credentials generated by the signer can be independently recovered by the xpub.
-
-However, the recovery process does require taking the xpub out of cold-storage, which may be inconvenient to the user.
-
-For a better user experience, the `EscrowScigner` includes a password-protected backup and restore option for secure storage in a browser environment. There is also a more basic `SignerAPI` and `WalletAPI` which can be hosted outside the browser (in an extension or external app).
-
-For more info on the `EscrowSigner` class, check out the [EscrowSigner Wiki](docs/signer.md).
-
-### Build a Proposal
-
-The proposal is a simple JSON document, and it can be built any number of ways.
-
-```ts
-const proposal = {
-  title     : 'Basic two-party contract with third-party arbitration.',
-  duration  : 14400,
-  network   : 'mutiny',
-  schedule  : [[ 7200, 'close', '*' ]],
-  value     : 10000,
-}
-```
-
-To make the negotiation process easier, you can define intended `roles` within a proposal:
-
-```ts
-const roles = [
-  {
-    title : 'buyer',
-    paths : [
-      [ 'heads', 10000 ],
-      [ 'draw',  5000  ]
-    ],
-    programs : [
-      [ 'endorse', 'close',   '*', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
-    ]
-  },
-  {
-    title : 'seller',
-    paths : [
-      [ 'tails', 10000 ],
-      [ 'draw',  5000  ]
-    ],
-    programs : [
-      [ 'endorse', 'close',   '*', 2 ],
-      [ 'endorse', 'dispute', 'heads|tails', 1 ]
-    ]
-  },
-  {
-    title : 'agent',
-    programs : [
-      [ 'endorse', 'resolve', '*', 1 ]
-    ]
-  }
-]
-```
-
-### Negotiate a Proposal
-
-In order to handle negotiation between parties, we have developed a [DraftData](./docs/data/draft.md) document which users can use to share and collaborate.
-
-```ts
-interface DraftData {
-  // Signed approvals from each member, to signal readiness.
-  approvals  : string[]    
-  // A list of active members of the proposal, and their credentials.  
-  members    : MemberData[]  
-  // The main proposal document being negotiated.
-  proposal   : ProposalData  
-  // List of roles defined for the proposal, and their requirements.
-  roles      : RolePolicy[]  
-  // Non-member endorsements of the proposal, used for indexing.
-  signatures : string[]      
-  // A list of terms in the proposal which are negotiable.
-  terms      : string[]      
-}
-```
-
-This document defines `members` and `roles` within the proposal, which `terms` are negotiable, and collects `approvals` from each member.
-
-```ts
-import { create_draft }    from '@scrow/core/proposal'
-import { signers }         from './02_create_signer.js'
-import { proposal, roles } from './03_create_draft.js'
-
-// Unpack our list of signers.
-const [ a_signer, b_signer, c_signer ] = signers
-
-// Define our negotiation session.
-export let draft = create_draft({ proposal, roles })
-
-// For each member, add their info to the proposal.
-draft = a_signer.draft.join(draft.roles[0], draft)
-draft = b_signer.draft.join(draft.roles[1], draft)
-draft = c_signer.draft.join(draft.roles[2], draft)
-
-// For each member, collect an approval and (optional) endorsement.
-signers.map(mbr => {
-  const approve = mbr.draft.approve(draft)
-  const endorse = mbr.draft.endorse(draft)
-  draft.approvals.push(approve)
-  draft.signatures.push(endorse)
-})
-```
-Each endorsement provided to the server will tag the proposal with the signer's pubkey. This allows an `EscrowSigner` to search for contracts via their main pubkey. Endorsing a proposal does not reveal which credential belongs to you.
-
-For more information on building a `proposal`, [click here](docs/proposal.md).
-
-### Create a Contract
-
-Once you have a complete proposal, the next step is to create a [contract](docs/interfaces/contract.md#contractdata):
-
-```ts
-// Request to create a contract from the proposal (and optional signatures).
-const res = await client.contract.create(proposal, signatures)
-// Check that the response is valid.
-if (!res.ok) throw new Error(res.error)
-// Unpack and return the contract data.
-const { contract } = res.data
-```
-
-The contract begins in a `published` state, and is ready for funding. You can share the contract with others by advertising its unique identifier, the `cid`.
-
-For more info on how to use a contract, [click here](docs/contract.md).
-
-### Deposit Funds
-
-To make a deposit, we start by requesting a deposit [account](docs/interfaces/deposit.md#depositaccount) from the escrow server:
-
-```ts
-// Define our deposit locktime.
-const locktime = 60 * 60  // 1 hour locktime
-// Get an account request from the signing device.
-const acct_req = signer.account.request(locktime)
-// Submit the request to the server
-const acct_res = await client.deposit.request(acct_req)
-// Check the response is valid.
-if (!res.ok) throw new Error(res.error)
-// Unpack the account data.
-const { account } = res.data
-```
-
-Each account is a time-locked 2-of-2 multi-signature address between the funder's signing device, and a random signing `agent` from the server.
-
-It is important that funders verify the account information is correct:
-
-```ts
-// Verify the account.
-const is_valid = signer.account.verify(account)
-if (!is_valid) throw new Error('account is invalid!')
-```
-
-After verifying the account, funders can safely send funds to the account address. Once the transaction is visible in the mempool, we can grab the transaction's `utxo` data using an oracle:
-
-```ts
-// Unpack the address from the account.
-const { address } = account
-// Fetch all utxos from the address.
-const utxos = await client.oracle.get_address_utxos(address)
-// There should be a utxo present.
-if (utxos.length === 0) throw new Error('utxo not found')
-// Get the output data from the utxo.
-const utxo_data = utxos[0].txspend
-```
-
-The final step is to register the `utxo` with the escrow server, and provide a `covenant` that locks it to the contract. We can perform both actions using the `commit` method:
-
-```ts
-// Create a commit request.
-const commit_req = signer.account.commit(account, contract, utxo)
-// Deliver the request to the server.
-const res = await client.deposit.commit(commit_req)
-// Check the response is valid.
-if (!res.ok) throw new Error('failed')
-// Unpack the response data, which should be the deposit and updated contract.
-const { contract, deposit } = res.data
-```
-
-> For more info on managing a `deposit`, [click here](docs/deposit.md).
-
-### Settle a Contract
-
-Once all required funds are deposited and confirmed, the contract virtual machine (CVM) will activate.
-
-Members of the contract can interact with the CVM by providing signed statements, called a [witness](./interfaces/witness.md):
-
-```ts
-// Start with a witness template.
-const template : WitnessTemplate = {
-  action : 'close',    // We want to close the contract.
-  method : 'endorse',  // Using the 'endorse' (signature) method.
-  path   : 'payout'    // Settling on the 'payout' path.
-}
-```
-
-Members can use their signing device to create a new statement, or endorse an existing statement from another member:
-
-```ts
-// Example list of signers.
-const [ a_signer, b_signer ] : EscrowSigner[] = signers
-// Initialize a variable for our witness data.
-let witness : WitnessData
-// Alice signs the initial statement.
-witness = a_signer.witness.sign(contract, template)
-// Bob endoreses the statement from Alice.
-witness = b_signer.witness.endorse(contract, witness)
-```
-
-These statements are submitted to the contract, and evaluated by the CVM. If the statement is valid, then the CVM will update its [state](docs/interfaces/contract.md#statedata), and the server will deliver an updated contract:
-
-```ts
-// Submit the completed statement to the contract.
-const res = await client.contract.submit(contract.cid, witness)
-// Check the response is valid.
-if (!res.ok) throw new Error(res.error)
-// The returned contract should be settled.
-const updated_contract = res.data.contract
-```
-
-If a spending condition is met within the CVM, the contract will be closed by the escrow server, and a settlement transaction will be broadcast.
-
-The updated contract will record this information under `spent_txid`. We can view the settlement transaction using an oracle:
-
-```ts
-// Get the transaction id from the contract.
-const txid = settled_contract.spent_txid
-// Fetch the settlement tx from the oracle.
-const txdata = await client.oracle.get_txdata(txid)
-// Print the transaction data to console.
-console.dir(txdata, { depth : null })
-```
-
-And that is it! The on-chain transaction will look like an anonymous coin-join of single-key spends, and it can be fee-bumped by any recipient of the contract funds using CPFP.
-
-For more information on contracts, the CVM, and settlement process, [click here](docs/contract.md).
 
 ## Development / Testing
 
@@ -619,7 +374,7 @@ This project uses the following scripts:
   test          : Runs the current test suite in `test/tape.ts`.
 ```
 
-### Running the Main Demo
+### Running the Demo
 
 The main demo is located in the [/demo](demo) directory, and serves as a great resource for how to use the client library.
 
@@ -688,14 +443,6 @@ Example of running the current test suite in verbose mode:
 VERBOSE=true npm run test
 ```
 
-### OpenAPI Specification
-
-There is an [OpenAPI 3.1](https://swagger.io/specification) specification file located at the root of this repo, named [spec.yml](spec.yml).
-
-You can use this file to demo our API within `Postman`, `Insomnia`, or your API tool of choice.
-
-Please stay tuned for more documentation and updates!
-
 ## Questions / Issues
 
 Feel free to post questions or comments on the issue board. All feedback is welcome.
@@ -738,7 +485,7 @@ Reference implementation of the Musig2 protocol with a few additional features. 
 
 https://github.com/cmdruid/musig2  
 
-**crypto tools**  
+**crypto-tools**  
 
 Provides a suite of cryptography primitives and tools. Wraps the noble-curve and noble-hash libraries (and cross-checks them with other implementations).
 
@@ -750,9 +497,9 @@ The swiss-army-knife of byte manipulation. Such a fantastic and invaluable tool.
 
 https://github.com/cmdruid/buff  
 
-**core command**  
+**core-cmd**  
 
-Not a run-time dependency, but I use this to incorporate bitcoin core directly into my test suite. I also use it to mock-up core as a poor-man's electrum server. Acts as a daemon wrapper and CLI tool, provides a full wallet API, faucets, and can run bitcoin core natively within a nodejs environment (which is pretty wild).
+Not a dependency, but I use this to run bitcoin core natively within my test suite. It wraps both `bitcoind` and `bitcoin-cli`, and provides a full sute of automation tools, including wallets, faucets, and more.
 
 https://github.com/cmdruid/core-cmd  
 
@@ -766,4 +513,4 @@ https://github.com/cmdruid/signer
 
 My inspiration for this project comes from the Bitcoin space, and the incredibly talented people that contribute. I will be forever grateful for their knowledge, kindness and spirit.
 
-I wish for Bitcoin to win all the marbles; and be the new global reserve marbles that we fight over. I firmly believe a better money system will make the world a better place. Maybe we will reach beyond the moon.
+I wish for Bitcoin to win all the marbles; and be the new global reserve marbles that we fight over. I firmly believe a better money system will make the world a better place. And with it, maybe humanity will reach beyond the moon.

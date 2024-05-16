@@ -11,19 +11,21 @@ import { get_return_tx } from '@scrow/sdk/return'
 import {
   create_account,
   create_account_req,
+  create_register_req
 } from '@scrow/sdk/account'
 
 import {
-  close_deposit,
+  spend_deposit,
   create_deposit,
-  create_register_req
+  confirm_deposit
 } from '@scrow/sdk/deposit'
 
 import {
   verify_account_req,
-  verify_account,
-  verify_deposit,
-  verify_register_req
+  verify_account_data,
+  verify_deposit_data,
+  verify_register_req,
+  verify_deposit_sigs
 } from '@/core/validation/index.js'
 
 /* Local Imports */
@@ -31,6 +33,7 @@ import {
 import {
   fund_address,
   get_members,
+  get_spend_state,
   get_utxo
 } from '../core.js'
 
@@ -58,21 +61,21 @@ export default async function (
 
       const [ server, funder ] = users
 
-      const funder_sd  = funder.signer
-      const server_sd  = server.signer
+      const funder_dev = funder.signer
+      const escrow_dev = server.signer
       const server_pol = ServerPolicy
 
       /* ------------------- [ Create Account ] ------------------ */
 
-      const return_addr = P2TR.create(funder_sd.pubkey, NETWORK)
+      const return_addr = P2TR.create(funder_dev.pubkey, NETWORK)
       // Client: Create account request.
-      const acct_req = create_account_req(funder_sd.pubkey, LOCKTIME, NETWORK, return_addr)
+      const acct_req = create_account_req(funder_dev.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
       verify_account_req(server_pol, acct_req)
       // Server: Create account data.
-      const account = create_account(acct_req, server_sd)
+      const account = create_account(acct_req, escrow_dev)
       // Client: Verify account data.
-      verify_account(account, funder_sd)
+      verify_account_data(account, funder_dev)
 
       if (VERBOSE) {
         console.log(banner('account'))
@@ -88,15 +91,18 @@ export default async function (
       // Fetch the utxo for the funded address.
       const utxo     = await get_utxo(client, account.deposit_addr, dep_txid)
       // Client: Create the commit request.
-      const reg_req  = create_register_req(FEERATE, account, funder_sd, utxo)
+      const reg_req  = create_register_req(FEERATE, account, funder_dev, utxo)
       // Server: Verify the registration request.
-      verify_register_req(server_pol, reg_req, server_sd)
+      verify_register_req(server_pol, reg_req, escrow_dev)
       // Server: Create the deposit data.
-      const deposit  = create_deposit(reg_req, server_sd)
+      let deposit = create_deposit(reg_req, escrow_dev)
       // Client: Verify the deposit data.
-      verify_deposit(deposit, funder_sd)
+      verify_deposit_data(deposit, funder_dev)
 
       await client.mine_blocks(1)
+
+      const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
+      deposit = confirm_deposit(deposit, utxo_state, escrow_dev)
 
       if (VERBOSE) {
         console.log(banner('deposit'))
@@ -107,9 +113,9 @@ export default async function (
 
       /* ------------------ [ Return Deposit ] ------------------ */
 
-      const txhex     = get_return_tx(deposit, server_sd)
+      const txhex     = get_return_tx(deposit, escrow_dev)
       const txid      = await client.publish_tx(txhex, true)
-      const dp_closed = close_deposit(deposit, txhex)
+      const dp_closed = spend_deposit(deposit, txhex, escrow_dev)
 
       if (VERBOSE) {
         console.log(banner('deposit closed'))
@@ -117,6 +123,10 @@ export default async function (
       } else {
         t.pass('return ok')
       }
+
+      verify_deposit_sigs(dp_closed, escrow_dev.pubkey)
+
+      t.pass('deposit sigs ok')
 
       t.equal(txid, dp_closed.spent_txid, 'completed with txid: ' + txid)
     } catch (err) {
