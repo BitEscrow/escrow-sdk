@@ -102,7 +102,7 @@ export default async function (
       await client.mine_blocks(1)
 
       const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
-      deposit = confirm_deposit(deposit, utxo_state, escrow_dev)
+      deposit = confirm_deposit(deposit, utxo_state)
 
       if (VERBOSE) {
         console.log(banner('deposit'))

@@ -44,7 +44,7 @@ export function create_account (
   // Compute the id for the account data.
   const account_id   = util.get_account_id(deposit_addr, account_hash, server_pk, created_at, server_tkn)
   // Sign the account identifier.
-  const server_sig   = signer.sign(account_id)
+  const account_sig  = signer.sign(account_id)
   // Return the complete account data object.
-  return sort_record({ ...request, account_hash, account_id, created_at, server_sig, deposit_addr, server_pk, server_tkn })
+  return sort_record({ ...request,  account_id, account_hash, account_sig, created_at, deposit_addr, server_pk, server_tkn })
 }

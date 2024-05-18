@@ -49,10 +49,10 @@ import {
   verify_commit_req,
   verify_deposit_data,
   verify_witness_receipt,
-  verify_contract_settlement,
   verify_witness_data,
   verify_contract_sigs,
-  verify_deposit_sigs
+  verify_deposit_sigs,
+  verify_contract
 } from '@/core/validation/index.js'
 
 import {
@@ -205,7 +205,7 @@ export default async function (
 
       const pending = deposits.map(async deposit => {
         const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
-        return confirm_deposit(deposit, utxo_state, escrow_dev)
+        return confirm_deposit(deposit, utxo_state)
       })
 
       deposits = await Promise.all(pending)
@@ -301,10 +301,16 @@ export default async function (
       const txid  = await client.publish_tx(txhex, true)
 
       contract = spend_contract(contract, txhex, txid, escrow_dev)
-
-      verify_contract_settlement(contract, deposits, proposal, vm_data)
-
       contract = settle_contract(contract, escrow_dev)
+
+      verify_contract({
+        contract,
+        commits : [ witness ],
+        engine  : CVM,
+        funds   : deposits,
+        pubkey  : escrow_dev.pubkey,
+        vmdata  : vm_data
+      })
 
       if (VERBOSE) {
         console.log(banner('settled contract'))

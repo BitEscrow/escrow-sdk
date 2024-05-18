@@ -74,7 +74,7 @@ export function verify_witness_data (
   assert.ok(pathnames.includes(path),  'path does not exist in vm')
   assert.ok(stamp >= active_at,        'stamp exists before active date')
   assert.ok(stamp >= commit_at,        'stamp exists before latest commit')
-  assert.ok(stamp < expires_at,        'stamp exists on or after close date')
+  assert.ok(stamp < expires_at,        'stamp exists on or after expiration date')
   assert.ok(output === null,           'vm has already closed on an output')
   verify_witness_sigs(program, witness)
 }
@@ -100,7 +100,7 @@ export function verify_witness_receipt (
   vmdata  : VMData,
   witness : WitnessData
 ) {
-  const { receipt_id, server_pk, server_sig } = receipt
+  const { receipt_id, receipt_sig, server_pk } = receipt
 
   // Don't forget to check that vm matches receipt.
   assert.ok(witness.vmid === vmdata.vmid,        'provided vmdata and witness vmid does not match')
@@ -116,7 +116,7 @@ export function verify_witness_receipt (
   assert.ok(int_wid === witness.wid,             'internal witness id does not match receipt')
   assert.ok(int_rid === receipt.receipt_id,      'internal receipt id does not match receipt')
 
-  const is_valid = verify_sig(server_sig, receipt_id, server_pk)
+  const is_valid = verify_sig(receipt_sig, receipt_id, server_pk)
 
   assert.ok(is_valid, 'receipt signature is invalid')
 }

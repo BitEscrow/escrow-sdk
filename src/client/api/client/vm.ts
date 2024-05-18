@@ -17,11 +17,8 @@ import { EscrowClient } from '../../class/client.js'
  */
 function list_machines_api (client : EscrowClient) {
   return async (
-    pubkey : string,
     token  : string
   ) : Promise<ApiResponse<VMListResponse>> => {
-    // Validate the pubkey.
-    assert.is_hash(pubkey)
     // Define the request url.
     const host = client.server_url
     const url  = `${host}/api/vm/list`

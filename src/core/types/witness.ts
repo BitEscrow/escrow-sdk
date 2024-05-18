@@ -35,6 +35,6 @@ export interface ReceiptPreImage extends WitnessData {
 }
 
 export interface WitnessReceipt extends ReceiptPreImage {
-  receipt_id : string
-  server_sig : string
+  receipt_id  : string
+  receipt_sig : string
 }

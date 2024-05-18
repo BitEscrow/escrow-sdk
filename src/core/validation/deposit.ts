@@ -103,18 +103,11 @@ export function verify_deposit_sigs (
   deposit : DepositData,
   pubkey  : string
 ) {
-  const labels = deposit.sigs.map(e => e[0])
-
-  assert.ok(labels.includes('registered'),                      'deposit signature missing: registered')
-  assert.ok(!deposit.confirmed || labels.includes('confirmed'), 'deposit signature missing: confirmed')
-  assert.ok(!deposit.locked    || labels.includes('locked'),    'deposit signature missing: locked')
-  assert.ok(!deposit.closed    || labels.includes('closed'),    'deposit signature missing: closed')
-  assert.ok(!deposit.spent     || labels.includes('spent'),     'deposit signature missing: spent')
-  assert.ok(!deposit.settled   || labels.includes('settled'),   'deposit signature missing: settled')
-
-  deposit.sigs.forEach(sig => {
-    verify_deposit_sig(deposit, pubkey, sig)
-  })
+  verify_deposit_sig(deposit, pubkey, 'registered')
+  if (deposit.locked)  verify_deposit_sig(deposit, pubkey, 'locked')
+  if (deposit.closed)  verify_deposit_sig(deposit, pubkey, 'closed')
+  if (deposit.spent)   verify_deposit_sig(deposit, pubkey, 'spent')
+  if (deposit.settled) verify_deposit_sig(deposit, pubkey, 'settled')
 }
 
 export function verify_feerate (

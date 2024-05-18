@@ -4,11 +4,6 @@ import { MusigContext } from '@cmdcode/musig2'
 export type HmacTypes  = '256' | '512'
 export type SignDevice = (msg : Bytes) => string
 
-export type ProofEntry<T> = [
-  label : T,
-  proof : string
-]
-
 export type MusignDevice = (
   ctx : MusigContext,
   aux : Bytes,

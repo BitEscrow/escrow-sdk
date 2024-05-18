@@ -37,11 +37,8 @@ function read_deposit_api (client : EscrowClient) {
 
 function list_deposit_api (client : EscrowClient) {
   return async (
-    pubkey : string,
     token  : string
   ) : Promise<ApiResponse<DepositListResponse>> => {
-    // Validate the pubkey.
-    assert.is_hash(pubkey)
     // Define the request url.
     const host = client.server_url
     const url  = `${host}/api/deposit/list`

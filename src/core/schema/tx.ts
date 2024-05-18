@@ -30,6 +30,7 @@ const tx_unconfirmed = z.object({
 const spend_info  = z.object({
   spent       : z.boolean(),
   spent_at    : stamp.nullable(),
+  spent_sig   : hex.nullable(),
   spent_txhex : hex.nullable(),
   spent_txid  : hash.nullable()
 })
@@ -37,6 +38,7 @@ const spend_info  = z.object({
 const tx_spent = z.object({
   spent       : z.literal(true),
   spent_at    : stamp,
+  spent_sig   : hex,
   spent_txhex : hex,
   spent_txid  : hash
 })
@@ -44,23 +46,27 @@ const tx_spent = z.object({
 const tx_unspent = z.object({
   spent       : z.literal(false),
   spent_at    : z.null(),
+  spent_sig   : z.null(),
   spent_txhex : z.null(),
   spent_txid  : z.null()
 })
 
 const settle_info = z.object({
-  settled    : z.boolean(),
-  settled_at : stamp.nullable()
+  settled     : z.boolean(),
+  settled_at  : stamp.nullable(),
+  settled_sig : hex.nullable()
 })
 
 const tx_settled = z.object({
-  settled    : z.literal(true),
-  settled_at : stamp
+  settled     : z.literal(true),
+  settled_at  : stamp,
+  settled_sig : hex
 })
 
 const tx_unsettled = z.object({
-  settled    : z.literal(false),
-  settled_at : z.null()
+  settled     : z.literal(false),
+  settled_at  : z.null(),
+  settled_sig : z.null()
 })
 
 const confirm_state = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])

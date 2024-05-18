@@ -146,7 +146,7 @@ export async function get_latest_utxo (
   host : string,
   addr : string
 ) : Promise<OracleTxSpendData | null> {
-  const utxos = await get_address_utxos(host, addr)
+  const utxos  = await get_address_utxos(host, addr)
   return utxos.at(0) ?? null
 }
 

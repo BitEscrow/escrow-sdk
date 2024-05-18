@@ -22,6 +22,7 @@ const close_req = z.object({
 const close_info = z.object({
   closed       : bool,
   closed_at    : stamp.nullable(),
+  closed_sig   : hex.nullable(),
   return_txhex : hex.nullable(),
   return_txid  : hash.nullable()
 })
@@ -29,6 +30,7 @@ const close_info = z.object({
 const dp_open = z.object({
   closed       : z.literal(false),
   closed_at    : z.null(),
+  closed_sig   : z.null(),
   return_txhex : z.null(),
   return_txid  : z.null()
 })
@@ -36,26 +38,30 @@ const dp_open = z.object({
 const dp_closed = z.object({
   closed       : z.literal(true),
   closed_at    : stamp,
+  closed_sig   : hex,
   return_txhex : hex,
   return_txid  : hash
 })
 
 const lock_info = z.object({
-  locked    : bool,
-  locked_at : stamp.nullable(),
-  covenant  : acct.covenant.nullable()
+  locked     : bool,
+  locked_at  : stamp.nullable(),
+  locked_sig : hex.nullable(),
+  covenant   : acct.covenant.nullable()
 })
 
 const dp_unlocked = z.object({
-  locked    : z.literal(false),
-  locked_at : z.null(),
-  covenant  : z.null()
+  locked     : z.literal(false),
+  locked_at  : z.null(),
+  locked_sig : z.null(),
+  covenant   : z.null()
 })
 
 const dp_locked = z.object({
-  locked    : z.literal(true),
-  locked_at : stamp,
-  covenant  : acct.covenant
+  locked     : z.literal(true),
+  locked_at  : stamp,
+  locked_sig : hex,
+  covenant   : acct.covenant
 })
 
 const lock_state  = z.discriminatedUnion('locked', [ dp_locked, dp_unlocked ])
@@ -72,6 +78,7 @@ const base_data = z.object({
   status,
   account_hash : hash,
   created_at   : stamp,
+  created_sig  : hex,
   dpid         : hash,
   deposit_pk   : hash,
   deposit_addr : str,

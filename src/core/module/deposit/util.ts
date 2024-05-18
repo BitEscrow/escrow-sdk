@@ -1,19 +1,18 @@
-import { Buff }              from '@cmdcode/buff'
-import { verify_sig }        from '@cmdcode/crypto-tools/signer'
-import { INIT_CONF_STATE }   from '@/core/lib/tx.js'
-import { DEPOSIT_KIND }      from '@/core/const.js'
-import { sort_record }       from '@/core/util/base.js'
-import { get_deposit_state } from './state.js'
-import * as assert           from '@/core/util/assert.js'
+import { Buff }            from '@cmdcode/buff'
+import { verify_sig }      from '@cmdcode/crypto-tools/signer'
+import { INIT_CONF_STATE } from '@/core/lib/tx.js'
+import { DEPOSIT_KIND }    from '@/core/const.js'
+import { get_proof_id }    from '@/core/util/notarize.js'
+import * as assert         from '@/core/util/assert.js'
 
-import { get_proof_id, parse_proof, update_proof } from '@/core/util/notarize.js'
+import { get_deposit_proof, get_deposit_state } from './state.js'
 
 import {
   DepositData,
+  DepositPreImage,
   DepositStatus,
   NoteTemplate,
   OracleTxSpendData,
-  ProofEntry,
   SignerAPI,
   TxConfirmState
 } from '@/core/types/index.js'
@@ -45,11 +44,11 @@ export function get_confirm_state (
 }
 
 export function get_deposit_preimg (
-  deposit : DepositData,
+  deposit : DepositPreImage,
   status  : DepositStatus
 ) : NoteTemplate {
   const { dpid, server_pk: pubkey } = deposit
-  const { content, created_at }    = get_deposit_state(deposit, status)
+  const { content, created_at }     = get_deposit_state(deposit, status)
   const kind  = DEPOSIT_KIND
   const tags  = [ [ 'i', dpid ] ]
   return { content, created_at, kind, pubkey, tags }
@@ -60,45 +59,31 @@ export function get_deposit_note (
   status  : DepositStatus
 ) {
   const tmpl  = get_deposit_preimg(deposit, status)
-  const proof = deposit.sigs.find(e => e[0] === status)
-  assert.exists(proof, 'signature no found for status: ' + status)
-  const id  = proof[1].slice(0, 64)
-  const sig = proof[1].slice(64)
-  return { ...tmpl, id, sig }
+  const proof = get_deposit_proof(deposit, status)
+  return { ...tmpl, ...proof }
 }
 
 export function notarize_deposit (
-  deposit : DepositData,
+  deposit : DepositPreImage,
   signer  : SignerAPI,
   status  : DepositStatus
-) : ProofEntry<DepositStatus> {
+) : string {
   const img = get_deposit_preimg(deposit, status)
   const dig = get_proof_id(img)
   const sig = signer.sign(dig)
-  return [ status, Buff.join([ dig, sig ]).hex ]
-}
-
-export function update_deposit (
-  deposit : DepositData,
-  signer  : SignerAPI,
-  status  : DepositStatus
-) {
-  const proof  = notarize_deposit(deposit, signer, status)
-  deposit.sigs = update_proof(deposit.sigs, proof)
-  return sort_record(deposit)
+  return Buff.join([ dig, sig ]).hex
 }
 
 export function verify_deposit_sig (
-  deposit   : DepositData,
-  pubkey    : string,
-  signature : ProofEntry<DepositStatus>
+  deposit : DepositData,
+  pubkey  : string,
+  status  : DepositStatus
 ) {
-  const [ status, proof ] = signature
-  const [ id, sig ]       = parse_proof(proof)
   const pub = deposit.server_pk
+  const prf = get_deposit_proof(deposit, status)
   const img = get_deposit_preimg(deposit, status)
   const dig = get_proof_id(img)
-  assert.ok(pubkey === pub,           'pubkey does not match: ' + status)
-  assert.ok(dig === id,               'digest does not match: ' + status)
-  assert.ok(verify_sig(sig, id, pub), 'invalid signature: '     + status)
+  assert.ok(pubkey === pub,                   'pubkey does not match: ' + status)
+  assert.ok(dig === prf.id,                   'digest does not match: ' + status)
+  assert.ok(verify_sig(prf.sig, prf.id, pub), 'invalid signature: '     + status)
 }

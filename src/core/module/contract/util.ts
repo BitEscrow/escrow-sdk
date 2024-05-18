@@ -1,25 +1,24 @@
 import { Buff }                 from '@cmdcode/buff'
 import { decode_tx, encode_tx } from '@scrow/tapscript/tx'
 import { verify_sig }           from '@cmdcode/crypto-tools/signer'
-import { assert, sort_record }  from '@/core/util/index.js'
-import { get_contract_state }   from './state.js'
+import { assert }               from '@/core/util/index.js'
+import { get_proof_id }         from '@/core/util/notarize.js'
 
 import { CONTRACT_KIND, SPEND_TXIN_SIZE } from '@/core/const.js'
 
 import {
-  get_proof_id,
-  parse_proof,
-  update_proof
-} from '@/core/util/notarize.js'
+  get_contract_proof,
+  get_contract_state
+}   from './state.js'
 
 import {
   ContractData,
+  ContractPreImage,
   ContractStatus,
   DepositData,
   FundingData,
   NoteTemplate,
   PaymentEntry,
-  ProofEntry,
   ProposalData,
   SignerAPI,
   SpendTemplate
@@ -181,7 +180,7 @@ export function get_contract_balance (contract : ContractData) {
 }
 
 export function get_contract_preimg (
-  contract : ContractData,
+  contract : ContractPreImage,
   status   : ContractStatus
 ) : NoteTemplate {
   const { cid, server_pk: pubkey } = contract
@@ -196,45 +195,31 @@ export function get_contract_note (
   status   : ContractStatus
 ) {
   const tmpl  = get_contract_preimg(contract, status)
-  const proof = contract.sigs.find(e => e[0] === status)
-  assert.exists(proof, 'signature no found for status: ' + status)
-  const id  = proof[1].slice(0, 64)
-  const sig = proof[1].slice(64)
-  return { ...tmpl, id, sig }
+  const proof = get_contract_proof(contract, status)
+  return { ...tmpl, ...proof }
 }
 
 export function notarize_contract (
-  contract : ContractData,
+  contract : ContractPreImage,
   signer   : SignerAPI,
   status   : ContractStatus
-) : ProofEntry<ContractStatus> {
+) : string {
   const img = get_contract_preimg(contract, status)
   const dig = get_proof_id(img)
   const sig = signer.sign(dig)
-  return [ contract.status, Buff.join([ dig, sig ]).hex ]
-}
-
-export function update_contract (
-  contract : ContractData,
-  signer   : SignerAPI,
-  status   : ContractStatus
-) {
-  const proof   = notarize_contract(contract, signer, status)
-  contract.sigs = update_proof(contract.sigs, proof)
-  return sort_record(contract)
+  return Buff.join([ dig, sig ]).hex
 }
 
 export function verify_contract_sig (
-  contract  : ContractData,
-  pubkey    : string,
-  signature : ProofEntry<ContractStatus>
+  contract : ContractData,
+  pubkey   : string,
+  status   : ContractStatus
 ) {
-  const [ status, proof ] = signature
-  const [ id, sig ]       = parse_proof(proof)
   const pub = contract.server_pk
+  const prf = get_contract_proof(contract, status)
   const img = get_contract_preimg(contract, status)
   const dig = get_proof_id(img)
-  assert.ok(pubkey === pub,           'pubkey does not match: ' + status)
-  assert.ok(dig === id,               'digest does not match: ' + status)
-  assert.ok(verify_sig(sig, id, pub), 'invalid signature: '     + status)
+  assert.ok(pubkey === pub,                   'pubkey does not match: ' + status)
+  assert.ok(dig === prf.id,                   'digest does not match: ' + status)
+  assert.ok(verify_sig(prf.sig, prf.id, pub), 'invalid signature: '     + status)
 }

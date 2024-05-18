@@ -80,12 +80,11 @@ function read_contract_api (client : EscrowClient) {
  */
 function list_contract_api (client : EscrowClient) {
   return async (
-    pubkey : string,
-    token  : string
+    token : string
   ) : Promise<ApiResponse<ContractListResponse>> => {
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/contract/list?pk=${pubkey}`
+    const url  = `${host}/api/contract/list`
     // Define the request config.
     const init = {
       method  : 'GET',
@@ -117,9 +116,7 @@ function list_funds_api (client : EscrowClient) {
 /**
  * Cancel a contract that is not active.
  */
-function cancel_contract_api (
-  client : EscrowClient
-) {
+function cancel_contract_api (client : EscrowClient) {
   return async (
     cid   : string,
     token : string

@@ -172,7 +172,7 @@ Each contract specifies a "script engine" or interpreter to use when evaluating 
 When the contract activates, a virtual machine is created using the specified engine. A hash-chain is also created, starting with the machine's identifier (vmid).
 
 ```ts
-vm_state: {
+vmdata: {
   commits  : [],
   error    : null,
   head     : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',

@@ -34,7 +34,9 @@ import {
   ProposalData,
   ServerPolicy,
   VMData,
-  ScriptEngineAPI
+  ScriptEngineAPI,
+  ContractVerifyConfig,
+  WitnessData
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
@@ -45,6 +47,7 @@ import {
   validate_proposal_data,
   verify_proposal_data
 } from './proposal.js'
+import { get_vm_config } from '../lib/vm.js'
 
 export function validate_publish_req (
   contract : unknown
@@ -69,6 +72,23 @@ export function verify_contract_req (
   verify_endorsements(proposal, endorsements)
 }
 
+export function verify_contract_publishing (
+  contract  : ContractData,
+  proposal  : ProposalData
+) {
+  const { created_at, fees } = contract
+  const out = create_spend_templates(proposal, fees)
+  const pid = get_proposal_id(proposal)
+  const cid = get_contract_id(out, pid, created_at)
+  assert.ok(pid === contract.prop_id, 'computed proposal id does not match contract')
+  assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
+  for (const [ label, txhex ] of out) {
+    const tmpl = contract.outputs.find(e => e[0] === label)
+    assert.ok(tmpl !== undefined,     'output template does not exist for label: ' + label)
+    assert.ok(tmpl[1] === txhex,      'tx hex does not match output for label: ' + label)
+  }
+}
+
 export function verify_endorsements (
   proposal   : ProposalData,
   signatures : string[] = []
@@ -79,6 +99,33 @@ export function verify_endorsements (
     const pub = sig.slice(0, 64)
     const is_valid = verify_endorsement(prop_id, sig)
     assert.ok(is_valid, 'signature is invalid for pubkey: ' + pub)
+  }
+}
+
+export function verify_contract (
+  config : ContractVerifyConfig
+) {
+  const { contract, commits, engine, funds, pubkey, vmdata } = config
+  verify_contract_data(contract)
+  verify_contract_sigs(contract, pubkey)
+  if (contract.secured) {
+    assert.exists(funds, 'you must provide a list of funds to verify')
+    verify_contract_funding(contract, funds)
+  }
+  if (contract.activated) {
+    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
+    verify_contract_activation(contract, vmdata)
+  }
+  if (contract.closed) {
+    assert.exists(commits, 'you must provide a list of witness commits to verify.')
+    assert.exists(engine,  'you must provide a script engine to use for verification.')
+    assert.exists(vmdata,  'you must provide a vmdata object to verify.')
+    verify_contract_close(contract, vmdata)
+  }
+  if (contract.spent) {
+    assert.exists(funds,  'you must provide a list of funds to verify')
+    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
+    verify_contract_spending(contract, funds, vmdata)
   }
 }
 
@@ -97,37 +144,15 @@ export function verify_contract_data (contract : ContractData) {
 
 export function verify_contract_sigs (
   contract : ContractData,
-  pubkey   : string
+  pubkey : string
 ) {
-  const labels = contract.sigs.map(e => e[0])
-
-  assert.ok(labels.includes('published'),                       'contract signature missing: published')
-  assert.ok(!contract.canceled  || labels.includes('canceled'), 'contract signature missing: canceled')
-  assert.ok(!contract.activated || labels.includes('active'),   'contract signature missing: active')
-  assert.ok(!contract.closed    || labels.includes('closed'),   'contract signature missing: closed')
-  assert.ok(!contract.spent     || labels.includes('spent'),    'contract signature missing: spent')
-  assert.ok(!contract.settled   || labels.includes('settled'),  'contract signature missing: settled')
-
-  contract.sigs.forEach(sig => {
-    verify_contract_sig(contract, pubkey, sig)
-  })
-}
-
-export function verify_contract_publishing (
-  contract  : ContractData,
-  proposal  : ProposalData
-) {
-  const { created_at, fees } = contract
-  const out = create_spend_templates(proposal, fees)
-  const pid = get_proposal_id(proposal)
-  const cid = get_contract_id(out, pid, created_at)
-  assert.ok(pid === contract.prop_id, 'computed proposal id does not match contract')
-  assert.ok(cid === contract.cid,     'computed contract id id does not match contract')
-  for (const [ label, txhex ] of out) {
-    const tmpl = contract.outputs.find(e => e[0] === label)
-    assert.ok(tmpl !== undefined,     'output template does not exist for label: ' + label)
-    assert.ok(tmpl[1] === txhex,      'tx hex does not match output for label: ' + label)
-  }
+  verify_contract_sig(contract, pubkey, 'published')
+  if (contract.canceled)  verify_contract_sig(contract, pubkey, 'canceled')
+  if (contract.secured)   verify_contract_sig(contract, pubkey, 'secured')
+  if (contract.activated) verify_contract_sig(contract, pubkey, 'active')
+  if (contract.closed)    verify_contract_sig(contract, pubkey, 'closed')
+  if (contract.spent)     verify_contract_sig(contract, pubkey, 'spent')
+  if (contract.settled)   verify_contract_sig(contract, pubkey, 'settled')
 }
 
 export function verify_contract_funding (
@@ -146,15 +171,36 @@ export function verify_contract_funding (
 
 export function verify_contract_activation (
   contract : ContractData,
-  vmstate  : VMData
+  vmdata   : VMData
 ) {
   const { activated, active_at, canceled, expires_at, engine_vmid } = contract
   assert.ok(!canceled,                       'contract is flagged as canceled')
   assert.ok(activated,                       'contract is not flagged as active')
-  assert.ok(active_at === vmstate.active_at, 'contract activated date does not match vm')
-  assert.ok(engine_vmid === vmstate.vmid,    'contract vmid does not match vm internal id')
+  assert.ok(active_at === vmdata.active_at, 'contract activated date does not match vm')
+  assert.ok(engine_vmid === vmdata.vmid,    'contract vmid does not match vm internal id')
   const expires_chk = active_at + contract.terms.duration
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
+}
+
+export function verify_contract_execution (
+  contract : ContractData,
+  engine   : ScriptEngineAPI,
+  vmdata   : VMData,
+  witness  : WitnessData[]
+) {
+  const config  = get_vm_config(contract)
+    let vmstate = engine.init(config)
+  witness.forEach(wit => { vmstate = engine.eval(vmstate, wit) })
+  assert.ok(vmstate.active_at  === vmdata.active_at,   'vmdata.active_at does not match vm result')
+  assert.ok(vmstate.closed     === vmdata.closed,      'vmdata.closed    does not match vm result')
+  assert.ok(vmstate.closed_at  === vmdata.closed_at,   'vmdata.closed_at does not match vm result')
+  assert.ok(vmstate.commit_at  === vmdata.commit_at,   'vmdata.commit_at does not match vm result')
+  assert.ok(vmstate.engine     === vmdata.engine,      'vmdata.engine does not match vm result')
+  assert.ok(vmstate.expires_at === vmdata.expires_at,  'vmdata.expires_at does not match vm result')
+  assert.ok(vmstate.head       === vmdata.head,        'vmdata.head      does not match vm result')
+  assert.ok(vmstate.output     === vmdata.output,      'vmdata.output    does not match vm result')
+  assert.ok(vmstate.step       === vmdata.step,        'vmdata.step does not match vm result')
+  assert.ok(vmstate.vmid       === vmdata.vmid,        'vmdata.vmid does not match vm result')
 }
 
 export function verify_contract_close (
@@ -195,20 +241,6 @@ export function verify_contract_spending (
   assert.ok(txid === contract.spent_txid, 'spent txid does not match contract')
 }
 
-export function verify_contract_settlement (
-  contract   : ContractData,
-  funds      : FundingData[],
-  proposal   : ProposalData,
-  vmstate    : VMData
-) {
-  verify_contract_data(contract)
-  verify_contract_publishing(contract, proposal)
-  verify_contract_funding(contract, funds)
-  verify_contract_activation(contract, vmstate)
-  verify_contract_close(contract, vmstate)
-  verify_contract_spending(contract, funds, vmstate)
-}
-
 export default {
   validate : {
     request : validate_publish_req,
@@ -216,13 +248,8 @@ export default {
   },
   verify : {
     request    : verify_contract_req,
-    data       : verify_contract_data,
     publish    : verify_contract_publishing,
-    funding    : verify_contract_funding,
-    activation : verify_contract_activation,
-    closing    : verify_contract_close,
-    spending   : verify_contract_spending,
-    settlement : verify_contract_settlement,
+    data       : verify_contract,
     signatures : verify_contract_sigs
   }
 }
