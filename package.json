@@ -30,9 +30,25 @@
       "import": "./dist/client/index.js",
       "types": "./dist/client/index.d.ts"
     },
+    "./client/lib": {
+      "import": "./dist/client/lib/index.js",
+      "types": "./dist/client/lib/index.d.ts"
+    },
     "./core": {
       "import": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
+    },
+    "./core/lib": {
+      "import": "./dist/core/lib/index.js",
+      "types": "./dist/core/lib/index.d.ts"
+    },
+    "./core/util": {
+      "import": "./dist/core/util/index.js",
+      "types": "./dist/core/util/index.d.ts"
+    },
+    "./core/validate": {
+      "import": "./dist/core/validate/index.js",
+      "types": "./dist/core/validate/index.d.ts"
     },
     "./cvm": {
       "import": "./dist/vm/index.js",
@@ -53,22 +69,6 @@
     "./witness": {
       "import": "./dist/core/module/witness/index.js",
       "types": "./dist/core/module/witness/index.d.ts"
-    },
-    "./lib": {
-      "import": "./dist/core/lib/index.js",
-      "types": "./dist/core/lib/index.d.ts"
-    },
-    "./schema": {
-      "import": "./dist/core/schema/index.js",
-      "types": "./dist/core/schema/index.d.ts"
-    },
-    "./util": {
-      "import": "./dist/core/util/index.js",
-      "types": "./dist/core/util/index.d.ts"
-    },
-    "./validate": {
-      "import": "./dist/core/validation/index.js",
-      "types": "./dist/core/validation/index.d.ts"
     }
   },
   "scripts": {
@@ -77,8 +77,6 @@
     "demo:vm": "yarn load demo/vm/eval.ts",
     "lint": "eslint . --ext .ts",
     "load": "tsx --tsconfig ./test/tsconfig.json",
-    "pub:dev": "yarn publish --tag dev",
-    "pub:rel": "yarn publish --tag latest",
     "release": "yarn lint && yarn test && yarn build",
     "run:regtest": "NETWORK=regtest yarn load",
     "run:mutiny": "NETWORK=mutiny  yarn load",

@@ -1,7 +1,8 @@
-import { parse_addr }            from '@scrow/tapscript/address'
-import { exists }                from '@/core/util/validate.js'
-import { TxConfirmState }        from '@/core/types/index.js'
-import { fetcher, resolve_json } from '@/client/lib/fetch.js'
+import { parse_addr } from '@scrow/tapscript/address'
+import { exists }     from '@/core/util/validate.js'
+import { TxOutput }   from '@/core/types/index.js'
+
+import { fetcher, get_confirm_state, resolve_json } from '@/client/lib/fetch.js'
 
 import {
   ApiResponse,
@@ -16,28 +17,6 @@ import {
 import ClientSchema from '@/client/schema/index.js'
 
 export class ChainOracle {
-  /**
-  * Compute the spending state of a deposit,
-  * using transaction data from an oracle.
-  */
-  static async get_deposit_state (
-    data     : OracleTxSpendData,
-    locktime : number
-  ) : Promise<TxConfirmState | null> {
-    if (data.status.confirmed) {
-        const expires_at = data.status.block_time + locktime
-        return { ...data.status, expires_at }
-    } else {
-      return {
-        confirmed    : false as const,
-        block_hash   : null,
-        block_height : null,
-        block_time   : null,
-        expires_at   : null
-      }
-    }
-  }
-
   readonly _host : string
 
   constructor (host : string) {
@@ -133,6 +112,15 @@ export class ChainOracle {
     }
     // Return the txout aling with its state and status.
     return { txout, status: tx.status, state }
+  }
+
+  async get_confirm_state (
+    locktime : number,
+    utxo     : TxOutput
+  ) {
+    const { txid, vout } = utxo
+    const res = await this.get_utxo_data({ txid, vout })
+    return (res === null) ? null : get_confirm_state(res, locktime)
   }
 
   async get_address_utxos (addr : string) : Promise<OracleTxSpendData[]> {

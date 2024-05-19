@@ -1,4 +1,6 @@
-import { ApiResponse } from '@/client/types/index.js'
+import { ApiResponse, OracleTxSpendData } from '@/client/types/index.js'
+
+import { TxConfirmState } from '@/core/types/index.js'
 
 export async function fetcher <T> (
   input   : URL | RequestInfo,
@@ -50,4 +52,22 @@ export async function resolve_json <T> (
   }
   // Return response with data.
   return { status, ok: true, data }
+}
+
+export function get_confirm_state (
+  data     : OracleTxSpendData,
+  locktime : number
+) : TxConfirmState {
+  if (data.status.confirmed) {
+      const expires_at = data.status.block_time + locktime
+      return { ...data.status, expires_at }
+  } else {
+    return {
+      confirmed    : false as const,
+      block_hash   : null,
+      block_height : null,
+      block_time   : null,
+      expires_at   : null
+    }
+  }
 }

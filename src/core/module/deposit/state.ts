@@ -1,5 +1,5 @@
-import { sort_record }                from '@/core/util/base.js'
-import { assert, parse_proof }        from '@/core/util/index.js'
+import { sort_record }         from '@/core/util/base.js'
+import { assert, parse_proof } from '@/core/util/index.js'
 
 import {
   DepositData,
