@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.12.38-dev",
+  "version": "0.12.39-dev",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -34,6 +34,10 @@
       "import": "./dist/client/lib/index.js",
       "types": "./dist/client/lib/index.d.ts"
     },
+    "./client/schema": {
+      "import": "./dist/client/schema/index.js",
+      "types": "./dist/client/schema/index.d.ts"
+    },
     "./core": {
       "import": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
@@ -41,6 +45,10 @@
     "./core/lib": {
       "import": "./dist/core/lib/index.js",
       "types": "./dist/core/lib/index.d.ts"
+    },
+    "./core/schema": {
+      "import": "./dist/core/schema/index.js",
+      "types": "./dist/core/schema/index.d.ts"
     },
     "./cvm": {
       "import": "./dist/vm/index.js",
