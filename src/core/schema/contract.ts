@@ -111,6 +111,7 @@ const close_state   = z.discriminatedUnion('closed',    [ ct_open,      ct_close
 /* ------------------- [ Contract Schema ] ------------------- */
 
 const base_data = z.object({
+  agent_pk     : hash,
   cid          : hash,
   created_at   : stamp,
   created_sig  : hex,
@@ -123,7 +124,6 @@ const base_data = z.object({
   outputs      : output.array(),
   moderator    : hash.nullable(),
   prop_id      : hash,
-  server_pk    : hash,
   sigs         : z.tuple([ status, hex ]).array(),
   status,
   subtotal     : num,

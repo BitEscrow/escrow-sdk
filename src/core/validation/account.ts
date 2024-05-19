@@ -109,24 +109,24 @@ export function verify_commit_req (
   contract  : ContractData,
   policy    : AccountPolicy,
   request   : CommitRequest,
-  server_sd : SignerAPI
+  agent : SignerAPI
 ) {
   const covenant = request.covenant
-  verify_register_req(policy, request, server_sd)
-  verify_covenant_data(contract, covenant, request, server_sd)
+  verify_register_req(policy, request, agent)
+  verify_covenant_data(contract, covenant, request, agent)
 }
 
 export function verify_account_data (
   account : AccountData,
   signer  : SignerAPI
 ) {
-  const { account_id, created_at, account_sig, deposit_addr, server_pk, server_tkn } = account
+  const { account_id, created_at, account_sig, deposit_addr, agent_pk, agent_tkn } = account
   // Create a context object for the account.
   const ctx = get_account_ctx(account)
   //
   const hash = get_account_hash(account)
   // Compute the id for the account data.
-  const id  = get_account_id(deposit_addr, hash, server_pk, created_at, server_tkn)
+  const id  = get_account_id(deposit_addr, hash, agent_pk, created_at, agent_tkn)
   // Define the deposit address
   const addr = account.deposit_addr
   // Define the deposit pubkey.
@@ -135,15 +135,15 @@ export function verify_account_data (
   assert.ok(signer.pubkey === pk,      'deposit pubkey does not match signing device')
   assert.ok(ctx.deposit_addr === addr, 'deposit address does not match signing device')
   assert.ok(id === account_id,         'account id does not match computed id')
-  assert.ok(verify_sig(account_sig, id, server_pk), 'server signature is invalid')
+  assert.ok(verify_sig(account_sig, id, agent_pk), 'server signature is invalid')
 }
 
 export function verify_session_token (
   request   : RegisterRequest,
-  server_sd : SignerAPI
+  agent_dev : SignerAPI
 ) {
-  const agent = get_account_agent(request, server_sd)
-  const sess  = parse_session_token(request.server_tkn)
+  const agent = get_account_agent(request, agent_dev)
+  const sess  = parse_session_token(request.agent_tkn)
   const seed  = get_session_seed(sess.id, agent, sess.ts)
   const agpn  = get_session_pnonce(seed, agent).hex
 

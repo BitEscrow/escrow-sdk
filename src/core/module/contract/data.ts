@@ -53,6 +53,7 @@ export function create_contract (
   // Return a completed contract.
   const template   = {
     ...GET_PUBLISH_STATE(),
+    agent_pk    : signer.pubkey,
     cid,
     created_at,
     fees,
@@ -62,7 +63,6 @@ export function create_contract (
     moderator   : request.proposal.moderator ?? null,
     outputs,
     prop_id,
-    server_pk   : signer.pubkey,
     sigs        : [],
     subtotal,
     terms       : sort_record(proposal),

@@ -1,17 +1,17 @@
-import { resolve_json } from '../util/fetch.js'
+import { resolve_json } from '@/client/util/fetch.js'
 import { Network }      from '@/core/types/index.js'
-import { ApiResponse }  from '@/client/types/index.js'
 
 import {
   DEFAULT_CONFIG,
   get_client_config
-} from '../config.js'
+} from '@/client/config/index.js'
 
 import {
+  ApiResponse,
   ClientConfig,
   ClientOptions,
   FetchConfig
-} from '../types/base.js'
+} from '@/client/types/index.js'
 
 import account_api   from '../api/client/account.js'
 import contract_api  from '../api/client/contract.js'
@@ -22,7 +22,7 @@ import server_api    from '../api/client/server.js'
 import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
 
-import ClientSchema  from '../schema/base.js'
+import ClientSchema  from '../schema/index.js'
 
 type Resolver = ReturnType<typeof get_fetcher>
 
@@ -34,7 +34,7 @@ export class EscrowClient {
     const options = { ...DEFAULT_CONFIG, ...opt }
     const client  = get_client_config(opt.network as Network)
     const config  = { ...client, ...options }
-    this._config  = ClientSchema.client_config.parse(config)
+    this._config  = ClientSchema.base.client_config.parse(config)
     this._fetcher = get_fetcher(opt.fetcher ?? fetch)
   }
 

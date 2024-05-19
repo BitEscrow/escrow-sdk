@@ -1,5 +1,5 @@
 import { EscrowClient }   from '@/client/class/client.js'
-import { DEFAULT_POLICY } from '@/client/config.js'
+import { DEFAULT_POLICY } from '@/client/config/index.js'
 
 import {
   validate_account_req,

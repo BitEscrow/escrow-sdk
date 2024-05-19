@@ -1,4 +1,4 @@
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner } from '@/client/class/signer.js'
 
 export function list_machines_api (esigner : EscrowSigner) {
   return () => {

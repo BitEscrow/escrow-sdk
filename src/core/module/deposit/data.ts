@@ -43,11 +43,11 @@ export function create_deposit (
     ...GET_REGISTER_STATE(),
     ...request,
     account_hash : get_account_hash(request),
+    agent_pk     : signer.pubkey,
     created_at,
     deposit_addr,
     dpid         : get_deposit_id(created_at, dp_hash),
     satpoint     : get_satpoint(request.utxo),
-    server_pk    : signer.pubkey,
     sigs         : [],
     updated_at   : created_at
   }

@@ -27,7 +27,7 @@ export function get_deposit_preimg (
   deposit : DepositPreImage,
   status  : DepositStatus
 ) : NoteTemplate {
-  const { dpid, server_pk: pubkey } = deposit
+  const { dpid, agent_pk: pubkey } = deposit
   const { content, created_at }     = get_deposit_state(deposit, status)
   const kind  = DEPOSIT_KIND
   const tags  = [ [ 'i', dpid ] ]
@@ -59,7 +59,7 @@ export function verify_deposit_sig (
   pubkey  : string,
   status  : DepositStatus
 ) {
-  const pub = deposit.server_pk
+  const pub = deposit.agent_pk
   const prf = get_deposit_proof(deposit, status)
   const img = get_deposit_preimg(deposit, status)
   const dig = get_proof_id(img)

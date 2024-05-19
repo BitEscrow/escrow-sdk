@@ -183,7 +183,7 @@ export function get_contract_preimg (
   contract : ContractPreImage,
   status   : ContractStatus
 ) : NoteTemplate {
-  const { cid, server_pk: pubkey } = contract
+  const { cid, agent_pk: pubkey } = contract
   const { content, created_at }    = get_contract_state(contract, status)
   const kind  = CONTRACT_KIND
   const tags  = [ [ 'i', cid ] ]
@@ -215,7 +215,7 @@ export function verify_contract_sig (
   pubkey   : string,
   status   : ContractStatus
 ) {
-  const pub = contract.server_pk
+  const pub = contract.agent_pk
   const prf = get_contract_proof(contract, status)
   const img = get_contract_preimg(contract, status)
   const dig = get_proof_id(img)

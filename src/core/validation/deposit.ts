@@ -61,13 +61,13 @@ export function verify_lock_req (
   contract  : ContractData,
   deposit   : DepositData,
   request   : LockRequest,
-  server_sd : SignerAPI
+  agent : SignerAPI
 ) {
   assert.ok(request.dpid === deposit.dpid)
   assert.ok(deposit.covenant === null)
   const covenant = request.covenant
   verify_lockable(deposit.status)
-  verify_covenant_data(contract, covenant, deposit, server_sd)
+  verify_covenant_data(contract, covenant, deposit, agent)
 }
 
 export function verify_close_req (

@@ -32,14 +32,14 @@ export interface AccountData {
   account_hash : string
   account_id   : string
   account_sig  : string
+  agent_pk     : string
+  agent_tkn    : string
   created_at   : number
   deposit_addr : string
   deposit_pk   : string
   locktime     : number
   network      : Network
   return_addr  : string
-  server_pk    : string
-  server_tkn   : string
 }
 
 export interface AccountTemplate {
@@ -47,7 +47,7 @@ export interface AccountTemplate {
   locktime    : number
   network     : Network
   return_addr : string
-  server_tkn  : string
+  agent_tkn  : string
 }
 
 export interface RegisterTemplate extends AccountTemplate {

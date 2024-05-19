@@ -77,6 +77,8 @@ const fund = z.object({
 const base_data = z.object({
   status,
   account_hash : hash,
+  agent_pk     : hash,
+  agent_tkn    : hex,
   created_at   : stamp,
   created_sig  : hex,
   dpid         : hash,
@@ -88,8 +90,6 @@ const base_data = z.object({
   return_psig  : hex,
   return_rate  : num,
   satpoint     : str,
-  server_pk    : hash,
-  server_tkn   : hex,
   sigs         : z.tuple([ status, hex ]).array(),
   updated_at   : stamp,
   utxo         : tx.txout

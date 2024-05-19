@@ -1,11 +1,11 @@
-import { EscrowClient } from '../../class/client.js'
+import { EscrowClient } from '@/client/class/client.js'
 
 import {
   create_session,
   decode_session,
   encode_session,
   publish_session
-} from '../../lib/session.js'
+} from '@/client/lib/session.js'
 
 export default function (_client : EscrowClient) {
   return {

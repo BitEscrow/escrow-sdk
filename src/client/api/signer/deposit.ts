@@ -1,5 +1,5 @@
 import { assert }       from '@/core/util/index.js'
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner } from '@/client/class/signer.js'
 
 import {
   verify_contract_data,

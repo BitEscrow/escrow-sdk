@@ -82,8 +82,8 @@ export interface DepositBase {
   return_rate  : number
   return_psig  : string
   satpoint     : string
-  server_pk    : string
-  server_tkn   : string
+  agent_pk    : string
+  agent_tkn   : string
   status       : DepositStatus
   updated_at   : number
   utxo         : TxOutput

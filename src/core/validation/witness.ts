@@ -100,7 +100,7 @@ export function verify_witness_receipt (
   vmdata  : VMData,
   witness : WitnessData
 ) {
-  const { receipt_id, receipt_sig, server_pk } = receipt
+  const { receipt_id, receipt_sig, agent_pk } = receipt
 
   // Don't forget to check that vm matches receipt.
   assert.ok(witness.vmid === vmdata.vmid,        'provided vmdata and witness vmid does not match')
@@ -116,7 +116,7 @@ export function verify_witness_receipt (
   assert.ok(int_wid === witness.wid,             'internal witness id does not match receipt')
   assert.ok(int_rid === receipt.receipt_id,      'internal receipt id does not match receipt')
 
-  const is_valid = verify_sig(receipt_sig, receipt_id, server_pk)
+  const is_valid = verify_sig(receipt_sig, receipt_id, agent_pk)
 
   assert.ok(is_valid, 'receipt signature is invalid')
 }

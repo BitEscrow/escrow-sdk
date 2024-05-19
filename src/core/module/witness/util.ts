@@ -20,7 +20,7 @@ export function get_witness_id (
 export function get_receipt_id (
   preimage : ReceiptPreImage
 ) {
-  const { receipt_at, server_pk, vm_hash, wid } = preimage
+  const { receipt_at, agent_pk, vm_hash, wid } = preimage
   const rat = Buff.num(receipt_at, 4)
-  return Buff.join([ wid, rat, server_pk, vm_hash ]).digest.hex
+  return Buff.join([ wid, rat, agent_pk, vm_hash ]).digest.hex
 }

@@ -77,9 +77,9 @@ export function create_account_ctx (
  */
 export function get_account_ctx (template : AccountTemplate) {
   // Unpack the account object.
-  const { deposit_pk, locktime, network, return_addr, server_tkn } = template
+  const { deposit_pk, locktime, network, return_addr, agent_tkn } = template
   // Return the account context object.
-  return create_account_ctx(deposit_pk, locktime, network, return_addr, server_tkn)
+  return create_account_ctx(deposit_pk, locktime, network, return_addr, agent_tkn)
 }
 
 /**
@@ -100,7 +100,7 @@ export function get_deposit_hash (
   request : RegisterTemplate | DepositData
 ) {
   const hash = get_account_hash(request)
-  const agnt = Buff.hex(request.server_tkn)
+  const agnt = Buff.hex(request.agent_tkn)
   const rate = Buff.num(request.return_rate, 4)
   const utxo = get_utxo_bytes(request.utxo)
   const pimg = Buff.join([ hash, agnt, rate, utxo ])
@@ -127,10 +127,10 @@ export function get_account_id (
 
 export function get_account_agent (
   request   : AccountRequest,
-  server_sd : SignerAPI
+  agent : SignerAPI
 ) {
   // Get account request hash.
   const hash = get_account_hash(request)
   // Get signing agent for account.
-  return server_sd.get_id(hash)
+  return agent.get_id(hash)
 }

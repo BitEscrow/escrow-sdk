@@ -4,7 +4,7 @@ import { parse_addr }  from '@scrow/tapscript/address'
 
 /* Module Imports */
 
-import { exists }                from '../../core/util/validate.js'
+import { exists }                from '@/core/util/validate.js'
 import { fetcher, resolve_json } from './fetch.js'
 
 /* Local Imports */

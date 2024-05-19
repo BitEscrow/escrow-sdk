@@ -1,7 +1,7 @@
 import { assert, parse_proposal } from '@/core/util/index.js'
 import { create_publish_req }     from '@/core/module/contract/index.js'
 import { EscrowClient }           from '@/client/class/client.js'
-import { DEFAULT_POLICY }         from '@/client/config.js'
+import { DEFAULT_POLICY }         from '@/client/config/index.js'
 
 import {
   verify_endorsements,

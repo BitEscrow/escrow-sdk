@@ -1,7 +1,10 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { Network }     from '@/core/types/index.js'
 
-import { DEFAULT_CONFIG, get_client_config } from '../config.js'
+import {
+  DEFAULT_CONFIG,
+  get_client_config
+} from '@/client/config/index.js'
 
 import {
   Seed,
@@ -24,7 +27,7 @@ import machine_api  from '../api/signer/vm.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
-import ClientSchema  from '../schema/base.js'
+import ClientSchema  from '../schema/index.js'
 
 export class EscrowSigner {
   static create (
@@ -90,7 +93,7 @@ export class EscrowSigner {
     const config = { ...client, ...opt }
     const xpub   = options.xpub ?? signer.xpub
 
-    this._config = ClientSchema.signer_config.parse(config)
+    this._config = ClientSchema.base.signer_config.parse(config)
     this._signer = signer
     this._wallet = new Wallet(xpub)
   }

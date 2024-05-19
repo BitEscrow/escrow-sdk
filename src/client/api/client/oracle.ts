@@ -1,6 +1,5 @@
-/* Global Imports */
-
 import { assert, sleep } from '@/core/util/index.js'
+import { EscrowClient }  from '@/client/class/client.js'
 
 import {
   broadcast_tx,
@@ -16,10 +15,6 @@ import {
   OracleQuery,
   OracleTxSpendData
 } from '@/client/types/index.js'
-
-/* Module Imports */
-
-import { EscrowClient } from '@/client/class/client.js'
 
 function broadcast_tx_api (client : EscrowClient) {
   return async (txhex : string) => {

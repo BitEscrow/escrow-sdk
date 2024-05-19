@@ -1,5 +1,5 @@
 import { assert }       from '@/core/util/index.js'
-import { EscrowClient } from '../../class/client.js'
+import { EscrowClient } from '@/client/class/client.js'
 
 import {
   ApiResponse,

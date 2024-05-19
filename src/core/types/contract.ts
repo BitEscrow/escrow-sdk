@@ -124,7 +124,7 @@ export interface ContractBase {
   moderator    : string | null
   outputs      : SpendTemplate[]
   prop_id      : string
-  server_pk    : string
+  agent_pk    : string
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData

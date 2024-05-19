@@ -1,5 +1,5 @@
 import { verify_witness_data } from '@/core/validation/witness.js'
-import { EscrowSigner }        from '../../class/signer.js'
+import { EscrowSigner }        from '@/client/class/signer.js'
 
 import {
   can_endorse,
