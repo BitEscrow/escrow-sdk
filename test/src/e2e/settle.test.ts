@@ -12,7 +12,6 @@ import { get_vm_config }    from '@scrow/sdk/vm'
 import CVM                  from '@scrow/sdk/cvm'
 
 import {
-  CoreAssert,
   DepositData,
   PaymentEntry,
   TxOutput
@@ -52,7 +51,8 @@ import {
   verify_witness_data,
   verify_contract_sigs,
   verify_deposit_sigs,
-  verify_contract_settlement
+  verify_contract_settlement,
+  verify_contract_req
 } from '@/core/validation/index.js'
 
 import {
@@ -125,7 +125,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
-      CoreAssert.contract.verify.request(CVM, server_pol.proposal, pub_req)
+      verify_contract_req(CVM, server_pol.proposal, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, escrow_dev)
       

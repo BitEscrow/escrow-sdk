@@ -4,9 +4,9 @@ import { verify_psig } from '@cmdcode/musig2'
 
 /* Module Imports */
 
-import { get_account_agent }      from '../module/account/util.js'
-import { parse_session_token }    from '../lib/session.js'
-import { assert, parse_covenant } from '../util/index.js'
+import { get_account_agent }   from '../module/account/util.js'
+import { parse_session_token } from '../lib/session.js'
+import { assert, parser }      from '../util/index.js'
 
 import {
   get_covenant_id,
@@ -32,7 +32,7 @@ import {
 export function validate_covenant_data (
   covenant : unknown
 ) : asserts covenant is CovenantData {
-  parse_covenant(covenant)
+  parser.parse_covenant(covenant)
 }
 
 export function verify_covenant_data (

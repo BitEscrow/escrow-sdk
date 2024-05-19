@@ -1,7 +1,7 @@
-import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_publish_req }     from '@/core/module/contract/index.js'
-import { EscrowClient }           from '@/client/class/client.js'
-import { DEFAULT_POLICY }         from '@/client/config/index.js'
+import { assert, parser }     from '@/core/util/index.js'
+import { create_publish_req } from '@/core/module/contract/index.js'
+import { EscrowClient }       from '@/client/class/client.js'
+import { DEFAULT_POLICY }     from '@/client/config/index.js'
 
 import {
   verify_endorsements,
@@ -35,7 +35,7 @@ function create_contract_api (
     // Unpack configurations from client.
     const { endorsements, proposal } = request
     // Parse and validate the proposal.
-    const prop = parse_proposal(proposal)
+    const prop = parser.parse_proposal(proposal)
     // Verify the proposal's terms.
     verify_proposal_data(engine, policy, prop)
     // Verify any signatures.

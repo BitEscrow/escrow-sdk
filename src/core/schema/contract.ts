@@ -112,9 +112,9 @@ const close_state   = z.discriminatedUnion('closed',    [ ct_open,      ct_close
 
 const base_data = z.object({
   agent_pk     : hash,
+  agent_sig    : hex,
   cid          : hash,
   created_at   : stamp,
-  created_sig  : hex,
   deadline_at  : stamp,
   endorsements : hex.array(),
   feerate      : num,
@@ -124,7 +124,6 @@ const base_data = z.object({
   outputs      : output.array(),
   moderator    : hash.nullable(),
   prop_id      : hash,
-  sigs         : z.tuple([ status, hex ]).array(),
   status,
   subtotal     : num,
   terms        : proposal.data,
@@ -137,7 +136,7 @@ const base_data = z.object({
   vin_txfee    : num
 })
 
-const data  = base_data
+const data = base_data
   .and(publish_state)
   .and(funding_state)
   .and(engine_state)

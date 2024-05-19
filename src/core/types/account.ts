@@ -31,8 +31,8 @@ export interface AccountContext {
 export interface AccountData {
   account_hash : string
   account_id   : string
-  account_sig  : string
   agent_pk     : string
+  agent_sig    : string
   agent_tkn    : string
   created_at   : number
   deposit_addr : string

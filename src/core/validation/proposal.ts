@@ -7,11 +7,7 @@ import {
   get_path_names
 } from '../lib/proposal.js'
 
-import {
-  assert,
-  now,
-  parse_proposal
-} from '../util/index.js'
+import { assert, now, parser } from '../util/index.js'
 
 import {
   ProposalData,
@@ -40,7 +36,7 @@ export function validate_proposal_tmpl (
 export function validate_proposal_data (
   proposal : unknown
 ) : asserts proposal is ProposalData {
-  parse_proposal(proposal)
+  parser.parse_proposal(proposal)
 }
 
 export function verify_proposal_data (

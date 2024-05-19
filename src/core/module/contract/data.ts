@@ -74,7 +74,7 @@ export function create_contract (
     vin_txfee   : feerate * SPEND_TXIN_SIZE
   }
   const proof = notarize_contract(template, signer, 'published')
-  return sort_record({ ...template, created_sig: proof })
+  return sort_record({ ...template, agent_sig: proof })
 }
 
 export function cancel_contract (

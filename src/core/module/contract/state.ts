@@ -56,8 +56,8 @@ export const GET_PUBLISH_STATE = () => {
     ...INIT_CANCEL_STATE(),
     ...INIT_PUBLISH_STATE(),
     ...INIT_FUNDING_STATE(),
-    created_sig : null,
-    status      : 'published' as ContractStatus
+    agent_sig : null,
+    status    : 'published' as ContractStatus
   }
 }
 
@@ -161,7 +161,7 @@ export function get_contract_proof (
   let sig
   switch (status) {
     case 'published':
-      sig = contract.created_sig; break
+      sig = contract.agent_sig; break
     case 'canceled':
       sig = contract.canceled_sig; break
     case 'secured':

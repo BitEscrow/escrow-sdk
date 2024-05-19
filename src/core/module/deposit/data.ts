@@ -52,7 +52,7 @@ export function create_deposit (
     updated_at   : created_at
   }
   const proof = notarize_deposit(template, signer, 'registered')
-  return sort_record({ ...template, created_sig: proof })
+  return sort_record({ ...template, agent_sig: proof })
 }
 
 export function confirm_deposit (

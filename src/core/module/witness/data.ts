@@ -19,12 +19,12 @@ export function create_receipt (
   receipt_at = now()
 ) : WitnessReceipt {
   const agent_pk   = signer.pubkey
-  const vm_closed   = data.closed
-  const vm_hash     = data.head
-  const vm_output   = data.output
-  const vm_step     = data.step
-  const preimg      = { ...witness, receipt_at, agent_pk, vm_closed, vm_hash, vm_output, vm_step }
-  const receipt_id  = get_receipt_id(preimg)
-  const receipt_sig = signer.sign(receipt_id)
-  return sort_record({ ...preimg, receipt_id, receipt_sig })
+  const vm_closed  = data.closed
+  const vm_hash    = data.head
+  const vm_output  = data.output
+  const vm_step    = data.step
+  const preimg     = { ...witness, receipt_at, agent_pk, vm_closed, vm_hash, vm_output, vm_step }
+  const receipt_id = get_receipt_id(preimg)
+  const agent_sig  = signer.sign(receipt_id)
+  return sort_record({ ...preimg, receipt_id, agent_sig })
 }

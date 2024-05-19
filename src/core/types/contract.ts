@@ -34,7 +34,7 @@ export type ContractData =
   TxSpendState         &
   TxSettleState
 
-export type ContractSignatures = 'created_sig' | 'canceled_sig' | 'secured_sig' | 'active_sig' |
+export type ContractSignatures = 'agent_sig'   | 'canceled_sig' | 'secured_sig' | 'active_sig' |
                                  'closed_sig'  | 'spent_sig'    | 'settled_sig'
 
 export type ContractPreImage = Omit<ContractData, ContractSignatures>
@@ -112,9 +112,10 @@ export interface ContractCreateConfig {
 }
 
 export interface ContractBase {
+  agent_pk     : string
+  agent_sig    : string
   cid          : string
   created_at   : number
-  created_sig  : string
   deadline_at  : number
   endorsements : string[]
   fees         : PaymentEntry[]
@@ -124,7 +125,6 @@ export interface ContractBase {
   moderator    : string | null
   outputs      : SpendTemplate[]
   prop_id      : string
-  agent_pk    : string
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData

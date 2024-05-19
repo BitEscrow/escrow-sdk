@@ -17,14 +17,14 @@ const data = z.object({
 })
 
 const receipt = data.extend({
-  agent_pk    : hash,
-  receipt_at  : stamp,
-  receipt_id  : hash,
-  receipt_sig : signature,
-  vm_closed   : bool,
-  vm_hash     : hash,
-  vm_output   : str.nullable(),
-  vm_step     : num
+  agent_pk   : hash,
+  agent_sig  : signature,
+  receipt_at : stamp,
+  receipt_id : hash,
+  vm_closed  : bool,
+  vm_hash    : hash,
+  vm_output  : str.nullable(),
+  vm_step    : num
 })
 
 export default { data, receipt }

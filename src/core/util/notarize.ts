@@ -4,15 +4,6 @@ import { sha256 }       from '@cmdcode/crypto-tools/hash'
 import { NoteTemplate } from '@/core/types/index.js'
 import * as assert      from '@/core/util/assert.js'
 
-export function get_record_id <T extends object> (obj : T) : Buff {
-  if (
-    Array.isArray(obj) ||
-    obj === null       ||
-    typeof obj !== 'object'
-  ) { throw new Error('not an object') }
-  return sha256(Buff.json(obj))
-}
-
 export function get_proof_id (
   template : NoteTemplate
 ) {

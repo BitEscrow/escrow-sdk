@@ -34,8 +34,8 @@ const commit_req = register_req.extend({ covenant })
 const data = z.object({
   account_hash : hash,
   account_id   : hash,
-  account_sig  : nonce,
   agent_pk     : hash,
+  agent_sig    : hex,
   agent_tkn    : token,
   created_at   : stamp,
   deposit_pk   : hash,

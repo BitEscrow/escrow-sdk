@@ -78,9 +78,9 @@ const base_data = z.object({
   status,
   account_hash : hash,
   agent_pk     : hash,
+  agent_sig    : hex,
   agent_tkn    : hex,
   created_at   : stamp,
-  created_sig  : hex,
   dpid         : hash,
   deposit_pk   : hash,
   deposit_addr : str,
@@ -90,7 +90,6 @@ const base_data = z.object({
   return_psig  : hex,
   return_rate  : num,
   satpoint     : str,
-  sigs         : z.tuple([ status, hex ]).array(),
   updated_at   : stamp,
   utxo         : tx.txout
 })
