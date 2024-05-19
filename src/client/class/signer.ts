@@ -93,7 +93,7 @@ export class EscrowSigner {
     const config = { ...client, ...opt }
     const xpub   = options.xpub ?? signer.xpub
 
-    this._config = ClientSchema.base.signer_config.parse(config)
+    this._config = ClientSchema.config.signer.parse(config)
     this._signer = signer
     this._wallet = new Wallet(xpub)
   }

@@ -77,9 +77,9 @@ export function commit_funds_api (esigner : EscrowSigner) {
 
 export default function (esigner : EscrowSigner) {
   return {
+    commit   : commit_funds_api(esigner),
     request  : request_account_api(esigner),
-    verify   : verify_account_api(esigner),
     register : register_funds_api(esigner),
-    commit   : commit_funds_api(esigner)
+    verify   : verify_account_api(esigner)
   }
 }

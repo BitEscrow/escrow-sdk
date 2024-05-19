@@ -1,5 +1,5 @@
-import base   from './base.js'
+import config from './config.js'
 import draft  from './draft.js'
 import oracle from './oracle.js'
 
-export default { base, draft, oracle }
+export default { config, draft, oracle }

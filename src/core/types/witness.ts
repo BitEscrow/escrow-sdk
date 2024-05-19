@@ -26,8 +26,8 @@ export interface WitnessData extends WitnessPreImage {
 }
 
 export interface ReceiptPreImage extends WitnessData {
+  agent_pk   : string
   receipt_at : number
-  agent_pk  : string
   vm_closed  : boolean
   vm_hash    : string
   vm_output  : string | null

@@ -77,13 +77,13 @@ if (DEMO_MODE) {
   await sleep(5000)
 
   // Fetch the settlement tx from the oracle.
-  const txdata = await client.oracle.get_txdata(txid)
+  const txdata = await client.oracle.get_tx_data(txid)
   // Print the transaction data to console.
   console.dir(txdata, { depth : null })
 
   print_banner('demo complete!')
   console.log('view your transaction here:')
-  console.log(`\n${client.oracle_url}/tx/${txid}\n`)
+  console.log(`\n${client._config.oracle_url}/tx/${txid}\n`)
 }
 
 await sleep(2000)

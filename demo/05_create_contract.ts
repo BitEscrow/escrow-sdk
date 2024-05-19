@@ -8,7 +8,7 @@ const DEMO_MODE = process.env.VERBOSE === 'true'
 // Unpack the default script engine and server policy.
 const { engine, policy } = config
 // Deliver proposal and endorsements to server.
-const res = await client.contract.create(engine, policy, publish_req)
+const res = await client.contract.create(publish_req, engine, policy.proposal)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 

@@ -1,7 +1,6 @@
 import {
   ContractData,
-  FundingData,
-  VMData
+  FundingData
 } from '@/core/types/index.js'
 
 export interface ContractDataResponse {
@@ -14,11 +13,4 @@ export interface ContractListResponse {
 
 export interface FundListResponse {
   funds : FundingData[]
-}
-
-export interface ContractVerifyConfig {
-  contract : ContractData
-  funds   ?: FundingData[]
-  pubkey   : string
-  vmdata  ?: VMData
 }

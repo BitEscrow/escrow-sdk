@@ -1,10 +1,5 @@
-/* Local Imports */
-
-import { verify_sig } from '@cmdcode/crypto-tools/signer'
-
-/* Module Imports */
-
-import { assert, regex }  from '../util/index.js'
+import { verify_sig }    from '@cmdcode/crypto-tools/signer'
+import { assert, regex } from '../util/index.js'
 
 import {
   get_receipt_id,
@@ -22,18 +17,25 @@ import {
 } from '../types/index.js'
 
 import PropSchema from '../schema/proposal.js'
+import VMSchema   from '../schema/vm.js'
 import WitSchema  from '../schema/witness.js'
 
 export function validate_program_entry (
   program : unknown
 ) : asserts program is ProgramEntry {
-  PropSchema.program.parse(program)
+  void PropSchema.program.parse(program)
+}
+
+export function validate_vm_data (
+  vmdata : VMData
+) {
+ void VMSchema.data.parse(vmdata)
 }
 
 export function validate_witness_data (
   witness : unknown
 ) : asserts witness is WitnessData {
-  WitSchema.data.parse(witness)
+  void WitSchema.data.parse(witness)
 }
 
 export function verify_program_entry (

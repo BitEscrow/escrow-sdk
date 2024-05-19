@@ -1,5 +1,6 @@
-import { resolve_json } from '@/client/util/fetch.js'
+import { resolve_json } from '@/client/lib/fetch.js'
 import { Network }      from '@/core/types/index.js'
+import { ChainOracle }  from './oracle.js'
 
 import {
   DEFAULT_CONFIG,
@@ -17,7 +18,6 @@ import account_api   from '../api/client/account.js'
 import contract_api  from '../api/client/contract.js'
 import deposit_api   from '../api/client/deposit.js'
 import draft_api     from '../api/client/draft.js'
-import oracle_api    from '../api/client/oracle.js'
 import server_api    from '../api/client/server.js'
 import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
@@ -29,13 +29,15 @@ type Resolver = ReturnType<typeof get_fetcher>
 export class EscrowClient {
   readonly _config  : ClientConfig
   readonly _fetcher : Resolver
+  readonly _oracle  : ChainOracle
 
   constructor (opt : ClientOptions = {}) {
     const options = { ...DEFAULT_CONFIG, ...opt }
     const client  = get_client_config(opt.network as Network)
     const config  = { ...client, ...options }
-    this._config  = ClientSchema.base.client_config.parse(config)
+    this._config  = ClientSchema.config.client.parse(config)
     this._fetcher = get_fetcher(opt.fetcher ?? fetch)
+    this._oracle  = new ChainOracle(config.oracle_url)
   }
 
   get fetcher () {
@@ -46,8 +48,8 @@ export class EscrowClient {
     return this._config.network
   }
 
-  get oracle_url () : string {
-    return this._config.oracle_url
+  get oracle () : ChainOracle {
+    return this._oracle
   }
 
   get server_pk () : string {
@@ -62,7 +64,6 @@ export class EscrowClient {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
-  oracle   = oracle_api(this)
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)
