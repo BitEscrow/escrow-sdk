@@ -71,7 +71,7 @@ export default async function (
       // Client: Create account request.
       const acct_req = create_account_req(funder_dev.pubkey, LOCKTIME, NETWORK, return_addr)
       // Server: Verify account request.
-      verify_account_req(server_pol, acct_req)
+      verify_account_req(server_pol.account, acct_req)
       // Server: Create account data.
       const account = create_account(acct_req, escrow_dev)
       // Client: Verify account data.
@@ -93,7 +93,7 @@ export default async function (
       // Client: Create the commit request.
       const reg_req  = create_register_req(FEERATE, account, funder_dev, utxo)
       // Server: Verify the registration request.
-      verify_register_req(server_pol, reg_req, escrow_dev)
+      verify_register_req(server_pol.account, reg_req, escrow_dev)
       // Server: Create the deposit data.
       let deposit = create_deposit(reg_req, escrow_dev)
       // Client: Verify the deposit data.

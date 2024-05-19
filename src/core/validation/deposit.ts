@@ -18,16 +18,16 @@ import {
 } from '../module/deposit/util.js'
 
 import {
+  AccountPolicy,
   CloseRequest,
   CommitRequest,
   ContractData,
   DepositData,
   DepositStatus,
   LockRequest,
-  OracleTxRecvStatus,
   RegisterRequest,
-  ServerPolicy,
-  SignerAPI
+  SignerAPI,
+  TxConfirmState
 } from '../types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
@@ -72,7 +72,7 @@ export function verify_lock_req (
 
 export function verify_close_req (
   deposit : DepositData,
-  policy  : ServerPolicy,
+  policy  : AccountPolicy,
   request : CloseRequest
 ) {
   const psig = request.return_psig
@@ -112,10 +112,10 @@ export function verify_deposit_sigs (
 
 export function verify_feerate (
   feerate : number,
-  policy  : ServerPolicy
+  policy  : AccountPolicy
 ) {
   //
-  const { FEERATE_MIN, FEERATE_MAX } = policy.account
+  const { FEERATE_MIN, FEERATE_MAX } = policy
   // Assert that all terms are valid.
   assert.ok(feerate >= FEERATE_MIN, `feerate is below threshold: ${feerate} < ${FEERATE_MIN}`)
   assert.ok(feerate <= FEERATE_MAX, `feerate is above threshold: ${feerate} > ${FEERATE_MAX}`)
@@ -146,12 +146,12 @@ export function verify_utxo (
 
 export function verify_utxo_lock (
   locktime : number,
-  policy   : ServerPolicy,
-  status   : OracleTxRecvStatus,
+  policy   : AccountPolicy,
+  state    : TxConfirmState,
   current = now()
 ) {
-  const limit = current - policy.account.GRACE_PERIOD
-  if (status.confirmed && status.block_time + locktime <= limit) {
+  const limit = current - policy.GRACE_PERIOD
+  if (state.confirmed && state.block_time + locktime <= limit) {
     throw new Error('Deposit lock is expiring within the grace period.')
   }
 }

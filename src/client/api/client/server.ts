@@ -3,7 +3,7 @@ import {
   ServerKeysResponse,
   ServerPolicyResponse,
   ServerStatusResponse
-} from '@/core/types/index.js'
+} from '@/client/types/index.js'
 
 import { EscrowClient } from '../../class/client.js'
 

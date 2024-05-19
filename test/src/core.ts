@@ -1,6 +1,6 @@
 import { Buff }              from '@cmdcode/buff'
 import { Signer, Wallet }    from '@cmdcode/signer'
-import { get_confirm_state } from '@/core/module/deposit/index.js'
+import { get_confirm_state } from '@/client/lib/oracle.js'
 import { TxOutput }          from '@/core/types/index.js'
 import { CoreSigner }        from './types.js'
 

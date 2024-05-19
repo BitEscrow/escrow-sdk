@@ -6,13 +6,16 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  ApiResponse,
-  DepositDataResponse,
-  DepositListResponse,
-  FundingDataResponse,
   CloseRequest,
   LockRequest
 } from '@/core/types/index.js'
+
+import {
+  ApiResponse,
+  DepositDataResponse,
+  DepositListResponse,
+  FundingDataResponse
+} from '@/client/types/index.js'
 
 /* Module Imports */
 

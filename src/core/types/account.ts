@@ -62,3 +62,12 @@ export interface RegisterRequest extends RegisterTemplate {
 export interface CommitRequest extends RegisterRequest {
   covenant : CovenantData
 }
+
+export interface AccountPolicy {
+  FEERATE_MIN   : number
+  FEERATE_MAX   : number
+  GRACE_PERIOD  : number
+  LOCKTIME_MIN  : number
+  LOCKTIME_MAX  : number
+  TOKEN_EXPIRY  : number
+}

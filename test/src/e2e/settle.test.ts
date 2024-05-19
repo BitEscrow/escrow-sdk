@@ -52,7 +52,7 @@ import {
   verify_witness_data,
   verify_contract_sigs,
   verify_deposit_sigs,
-  verify_contract
+  verify_contract_settlement
 } from '@/core/validation/index.js'
 
 import {
@@ -109,7 +109,7 @@ export default async function (
       // Construct a proposal from the template.
       const proposal = await get_proposal(members)
       // Verify the proposal
-      verify_proposal_data(CVM, server_pol, proposal)
+      verify_proposal_data(CVM, server_pol.proposal, proposal)
       // Have each member endorse the proposal.
       const signatures = members.map(e => endorse_proposal(proposal, e.signer))
 
@@ -125,7 +125,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
-      CoreAssert.contract.verify.request(CVM, server_pol, pub_req)
+      CoreAssert.contract.verify.request(CVM, server_pol.proposal, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, escrow_dev)
       
@@ -148,7 +148,7 @@ export default async function (
         // Client: Create account request.
         const acct_req = create_account_req(funder.signer.pubkey, LOCKTIME, NETWORK, return_addr)
         // Server: Verify account request.
-        verify_account_req(server_pol, acct_req)
+        verify_account_req(server_pol.account, acct_req)
         // Server: Create account data.
         const account = create_account(acct_req, escrow_dev)
         // Client: Verify account data.
@@ -176,7 +176,7 @@ export default async function (
         // Client: Create the commit request.
         const commit_req = create_commit_req(FEERATE, contract, account, funder.signer, utxo)
         // Server: Verify the registration request.
-        verify_commit_req(contract, server_pol, commit_req, escrow_dev)
+        verify_commit_req(contract, server_pol.account, commit_req, escrow_dev)
         // Server: Create the deposit data.
         const deposit = create_deposit(commit_req, escrow_dev)
         // Client: Verify the deposit data.
@@ -297,20 +297,14 @@ export default async function (
 
       /* ------------------- [ Settle Contract ] ------------------- */
 
-      const txhex = get_settlement_tx(contract, deposits, escrow_dev)
-      const txid  = await client.publish_tx(txhex, true)
+      const commits = [ witness ]
+      const txhex   = get_settlement_tx(contract, deposits, escrow_dev)
+      const txid    = await client.publish_tx(txhex, true)
 
       contract = spend_contract(contract, txhex, txid, escrow_dev)
       contract = settle_contract(contract, escrow_dev)
-
-      verify_contract({
-        contract,
-        commits : [ witness ],
-        engine  : CVM,
-        funds   : deposits,
-        pubkey  : escrow_dev.pubkey,
-        vmdata  : vm_data
-      })
+      
+      verify_contract_settlement(contract, CVM, deposits, commits, vm_data)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))

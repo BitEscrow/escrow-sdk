@@ -7,7 +7,8 @@ import {
   WitnessData,
   ProgramData,
   FundingData,
-  ServerPolicy
+  ProposalPolicy,
+  AccountPolicy
 } from '../types/index.js'
 
 import CoreSchema from '../schema/index.js'
@@ -60,10 +61,16 @@ export function parse_proposal (
   return CoreSchema.proposal.data.parse(proposal)
 }
 
-export function parse_server_policy (
+export function parse_account_policy (
   policy : unknown
-) : ServerPolicy {
-  return CoreSchema.server.policy.parse(policy)
+) : AccountPolicy {
+  return CoreSchema.account.policy.parse(policy)
+}
+
+export function parse_proposal_policy (
+  policy : unknown
+) : ProposalPolicy {
+  return CoreSchema.proposal.policy.parse(policy)
 }
 
 export function parse_witness (

@@ -1,4 +1,4 @@
-import { TxOutput } from './tx.js'
+import { TxOutput } from '@/core/types/tx.js'
 
 export type OracleFeeEstimate  = Record<string, number>
 export type OracleTxRecvStatus = TxConfirmed | TxUnconfirmed

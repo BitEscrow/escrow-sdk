@@ -4,7 +4,7 @@ import { parse_addr }  from '@scrow/tapscript/address'
 
 /* Module Imports */
 
-import { exists }                from './validate.js'
+import { exists }                from '../../core/util/validate.js'
 import { fetcher, resolve_json } from './fetch.js'
 
 /* Local Imports */
@@ -17,9 +17,9 @@ import {
   OracleTxSpendState,
   OracleTxData,
   OracleUtxo
-} from '../types/index.js'
+} from '@/client/types/index.js'
 
-import CoreSchema from '../schema/index.js'
+import ClientSchema from '@/client/schema/index.js'
 
 /**
  * Fetch transaction data from the oracle.
@@ -39,9 +39,9 @@ export async function get_tx_data (
   // If the response failed, throw.
   if (!json.ok) throw new Error(json.error)
   // Parse the returned data.
-  const parsed = await CoreSchema.oracle.txdata.spa(json.data)
+  const parsed = await ClientSchema.oracle.txdata.spa(json.data)
   // If data fails validation, throw.
-  if (!parsed.success) throw new Error(parsed.error.toString())
+  if (!parsed.success) throw parsed.error
   // Return the parsed data.
   return parsed.data
 }
@@ -66,9 +66,9 @@ export async function get_utxo_state (
   // If the response failed, throw.
   if (!json.ok) throw new Error(json.error)
   // Parse the returned data.
-  const parsed = await CoreSchema.oracle.txostate.spa(json.data)
+  const parsed = await ClientSchema.oracle.txostate.spa(json.data)
   // If data fails validation, throw.
-  if (!parsed.success) throw new Error(parsed.error.toString())
+  if (!parsed.success) throw parsed.error
   // Return the parsed data.
   return parsed.data
 }
@@ -130,9 +130,9 @@ export async function get_address_utxos (
   // If response failed, throw error.
   if (!res.ok) throw new Error(res.error)
   // Parse the returned data.
-  const parsed = await CoreSchema.oracle.utxo.array().spa(res.data)
+  const parsed = await ClientSchema.oracle.utxo.array().spa(res.data)
   // If data fails validation, throw.
-  if (!parsed.success) throw new Error(parsed.error.toString())
+  if (!parsed.success) throw parsed.error
   // Return the parsed data.
   return parsed.data.map(({ txid, status, value, vout }) => {
     const scriptkey = parse_addr(addr).hex

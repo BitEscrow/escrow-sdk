@@ -1,4 +1,4 @@
-import { ApiResponse } from '../types/base.js'
+import { ApiResponse } from '@/client/types/index.js'
 
 export async function fetcher <T> (
   input   : URL | RequestInfo,

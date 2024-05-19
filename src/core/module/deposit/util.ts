@@ -1,9 +1,8 @@
-import { Buff }            from '@cmdcode/buff'
-import { verify_sig }      from '@cmdcode/crypto-tools/signer'
-import { INIT_CONF_STATE } from '@/core/lib/tx.js'
-import { DEPOSIT_KIND }    from '@/core/const.js'
-import { get_proof_id }    from '@/core/util/notarize.js'
-import * as assert         from '@/core/util/assert.js'
+import { Buff }         from '@cmdcode/buff'
+import { verify_sig }   from '@cmdcode/crypto-tools/signer'
+import { DEPOSIT_KIND } from '@/core/const.js'
+import { get_proof_id } from '@/core/util/notarize.js'
+import * as assert      from '@/core/util/assert.js'
 
 import { get_deposit_proof, get_deposit_state } from './state.js'
 
@@ -12,9 +11,7 @@ import {
   DepositPreImage,
   DepositStatus,
   NoteTemplate,
-  OracleTxSpendData,
-  SignerAPI,
-  TxConfirmState
+  SignerAPI
 } from '@/core/types/index.js'
 
 export function get_deposit_id (
@@ -24,23 +21,6 @@ export function get_deposit_id (
   const cat  = Buff.num(created_at, 4)
   const hash = Buff.hex(dep_hash, 64)
   return Buff.join([ cat, hash ]).digest.hex
-}
-
-/**
- * Compute the spending state of a deposit,
- * using transaction data from an oracle.
- */
-export function get_confirm_state (
-  locktime  : number,
-  utxo_data : OracleTxSpendData
-) : TxConfirmState {
-  const { status } = utxo_data
-  if (status.confirmed) {
-      const expires_at = status.block_time + locktime
-      return { ...status, expires_at }
-  } else {
-    return INIT_CONF_STATE()
-  }
 }
 
 export function get_deposit_preimg (

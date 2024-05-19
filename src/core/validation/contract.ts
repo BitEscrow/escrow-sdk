@@ -32,11 +32,10 @@ import {
   ContractRequest,
   FundingData,
   ProposalData,
-  ServerPolicy,
   VMData,
   ScriptEngineAPI,
-  ContractVerifyConfig,
-  WitnessData
+  WitnessData,
+  ProposalPolicy
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
@@ -63,7 +62,7 @@ export function validate_contract_data (
 
 export function verify_contract_req (
   machine : ScriptEngineAPI,
-  policy  : ServerPolicy,
+  policy  : ProposalPolicy,
   request : ContractRequest
 ) {
   const { endorsements, proposal } = request
@@ -73,8 +72,8 @@ export function verify_contract_req (
 }
 
 export function verify_contract_publishing (
-  contract  : ContractData,
-  proposal  : ProposalData
+  contract : ContractData,
+  proposal : ProposalData
 ) {
   const { created_at, fees } = contract
   const out = create_spend_templates(proposal, fees)
@@ -99,33 +98,6 @@ export function verify_endorsements (
     const pub = sig.slice(0, 64)
     const is_valid = verify_endorsement(prop_id, sig)
     assert.ok(is_valid, 'signature is invalid for pubkey: ' + pub)
-  }
-}
-
-export function verify_contract (
-  config : ContractVerifyConfig
-) {
-  const { contract, commits, engine, funds, pubkey, vmdata } = config
-  verify_contract_data(contract)
-  verify_contract_sigs(contract, pubkey)
-  if (contract.secured) {
-    assert.exists(funds, 'you must provide a list of funds to verify')
-    verify_contract_funding(contract, funds)
-  }
-  if (contract.activated) {
-    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
-    verify_contract_activation(contract, vmdata)
-  }
-  if (contract.closed) {
-    assert.exists(commits, 'you must provide a list of witness commits to verify.')
-    assert.exists(engine,  'you must provide a script engine to use for verification.')
-    assert.exists(vmdata,  'you must provide a vmdata object to verify.')
-    verify_contract_close(contract, vmdata)
-  }
-  if (contract.spent) {
-    assert.exists(funds,  'you must provide a list of funds to verify')
-    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
-    verify_contract_spending(contract, funds, vmdata)
   }
 }
 
@@ -241,15 +213,37 @@ export function verify_contract_spending (
   assert.ok(txid === contract.spent_txid, 'spent txid does not match contract')
 }
 
+export function verify_contract_settlement (
+  contract   : ContractData,
+  engine     : ScriptEngineAPI,
+  funds      : FundingData[],
+  statements : WitnessData[],
+  vmdata     : VMData
+) {
+  verify_contract_data(contract)
+  verify_contract_funding(contract, funds)
+  verify_contract_activation(contract, vmdata)
+  verify_contract_execution(contract, engine, vmdata, statements)
+  verify_contract_close(contract, vmdata)
+  verify_contract_spending(contract, funds, vmdata)
+}
+
 export default {
   validate : {
     request : validate_publish_req,
     data    : validate_contract_data
   },
   verify : {
-    request    : verify_contract_req,
-    publish    : verify_contract_publishing,
-    data       : verify_contract,
-    signatures : verify_contract_sigs
+    request      : verify_contract_req,
+    published    : verify_contract_publishing,
+    endorsements : verify_endorsements,
+    data         : verify_contract_data,
+    secured      : verify_contract_funding,
+    active       : verify_contract_activation,
+    execution    : verify_contract_execution,
+    closed       : verify_contract_close,
+    spend        : verify_contract_spending,
+    signatures   : verify_contract_sigs,
+    settlement   : verify_contract_settlement
   }
 }

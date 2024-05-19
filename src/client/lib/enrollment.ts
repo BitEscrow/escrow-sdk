@@ -9,7 +9,7 @@ import {
   RoleTemplate,
   DraftSession,
   CredentialData
-} from '../types.js'
+} from '../types/base.js'
 
 const GET_ROLE_DEFAULTS = () => {
   return {

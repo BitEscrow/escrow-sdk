@@ -1,12 +1,17 @@
-import { resolve_json }                      from '@/core/util/fetch.js'
-import { ApiResponse, Network }              from '@/core/types/index.js'
-import { DEFAULT_CONFIG, get_client_config } from '../config.js'
+import { resolve_json } from '../util/fetch.js'
+import { Network }      from '@/core/types/index.js'
+import { ApiResponse }  from '@/client/types/index.js'
+
+import {
+  DEFAULT_CONFIG,
+  get_client_config
+} from '../config.js'
 
 import {
   ClientConfig,
   ClientOptions,
   FetchConfig
-} from '../types.js'
+} from '../types/base.js'
 
 import account_api   from '../api/client/account.js'
 import contract_api  from '../api/client/contract.js'
@@ -17,7 +22,7 @@ import server_api    from '../api/client/server.js'
 import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
 
-import ClientSchema  from '../schema.js'
+import ClientSchema  from '../schema/base.js'
 
 type Resolver = ReturnType<typeof get_fetcher>
 

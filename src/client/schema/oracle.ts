@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import base  from './base.js'
-import tx    from './tx.js'
+import base  from '@/core/schema/base.js'
+import tx    from '@/core/schema/tx.js'
 
 const { bool, hash, hex, num, stamp, str } = base
 

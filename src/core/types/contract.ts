@@ -1,6 +1,3 @@
-import { FundingData } from './deposit.js'
-import { ScriptEngineAPI, VMData }      from './machine.js'
-
 import {
   PaymentEntry,
   ProposalData
@@ -10,7 +7,6 @@ import {
   TxSettleState,
   TxSpendState
 } from './tx.js'
-import { WitnessData } from './witness.js'
 
 export type ContractStatus =
   'published' |  // Contract is published and awaiting funds.
@@ -113,15 +109,6 @@ export interface ContractCreateConfig {
   created_at ?: number
   fees        : PaymentEntry[]
   feerate     : number
-}
-
-export interface ContractVerifyConfig {
-  contract : ContractData
-  commits ?: WitnessData[]
-  engine  ?: ScriptEngineAPI
-  funds   ?: FundingData[]
-  pubkey   : string
-  vmdata  ?: VMData
 }
 
 export interface ContractBase {

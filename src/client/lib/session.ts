@@ -20,9 +20,9 @@ import {
   DraftSession,
   CredentialData,
   DraftTemplate
-} from '../types.js'
+} from '../types/base.js'
 
-import ClientSchema from '../schema.js'
+import ClientSchema from '../schema/base.js'
 
 import {
   add_member_data,

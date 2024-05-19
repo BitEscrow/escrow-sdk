@@ -14,7 +14,7 @@ import {
   SignerConfig,
   SignerOptions,
   WalletAPI
-} from '../types.js'
+} from '../types/base.js'
 
 import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
@@ -24,7 +24,7 @@ import machine_api  from '../api/signer/vm.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
-import ClientSchema  from '../schema.js'
+import ClientSchema  from '../schema/base.js'
 
 export class EscrowSigner {
   static create (

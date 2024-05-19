@@ -1,5 +1,5 @@
-import { ContractData } from '../contract.js'
-import { DepositData }  from '../deposit.js'
+import { ContractData } from '@/core/types/contract.js'
+import { DepositData }  from '@/core/types/deposit.js'
 
 export interface DepositDataResponse {
   deposit : DepositData

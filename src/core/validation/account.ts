@@ -26,7 +26,7 @@ import {
   CommitRequest,
   ContractData,
   RegisterRequest,
-  ServerPolicy,
+  AccountPolicy,
   SignerAPI
 } from '../types/index.js'
 
@@ -66,11 +66,11 @@ export function validate_session_token (
 }
 
 export function verify_account_req (
-  policy  : ServerPolicy,
+  policy  : AccountPolicy,
   request : AccountRequest
 ) {
   // Unpack policy object.
-  const { LOCKTIME_MIN, LOCKTIME_MAX } = policy.account
+  const { LOCKTIME_MIN, LOCKTIME_MAX } = policy
   // Unpack request object.
   const { deposit_pk, locktime, network, return_addr } = request
   // Normalize the test network label before verification.
@@ -89,7 +89,7 @@ export function verify_account_req (
 }
 
 export function verify_register_req (
-  policy  : ServerPolicy,
+  policy  : AccountPolicy,
   request : RegisterRequest,
   signer  : SignerAPI
 ) {
@@ -107,7 +107,7 @@ export function verify_register_req (
 
 export function verify_commit_req (
   contract  : ContractData,
-  policy    : ServerPolicy,
+  policy    : AccountPolicy,
   request   : CommitRequest,
   server_sd : SignerAPI
 ) {

@@ -1,4 +1,4 @@
-import { WitnessReceipt } from '../witness.js'
+import { WitnessReceipt } from '@/core/types/witness.js'
 
 export interface WitnessDataResponse {
   witness : WitnessReceipt

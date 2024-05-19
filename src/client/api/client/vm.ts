@@ -1,15 +1,14 @@
-import { assert } from '@/core/util/index.js'
+import { assert }       from '@/core/util/index.js'
+import { WitnessData }  from '@/core/types/index.js'
+import { EscrowClient } from '@/client/class/client.js'
 
 import {
   ApiResponse,
   VMDataResponse,
   VMListResponse,
   VMSubmitResponse,
-  WitnessData,
   WitnessListResponse
-} from '@/core/types/index.js'
-
-import { EscrowClient } from '../../class/client.js'
+} from '@/client/types/index.js'
 
 /**
  * Return a list of verified witnesses

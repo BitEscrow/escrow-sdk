@@ -8,7 +8,7 @@ import {
 import {
   CredentialConfig,
   DraftSession
-} from '../../types.js'
+} from '../../types/base.js'
 
 import {
   claim_membership,

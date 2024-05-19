@@ -4,7 +4,7 @@ import { EscrowClient } from '../../class/client.js'
 import {
   ApiResponse,
   WitnessDataResponse
-} from '@/core/types/index.js'
+} from '@/client/types/index.js'
 
 function read_witness_api (client : EscrowClient) {
   return async (

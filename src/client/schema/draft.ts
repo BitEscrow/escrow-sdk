@@ -2,17 +2,7 @@ import { z } from 'zod'
 import base  from '@/core/schema/base.js'
 import prop  from '@/core/schema/proposal.js'
 
-const { bool, hash, hex, label, network, num, str } = base
-
-const signer_config = z.object({
-  network,
-  server_pk  : hash,
-  server_url : str
-})
-
-const client_config = signer_config.extend({
-  oracle_url : str
-})
+const { bool, hash, hex, label, num, str } = base
 
 const cred = z.object({
   pub  : hash,
@@ -52,4 +42,4 @@ const session = z.object({
   sigs     : hex.array()
 })
 
-export default { client_config, cred, mship, path, policy, role, session, signer_config }
+export default { cred, mship, path, policy, role, session }

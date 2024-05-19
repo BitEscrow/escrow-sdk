@@ -10,12 +10,12 @@ import {
   get_tx_data,
   get_address_utxos,
   get_latest_utxo
-} from '@/core/util/oracle.js'
+} from '../../util/oracle.js'
 
 import {
   OracleQuery,
   OracleTxSpendData
-} from '@/core/types/index.js'
+} from '@/client/types/index.js'
 
 /* Module Imports */
 

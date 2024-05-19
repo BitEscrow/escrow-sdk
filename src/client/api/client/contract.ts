@@ -1,7 +1,7 @@
-/* Global Imports */
-
 import { assert, parse_proposal } from '@/core/util/index.js'
 import { create_publish_req }     from '@/core/module/contract/index.js'
+import { EscrowClient }           from '@/client/class/client.js'
+import { DEFAULT_POLICY }         from '@/client/config.js'
 
 import {
   verify_endorsements,
@@ -9,18 +9,17 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  ApiResponse,
-  ContractDataResponse,
-  ContractListResponse,
-  FundListResponse,
   ContractRequest,
-  ServerPolicy,
+  ProposalPolicy,
   ScriptEngineAPI
 } from '@/core/types/index.js'
 
-/* Module Imports */
-
-import { EscrowClient } from '../../class/client.js'
+import {
+  ApiResponse,
+  ContractDataResponse,
+  ContractListResponse,
+  FundListResponse
+} from '@/client/types/index.js'
 
 /**
  * Create a contract from a proposal document.
@@ -29,9 +28,9 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
+    request : ContractRequest,
     engine  : ScriptEngineAPI,
-    policy  : ServerPolicy,
-    request : ContractRequest
+    policy  : ProposalPolicy = DEFAULT_POLICY.proposal
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
     const { endorsements, proposal } = request

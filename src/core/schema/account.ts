@@ -45,4 +45,13 @@ const data = z.object({
   server_tkn   : token
 })
 
-export default { data, account_req, commit_req, covenant, register_req, token }
+const policy = z.object({
+  FEERATE_MIN  : num,
+  FEERATE_MAX  : num,
+  GRACE_PERIOD : num,
+  LOCKTIME_MIN : num,
+  LOCKTIME_MAX : num,
+  TOKEN_EXPIRY : num
+})
+
+export default { data, account_req, commit_req, covenant, policy, register_req, token }
