@@ -1,12 +1,12 @@
 # Server API
 
-Reference guide for the BitEscrow Server API. Click on the links below to navigate:
+Reference guide for the BitEscrow Server API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/server/keys](#get-server-keys) | Fetch the latest server pubkeys in rotaion. |
-| [/api/server/policy](#get-server-policy) | Fetch the policies and terms of the escrow server. |
-| [/api/server/status](#get-server-status) | Fetch the current status of the server. |
+| [/api/server/keys](#get-server-keys)     | Fetch the latest server pubkeys. |
+| [/api/server/policy](#get-server-policy) | Fetch the policy of the server.  |
+| [/api/server/status](#get-server-status) | Fetch the status of the server.  |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  

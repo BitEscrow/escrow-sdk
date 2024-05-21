@@ -11,7 +11,7 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  ContractRequest,
+  ContractPublishRequest,
   ContractSession,
   ProposalPolicy,
   ScriptEngineAPI
@@ -31,7 +31,7 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    request : ContractRequest,
+    request : ContractPublishRequest,
     engine  : ScriptEngineAPI,
     policy  : ProposalPolicy = DEFAULT_POLICY.proposal
   ) : Promise<ApiResponse<ContractDataResponse>> => {

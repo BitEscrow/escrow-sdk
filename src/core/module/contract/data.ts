@@ -1,22 +1,22 @@
-import { SPEND_TXIN_SIZE }          from '../../const.js'
-import { assert, now, sort_record } from '../../util/index.js'
-import { get_vm_id }                from '../../lib/vm.js'
+import { assert, now, sort_record } from '@/core/util/index.js'
+import { get_machine_id }           from '@/core/module/machine/util.js'
+import { SPEND_TXIN_SIZE }          from '@/core/const.js'
 import { GET_PUBLISH_STATE }        from './state.js'
 
 import {
   ContractCreateConfig,
   ContractData,
-  ContractRequest,
+  ContractPublishRequest,
   ContractStatus,
   DepositData,
   SignerAPI,
   MachineData
-} from '../../types/index.js'
+} from '@/core/types/index.js'
 
 import {
   get_pay_total,
   get_proposal_id
-} from '../../lib/proposal.js'
+} from '@/core/lib/proposal.js'
 
 import {
   create_spend_templates,
@@ -31,7 +31,7 @@ import {
  */
 export function create_contract (
   config  : ContractCreateConfig,
-  request : ContractRequest,
+  request : ContractPublishRequest,
   signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.
@@ -174,12 +174,12 @@ export function activate_contract (
   // Define a hard expiration date.
   const activated   = true as const
   const expires_at  = active_at + contract.terms.duration
-  const engine_vmid = get_vm_id(active_at, contract.cid, expires_at)
-  const engine_head = engine_vmid
+  const machine_vmid = get_machine_id(active_at, contract.cid, expires_at)
+  const machine_head = machine_vmid
   const status      = 'active' as ContractStatus
   const updated_at  = active_at
   // Return the new contract and vm config.
-  const changes = { activated, active_at, expires_at, engine_head, engine_vmid }
+  const changes = { activated, active_at, expires_at, machine_head, machine_vmid }
   const updated = { ...contract, ...changes, status, updated_at }
   const proof   = notarize_contract(updated, signer, status)
   return sort_record({ ...updated, active_sig: proof })
@@ -194,11 +194,11 @@ export function close_contract (
   assert.ok(vmdata.closed,      'vm state is not closed')
   const closed      = true as const
   const closed_at   = vmdata.closed_at
-  const engine_head = vmdata.head
-  const engine_vout = vmdata.output
+  const machine_head = vmdata.head
+  const machine_vout = vmdata.output
   const status      = 'closed' as ContractStatus
   const updated_at  = closed_at
-  const changes     = { closed, closed_at, engine_head, engine_vout }
+  const changes     = { closed, closed_at, machine_head, machine_vout }
   const updated     = { ...contract, ...changes, status, updated_at }
   const proof       = notarize_contract(updated, signer, status)
   return sort_record({ ...updated, closed_sig: proof })

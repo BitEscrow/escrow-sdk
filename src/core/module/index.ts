@@ -1,11 +1,13 @@
-import AccountLib  from './account/index.js'
-import ContractLib from './contract/index.js'
-import DepositLib  from './deposit/index.js'
-import WitnessLib  from './witness/index.js'
+import AccountMod  from './account/index.js'
+import ContractMod from './contract/index.js'
+import DepositMod  from './deposit/index.js'
+import MachineMod  from './machine/index.js'
+import WitnessMod  from './witness/index.js'
 
 export default {
-  account  : AccountLib,
-  contract : ContractLib,
-  deposit  : DepositLib,
-  witness  : WitnessLib
+  account  : AccountMod,
+  contract : ContractMod,
+  deposit  : DepositMod,
+  machine  : MachineMod,
+  witness  : WitnessMod
 }

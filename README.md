@@ -191,7 +191,7 @@ vmdata: {
 }
 ```
 
-Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witnessdata). These witness statements provide instructions to the virtual machine and execute programs.
+Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witness-data). These witness statements provide instructions to the virtual machine and execute programs.
 
 Each statement calls upon a `method`, an `action` to perform on success, and a target spending `path` in the contract.
 

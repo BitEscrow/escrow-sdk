@@ -1,13 +1,7 @@
-/* Global Imports */
-
-import { Test }       from 'tape'
-import { CoreClient } from '@cmdcode/core-cmd'
-import { P2TR }       from '@scrow/tapscript/address'
-
-/* Package Imports */
-
+import { Test }           from 'tape'
+import { CoreClient }     from '@cmdcode/core-cmd'
+import { P2TR }           from '@scrow/tapscript/address'
 import { create_deposit } from '@scrow/sdk/deposit'
-import { get_txid }       from '@scrow/sdk/tx'
 
 import {
   create_account,
@@ -16,10 +10,11 @@ import {
 } from '@scrow/sdk/account'
 
 import {
+  get_txid,
   get_recovery_config,
   get_recovery_tx,
   sign_recovery_tx
-} from '@scrow/sdk/recovery'
+} from '@scrow/sdk/core/lib'
 
 import {
   verify_account_req,
@@ -27,8 +22,6 @@ import {
   verify_deposit_data,
   verify_register_req
 } from '@/core/validation/index.js'
-
-/* Local Imports */
 
 import {
   fund_address,

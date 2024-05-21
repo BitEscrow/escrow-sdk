@@ -11,14 +11,16 @@ import { WitnessData }     from '@scrow/sdk'
 import { client }          from '@scrow/demo/01_create_client.js'
 import { signers }         from '@scrow/demo/02_create_signer.js'
 
-// Define the deposit id we will use.
+// Get the identifier from the input.
 const vmid = process.argv.slice(2).at(0)
-// If dpid is not specified, throw an error
+// If an identifier is not specified, throw an error
 if (vmid === undefined) throw "must provide a 'vmid' value as an argument"
-
-const vm_res = await client.vm.read(vmid)
-if (!vm_res.ok) throw new Error('unable to fetch vm')
-const vmdata = vm_res.data.vmdata
+// Fetch the record from the server.
+const vmres      = await client.machine.read(vmid)
+// If the response is not ok, throw an error.
+if (!vmres.ok) throw new Error('unable to fetch vm')
+// Unpack the response data.
+const vmstate = vmres.data.vmdata
 
 // Unpack our list of signers.
 const [ a_signer, b_signer ] = signers
@@ -29,24 +31,27 @@ const template = {
   method : 'endorse',
   path   : 'payout'
 }
-
 // Initialize a variable for our witness data.
 let witness : WitnessData
 // Alice signs the initial statement.
-witness = a_signer.witness.create(vmdata, template)
+witness = a_signer.witness.create(vmstate, template)
 // Bob endoreses the statement from Alice.
-witness = b_signer.witness.endorse(vmdata, witness)
+witness = b_signer.witness.endorse(vmstate, witness)
 
 print_banner('witness statement')
 console.dir(witness, { depth : null })
 
 // Submit the signed statement to the server.
-const res = await client.vm.submit(vmid, witness)
+const res = await client.machine.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack the contract from the response.
-const updated = res.data
+// Unpack the data from the response.
+const { commit, vmdata } = res.data
+
+print_banner('signed statement')
+console.dir(commit, { depth : null })
+console.log('\n')
 
 print_banner('updated machine')
-console.dir(updated, { depth : null })
+console.dir(vmdata, { depth : null })
 console.log('\n')

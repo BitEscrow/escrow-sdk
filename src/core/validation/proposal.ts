@@ -1,31 +1,23 @@
 /* Module Imports */
-import { create_program } from '../lib/vm.js'
+import { create_program }             from '@/core/lib/program.js'
+import { assert, now, parser }        from '@/core/util/index.js'
+import { verify_program_entry }       from './witness.js'
+import { check_expires, check_regex } from './util.js'
 
 import {
   get_pay_total,
   get_path_total,
   get_path_names
-} from '../lib/proposal.js'
-
-import { assert, now, parser } from '../util/index.js'
+} from '@/core/lib/proposal.js'
 
 import {
   ProposalData,
   ProposalPolicy,
   ProposalTemplate,
   ScriptEngineAPI
-} from '../types/index.js'
+} from '@/core/types/index.js'
 
 import PropSchema from '../schema/proposal.js'
-
-/* Local Imports */
-
-import { verify_program_entry } from './witness.js'
-
-import {
-  check_expires,
-  check_regex
-} from './util.js'
 
 export function validate_proposal_tmpl (
   proposal : unknown

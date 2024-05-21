@@ -2,9 +2,9 @@ import account  from './account.js'
 import base     from './base.js'
 import contract from './contract.js'
 import deposit  from './deposit.js'
+import machine  from './machine.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
-import vm       from './vm.js'
 import witness  from './witness.js'
 
 export default {
@@ -12,8 +12,8 @@ export default {
   base,
   contract,
   deposit,
+  machine,
   proposal,
   tx,
-  vm,
   witness
 }

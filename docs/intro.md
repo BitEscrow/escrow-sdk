@@ -72,7 +72,7 @@ Once the terms have been decided, any party can deliver the final proposal to th
 
 ### Funding
 
-To deposit funds into a contract, each funder requests a [Deposit Account](data/account.md#accountdata) from the escrow server. This account sets up a 2-of-2 multi-signature address, with a time-locked return path for the funder.
+To deposit funds into a contract, each funder requests a [Deposit Account](data/account.md#account-data) from the escrow server. This account sets up a 2-of-2 multi-signature address, with a time-locked return path for the funder.
 
 ```ts
 interface AccountData {
@@ -137,7 +137,7 @@ vm_state: {
 }
 ```
 
-Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witnessdata). These witness statements provide instructions to the virtual machine and execute programs.
+Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witness-data). These witness statements provide instructions to the virtual machine and execute programs.
 
 Each statement calls upon a `method`, an `action` to perform on success, and a target spending `path` in the contract.
 

@@ -1,9 +1,9 @@
 import { WitnessCommit } from '@/core/types/witness.js'
 
 export interface WitnessDataResponse {
-  statement : WitnessCommit
+  commit : WitnessCommit
 }
 
 export interface WitnessListResponse {
-  statements : WitnessCommit[]
+  commits : WitnessCommit[]
 }

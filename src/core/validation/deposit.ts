@@ -1,21 +1,21 @@
-/* Global Imports */
-
 import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
+import { assert, now }    from '@/core/util/index.js'
 
-/* Module Imports */
-
-import { assert, now } from '../util/index.js'
+import {
+  verify_covenant_data,
+  verify_return_psig
+} from './covenant.js'
 
 import {
   get_account_ctx,
   get_deposit_hash
-} from '../module/account/util.js'
+} from '@/core/module/account/util.js'
 
 import {
   get_deposit_id,
   verify_deposit_sig
-} from '../module/deposit/util.js'
+} from '@/core/module/deposit/util.js'
 
 import {
   AccountPolicy,
@@ -23,21 +23,13 @@ import {
   CommitRequest,
   ContractData,
   DepositData,
-  DepositStatus,
   LockRequest,
   RegisterRequest,
   SignerAPI,
   TxConfirmState
-} from '../types/index.js'
+} from '@/core/types/index.js'
 
 import DepositSchema from '../schema/deposit.js'
-
-/* Local Imports */
-
-import {
-  verify_covenant_data,
-  verify_return_psig
-} from './covenant.js'
 
 export function validate_lock_req (
   request : unknown
@@ -64,10 +56,11 @@ export function verify_lock_req (
   agent : SignerAPI
 ) {
   assert.ok(request.dpid === deposit.dpid)
-  assert.ok(deposit.covenant === null)
-  const covenant = request.covenant
-  verify_lockable(deposit.status)
-  verify_covenant_data(contract, covenant, deposit, agent)
+  assert.ok(deposit.confirmed, 'deposit is not confirmed')
+  assert.ok(!deposit.locked,   'deposit is already locked')
+  assert.ok(!deposit.closed,   'deposit is already closed')
+  assert.ok(!deposit.spent,    'deposit is already spent')
+  verify_covenant_data(contract, request.covenant, deposit, agent)
 }
 
 export function verify_close_req (
@@ -119,12 +112,6 @@ export function verify_feerate (
   // Assert that all terms are valid.
   assert.ok(feerate >= FEERATE_MIN, `feerate is below threshold: ${feerate} < ${FEERATE_MIN}`)
   assert.ok(feerate <= FEERATE_MAX, `feerate is above threshold: ${feerate} > ${FEERATE_MAX}`)
-}
-
-export function verify_lockable (status : DepositStatus) {
-  if (status !== 'registered' && status !== 'confirmed') {
-    throw new Error('deposit is not in a lockable state: ' + status)
-  }
 }
 
 export function verify_utxo (

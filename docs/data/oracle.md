@@ -1,6 +1,6 @@
 # Oracle Interfaces
 
-List of interfaces for the Oracle API. Click on the links below to navigate:
+List of data interfaces for the Oracle API.
 
 - [OracleTxData](#oracletxdata)
 - [OracleSpendData](#oraclespenddata)

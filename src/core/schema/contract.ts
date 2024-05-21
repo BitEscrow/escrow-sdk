@@ -2,13 +2,13 @@ import { z }    from 'zod'
 import base     from './base.js'
 import deposit  from './deposit.js'
 import proposal from './proposal.js'
-import vm       from './vm.js'
+import vm       from './machine.js'
 import tx       from './tx.js'
 import witness  from './witness.js'
 
 const { bool, hash, hex, label, num, stamp, str } = base
 
-const status  = z.enum([ 'published', 'funded', 'secured', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', 'error' ])
+const status  = z.enum([ 'published', 'canceled', 'secured', 'active', 'closed', 'spent', 'settled', 'error' ])
 const output  = z.tuple([ label, hex ])
 
 /* ------------------- [ Request Schema ] ------------------- */
@@ -57,51 +57,51 @@ const ct_secured = z.object({
 })
 
 const engine_info = z.object({
-  activated   : bool,
-  active_at   : stamp.nullable(),
-  active_sig  : hex.nullable(),
-  engine_head : hash.nullable(),
-  engine_vmid : hash.nullable(),
-  expires_at  : stamp.nullable()
+  activated    : bool,
+  active_at    : stamp.nullable(),
+  active_sig   : hex.nullable(),
+  machine_head : hash.nullable(),
+  machine_vmid : hash.nullable(),
+  expires_at   : stamp.nullable()
 })
 
 const ct_active = z.object({
-  activated   : z.literal(true),
-  active_at   : stamp,
-  active_sig  : hex,
-  engine_head : hash,
-  engine_vmid : hash,
-  expires_at  : stamp
+  activated    : z.literal(true),
+  active_at    : stamp,
+  active_sig   : hex,
+  machine_head : hash,
+  machine_vmid : hash,
+  expires_at   : stamp
 })
 
 const ct_inactive = z.object({
-  activated   : z.literal(false),
-  active_at   : z.null(),
-  active_sig  : z.null(),
-  engine_head : z.null(),
-  engine_vmid : z.null(),
-  expires_at  : z.null()
+  activated    : z.literal(false),
+  active_at    : z.null(),
+  active_sig   : z.null(),
+  machine_head : z.null(),
+  machine_vmid : z.null(),
+  expires_at   : z.null()
 })
 
 const close_info = z.object({
-  closed      : bool,
-  closed_at   : stamp.nullable(),
-  closed_sig  : hex.nullable(),
-  engine_vout : str.nullable()
+  closed       : bool,
+  closed_at    : stamp.nullable(),
+  closed_sig   : hex.nullable(),
+  machine_vout : str.nullable()
 })
 
 const ct_open = z.object({
-  closed      : z.literal(false),
-  closed_at   : z.null(),
-  closed_sig  : z.null(),
-  engine_vout : z.null()
+  closed       : z.literal(false),
+  closed_at    : z.null(),
+  closed_sig   : z.null(),
+  machine_vout : z.null()
 })
 
 const ct_closed = z.object({
-  closed      : z.literal(true),
-  closed_at   : stamp,
-  closed_sig  : hex,
-  engine_vout : str.nullable()
+  closed       : z.literal(true),
+  closed_at    : stamp,
+  closed_sig   : hex,
+  machine_vout : str.nullable()
 })
 
 /* ------------------- [ State Unions ] ------------------- */

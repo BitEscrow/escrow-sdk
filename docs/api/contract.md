@@ -1,14 +1,14 @@
 # Contract API
 
-Reference guide for the BitEscrow Contract API. Click on the links below to navigate:
+Reference guide for the BitEscrow Contract API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/contract/create](#create-a-contract)      | Create a new contract on the escrow server. |
+| [/api/contract/create](#create-a-contract)      | Publish a new contract.   |
 | [/api/contract/list](#list-contracts-by-pubkey) | List contracts by pubkey. |
-| [/api/contract/:cid](#read-a-contract-by-id)    | Read a contract via ID. |
-| [/api/contract/:cid/cancel](#cancel-a-contract) | Cancel a contract. |
-| [/api/contract/:cid/funds](#list-funding-by-id) | List the funds deposited in a contract. |
+| [/api/contract/:cid](#read-a-contract-by-id)    | Read a contract via ID.   |
+| [/api/contract/:cid/cancel](#cancel-a-contract) | Cancel a contract.        |
+| [/api/contract/:cid/funds](#list-funding-by-id) | List funds in a contract. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -32,9 +32,9 @@ body     : JSON.stringify(contract_request)
 **Request Body**
 
 ```ts
-export interface ContractRequest {
-  endorsements ?: string[]
-  proposal      : ProposalData
+interface ContractPublishRequest {
+  endorsements ?: string[]      // Optional endorsements of proposal.
+  proposal      : ProposalData  // Completed proposal document.
 }
 ```
 
@@ -53,12 +53,10 @@ interface ContractDataResponse {
 ```ts
 // Define the script engine to use.
 const engine = CVM
-// Define the server policy to use.
-const policy = config.policy.proposal
 // Define a proposal and optional endorsements.
 const req = { endorsements, proposal }
 // Deliver the publish request to the server.
-const res = await client.contract.create(req, engine, policy)
+const res = await client.contract.create(req, engine)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.
@@ -73,10 +71,9 @@ const { contract } = res.data
 
 **Related Interfaces**
 
-- [ContractData](../data/contract.md#contractdata)
-- [ProposalData](../data/draft.md#proposaldata)
-- [ScriptEngine](../data/machine.md#scriptengine-api)
-- [ServerPolicy](../data/server.md#serverpolicy)
+- [ContractData](../data/contract.md#contract-data)
+- [ProposalData](../data/proposal.md#proposal-data)
+- [ScriptEngine](../data/machine.md#script-engine-api)
 
 ---
 
@@ -119,13 +116,13 @@ const { contracts } = res.data
 
 **Related Interfaces**
 
-- [ContractData](../data/contract.md#contractdata)
+- [ContractData](../data/contract.md#contract-data)
 
 ---
 
 ## Read a Contract By Id
 
-Fetch a contract from the server by its contract id (cid).
+Fetch a contract from the server by its identifier (cid).
 
 **Request Format**
 
@@ -147,7 +144,7 @@ interface ContractDataResponse {
 **Example Request**
 
 ```ts
-// Fetch a contract from the server by cid.
+// Fetch a contract from the server.
 const res = await client.contract.read(cid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
@@ -163,7 +160,7 @@ const { contract } = res.data
 
 **Related Interfaces**
 
-- [ContractData](../data/contract.md#contractdata)
+- [ContractData](../data/contract.md#contract-data)
 
 ---
 
@@ -198,7 +195,7 @@ const req = signer.contract.cancel(cid)
 const res = await client.contract.cancel(cid, req)
 // If the request fails, throw an error.
 if (!res.ok) throw new Error(res.error)
-// Unwrap our response payload.
+// Unpack the response data.
 const { contract } = res.data
 ```
 
@@ -210,13 +207,13 @@ const { contract } = res.data
 
 **Related Interfaces:**
 
-- [ContractData](../data/contract.md#contractdata)
+- [ContractData](../data/contract.md#contract-data)
 
 ---
 
 ## List Funding By Id
 
-Fetch a list of funds for a contract id (cid).
+Fetch a list of funds locked to a contract.
 
 **Request Format**
 
@@ -250,4 +247,4 @@ const { funds } = res.data
 
 **Related Interfaces**
 
-- [FundingData](../data/contract.md#fundingdata)
+- [FundingData](../data/contract.md#funding-data)

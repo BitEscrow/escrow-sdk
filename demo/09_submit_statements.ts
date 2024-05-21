@@ -1,7 +1,7 @@
-import { print_banner }    from '@scrow/test'
-import { get_vm_config }   from '@scrow/sdk/vm'
-import { WitnessData }     from '@scrow/sdk/core'
-import CVM                 from '@scrow/sdk/cvm'
+import { print_banner }       from '@scrow/test'
+import { get_machine_config } from '@scrow/sdk/machine'
+import { WitnessData }        from '@scrow/sdk/core'
+import CVM                    from '@scrow/sdk/cvm'
 
 import { client }          from './01_create_client.js'
 import { signers }         from './02_create_signer.js'
@@ -20,7 +20,7 @@ const [ a_signer, b_signer ] = signers
  * to validate our own statement, and to verify it was executed
  * fairly by the escrow server.
  */
-const config = get_vm_config(active_contract)
+const config = get_machine_config(active_contract)
 // Create the initial state of the machine.
 const vmdata = CVM.init(config)
 // The machine id is derived from the contract.
@@ -54,25 +54,25 @@ if (DEMO_MODE) {
 /**
  * Submit the signed witness statement to the escrow server.
  */
-const res = await client.vm.submit(vmid, witness)
+const res = await client.machine.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 
 /**
- * The server will respond with a signed receipt of execution. This receipt
- * commits to the witness statement, plus the new state of the machine.
+ * The server will respond with a signed receipt. This receipt 
+ * commits to our statement being evaluated by the machine.
  */
-const vm_receipt = res.data.receipt
+const vm_commit = res.data.commit
 
 /**
  * We can use the receipt to verify that our witness statement was processed 
  * correctly by the escrow server.
  */
-client.witness.verify(vm_receipt, vmdata, witness)
+client.witness.verify(vm_commit, vmdata, witness)
 
 if (DEMO_MODE) {
-  print_banner('vm receipt')
-  console.dir(vm_receipt, { depth : null })
+  print_banner('witness receipt')
+  console.dir(vm_commit, { depth : null })
 }
 
 export { vmdata, witness }

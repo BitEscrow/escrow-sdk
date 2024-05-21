@@ -130,8 +130,8 @@ export function get_settlement_tx (
   signer    : SignerAPI
 ) : string {
   assert.ok(contract.closed)
-  assert.exists(contract.engine_vout)
-  const vout   = contract.engine_vout
+  assert.exists(contract.machine_vout)
+  const vout   = contract.machine_vout
   const output = get_spend_template(vout, contract.outputs)
   const txdata = decode_tx(output, false)
   for (const deposit of deposits) {

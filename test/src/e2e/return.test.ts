@@ -1,12 +1,7 @@
-/* Global Imports */
-
-import { Test }       from 'tape'
-import { CoreClient } from '@cmdcode/core-cmd'
-import { P2TR }       from '@scrow/tapscript/address'
-
-/* Package Imports */
-
-import { get_return_tx } from '@scrow/sdk/return'
+import { Test }          from 'tape'
+import { CoreClient }    from '@cmdcode/core-cmd'
+import { P2TR }          from '@scrow/tapscript/address'
+import { get_return_tx } from '@scrow/sdk/core/lib'
 
 import {
   create_account,

@@ -1,6 +1,6 @@
 # Server Interfaces
 
-List of interfaces for the Server API.
+List of data interfaces for the Server API.
 
 - [ServerPolicy](#serverpolicy)
 

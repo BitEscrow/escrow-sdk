@@ -1,8 +1,8 @@
-import { MachineData }    from '@/core/types/machine.js'
+import { MachineData }   from '@/core/types/machine.js'
 import { WitnessCommit } from '@/core/types/witness.js'
 
 export interface VMDataResponse {
-  machine : MachineData
+  vmdata : MachineData
 }
 
 export interface VMListResponse {
@@ -10,6 +10,6 @@ export interface VMListResponse {
 }
 
 export interface VMSubmitResponse {
-  machine   : MachineData
-  statement : WitnessCommit
+  commit : WitnessCommit
+  vmdata : MachineData
 }

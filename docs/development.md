@@ -1,4 +1,4 @@
-# Development
+# SDK Development
 
 To get started, make sure you are running `v19+` of node, then install the project dependencies using your node manager of choice:
 

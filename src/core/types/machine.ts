@@ -1,4 +1,5 @@
 import { Literal }                     from './base.js'
+import { ProgramData }                 from './program.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
 import { WitnessData }                 from './witness.js'
 
@@ -26,22 +27,6 @@ interface VMClosed {
   closed_at : number
 }
 
-export interface ProgramQuery {
-  action   ?: string
-  includes ?: Literal[]
-  method   ?: string
-  params   ?: Literal[]
-  path     ?: string
-}
-
-export interface ProgramData {
-  prog_id : string
-  method  : string
-  actions : string
-  params  : Literal[]
-  paths   : string
-}
-
 export interface MachineConfig {
   active_at  : number
   engine     : string
@@ -50,6 +35,11 @@ export interface MachineConfig {
   programs   : ProgramEntry[]
   schedule   : ScheduleEntry[]
   vmid       : string
+}
+
+export interface VMSubmitRequest {
+  vmid    : string
+  witness : WitnessData
 }
 
 export interface MachineBase {

@@ -96,10 +96,6 @@ export function get_deposit_state (
       state = { ...rest, ...GET_REGISTER_STATE() }
       stamp = deposit.created_at
       break
-    case 'confirmed':
-      state = { ...rest, ...GET_CONFIRMED_STATE() }
-      stamp = deposit.block_time
-      break
     case 'locked':
       state = { ...rest, ...GET_LOCKED_STATE() }
       stamp = deposit.locked_at

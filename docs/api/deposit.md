@@ -1,14 +1,14 @@
 # Deposit API
 
-Reference guide for the BitEscrow Deposit API. Click on the links below to navigate:
+Reference guide for the BitEscrow Deposit API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/deposit/list](#list-deposits-by-pubkey)        | Request a list of deposits indexed by your pubkey. |
-| [/api/deposit/:dpid](#read-a-deposit-by-id)          | Fetch a deposit from the server by id (dpid). |
-| [/api/deposit/:dpid/lock](#lock-funds-to-a-contract) | Commit funds in an open deposit to a contract. |
-| [/api/deposit/:dpid/cancel](#close-a-deposit)        | Close an account and return funds to the registered xpub. |
-| [/api/deposit/:dpid/close](#close-a-deposit)         | Close an account and return funds to the registered xpub. |
+| [/api/deposit/list](#list-deposits-by-pubkey)    | List deposits by pubkey.           |
+| [/api/deposit/lock](#lock-deposit-to-a-contract) | Lock a deposit to a contract.      |
+| [/api/deposit/close](#close-a-deposit)           | Close a deposit and return funds.  |
+| [/api/deposit/:dpid](#read-a-deposit-by-id)      | Fetch a deposit via ID.            |
+| [/api/deposit/:dpid/cancel](#cancel-a-deposit)   | Cancel a deposit and return funds. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -18,7 +18,7 @@ Reference guide for the BitEscrow Deposit API. Click on the links below to navig
 
 ## List Deposits By Pubkey
 
-Request a list of deposits that are endorsed by the token's pubkey.
+Request a list of deposits linked to the token's pubkey.
 
 **Request Format**
 
@@ -55,13 +55,13 @@ const { deposits } = res.data
 
 **Related Interfaces:**
 
-- [DepositData](../data/deposit.md#depositdata)
+- [DepositData](../data/deposit.md#deposit-data)
 
 ---
 
 ## Read a Deposit By Id
 
-Fetch a deposit from the server by id (dpid).
+Fetch a deposit from the server by its identifier (dpid).
 
 **Request Format**
 
@@ -99,19 +99,19 @@ const { deposit } = res.data
 
 **Related Interfaces:**
 
-- [DepositData](../data/deposit.md#depositdata)
+- [DepositData](../data/deposit.md#deposit-data)
 
 ---
 
-## Lock Funds to a Contract
+## Lock Deposit to a Contract
 
-Commit funds in an open deposit to a contract.
+Lock a deposit to a specific contract.
 
 **Request Format**
 
 ```ts
 method   : 'POST'
-endpoint : '/api/deposit/:dpid/lock'
+endpoint : '/api/deposit/lock'
 headers  : { 'content-type' : 'application/json' }
 body     : JSON.stringify(lock_request)
 ```
@@ -120,7 +120,8 @@ body     : JSON.stringify(lock_request)
 
 ```ts
 interface LockRequest {
-  covenant : CovenantData  // Covenant that locks the UTXO.
+  dpid     : string
+  covenant : CovenantData
 }
 ```
 
@@ -152,69 +153,21 @@ const { contract, deposit } = res.data
 
 **Related Interfaces:**
 
-- [ContractData](../data/contract.md#contractdata)
-- [CovenantData](../data/deposit.md#covenantdata)
-- [DepositData](../data/deposit.md#depositdata)
-
----
-
-## Cancel a Deposit
-
-Close an account and return funds to the registered xpub.
-
-**Request Format**
-
-```ts
-method   : 'GET'
-endpoint : '/api/deposit/:dpid/cancel'
-headers  : { 'content-type' : 'application/json' }
-body     : JSON.stringify(close_request)
-```
-
-**Response Interface**
-
-```ts
-interface DepositDataResponse {
-  data : {
-    deposit : DepositData
-  }
-}
-```
-
-**Example Request**
-
-```ts
-// Generate a close request from the depositor.
-const req = signer.deposit.cancel(dpid)
-// Deliver the request and token.
-const res = await client.deposit.cancel(dpid, req)
-// Check the response is valid.
-if (!res.ok) throw new Error(res.error)
-// Unpack our response data.
-const { deposit } = res.data
-```
-
-> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/deposit/cancel.ts).
-
-**Example Response**
-
-- [DepositData](../examples/depositdata.md)
-
-**Related Interfaces:**
-
-- [DepositData](../data/deposit.md#depositdata)
+- [ContractData](../data/contract.md#contract-data)
+- [CovenantData](../data/deposit.md#covenant-data)
+- [DepositData](../data/deposit.md#deposit-data)
 
 ---
 
 ## Close a Deposit
 
-Close an account and return funds to the registered xpub.
+Close a deposit and return the funds (with an updated feerate).
 
 **Request Format**
 
 ```ts
 method   : 'POST'
-endpoint : '/api/deposit/:dpid/close'
+endpoint : '/api/deposit/close'
 headers  : { 'content-type' : 'application/json' }
 body     : JSON.stringify(close_request)
 ```
@@ -223,9 +176,9 @@ body     : JSON.stringify(close_request)
 
 ```ts
 export interface CloseRequest {
-  pnonce : string  // The publice nonce used for signing.
-  psig   : string  // The partial signature for spending.
-  txfee  : number  // The transaction fee used in the tx.
+  dpid        : string
+  return_rate : number
+  return_psig : string
 }
 ```
 
@@ -260,4 +213,51 @@ const { deposit } = res.data
 
 **Related Interfaces:**
 
-- [DepositData](../data/deposit.md#depositdata)
+- [DepositData](../data/deposit.md#deposit-data)
+
+---
+
+## Cancel a Deposit
+
+Cancel a deposit and return the funds.
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/deposit/:dpid/cancel'
+headers  : { 'Authorization' : 'Token ' + auth_token }
+```
+
+**Response Interface**
+
+```ts
+interface DepositDataResponse {
+  data : {
+    deposit : DepositData
+  }
+}
+```
+
+**Example Request**
+
+```ts
+// Generate a close request from the depositor.
+const req = signer.deposit.cancel(dpid)
+// Deliver the request and token.
+const res = await client.deposit.cancel(dpid, req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our response data.
+const { deposit } = res.data
+```
+
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/deposit/cancel.ts).
+
+**Example Response**
+
+- [DepositData](../examples/deposit-data.md)
+
+**Related Interfaces:**
+
+- [DepositData](../data/deposit.md#deposit-data)

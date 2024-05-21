@@ -1,9 +1,12 @@
-import { get_vm_config } from '../lib/vm.js'
-import { assert }        from '../util/index.js'
+import { decode_tx, encode_tx }     from '@scrow/tapscript/tx'
+import { assert }                   from '@/core/util/index.js'
+import { get_machine_config }       from '@/core/module/machine/util.js'
+import { create_txinput, get_txid } from '@/core/lib/tx.js'
 
-import { decode_tx, encode_tx }                from '@scrow/tapscript/tx'
-import { get_proposal_id, verify_endorsement } from '../lib/proposal.js'
-import { create_txinput, get_txid }            from '../lib/tx.js'
+import {
+  get_proposal_id,
+  verify_endorsement
+} from '../lib/proposal.js'
 
 import {
   validate_proposal_data,
@@ -20,7 +23,7 @@ import {
 
 import {
   ContractData,
-  ContractRequest,
+  ContractPublishRequest,
   FundingData,
   ProposalData,
   MachineData,
@@ -34,9 +37,9 @@ import ContractSchema from '../schema/contract.js'
 import DepositSchema  from '../schema/deposit.js'
 
 export function validate_publish_req (
-  contract : unknown
-) : asserts contract is ContractData {
-  void ContractSchema.publish_req.parse(contract)
+  request : unknown
+) : asserts request is ContractPublishRequest {
+  void ContractSchema.publish_req.parse(request)
 }
 
 export function validate_contract_data (
@@ -57,10 +60,10 @@ export function validate_contract_session (
   void ContractSchema.session.parse(session)
 }
 
-export function verify_contract_req (
+export function verify_publish_req (
   machine : ScriptEngineAPI,
   policy  : ProposalPolicy,
-  request : ContractRequest
+  request : ContractPublishRequest
 ) {
   const { endorsements, proposal } = request
   validate_proposal_data(proposal)
@@ -142,11 +145,11 @@ export function verify_contract_activation (
   contract : ContractData,
   vmdata   : MachineData
 ) {
-  const { activated, active_at, canceled, expires_at, engine_vmid } = contract
+  const { activated, active_at, canceled, expires_at, machine_vmid } = contract
   assert.ok(!canceled,                       'contract is flagged as canceled')
   assert.ok(activated,                       'contract is not flagged as active')
   assert.ok(active_at === vmdata.active_at, 'contract activated date does not match vm')
-  assert.ok(engine_vmid === vmdata.vmid,    'contract vmid does not match vm internal id')
+  assert.ok(machine_vmid === vmdata.vmid,    'contract vmid does not match vm internal id')
   const expires_chk = active_at + contract.terms.duration
   assert.ok(expires_at === expires_chk,      'computed expiration date does not match contract')
 }
@@ -157,7 +160,7 @@ export function verify_contract_execution (
   vmdata   : MachineData,
   witness  : WitnessData[]
 ) {
-  const config  = get_vm_config(contract)
+  const config  = get_machine_config(contract)
     let vmstate = engine.init(config)
   witness.forEach(wit => { vmstate = engine.eval(vmstate, wit) })
   assert.ok(vmstate.active_at  === vmdata.active_at,   'vmdata.active_at does not match vm result')
@@ -179,8 +182,8 @@ export function verify_contract_close (
   assert.ok(vmstate.closed,  'vm state is not closed')
   assert.ok(contract.closed, 'contract is not closed')
   assert.ok(vmstate.closed_at === contract.closed_at,   'contract closed_at does not match vm result')
-  assert.ok(vmstate.head      === contract.engine_head, 'contract active_head does not match vm result')
-  assert.ok(vmstate.output    === contract.engine_vout, 'contract closed_path does not match vm result')
+  assert.ok(vmstate.head      === contract.machine_head, 'contract active_head does not match vm result')
+  assert.ok(vmstate.output    === contract.machine_vout, 'contract closed_path does not match vm result')
 }
 
 export function verify_contract_spending (
@@ -189,9 +192,9 @@ export function verify_contract_spending (
 ) {
   assert.ok(contract.closed,          'contract is not closed')
   assert.ok(contract.spent,           'contract is not settled')
-  assert.exists(contract.engine_vout, 'contract has null output')
+  assert.exists(contract.machine_vout, 'contract has null output')
   // Get the spend template for the provided output.
-  const output = get_spend_template(contract.engine_vout, contract.outputs)
+  const output = get_spend_template(contract.machine_vout, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
   // Collect utxos from funds.
@@ -233,7 +236,7 @@ export function verify_contract_session (session : ContractSession) {
   let vmstate = vmdata
 
   if (engine !== undefined) {
-    const config = get_vm_config(contract)
+    const config = get_machine_config(contract)
     vmstate = engine.init(config)
   }
 
@@ -275,7 +278,7 @@ export default {
     session : validate_contract_session
   },
   verify : {
-    request      : verify_contract_req,
+    request      : verify_publish_req,
     published    : verify_contract_publishing,
     endorsements : verify_endorsements,
     data         : verify_contract_data,

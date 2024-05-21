@@ -31,21 +31,21 @@ export const INIT_FUNDING_STATE = () => {
 
 export const INIT_ACTIVE_STATE = () => {
   return {
-    activated   : false as const,
-    active_at   : null,
-    active_sig  : null,
-    engine_head : null,
-    engine_vmid : null,
-    expires_at  : null
+    activated    : false as const,
+    active_at    : null,
+    active_sig   : null,
+    machine_head : null,
+    machine_vmid : null,
+    expires_at   : null
   }
 }
 
 export const INIT_CLOSE_STATE = () => {
   return {
-    closed      : false as const,
-    closed_at   : null,
-    closed_sig  : null,
-    engine_vout : null
+    closed       : false as const,
+    closed_at    : null,
+    closed_sig   : null,
+    machine_vout : null
   }
 }
 
@@ -82,9 +82,9 @@ export const GET_ACTIVE_STATE = () => {
   return {
     ...GET_CLOSE_STATE(),
     ...INIT_CLOSE_STATE(),
-    active_sig  : null,
-    engine_head : null,
-    status      : 'active' as ContractStatus
+    active_sig   : null,
+    machine_head : null,
+    status       : 'active' as ContractStatus
   }
 }
 

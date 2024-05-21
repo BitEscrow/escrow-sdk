@@ -1,11 +1,11 @@
 # Machine Interfaces
 
-List of interfaces for the ScriptEngine API. Click on the links below to navigate:
+List of data interfaces for the Machine API.
 
-- [ProgramData](#programdata)
-- [MachineConfig](#machineconfig)
-- [MachineData](#machinedata)
-- [ScriptEngineAPI](#scriptengine-api)
+- [ProgramData](#program-data)
+- [MachineConfig](#machine-config)
+- [MachineData](#machine-data)
+- [ScriptEngineAPI](#script-engine-api)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -13,7 +13,7 @@ List of interfaces for the ScriptEngine API. Click on the links below to navigat
 
 ---
 
-## ProgramData
+## Program Data
 
 Describes a program in the virtual machine.
 
@@ -27,9 +27,11 @@ interface ProgramData {
 }
 ```
 
-## MachineConfig
+---
 
-The interface for initializing a virtual machine from a contract.
+## Machine Config
+
+The config interface for initializing a virtual machine.
 
 ```ts
 interface MachineConfig {
@@ -43,7 +45,9 @@ interface MachineConfig {
 }
 ```
 
-## MachineData
+---
+
+## Machine Data
 
 The main data interface for a virtual machine instance.
 
@@ -70,12 +74,14 @@ The `MachineData` interface is extended by state interfaces, each one describing
 
 ```ts
 interface MachineExecState {
-  closed    : boolean        // Whether the machine has finished executing.
-  closed_at : number | null  // UTC timestamp for when the machine closed.
+  closed    : boolean        // Whether the machine is closed from execution.
+  closed_at : number | null  // UTC timestamp for when the machine was closed.
 }
 ```
 
-## ScriptEngine API
+---
+
+## Script Engine API
 
 The interface required for a script interpreter to plug into an escrow contract.
 
@@ -85,6 +91,7 @@ interface ScriptEngineAPI {
   actions : string[] // A list of instructions available to use. 
   methods : string[] // A list of methods available to use.
   states  : string[] // A list of run states to expect from the machine.
+
   // Method for evaluating a stack of witness statements.
   eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
   // Method for creating a virtual machine instance.

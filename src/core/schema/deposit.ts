@@ -6,7 +6,7 @@ import tx    from './tx.js'
 const { bool, hash, hex, network, num, stamp, str } = base
 
 const locktime = z.union([ str, num ]).transform(e => Number(e))
-const status   = z.enum([ 'registered', 'confirmed', 'locked', 'spent', 'settled', 'closed', 'expired', 'error' ])
+const status   = z.enum([ 'registered', 'open', 'locked', 'spent', 'settled', 'closed', 'error' ])
 
 const lock_req = z.object({
   dpid     : hash,

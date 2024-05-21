@@ -36,13 +36,13 @@ if (!res.ok) throw new Error(res.error)
 const { contract } = res.data
 ```
 
-If there are no errors with your submission, you will receive a [ContractData](../data/contract.md#contractdata) object in response.
+If there are no errors with your submission, you will receive a [ContractData](../data/contract.md#contract-data) object in response.
 
 ## Funding a Contract
 
 Once a contract is published, it is open to funding from [depositors](deposit.md#depositing-funds).
 
-The [ContractData](../data/contract.md#contractdata) interface has three fields for tracking funding: `balance`, `pending`, and `total`.
+The [ContractData](../data/contract.md#contract-data) interface has three fields for tracking funding: `balance`, `pending`, and `total`.
 
 **Pending**: Funds are locked to the contract, but not confirmed on-chain.  
 **Balance**: Funds are locked to the contract, and confirmed on-chain.  

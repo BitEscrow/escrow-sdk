@@ -1,11 +1,11 @@
 import { Buff }           from '@cmdcode/buff'
-import { get_program }    from '../../lib/vm.js'
+import { get_program }    from '@/core/lib/program.js'
 import { get_witness_id } from './util.js'
 
 import {
   now,
   sort_record
-} from '../../util/index.js'
+} from '@/core/util/index.js'
 
 import {
   ProgramEntry,
@@ -14,7 +14,7 @@ import {
   MachineData,
   WitnessData,
   WitnessTemplate
-} from '../../types/index.js'
+} from '@/core/types/index.js'
 
 export function create_witness (
   config   : MachineConfig | MachineData,

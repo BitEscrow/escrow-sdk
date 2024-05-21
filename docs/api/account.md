@@ -1,12 +1,12 @@
 # Account API
 
-Reference guide for the Escrow Account API. Click on the links below to navigate:
+Reference guide for the Escrow Account API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/account/request](#request-a-deposit-account) | Request a new deposit account from the escrow server. |
-| [/api/account/register](#register-a-deposit-utxo)  | Register a deposit (utxo) with the escrow server. |
-| [/api/account/commit](#commit-a-deposit-utxo)      | Register a deposit and secure it to a contract. |
+| [/api/account/request](#request-a-deposit-account) | Request a new deposit account. |
+| [/api/account/register](#register-a-deposit-utxo)  | Register a deposit of funds.   |
+| [/api/account/commit](#commit-a-deposit-utxo)      | Register funds for a contract. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -51,13 +51,13 @@ interface AccountDataResponse {
 **Example Request**
 
 ```ts
-// Get an account request from the funder device.
+// Get an account request from the signing device.
 const req = signer.account.request(locktime, return_addr)
-// Submit the account request to the server
+// Submit the request to the server.
 const res = await client.account.request(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack our data response.
+// Unpack the response data.
 const { account } = res.data
 ```
 
@@ -65,11 +65,11 @@ const { account } = res.data
 
 **Example Response**
 
-- [AccountData](../examples/account.md)
+- [AccountData](../examples/accountdata.md)
 
 **Related Interfaces:**
 
-- [AccountData](../data/account.md#accountdata)
+- [AccountData](../data/account.md#account-data)
 
 ---
 
@@ -90,9 +90,9 @@ body     : JSON.stringify(register_request)
 
 ```ts
 interface RegisterRequest {
-  agent_tkn   : string        // The server token to use when creating a covenant.
-  deposit_pk  : string        // Public key belonging the user making the deposit.
-  locktime    : number        // Desired locktime (in seconds) for account recovery.
+  agent_tkn   : string        // The agent token provided by the server.
+  deposit_pk  : string        // Public key belonging the funder's signing device.
+  locktime    : number        // Desired locktime (in seconds) to hold funds in escrow.
   network     : ChainNetwork  // The block-chain network to use.
   return_addr : string        // The return address to use when closing the deposit.
   return_psig : string        // Pre-authorization for returning the deposit.
@@ -132,8 +132,8 @@ const { deposit } = res.data
 
 **Related Interfaces:**
 
-- [DepositData](../data/deposit.md#depositdata)
-- [TxOutput](../data/deposit.md#txoutput)
+- [DepositData](../data/deposit.md#deposit-data)
+- [TxOutput](../data/deposit.md#tx-output)
 
 ---
 
@@ -192,7 +192,7 @@ const { contract, deposit } = res.data
 
 **Related Interfaces:**
 
-- [ContractData](../data/contract.md#contractdata)
-- [CovenantData](../data/deposit.md#covenantdata)
-- [DepositData](../data/deposit.md#depositdata)
-- [TxOutput](../data/oracle.md#txoutput)
+- [ContractData](../data/contract.md#contract-data)
+- [CovenantData](../data/deposit.md#covenant-data)
+- [DepositData](../data/deposit.md#deposit-data)
+- [TxOutput](../data/deposit.md#tx-output)

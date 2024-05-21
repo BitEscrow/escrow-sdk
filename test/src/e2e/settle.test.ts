@@ -1,15 +1,11 @@
-/* Global Imports */
-
-import { Test }       from 'tape'
-import { CoreClient } from '@cmdcode/core-cmd'
-import { P2TR }       from '@scrow/tapscript/address'
-
-/* Package Imports */
-
-import { endorse_proposal } from '@scrow/sdk/proposal'
-import { assert }           from '@scrow/sdk/util'
-import { get_vm_config }    from '@scrow/sdk/vm'
-import CVM                  from '@scrow/sdk/cvm'
+import { Test }               from 'tape'
+import { CoreClient }         from '@cmdcode/core-cmd'
+import { P2TR }               from '@scrow/tapscript/address'
+import { endorse_proposal }   from '@scrow/sdk/core/lib'
+import { get_machine_config } from '@scrow/sdk/machine'
+import { assert }             from '@scrow/sdk/util'
+import { get_proposal }       from './util.js'
+import CVM                    from '@scrow/sdk/cvm'
 
 import {
   DepositData,
@@ -52,7 +48,7 @@ import {
   verify_contract_sigs,
   verify_deposit_sigs,
   verify_contract_settlement,
-  verify_contract_req
+  verify_publish_req
 } from '@/core/validation/index.js'
 
 import {
@@ -61,16 +57,12 @@ import {
   endorse_witness
 } from '@scrow/sdk/witness'
 
-/* Local Imports */
-
 import {
   fund_address,
   get_members,
   get_spend_state,
   get_utxo
 } from '../core.js'
-
-import { get_proposal } from './util.js'
 
 import ServerPolicy from '../config/policy.json' assert { type: 'json' }
 
@@ -125,7 +117,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
-      verify_contract_req(CVM, server_pol.proposal, pub_req)
+      verify_publish_req(CVM, server_pol.proposal, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, escrow_dev)
       
@@ -222,7 +214,7 @@ export default async function (
 
       contract = activate_contract(contract, escrow_dev)
 
-      const vm_config = get_vm_config(contract)
+      const vm_config = get_machine_config(contract)
       let   vm_data   = CVM.init(vm_config)
 
       if (VERBOSE) {

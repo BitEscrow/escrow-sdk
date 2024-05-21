@@ -1,7 +1,7 @@
 import { Wallet }                from '@cmdcode/signer'
 import { assert, get_record_id } from '@/core/util/index.js'
 import { ProposalData }          from '@/core/types/index.js'
-import { get_program_idx }       from '@/core/lib/vm.js'
+import { get_program_idx }       from '@/core/lib/program.js'
 
 import {
   MemberData,

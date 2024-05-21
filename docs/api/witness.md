@@ -1,10 +1,11 @@
 # Witness API
 
-Reference guide for the BitEscrow Witness API. Click on the links below to navigate:
+Reference guide for the BitEscrow Witness API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/witness/:wid](#read-a-statement-by-id) | Fetch a witness statement from the server by id (wid). |
+| [/api/witness/list](#list-statements-by-pubkey) | List statements by pubkey. |
+| [/api/witness/:wid](#read-a-statement-by-id)    | Fetch a statement by ID.   |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -29,7 +30,7 @@ headers  : { 'content-type' : 'application/json' }
 ```ts
 interface WitnessListResponse {
   data : {
-    statements : WitnessReceipt[]
+    commits : WitnessCommit[]
   }
 }
 ```
@@ -37,17 +38,22 @@ interface WitnessListResponse {
 **Example Request**
 
 ```ts
-// Deliver proposal and endorsements to server.
-const res = await client.contract.create(draft)
-// Check if response is valid.
+// Generate a request token.
+const req = signer.witness.list()
+// Submit the request and token.
+const res = await client.witness.list(req)
+// Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack our published contract.
-const new_contract = res.data.contract
+// Unpack our data payload.
+const { commits } = res.data
 ```
 
-**Related Interfaces**
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/list.ts).
 
-- [MachineData](../data/machine.md#machinedata)
+**Related Interfaces:**
+
+- [WitnessCommit](../data/witness.md#witness-commit)
+
 
 ---
 
@@ -67,7 +73,7 @@ endpoint : '/api/witness/:wid'
 ```ts
 interface WitnessDataResponse {
   data : {
-    statement : WitnessReceipt
+    statement : WitnessCommit
   }
 }
 ```
@@ -80,15 +86,15 @@ const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { statement } = res.data
+const { commit } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/read.ts).
 
 **Example Response**
 
-- [WitnessReceipt](../examples/witnessreceipt.md)
+- [WitnessCommit](../examples/witnesscommit.md)
 
 **Related Interfaces:**
 
-- [WitnessReceipt](../data/witness.md#witnessreceipt)
+- [WitnessCommit](../data/witness.md#witness-commit)

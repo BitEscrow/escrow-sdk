@@ -1,4 +1,4 @@
-import { ChainNetwork }      from './base.js'
+import { ChainNetwork } from './base.js'
 import { CovenantData } from './covenant.js'
 
 import {
@@ -11,7 +11,7 @@ import {
 export type LockState     = DepositIsLocked | DepositIsUnlocked
 export type CloseState    = DepositIsClosed | DepositIsOpen
 export type DepositData   = DepositBase & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
-export type DepositStatus = 'registered' | 'confirmed' | 'closed' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
+export type DepositStatus = 'registered' | 'open' | 'closed' | 'locked' | 'spent' | 'settled' | 'error'
 
 export type DepositSignatures = 'created_sig' | 'locked_sig' | 'closed_sig' | 'spent_sig' | 'settled_sig'
 export type DepositPreImage   = Omit<DepositData, DepositSignatures>

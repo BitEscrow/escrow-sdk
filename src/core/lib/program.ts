@@ -1,14 +1,11 @@
-import { Buff }           from '@cmdcode/buff'
-import { assert, regex }  from '../util/index.js'
-import { get_path_names } from './proposal.js'
+import { Buff }  from '@cmdcode/buff'
+import { regex } from '@/core/util/index.js'
 
 import {
   ProgramQuery,
   ProgramData,
-  ProgramEntry,
-  MachineConfig,
-  ContractData
-} from '../types/index.js'
+  ProgramEntry
+} from '@/core/types/index.js'
 
 export function create_program (
   entry : ProgramEntry
@@ -72,25 +69,4 @@ export function get_program_idx (
     return (e[0] === method && e[1] === actions && e[2] === paths && e[3] === thold)
   })
   return (idx !== -1) ? idx : null
-}
-
-export function get_vm_config (
-  contract : ContractData
-) : MachineConfig {
-  assert.ok(contract.activated, 'contract is not active')
-  const { active_at, expires_at, terms, engine_vmid } = contract
-  const { engine, paths, programs, schedule } = terms
-  const pathnames = get_path_names(paths)
-  return { active_at, expires_at, engine, pathnames, programs, schedule, vmid: engine_vmid }
-}
-
-export function get_vm_id (
-  active_at : number,
-  cid       : string,
-  closes_at : number
-) {
-  const hash  = Buff.hex(cid)
-  const start = Buff.num(active_at, 4)
-  const stop  = Buff.num(closes_at, 4)
-  return Buff.join([ hash, start, stop ]).digest.hex
 }

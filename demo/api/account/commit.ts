@@ -62,7 +62,7 @@ const utxo = data.txout
 print_banner('address utxo')
 console.log('utxo:', utxo)
 
-/** ========== [ Commit Deposit UTXO ] ========== **/
+/** ========== [ Commit Deposit ] ========== **/
 
 // Generate a commit request from the depositor.
 const req = signer.account.commit(new_account, new_contract, return_rate, utxo)

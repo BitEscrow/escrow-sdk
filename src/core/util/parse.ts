@@ -52,7 +52,7 @@ export function parse_fund (
 export function parse_program (
   program : unknown
 ) : ProgramData {
-  return CoreSchema.vm.program.parse(program)
+  return CoreSchema.machine.program.parse(program)
 }
 
 export function parse_proposal (

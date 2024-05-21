@@ -1,10 +1,10 @@
 # Witness Interfaces
 
-List of interfaces for the Witness API. Click on the links below to navigate:
+List of data interfaces for the Witness API.
 
-- [WitnessTemplate](#witnesstemplate)
-- [WitnessData](#witnessdata)
-- [WitnessReceipt](#witnessreceipt)
+- [WitnessTemplate](#witness-template)
+- [WitnessData](#witness-data)
+- [WitnessCommit](#witness-commit)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -12,7 +12,7 @@ List of interfaces for the Witness API. Click on the links below to navigate:
 
 ---
 
-## WitnessTemplate
+## Witness Template
 
 A template interface, used when creating a new witness statement.
 
@@ -27,7 +27,9 @@ interface WitnessTemplate {
 }
 ```
 
-## WitnessData
+---
+
+## Witness Data
 
 A signed statement that is ready to be input into the virtual machine.
 
@@ -46,19 +48,21 @@ interface WitnessData {
 }
 ```
 
-## WitnessReceipt
+---
 
-The `WitnessData` object is stored and returned with a signed receipt attached.
+## Witness Commit
+
+A signed receipt that confirms a statement was evaluated by the machine.
 
 ```ts
-interface WitnessReceipt extends WitnessData {
-  receipt_at  : number       // UTC timestamp for when the receipt was created. 
-  receipt_id  : string        // Hash identifier for the receipt. 
-  server_pk   : string        // The public key being used by the escrow server.
-  server_sig  : string        // A confirmation signature from the escrow server.
-  vm_closed   : boolean       // The result state of the virtual machine.
-  vm_hash     : string        // The result head of the hash-chain in the machine.
-  vm_output   : string | null // The result output of the machine.
-  vm_step     : number        // The result execution step of the machine.
+interface WitnessCommit extends WitnessData {
+  agent_pk   : string        // The public key being used by the escrow server.
+  commit_at  : number        // UTC timestamp for when the receipt was created. 
+  commit_id  : string        // Hash identifier for the receipt. 
+  commit_sig : string        // A confirmation signature from the escrow server.
+  vm_closed  : boolean       // The result state of the virtual machine.
+  vm_head    : string        // The result head of the hash-chain in the machine.
+  vm_output  : string | null // The result output of the machine.
+  vm_step    : number        // The result execution step of the machine.
 }
 ```

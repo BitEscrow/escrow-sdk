@@ -47,11 +47,10 @@ export function endorse_witness_api (esigner : EscrowSigner) {
   }
 }
 
-export function list_machines_api (esigner : EscrowSigner) {
+export function list_witness_api (esigner : EscrowSigner) {
   return () => {
-    const pub  = esigner.pubkey
     const host = esigner.server_url
-    const url  = `${host}/api/vm/list?pk=${pub}`
+    const url  = `${host}/api/witness/list`
     const content = 'GET' + url
     return esigner._signer.gen_token(content)
   }
@@ -61,6 +60,7 @@ export default function (esigner : EscrowSigner) {
   return {
     can_sign : can_sign_api(esigner),
     create   : create_witness_api(esigner),
-    endorse  : endorse_witness_api(esigner)
+    endorse  : endorse_witness_api(esigner),
+    list     : list_witness_api(esigner)
   }
 }

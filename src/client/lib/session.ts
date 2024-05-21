@@ -12,7 +12,7 @@ import {
 } from '@/core/lib/proposal.js'
 
 import {
-  ContractRequest,
+  ContractPublishRequest,
   SignerAPI
 } from '@/core/types/index.js'
 
@@ -145,7 +145,7 @@ export function verify_session (
 
 export function publish_session (
   session : DraftSession
-) : ContractRequest {
+) : ContractPublishRequest {
   const { proposal, sigs: endorsements } = session
   return { endorsements, proposal }
 }

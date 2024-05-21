@@ -1,9 +1,9 @@
 /**
- * Contract API Demo for endpoint:
- * /api/contract/:cid/list
+ * Witness API Demo for endpoint:
+ * /api/witness/list
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/contract/list
+ * yarn load demo/api/witness/list
  */
 
 import { print_banner } from '@scrow/test'
@@ -13,14 +13,14 @@ import { signers }      from '@scrow/demo/02_create_signer.js'
 // Select a signer to use.
 const signer = signers[0]
 // Generate a request token.
-const req = signer.vm.list()
-// Deliver the request and token.
-const res = await client.vm.list(signer.pubkey, req)
+const req = signer.witness.list()
+// Submit the request and token.
+const res = await client.witness.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.
-const machines = res.data.machines
+const { commits } = res.data
 
-print_banner('vm list')
-console.dir(machines, { depth : null })
+print_banner('statement list')
+console.dir(commits, { depth : null })
 console.log('\n')

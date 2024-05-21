@@ -1,6 +1,7 @@
-import { assert }       from '@/core/util/index.js'
-import { WitnessData }  from '@/core/types/index.js'
-import { EscrowClient } from '@/client/class/client.js'
+import { assert }              from '@/core/util/index.js'
+import { WitnessData }         from '@/core/types/index.js'
+import { EscrowClient }        from '@/client/class/client.js'
+import { validate_submit_req } from '@/core/validation/machine.js'
 
 import {
   ApiResponse,
@@ -20,7 +21,7 @@ function list_machines_api (client : EscrowClient) {
   ) : Promise<ApiResponse<VMListResponse>> => {
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/vm/list`
+    const url  = `${host}/api/machine/list`
     // Define the request config.
     const init = {
       method  : 'GET',
@@ -39,15 +40,15 @@ function submit_witness_api (client : EscrowClient) {
     vmid    : string,
     witness : WitnessData
   ) : Promise<ApiResponse<VMSubmitResponse>> => {
-    // Validate the contract id.
-    assert.is_hash(vmid)
+    // Validate the request.
+    validate_submit_req({ vmid, witness })
     // Formulate the request url.
     const host = client.server_url
-    const url  = `${host}/api/vm/${vmid}/submit`
+    const url  = `${host}/api/machine/submit`
     // Formulate the request body.
     const init = {
       method  : 'POST',
-      body    : JSON.stringify(witness),
+      body    : JSON.stringify({ vmid, witness }),
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
@@ -65,7 +66,7 @@ function read_vm_state_api (client : EscrowClient) {
     assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/vm/${vmid}`
+    const url  = `${host}/api/machine/${vmid}`
     // Return the response.
     return client.fetcher<VMDataResponse>({ url })
   }
@@ -77,7 +78,7 @@ function list_commits_api (client : EscrowClient) {
     assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/vm/${vmid}/commits`
+    const url  = `${host}/api/machine/${vmid}/commits`
     // Return the response.
     return client.fetcher<WitnessListResponse>({ url })
   }

@@ -1,10 +1,10 @@
 import { verify_sig }    from '@cmdcode/crypto-tools/signer'
-import { assert, regex } from '../util/index.js'
+import { assert, regex } from '@/core/util/index.js'
 
 import {
   get_commit_id,
   get_witness_id
-} from '../module/witness/util.js'
+} from '@/core/module/witness/util.js'
 
 import {
   Literal,
@@ -14,11 +14,11 @@ import {
   ScriptEngineAPI,
   WitnessData,
   WitnessCommit
-} from '../types/index.js'
+} from '@/core/types/index.js'
 
-import PropSchema from '../schema/proposal.js'
-import VMSchema   from '../schema/vm.js'
-import WitSchema  from '../schema/witness.js'
+import PropSchema from '@/core/schema/proposal.js'
+import VMSchema   from '@/core/schema/machine.js'
+import WitSchema  from '@/core/schema/witness.js'
 
 export function validate_program_entry (
   program : unknown
@@ -98,7 +98,7 @@ export function verify_witness_sigs (
 }
 
 export function verify_witness_commit (
-  commit : WitnessCommit,
+  commit  : WitnessCommit,
   vmdata  : MachineData,
   witness : WitnessData
 ) {
