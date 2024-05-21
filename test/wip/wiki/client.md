@@ -5,7 +5,7 @@ The `EscrowClient` is a basic client for consuming our API. It has access to all
 **Sections**
 
 1. [How to Use](#how-to-use)
-2. [Selecting a Network](#selecting-a-network)
+2. [Selecting a ChainNetwork](#selecting-a-network)
 3. [Selecting an Oracle](#selecting-an-oracle)
 
 **Interfaces**
@@ -40,7 +40,7 @@ const client_config = {
 const client = new EscrowClient(client_config)
 ```
 
-## Selecting a Network
+## Selecting a ChainNetwork
 
 We have an escrow server running for `signet`, `testnet` and `mutinynet`.
 

@@ -7,13 +7,15 @@ import { funded_contract } from './07_deposit_funds.js'
 
 const DEMO_MODE = process.env.VERBOSE === 'true'
 
-// Get the contract cid.
-const cid = funded_contract.cid
-// Unpack our polling config.
+/**
+ * We are going to poll the escrow server and watch for the
+ * contract to activate. The contract will only activate once
+ * all funding is confirmed on-chain, and the effective date
+ * of the contract has passed.
+ */
 const [ ival, retries ] = config.poll
 
-// Fetch the current contract data.
-let res   = await client.contract.read(cid),
+let res   = await client.contract.read(funded_contract.cid),
     tries = 1
 
 if (DEMO_MODE || config.network !== 'regtest') {
@@ -28,7 +30,7 @@ while (res.ok && !res.data.contract.activated && tries < retries) {
   // Sleep for interval seconds.
   await sleep(ival * 1000)
   // Fetch the latest contract data.
-  res = await client.contract.read(cid)
+  res = await client.contract.read(funded_contract.cid)
   // Increment our tries counter
   tries += 1
 }
@@ -41,9 +43,6 @@ if (!res.data.contract.activated) {
   throw new Error('contract is not active')
 }
 
-/**
- * Define our active contract.
- */
 export const active_contract = res.data.contract
 
 if (DEMO_MODE) {

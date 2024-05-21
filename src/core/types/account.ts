@@ -1,6 +1,6 @@
-import { KeyContext } from '@cmdcode/musig2'
-import { Network }    from './base.js'
-import { TxOutput }   from './tx.js'
+import { KeyContext }   from '@cmdcode/musig2'
+import { ChainNetwork } from './base.js'
+import { TxOutput }     from './tx.js'
 
 import {
   ScriptWord,
@@ -12,7 +12,7 @@ import { CovenantData, SessionToken } from './covenant.js'
 export interface AccountRequest {
   deposit_pk  : string
   locktime    : number
-  network     : Network
+  network     : ChainNetwork
   return_addr : string
 }
 
@@ -20,7 +20,7 @@ export interface AccountContext {
   deposit_addr : string
   deposit_pk   : string
   key_data     : KeyContext
-  network      : Network
+  network      : ChainNetwork
   return_addr  : string
   script       : ScriptWord[]
   sequence     : number
@@ -32,22 +32,22 @@ export interface AccountData {
   account_hash : string
   account_id   : string
   agent_pk     : string
-  agent_sig    : string
   agent_tkn    : string
   created_at   : number
+  created_sig  : string
   deposit_addr : string
   deposit_pk   : string
   locktime     : number
-  network      : Network
+  network      : ChainNetwork
   return_addr  : string
 }
 
 export interface AccountTemplate {
+  agent_tkn   : string
   deposit_pk  : string
   locktime    : number
-  network     : Network
+  network     : ChainNetwork
   return_addr : string
-  agent_tkn  : string
 }
 
 export interface RegisterTemplate extends AccountTemplate {

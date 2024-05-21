@@ -1,8 +1,13 @@
-import { parse_addr } from '@scrow/tapscript/address'
-import { exists }     from '@/core/util/validate.js'
-import { TxOutput }   from '@/core/types/index.js'
+import { parse_addr }    from '@scrow/tapscript/address'
+import { assert, sleep } from '@/core/util/index.js'
+import { exists }        from '@/core/util/validate.js'
+import { TxOutput }      from '@/core/types/index.js'
 
-import { fetcher, get_confirm_state, resolve_json } from '@/client/lib/fetch.js'
+import {
+  fetcher,
+  get_confirm_state,
+  resolve_json
+} from '@/client/lib/fetch.js'
 
 import {
   ApiResponse,
@@ -205,5 +210,31 @@ export class ChainOracle {
     }
     // Else, return feerate from oracle.
     return feerate
+  }
+
+  async poll_address (
+    address  : string,
+    interval : number,
+    retries  : number,
+    verbose  = false
+  ) : Promise<OracleTxSpendData> {
+    let tries = 0,
+        utxos : OracleTxSpendData[] = []
+    for (let i = 0; i < retries; i++) {
+      if (utxos.length > 0) {
+        const utxo = utxos.at(-1)
+        assert.exists(utxo)
+        return utxo
+      } else {
+        utxos = await this.get_address_utxos(address)
+        tries += 1
+        if (verbose) {
+          const msg = `[${tries}/${retries}] checking address in ${interval} seconds...`
+          console.log(msg)
+        }
+        await sleep(interval * 1000)
+      }
+    }
+    throw new Error('polling timed out')
   }
 }

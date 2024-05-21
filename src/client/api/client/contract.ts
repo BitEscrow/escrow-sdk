@@ -4,12 +4,15 @@ import { EscrowClient }       from '@/client/class/client.js'
 import { DEFAULT_POLICY }     from '@/client/config/index.js'
 
 import {
+  verify_contract_session,
+  verify_contract_sigs,
   verify_endorsements,
   verify_proposal_data
 } from '@/core/validation/index.js'
 
 import {
   ContractRequest,
+  ContractSession,
   ProposalPolicy,
   ScriptEngineAPI
 } from '@/core/types/index.js'
@@ -135,12 +138,21 @@ function cancel_contract_api (client : EscrowClient) {
   }
 }
 
+function verify_contract_api (client : EscrowClient) {
+  return (session : ContractSession) => {
+    const pubkey = client.server_pk
+    verify_contract_session(session)
+    verify_contract_sigs(session.contract, pubkey)
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
     cancel : cancel_contract_api(client),
     create : create_contract_api(client),
     funds  : list_funds_api(client),
     list   : list_contract_api(client),
-    read   : read_contract_api(client)
+    read   : read_contract_api(client),
+    verify : verify_contract_api(client)
   }
 }

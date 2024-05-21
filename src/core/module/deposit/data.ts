@@ -48,11 +48,10 @@ export function create_deposit (
     deposit_addr,
     dpid         : get_deposit_id(created_at, dp_hash),
     satpoint     : get_satpoint(request.utxo),
-    sigs         : [],
     updated_at   : created_at
   }
   const proof = notarize_deposit(template, signer, 'registered')
-  return sort_record({ ...template, agent_sig: proof })
+  return sort_record({ ...template, created_sig: proof })
 }
 
 export function confirm_deposit (

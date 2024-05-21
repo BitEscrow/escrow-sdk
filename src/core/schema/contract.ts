@@ -1,7 +1,10 @@
 import { z }    from 'zod'
 import base     from './base.js'
+import deposit  from './deposit.js'
 import proposal from './proposal.js'
+import vm       from './vm.js'
 import tx       from './tx.js'
+import witness  from './witness.js'
 
 const { bool, hash, hex, label, num, stamp, str } = base
 
@@ -112,9 +115,9 @@ const close_state   = z.discriminatedUnion('closed',    [ ct_open,      ct_close
 
 const base_data = z.object({
   agent_pk     : hash,
-  agent_sig    : hex,
   cid          : hash,
   created_at   : stamp,
+  created_sig  : hex,
   deadline_at  : stamp,
   endorsements : hex.array(),
   feerate      : num,
@@ -152,4 +155,12 @@ const shape = base_data
   .merge(tx.spend_info)
   .merge(tx.settle_info)
 
-export default { data, output, publish_req, shape, status }
+const session = z.object({
+  contract   : data,
+  engine     : vm.api.optional(),
+  funds      : deposit.fund.array().optional(),
+  statements : witness.data.array().optional(),
+  vmdata     : vm.data.optional()
+})
+
+export default { data, output, publish_req, session, shape, status }

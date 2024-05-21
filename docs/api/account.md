@@ -16,7 +16,7 @@ Reference guide for the Escrow Account API. Click on the links below to navigate
 
 ## Request a Deposit Account
 
-Request a new deposit address from the escrow server.
+Request a new deposit account from the escrow server.
 
 **Request Format**
 
@@ -31,10 +31,10 @@ body     : JSON.stringify(account_request)
 
 ```ts
 interface AccountRequest {
-  deposit_pk  : string   // Public key belonging the user making the deposit.
-  locktime   ?: number   // Desired locktime (in seconds) for account recovery.
-  network     : Network  // The block-chain network to use.
-  return_addr : string   // The return address to use when closing the deposit.
+  deposit_pk  : string       // Public key belonging the user making the deposit.
+  locktime   ?: number       // Desired locktime (in seconds) for account recovery.
+  network     : ChainNetwork // The block-chain network to use.
+  return_addr : string       // The return address to use when closing the deposit.
 }
 ```
 
@@ -43,7 +43,7 @@ interface AccountRequest {
 ```ts
 interface AccountDataResponse {
   data : {
-    account : DepositAccount
+    account : AccountData
   }
 }
 ```
@@ -51,42 +51,31 @@ interface AccountDataResponse {
 **Example Request**
 
 ```ts
-import { config }  from '@scrow/demo/00_demo_config.js'
-import { client }  from '@scrow/demo/01_create_client.js'
-import { signers } from '@scrow/demo/02_create_signer.js'
-
-// Define our funder for the deposit.
-const funder   = signers[0]
-// Define our deposit locktime.
-const locktime    = config.locktime
-// Define a return address for the deposit.
-const return_addr = config.return_addr
 // Get an account request from the funder device.
-const acct_req    = funder.account.request(locktime, return_addr)
+const req = signer.account.request(locktime, return_addr)
 // Submit the account request to the server
-const acct_res    = await client.account.request(acct_req)
+const res = await client.account.request(req)
 // Check the response is valid.
-if (!acct_res.ok) throw new Error(acct_res.error)
+if (!res.ok) throw new Error(res.error)
 // Unpack our data response.
-const new_account = acct_res.data.account
+const { account } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/account/request.ts) using the shell command:  
-> `yarn load demo/api/account/request`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/account/request.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/account.md)
+- [AccountData](../examples/account.md)
 
 **Related Interfaces:**
 
-- [AccountData](../interfaces/account.md#accountdata)
+- [AccountData](../data/account.md#accountdata)
 
 ---
 
-## Register a Deposit UTXO
+## Register a Deposit
 
-Register a utxo sent to a deposit address.
+Register a utxo that has been sent to a deposit address.
 
 **Request Format**
 
@@ -101,14 +90,14 @@ body     : JSON.stringify(register_request)
 
 ```ts
 interface RegisterRequest {
-  deposit_pk  : string    // Public key belonging the user making the deposit.
-  locktime    : number    // Desired locktime (in seconds) for account recovery.
-  network     : Network   // The block-chain network to use.
-  return_addr : string    // The return address to use when closing the deposit.
-  return_fees : number    // The transaction fee amount to use when closing the deposit.
-  return_psig : string    // Pre-authorization for returning the deposit.
-  server_tkn  : string    // The server token to use when creating a covenant.
-  utxo        : TxOutput  // The unspent output to register as a deposit.
+  agent_tkn   : string        // The server token to use when creating a covenant.
+  deposit_pk  : string        // Public key belonging the user making the deposit.
+  locktime    : number        // Desired locktime (in seconds) for account recovery.
+  network     : ChainNetwork  // The block-chain network to use.
+  return_addr : string        // The return address to use when closing the deposit.
+  return_psig : string        // Pre-authorization for returning the deposit.
+  return_rate : number        // The transaction fee amount to use when closing the deposit.
+  utxo        : TxOutput      // The unspent output to register as a deposit.
 }
 ```
 
@@ -125,43 +114,30 @@ interface DepositDataResponse {
 **Example Request**
 
 ```ts
-import { config }       from '@scrow/demo/00_demo_config.js'
-import { client }       from '@scrow/demo/01_create_client.js'
-import { new_account }  from '@scrow/demo/06_request_account.js'
-
-// Unpack account details.
-const { address, deposit_pk, sequence, spend_xpub } = new_account
-// Define our polling interval and retries.
-const [ ival, retries ] = config.poll
-// Poll for utxos from the account address.
-const utxos = await client.oracle.poll_address(address, ival, retries, true)
-// Get the output data from the utxo.
-const utxo  = utxos[0].txspend
 // Create a registration request.
-const req = { deposit_pk, sequence, spend_xpub, utxo }
+const req = signer.account.register(new_account, return_rate, utxo)
 // Deliver our registration request to the server.
-const res = await client.deposit.register(reg_req)
+const res = await client.account.register(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
-const open_deposit = res.data.deposit
+const { deposit } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/register.ts) using the shell command:  
-> `yarn load demo/api/deposit/register`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/account/register.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/deposit_data.md)
+- [DepositData](../examples/depositdata.md)
 
 **Related Interfaces:**
 
 - [DepositData](../data/deposit.md#depositdata)
-- [TxOutput](../data/oracle.md#txoutput)
+- [TxOutput](../data/deposit.md#txoutput)
 
 ---
 
-## Commit a Deposit UTXO
+## Commit a Deposit
 
 Register and commit a utxo to a published contract.
 
@@ -169,7 +145,7 @@ Register and commit a utxo to a published contract.
 
 ```ts
 method   : 'POST'
-endpoint : '/api/deposit/commit'
+endpoint : '/api/account/commit'
 headers  : { 'content-type' : 'application/json' }
 body     : JSON.stringify(commit_request)
 ```
@@ -178,12 +154,8 @@ body     : JSON.stringify(commit_request)
 
 ```ts
 interface CommitRequest extends RegisterRequest {
-  covenant    : CovenantData  // Covenant that locks the UTXO.
-  deposit_pk  : string        // Public key of the funder making the deposit.
-  return_psig : string        // Pre-authorization for returning the deposit.
-  sequence    : number        // Locktime converted into a sequence value.
-  spend_xpub  : string        // The extended key used for returning funds.
-  utxo        : TxOutput      // The unspent output to register as a deposit.
+  ...RegisterRequest
+  covenant : CovenantData  // Covenant that locks the UTXO.
 }
 ```
 
@@ -201,33 +173,22 @@ interface FundDataResponse {
 **Example Request**
 
 ```ts
-import { config }       from '@scrow/demo/00_demo_config.js'
-import { client }       from '@scrow/demo/01_create_client.js'
-import { new_contract } from '@scrow/demo/05_create_contract.js'
-import { new_account }  from '@scrow/demo/06_request_account.js'
-
-// Define our polling interval and retries.
-const [ ival, retries ] = config.poll
-// Poll for utxos from the account address.
-const utxos = await client.oracle.poll_address(address, ival, retries, true)
-// Get the output data from the utxo.
-const utxo  = utxos[0].txspend
 // Generate a commit request from the depositor.
-const req = depositor.account.commit(new_account, new_contract, utxo)
+const req = signer.account.commit(new_account, new_contract, return_rate, utxo)
 // Deliver our commit request to the server.
-const res = await client.deposit.commit(req)
+const res = await client.account.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
-const locked_deposit = res.data.deposit
+const { contract, deposit } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/deposit/commit.ts) using the shell command:  
-> `yarn load demo/api/account/commit`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/account/commit.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/deposit_commit.md)
+- [ContractData](../examples/contractdata.md)
+- [DepositData](../examples/depositdata.md)
 
 **Related Interfaces:**
 

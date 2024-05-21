@@ -1,4 +1,4 @@
-import { Literal, Network } from './base.js'
+import { Literal, ChainNetwork } from './base.js'
 
 export type PaymentEntry = [
   value   : number,
@@ -40,7 +40,7 @@ export interface ProposalData {
   engine      : string
   feerate    ?: number
   moderator  ?: string
-  network     : Network
+  network     : ChainNetwork
   paths       : PathEntry[]
   payments    : PaymentEntry[]
   programs    : ProgramEntry[]

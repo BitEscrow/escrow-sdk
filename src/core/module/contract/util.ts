@@ -184,7 +184,7 @@ export function get_contract_preimg (
   status   : ContractStatus
 ) : NoteTemplate {
   const { cid, agent_pk: pubkey } = contract
-  const { content, created_at }    = get_contract_state(contract, status)
+  const { content, created_at }   = get_contract_state(contract, status)
   const kind  = CONTRACT_KIND
   const tags  = [ [ 'i', cid ] ]
   return { content, created_at, kind, pubkey, tags }

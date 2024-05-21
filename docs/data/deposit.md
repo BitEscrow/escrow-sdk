@@ -49,7 +49,7 @@ interface DepositData {
   deposit_pk   : string   // The public key of the user making the deposit.
   dpid         : string   // The unique identifier of the deposit.
   locktime     : number   // Desired locktime (in seconds) for account recovery.
-  network      : Network  // The block-chain network to use.
+  network      : ChainNetwork  // The block-chain network to use.
   return_addr  : string   // The return address to use when closing the deposit.
   return_fees  : number   // The transaction fee amount to use when closing the deposit.
   return_psig  : string   // Pre-authorization for returning the deposit.

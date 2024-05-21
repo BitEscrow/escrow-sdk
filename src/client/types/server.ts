@@ -1,4 +1,4 @@
-import { AccountPolicy, Network, ProposalPolicy } from '@/core/types/index.js'
+import { AccountPolicy, ChainNetwork, ProposalPolicy } from '@/core/types/index.js'
 
 export type ApiResponse<T> = DataResponse<T> | ErrorResponse
 
@@ -19,7 +19,7 @@ export interface ServerConfig {
   oracle_url : string
   server_pk  : string
   server_url : string
-  network    : Network
+  network    : ChainNetwork
 }
 
 export interface ServerKeysResponse {

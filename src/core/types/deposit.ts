@@ -1,4 +1,4 @@
-import { Network }      from './base.js'
+import { ChainNetwork }      from './base.js'
 import { CovenantData } from './covenant.js'
 
 import {
@@ -13,7 +13,7 @@ export type CloseState    = DepositIsClosed | DepositIsOpen
 export type DepositData   = DepositBase & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
 export type DepositStatus = 'registered' | 'confirmed' | 'closed' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
 
-export type DepositSignatures = 'agent_sig' | 'locked_sig' | 'closed_sig' | 'spent_sig' | 'settled_sig'
+export type DepositSignatures = 'created_sig' | 'locked_sig' | 'closed_sig' | 'spent_sig' | 'settled_sig'
 export type DepositPreImage   = Omit<DepositData, DepositSignatures>
 
 export type FundingData = TxConfirmState & TxSettleState & TxSpendState & {
@@ -72,14 +72,14 @@ export interface DepositConfig {
 export interface DepositBase {
   account_hash : string
   agent_pk     : string
-  agent_sig    : string
   agent_tkn    : string
   created_at   : number
+  created_sig  : string
   deposit_pk   : string
   deposit_addr : string
   dpid         : string
   locktime     : number
-  network      : Network
+  network      : ChainNetwork
   return_addr  : string
   return_rate  : number
   return_psig  : string

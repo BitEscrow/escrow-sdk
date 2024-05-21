@@ -1,9 +1,9 @@
 import { Buff, Bytes } from '@cmdcode/buff'
-import { Network }     from '@/core/types/index.js'
+import { ChainNetwork }     from '@/core/types/index.js'
 
 import {
   DEFAULT_CONFIG,
-  get_client_config
+  get_server_config
 } from '@/client/config/index.js'
 
 import {
@@ -89,7 +89,7 @@ export class EscrowSigner {
     options : SignerOptions = {}
   ) {
     const opt    = { ...DEFAULT_CONFIG, ...options }
-    const client = get_client_config(opt.network as Network)
+    const client = get_server_config(opt.network as ChainNetwork)
     const config = { ...client, ...opt }
     const xpub   = options.xpub ?? signer.xpub
 

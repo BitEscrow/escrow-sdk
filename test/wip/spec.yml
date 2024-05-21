@@ -791,7 +791,7 @@ components:
           type: string
           nullable: true
         network:
-          $ref: '#/components/schemas/Network'
+          $ref: '#/components/schemas/ChainNetwork'
         paths:
           type: array
           items:
@@ -829,7 +829,7 @@ components:
     Literal:
       types: [ string, number, boolean, null ]
       
-    Network:
+    ChainNetwork:
       type: string
 
     MemberData:

@@ -1,4 +1,4 @@
-import { Network }     from '@/core/types/index.js'
+import { ChainNetwork }     from '@/core/types/index.js'
 import DEFAULT_POLICY  from './policy.js'
 import DEFAULT_SERVERS from './settings.js'
 
@@ -8,7 +8,7 @@ const DEFAULT_CONFIG = {
   network : DEFAULT_NETWORK
 }
 
-function get_client_config (network : Network) {
+function get_server_config (network : ChainNetwork) {
   return DEFAULT_SERVERS[network]
 }
 
@@ -17,5 +17,5 @@ export {
   DEFAULT_NETWORK,
   DEFAULT_POLICY,
   DEFAULT_SERVERS,
-  get_client_config
+  get_server_config
 }

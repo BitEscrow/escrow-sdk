@@ -7,19 +7,22 @@
  */
 
 import { print_banner } from '@scrow/test'
+import CVM              from '@scrow/sdk/cvm'
 import { config }       from '@scrow/demo/00_demo_config.js'
 import { client }       from '@scrow/demo/01_create_client.js'
 import { publish_req }  from '@scrow/demo/04_finish_proposal.js'
 
-// Unpack the default script engine and server policy.
-const { engine, policy } = config
-// Deliver proposal and endorsements to server.
-const res = await client.contract.create(engine, policy, publish_req)
+// Define the script engine to use.
+const engine = CVM
+// Define the server policy to use.
+const policy = config.policy.proposal
+// Deliver the publish request to the server.
+const res = await client.contract.create(publish_req, engine, policy)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.
-const new_contract = res.data.contract
+const { contract } = res.data
 
 print_banner('new contract')
-console.dir(new_contract, { depth : null })
+console.dir(contract, { depth : null })
 console.log('\n')

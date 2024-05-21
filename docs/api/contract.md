@@ -4,11 +4,11 @@ Reference guide for the BitEscrow Contract API. Click on the links below to navi
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/contract/create](#create-a-contract)            | Create a new contract on the escrow server. |
-| [/api/contract/list](#list-contracts-by-pubkey)       | List contracts by pubkey. |
-| [/api/contract/:cid](#read-a-contract-by-id)          | Read a contract via ID. |
-| [/api/contract/:cid/cancel](#cancel-a-contract)       | Cancel a contract. |
-| [/api/contract/:cid/funds](#list-funds-in-a-contract) | List the funds deposited in a contract. |
+| [/api/contract/create](#create-a-contract)      | Create a new contract on the escrow server. |
+| [/api/contract/list](#list-contracts-by-pubkey) | List contracts by pubkey. |
+| [/api/contract/:cid](#read-a-contract-by-id)    | Read a contract via ID. |
+| [/api/contract/:cid/cancel](#cancel-a-contract) | Cancel a contract. |
+| [/api/contract/:cid/funds](#list-funding-by-id) | List the funds deposited in a contract. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -32,10 +32,9 @@ body     : JSON.stringify(contract_request)
 **Request Body**
 
 ```ts
-interface ContractRequest {
-  members     : MemberData[]
-  proposal    : ProposalData
-  signatures ?: string[]
+export interface ContractRequest {
+  endorsements ?: string[]
+  proposal      : ProposalData
 }
 ```
 
@@ -52,40 +51,44 @@ interface ContractDataResponse {
 **Example Request**
 
 ```ts
-import { client } from '@scrow/demo/01_create_client.js'
-import { draft }  from '@scrow/demo/04_finish_draft.js'
-
-// Deliver proposal and endorsements to server.
-const res = await client.contract.create(draft)
+// Define the script engine to use.
+const engine = CVM
+// Define the server policy to use.
+const policy = config.policy.proposal
+// Define a proposal and optional endorsements.
+const req = { endorsements, proposal }
+// Deliver the publish request to the server.
+const res = await client.contract.create(req, engine, policy)
 // Check if response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our published contract.
-const new_contract = res.data.contract
+const { contract } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/create.ts) using the shell command:  
-> `yarn load demo/api/contract/create`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/contract/create.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/contract_data.md)
+- [ContractData](../examples/contractdata.md)
 
 **Related Interfaces**
 
-- [ProposalData](../data/draft.md#proposaldata)
 - [ContractData](../data/contract.md#contractdata)
+- [ProposalData](../data/draft.md#proposaldata)
+- [ScriptEngine](../data/machine.md#scriptengine-api)
+- [ServerPolicy](../data/server.md#serverpolicy)
 
 ---
 
 ## List Contracts By Pubkey
 
-Request a list of contracts that are tagged by a specific pubkey.
+Request a list of contracts that are endorsed by the token's pubkey.
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/contract/list/:pubkey'
+endpoint : '/api/contract/list'
 headers  : { 'Authorization' : 'Token ' + auth_token }
 ```
 
@@ -102,27 +105,17 @@ interface ContractListResponse {
 **Example Request**
 
 ```ts
-import { client }  from '@scrow/demo/01_create_client.js'
-import { signers } from '@scrow/demo/02_create_signer.js'
-
-// Select a signer to use.
-const signer = signers[0]
 // Generate a request token.
-const req = signer.request.contract_list()
-// Deliver the request and token.
-const res = await client.contract.list(signer.pubkey, req)
+const req = signer.contract.list()
+// Submit the request and token.
+const res = await client.contract.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.
-const contracts = res.data.contracts
+const { contracts } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/list.ts) using the shell command:  
-> `yarn load demo/api/contract/list`
-
-**Example Response**
-
-- [JSON Data](../examples/contract_list.md)
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/contract/list.ts).
 
 **Related Interfaces**
 
@@ -154,25 +147,19 @@ interface ContractDataResponse {
 **Example Request**
 
 ```ts
-import { client }       from '@scrow/demo/01_create_client.js'
-import { new_contract } from '@scrow/demo/05_create_contract.js'
-
-// Define the contract id we will use.
-const cid = new_contract.cid
 // Fetch a contract from the server by cid.
 const res = await client.contract.read(cid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const contract = res.data.contract
+const { contract } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/read.ts) using the shell command:  
-> `yarn load demo/api/contract/read`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/contract/read.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/contract_data.md)
+- [ContractData](../examples/contractdata.md)
 
 **Related Interfaces**
 
@@ -205,29 +192,62 @@ interface ContractDataResponse {
 **Example Code**
 
 ```ts
-import { client }              from '@scrow/demo/01_create_client.js'
-import { moderator as signer } from '@scrow/demo/03_build_proposal.js'
-import { new_contract }        from '@scrow/demo/05_create_contract.js'
-
-// Define the contract id we will cancel.
-const cid = new_contract.cid
 // Generate an auth token from the moderator's signer.
-const req = signer.request.contract_cancel(cid)
+const req = signer.contract.cancel(cid)
 // Send the cancel request, along with the auth token.
 const res = await client.contract.cancel(cid, req)
 // If the request fails, throw an error.
 if (!res.ok) throw new Error(res.error)
 // Unwrap our response payload.
-const canceled_contract = res.data.contract
+const { contract } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/cancel.ts) using the shell command:  
-> `yarn load demo/api/contract/cancel`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/contract/cancel.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/contract_canceled.md)
+- [ContractData](../examples/contractdata.md)
 
 **Related Interfaces:**
 
 - [ContractData](../data/contract.md#contractdata)
+
+---
+
+## List Funding By Id
+
+Fetch a list of funds for a contract id (cid).
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/contract/:cid/funds'
+```
+
+**Response Interface**
+
+```ts
+interface FundListResponse {
+  data : {
+    funds : FundingData[]
+  }
+}
+```
+
+**Example Request**
+
+```ts
+// Fetch a contract from the server by cid.
+const res = await client.contract.funds(cid)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack the data object.
+const { funds } = res.data
+```
+
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/contract/funds.ts).
+
+**Related Interfaces**
+
+- [FundingData](../data/contract.md#fundingdata)

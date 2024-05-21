@@ -1,9 +1,9 @@
 /**
- * Deposit API Demo for endpoint:
- * /api/deposit/:dpid/commit
+ * Account API Demo for endpoint:
+ * /api/account/commit
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/deposit/commit
+ * yarn load demo/api/account/commit
  */
 
 import { print_banner }         from '@scrow/test'
@@ -20,15 +20,20 @@ import {
   fund_regtest_address,
 } from '@scrow/demo/util.js'
 
+/** ========== [ Define Variables ] ========== **/
 
 // Unpack account address.
 const { deposit_addr } = new_account
 // Compute a total amount (in sats) with the txfee.
-const amt_total = get_contract_balance(new_contract) + new_contract.vin_txfee
+const amt_total   = get_contract_balance(new_contract) + new_contract.vin_txfee
 // Also compute a total amount in bitcoin.
-const btc_total = amt_total / 100_000_000
+const btc_total   = amt_total / 100_000_000
+// Define a feerate for the return transaction.
+const return_rate = config.feerate
+// Define our funder for the deposit.
+const signer      = signers[0]
 
-/** ========== [ Print Deposit Info ] ========== **/
+/** ========== [ Fund Deposit Address ] ========== **/
 
 switch (config.network) {
   case 'mutiny':
@@ -51,24 +56,27 @@ await sleep(2000)
 // Define our polling interval and retries.
 const [ ival, retries ] = config.poll
 // Poll for utxos from the account address.
-const utxo = await client.oracle.poll_address(deposit_addr, ival, retries, true)
+const data = await client.oracle.poll_address(deposit_addr, ival, retries, true)
+const utxo = data.txout
 
 print_banner('address utxo')
 console.log('utxo:', utxo)
 
-// Define our funder for the deposit.
-const funder = signers[0]
-// Define a feerate for the return transaction.
-const feerate = config.feerate
+/** ========== [ Commit Deposit UTXO ] ========== **/
+
 // Generate a commit request from the depositor.
-const req    = funder.account.commit(new_account, new_contract, feerate, utxo.txout)
+const req = signer.account.commit(new_account, new_contract, return_rate, utxo)
 // Deliver our commit request to the server.
-const res    = await client.account.commit(req)
+const res = await client.account.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
-const locked_deposit = res.data.deposit
+const { contract, deposit } = res.data
+
+print_banner('updated contract')
+console.dir(contract, { depth: null })
+console.log('\n')
 
 print_banner('locked deposit')
-console.dir(locked_deposit, { depth: null })
+console.dir(deposit, { depth: null })
 console.log('\n')

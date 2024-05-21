@@ -1,0 +1,17 @@
+# Deposit Account
+
+```ts
+{
+  account_hash: 'b21794c93de3b32f1a7be569869425be16d8b610bcad1a5538ec60f7799a27f4',
+  account_id: '604cee89678c96cac9b4a54029f8616b8402b0f8d3d1a447d0186a28041a43c8',
+  agent_pk: '33f9d5a021afdffb864153eefa5d353d53e2d22053dadf8577c0e2b524bac794',
+  agent_tkn: '664ba252eca005907c0f0bc4e2f6a2470bcbed05ae69211f9b77999901a99db8a2eef7b367f08ed54cd175b83c2453151f6fad0cdbe7eb48bfc6f94dbab8562ccf4d749e4c39f6f9bab85b14e92d985e138ed36673757c1fbf508c4be405e0053a8a18573fecc764121b1a015e9be50ddd26b2f94c753d994e551bebe7f9db48c7d9540e',
+  created_at: 1716232786,
+  created_sig: 'f9728464825238d54fdaf805305eef255e192a2f96ca6eebb8b57d145b1b224b72c32d13ea81c23de47c6a730c8620995d43f990ce4ab88d6bba94fbec7f60cb',
+  deposit_addr: 'bcrt1pls4wqx356dqsn3yp8h5epfxjwlt4mgftel637tmplh0phz4kvses9nmgs8',
+  deposit_pk: '6dd326ab4c6cecd85165f82a8e622dd030b233fdc7751ac2c9e9b1073ab66e3f',
+  locktime: 172800,
+  network: 'regtest',
+  return_addr: 'bcrt1putcsjtnrk8kw9632mhleg5dn6w7230gs2fuert7jr3ka5csrgcss0vycan'
+}
+```

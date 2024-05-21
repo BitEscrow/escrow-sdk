@@ -13,7 +13,7 @@ import {
   ProgramEntry,
   SignerAPI,
   MachineConfig,
-  VMData,
+  MachineData,
   WitnessData,
 } from '@scrow/sdk/core'
 
@@ -61,7 +61,7 @@ export function get_config (MachineConfig : unknown) {
 }
 
 export function compile_witness_vectors (
-  vmdata    : VMData,
+  vmdata    : MachineData,
   witnesses : WitnessVector[]
 ) {
   const wit_data : WitnessData[] = []
@@ -87,7 +87,7 @@ export function run_vm_vectors (
   config     : MachineConfig,
   timeout    : number,
   vectors    : WitnessVector[]
-) : VMData {
+) : MachineData {
   const marker = config.active_at + timeout
   let   vmdata = CVM.init(config)
   const stack  = compile_witness_vectors(vmdata, vectors)

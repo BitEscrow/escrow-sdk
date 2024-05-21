@@ -1,4 +1,4 @@
-import { get_receipt_id } from './util.js'
+import { get_commit_id } from './util.js'
 
 import {
   now,
@@ -7,24 +7,24 @@ import {
 
 import {
   SignerAPI,
-  VMData,
+  MachineData,
   WitnessData,
-  WitnessReceipt
+  WitnessCommit
 } from '../../types/index.js'
 
-export function create_receipt (
-  data    : VMData,
+export function create_commit (
+  data    : MachineData,
   signer  : SignerAPI,
   witness : WitnessData,
-  receipt_at = now()
-) : WitnessReceipt {
+  commit_at = now()
+) : WitnessCommit {
   const agent_pk   = signer.pubkey
   const vm_closed  = data.closed
-  const vm_hash    = data.head
+  const vm_head    = data.head
   const vm_output  = data.output
   const vm_step    = data.step
-  const preimg     = { ...witness, receipt_at, agent_pk, vm_closed, vm_hash, vm_output, vm_step }
-  const receipt_id = get_receipt_id(preimg)
-  const agent_sig  = signer.sign(receipt_id)
-  return sort_record({ ...preimg, receipt_id, agent_sig })
+  const preimg     = { ...witness, commit_at, agent_pk, vm_closed, vm_head, vm_output, vm_step }
+  const commit_id  = get_commit_id(preimg)
+  const commit_sig = signer.sign(commit_id)
+  return sort_record({ ...preimg, commit_id, commit_sig })
 }

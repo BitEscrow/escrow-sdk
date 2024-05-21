@@ -102,7 +102,7 @@ class EscrowSigner {
   // The pubkey of the escrow server.
   get host_pub () : string | undefined
   // The network configured on the signer.
-  get network  () : Network
+  get network  () : ChainNetwork
   // The pubkey of the signer.
   get pubkey   () : string
 

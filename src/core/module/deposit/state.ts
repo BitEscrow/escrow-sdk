@@ -39,8 +39,8 @@ export const GET_REGISTER_STATE = () => {
     ...INIT_LOCK_STATE(),
     ...INIT_SPEND_STATE(),
     ...INIT_SETTLE_STATE(),
-    agent_sig : null,
-    status    : 'registered' as DepositStatus
+    created_sig : null,
+    status      : 'registered' as DepositStatus
   }
 }
 
@@ -130,7 +130,7 @@ export function get_deposit_proof (
   let sig
   switch (status) {
     case 'registered':
-      sig = deposit.agent_sig; break
+      sig = deposit.created_sig; break
     case 'locked':
       sig = deposit.locked_sig;  break
     case 'closed':

@@ -6,7 +6,7 @@ import {
   AccountTemplate,
   CommitRequest,
   ContractData,
-  Network,
+  ChainNetwork,
   RegisterRequest,
   SignerAPI,
   TxOutput
@@ -20,7 +20,7 @@ import AcctSchema from '../../schema/account.js'
 export function create_account_req (
   deposit_pk  : string,
   locktime    : number,
-  network     : Network,
+  network     : ChainNetwork,
   return_addr : string
 ) : AccountRequest {
   // Parse and return a valid account request object.

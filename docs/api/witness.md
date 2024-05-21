@@ -12,9 +12,48 @@ Reference guide for the BitEscrow Witness API. Click on the links below to navig
 
 ---
 
-## Read a Statement By WID
+## List Statements By Pubkey
 
-Fetch a witness statement from the server by id (wid).
+Request a list of statements that are endorsed by the token's pubkey.
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/witness/list'
+headers  : { 'content-type' : 'application/json' }
+```
+
+**Response Interface**
+
+```ts
+interface WitnessListResponse {
+  data : {
+    statements : WitnessReceipt[]
+  }
+}
+```
+
+**Example Request**
+
+```ts
+// Deliver proposal and endorsements to server.
+const res = await client.contract.create(draft)
+// Check if response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our published contract.
+const new_contract = res.data.contract
+```
+
+**Related Interfaces**
+
+- [MachineData](../data/machine.md#machinedata)
+
+---
+
+## Read a Statement By Id
+
+Fetch a witness statement from the server by its identifier (wid).
 
 **Request Format**
 
@@ -28,7 +67,7 @@ endpoint : '/api/witness/:wid'
 ```ts
 interface WitnessDataResponse {
   data : {
-    witness : WitnessData
+    statement : WitnessReceipt
   }
 }
 ```
@@ -36,26 +75,20 @@ interface WitnessDataResponse {
 **Example Request**
 
 ```ts
-import { client }  from '@scrow/demo/01_create_client.js'
-import { witness } from '@scrow/demo/09_settle_contract.js'
-
-// Define the witness id we will use.
-const wid = witness.wid
 // Fetch a contract from the server by cid.
 const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const statement = res.data.witness
+const { statement } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/witness/read.ts) using the shell command:  
-> `yarn load demo/api/witness/read`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/read.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/witness_data.md)
+- [WitnessReceipt](../examples/witnessreceipt.md)
 
 **Related Interfaces:**
 
-- [WitnessData](../data/witness.md#witnessdata)
+- [WitnessReceipt](../data/witness.md#witnessreceipt)

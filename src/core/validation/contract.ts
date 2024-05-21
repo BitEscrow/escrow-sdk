@@ -1,23 +1,14 @@
-/* Global Imports */
+import { get_vm_config } from '../lib/vm.js'
+import { assert }        from '../util/index.js'
+
+import { decode_tx, encode_tx }                from '@scrow/tapscript/tx'
+import { get_proposal_id, verify_endorsement } from '../lib/proposal.js'
+import { create_txinput, get_txid }            from '../lib/tx.js'
 
 import {
-  decode_tx,
-  encode_tx
-} from '@scrow/tapscript/tx'
-
-/* Module Imports */
-
-import { assert } from '../util/index.js'
-
-import {
-  get_proposal_id,
-  verify_endorsement
-} from '../lib/proposal.js'
-
-import {
-  create_txinput,
-  get_txid
-} from '../lib/tx.js'
+  validate_proposal_data,
+  verify_proposal_data
+} from './proposal.js'
 
 import {
   create_spend_templates,
@@ -32,23 +23,15 @@ import {
   ContractRequest,
   FundingData,
   ProposalData,
-  VMData,
+  MachineData,
   ScriptEngineAPI,
   WitnessData,
-  ProposalPolicy
+  ProposalPolicy,
+  ContractSession
 } from '../types/index.js'
 
 import ContractSchema from '../schema/contract.js'
 import DepositSchema  from '../schema/deposit.js'
-
-/* Local Imports */
-
-import {
-  validate_proposal_data,
-  verify_proposal_data
-} from './proposal.js'
-import { get_vm_config } from '../lib/vm.js'
-import { validate_vm_data } from './witness.js'
 
 export function validate_publish_req (
   contract : unknown
@@ -66,6 +49,12 @@ export function validate_contract_funds (
   funds : FundingData[]
 ) {
   void DepositSchema.fund.array().parse(funds)
+}
+
+export function validate_contract_session (
+  session : unknown
+) : asserts session is ContractSession {
+  void ContractSchema.session.parse(session)
 }
 
 export function verify_contract_req (
@@ -151,7 +140,7 @@ export function verify_contract_funding (
 
 export function verify_contract_activation (
   contract : ContractData,
-  vmdata   : VMData
+  vmdata   : MachineData
 ) {
   const { activated, active_at, canceled, expires_at, engine_vmid } = contract
   assert.ok(!canceled,                       'contract is flagged as canceled')
@@ -165,7 +154,7 @@ export function verify_contract_activation (
 export function verify_contract_execution (
   contract : ContractData,
   engine   : ScriptEngineAPI,
-  vmdata   : VMData,
+  vmdata   : MachineData,
   witness  : WitnessData[]
 ) {
   const config  = get_vm_config(contract)
@@ -185,7 +174,7 @@ export function verify_contract_execution (
 
 export function verify_contract_close (
   contract : ContractData,
-  vmstate  : VMData
+  vmstate  : MachineData
 ) {
   assert.ok(vmstate.closed,  'vm state is not closed')
   assert.ok(contract.closed, 'contract is not closed')
@@ -196,14 +185,13 @@ export function verify_contract_close (
 
 export function verify_contract_spending (
   contract   : ContractData,
-  funds      : FundingData[],
-  vmstate    : VMData
+  funds      : FundingData[]
 ) {
-  assert.ok(contract.closed,         'contract is not closed')
-  assert.ok(contract.spent,          'contract is not settled')
-  assert.ok(vmstate.output !== null, 'vmstate is not closed')
+  assert.ok(contract.closed,          'contract is not closed')
+  assert.ok(contract.spent,           'contract is not settled')
+  assert.exists(contract.engine_vout, 'contract has null output')
   // Get the spend template for the provided output.
-  const output = get_spend_template(vmstate.output, contract.outputs)
+  const output = get_spend_template(contract.engine_vout, contract.outputs)
   // Convert the output into a txdata object.
   const txdata = decode_tx(output, false)
   // Collect utxos from funds.
@@ -226,56 +214,65 @@ export function verify_contract_settlement (
   engine     : ScriptEngineAPI,
   funds      : FundingData[],
   statements : WitnessData[],
-  vmdata     : VMData
+  vmdata     : MachineData
 ) {
   verify_contract_data(contract)
   verify_contract_funding(contract, funds)
   verify_contract_activation(contract, vmdata)
   verify_contract_execution(contract, engine, vmdata, statements)
   verify_contract_close(contract, vmdata)
-  verify_contract_spending(contract, funds, vmdata)
+  verify_contract_spending(contract, funds)
 }
 
-export function verify_contract_state (
-  contract : ContractData,
-  funds   ?: FundingData[],
-  vmdata  ?: VMData
-) {
-  validate_contract_data(contract)
+export function verify_contract_session (session : ContractSession) {
+  const { contract, engine, funds, statements, vmdata } = session
+
+  validate_contract_session(session)
   verify_contract_data(contract)
 
-  if (funds !== undefined) {
-    validate_contract_funds(funds)
+  let vmstate = vmdata
+
+  if (engine !== undefined) {
+    const config = get_vm_config(contract)
+    vmstate = engine.init(config)
   }
 
-  if (vmdata !== undefined) {
-    validate_vm_data(vmdata)
+  const can_exec = (
+    engine     !== undefined &&
+    statements !== undefined &&
+    vmstate    !== undefined
+  )
+
+  if (can_exec && vmstate !== undefined) {
+    vmstate = engine.eval(vmstate, statements)
   }
 
   if (contract.secured && funds !== undefined) {
     verify_contract_funding(contract, funds)
   }
 
-  if (contract.activated && vmdata !== undefined) {
-    verify_contract_activation(contract, vmdata)
+  if (contract.activated && vmstate !== undefined) {
+    verify_contract_activation(contract, vmstate)
   }
 
-  if (contract.closed && vmdata !== undefined) {
-    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
-    verify_contract_close(contract, vmdata)
+  if (contract.activated && can_exec && vmstate !== undefined) {
+    verify_contract_execution(contract, engine, vmstate, statements)
   }
 
-  if (contract.spent) {
-    assert.exists(funds,  'you must provide a list of funds to verify')
-    assert.exists(vmdata, 'you must provide a vmdata object to verify.')
-    verify_contract_spending(contract, funds, vmdata)
+  if (contract.closed && vmstate !== undefined) {
+    verify_contract_close(contract, vmstate)
+  }
+
+  if (contract.spent && funds !== undefined) {
+    verify_contract_spending(contract, funds)
   }
 }
 
 export default {
   validate : {
     request : validate_publish_req,
-    data    : validate_contract_data
+    data    : validate_contract_data,
+    session : validate_contract_session
   },
   verify : {
     request      : verify_contract_req,
@@ -287,8 +284,8 @@ export default {
     execution    : verify_contract_execution,
     closed       : verify_contract_close,
     spend        : verify_contract_spending,
-    signatures   : verify_contract_sigs,
+    session      : verify_contract_session,
     settlement   : verify_contract_settlement,
-    state        : verify_contract_state
+    signatures   : verify_contract_sigs
   }
 }

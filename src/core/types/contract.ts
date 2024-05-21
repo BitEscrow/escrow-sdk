@@ -1,3 +1,8 @@
+import { FundingData } from './deposit.js'
+import { WitnessData } from './witness.js'
+
+import { ScriptEngineAPI, MachineData } from './machine.js'
+
 import {
   PaymentEntry,
   ProposalData
@@ -34,7 +39,7 @@ export type ContractData =
   TxSpendState         &
   TxSettleState
 
-export type ContractSignatures = 'agent_sig'   | 'canceled_sig' | 'secured_sig' | 'active_sig' |
+export type ContractSignatures = 'created_sig'   | 'canceled_sig' | 'secured_sig' | 'active_sig' |
                                  'closed_sig'  | 'spent_sig'    | 'settled_sig'
 
 export type ContractPreImage = Omit<ContractData, ContractSignatures>
@@ -113,9 +118,9 @@ export interface ContractCreateConfig {
 
 export interface ContractBase {
   agent_pk     : string
-  agent_sig    : string
   cid          : string
   created_at   : number
+  created_sig  : string
   deadline_at  : number
   endorsements : string[]
   fees         : PaymentEntry[]
@@ -135,4 +140,12 @@ export interface ContractBase {
   vin_count    : number
   vin_txfee    : number
   updated_at   : number
+}
+
+export interface ContractSession {
+  contract    : ContractData
+  engine     ?: ScriptEngineAPI
+  funds      ?: FundingData[]
+  statements ?: WitnessData[]
+  vmdata     ?: MachineData
 }

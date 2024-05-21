@@ -19,7 +19,7 @@ const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const statement = res.data.witness
+const { statement } = res.data
 
 print_banner('witness statement')
 console.dir(statement, { depth : null })

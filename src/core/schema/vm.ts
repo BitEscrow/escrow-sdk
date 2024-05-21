@@ -84,7 +84,7 @@ const api = z.object({
   actions : str.array(),
   methods : str.array(),
   states  : str.array(),
-  tag     : str,
+  label   : str,
   eval    : vm_eval,
   init    : vm_init,
   run     : vm_run,

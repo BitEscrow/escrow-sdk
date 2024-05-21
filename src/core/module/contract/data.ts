@@ -10,7 +10,7 @@ import {
   ContractStatus,
   DepositData,
   SignerAPI,
-  VMData
+  MachineData
 } from '../../types/index.js'
 
 import {
@@ -63,7 +63,6 @@ export function create_contract (
     moderator   : request.proposal.moderator ?? null,
     outputs,
     prop_id,
-    sigs        : [],
     subtotal,
     terms       : sort_record(proposal),
     tx_bsize,
@@ -74,7 +73,7 @@ export function create_contract (
     vin_txfee   : feerate * SPEND_TXIN_SIZE
   }
   const proof = notarize_contract(template, signer, 'published')
-  return sort_record({ ...template, agent_sig: proof })
+  return sort_record({ ...template, created_sig: proof })
 }
 
 export function cancel_contract (
@@ -188,7 +187,7 @@ export function activate_contract (
 
 export function close_contract (
   contract : ContractData,
-  vmdata   : VMData,
+  vmdata   : MachineData,
   signer   : SignerAPI
 ) : ContractData {
   assert.ok(contract.activated, 'contract is not active')

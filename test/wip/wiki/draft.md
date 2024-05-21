@@ -33,7 +33,7 @@ interface ProposalData {
   duration   : number           // The max length of an active contract.
   effective ?: number           // Set a specific date for activation.
   feerate   ?: number           // Define a fee-rate to use for transactions.
-  network    : Network          // Network (chain) of the contract.
+  network    : ChainNetwork          // ChainNetwork (chain) of the contract.
   paths      : PathEntry[]      // Conditional payments in the contract.
   payments   : PaymentEntry[]   // Unconditional payments in the contract.
   programs   : ProgramTerms[]   // Programs available to run in the CVM.
@@ -76,7 +76,7 @@ Sets the feerate for the transactions that are pre-signed by depositors. If no f
 
 Stores the anonymous credentials for each member of the contract.
 
-**Network**  
+**ChainNetwork**  
 
 Specifies the network (blockchain) to use for the contract.
 

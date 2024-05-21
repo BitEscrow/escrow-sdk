@@ -14,12 +14,12 @@ import { signers }      from '@scrow/demo/02_create_signer.js'
 const signer = signers[0]
 // Generate a request token.
 const req = signer.contract.list()
-// Deliver the request and token.
-const res = await client.contract.list(signer.pubkey, req)
+// Submit the request and token.
+const res = await client.contract.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.
-const contracts = res.data.contracts
+const { contracts } = res.data
 
 print_banner('contract list')
 console.dir(contracts, { depth : null })

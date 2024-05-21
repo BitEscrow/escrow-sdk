@@ -1,9 +1,9 @@
-import { WitnessReceipt } from '@/core/types/witness.js'
+import { WitnessCommit } from '@/core/types/witness.js'
 
 export interface WitnessDataResponse {
-  witness : WitnessReceipt
+  statement : WitnessCommit
 }
 
 export interface WitnessListResponse {
-  statements : WitnessReceipt[]
+  statements : WitnessCommit[]
 }

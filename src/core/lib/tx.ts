@@ -35,7 +35,7 @@ import { assert } from '../util/index.js'
 
 import {
   TxConfirmState,
-  Network,
+  ChainNetwork,
   TxSettleState,
   SignerAPI,
   TxSpendState,
@@ -88,7 +88,7 @@ export function create_timelock (
 
 export function get_address (
   tapkey   : Bytes,
-  network ?: Network
+  network ?: ChainNetwork
 ) {
   if (network === 'mutiny') {
     network = 'signet'

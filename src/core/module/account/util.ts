@@ -15,7 +15,7 @@ import {
 import {
   AccountContext,
   AccountRequest,
-  Network,
+  ChainNetwork,
   SignerAPI,
   AccountTemplate,
   RegisterTemplate,
@@ -42,7 +42,7 @@ import {
 export function create_account_ctx (
   deposit_pk  : string,
   locktime    : number,
-  network     : Network,
+  network     : ChainNetwork,
   return_addr : string,
   token       : string
 ) : AccountContext {

@@ -1,10 +1,11 @@
 /**
- * Deposit API Demo for endpoint:
- * /api/deposit/:dpid/register
+ * Account API Demo for endpoint:
+ * /api/account/register
  * 
  * You can run this demo using the shell command:
- * yarn load demo/api/deposit/register
+ * yarn load demo/api/account/register
  */
+
 
 import { print_banner } from '@scrow/test'
 import { sleep }        from '@scrow/sdk/util'
@@ -20,16 +21,22 @@ import {
   fund_regtest_address
 } from '@scrow/demo/util.js'
 
+/** ========== [ Define Variables ] ========== **/
+
 // Unpack account address.
 const { deposit_addr } = new_account
 // Compute a txfee from the feerate.
-const vin_fee   = 1000
+const vin_fee     = 1000
 // Compute a total amount (in sats) with the txfee.
-const amt_total = proposal.value + vin_fee
+const amt_total   = proposal.value + vin_fee
 // Also compute a total amount in bitcoin.
-const btc_total = amt_total / 100_000_000
+const btc_total   = amt_total / 100_000_000
+// Define a feerate for the return transaction.
+const return_rate = config.feerate
+// Define a funder from list of signers.
+const signer      = signers[0]
 
-/** ========== [ Print Deposit Info ] ========== **/
+/** ========== [ Fund Deposit Address ] ========== **/
 
 switch (config.network) {
   case 'mutiny':
@@ -52,24 +59,23 @@ await sleep(2000)
 // Define our polling interval and retries.
 const [ ival, retries ] = config.poll
 // Poll for utxos from the account address.
-const utxo = await client.oracle.poll_address(deposit_addr, ival, retries, true)
+const data = await client.oracle.poll_address(deposit_addr, ival, retries, true)
+const utxo = data.txout
 
 print_banner('address utxo')
 console.log('utxo:', utxo)
 
-// Define a funder from list of signers.
-const funder = signers[0]
-// Define a feerate for the return transaction.
-const feerate = config.feerate
 // Create a registration request.
-const req = funder.account.register(new_account, feerate, utxo.txout)
+const req = signer.account.register(new_account, return_rate, utxo)
 // Deliver our registration request to the server.
 const res = await client.account.register(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data object.
-export const open_deposit = res.data.deposit
+const { deposit } = res.data
 
 print_banner('open deposit')
-console.dir(open_deposit, { depth: null })
+console.dir(deposit, { depth: null })
 console.log('\n')
+
+export const open_deposit = deposit

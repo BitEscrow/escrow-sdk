@@ -120,7 +120,7 @@ export function verify_account_data (
   account : AccountData,
   signer  : SignerAPI
 ) {
-  const { account_id, created_at, agent_sig, deposit_addr, agent_pk, agent_tkn } = account
+  const { account_id, created_at, created_sig, deposit_addr, agent_pk, agent_tkn } = account
   // Create a context object for the account.
   const ctx = get_account_ctx(account)
   //
@@ -135,7 +135,7 @@ export function verify_account_data (
   assert.ok(signer.pubkey === pk,      'deposit pubkey does not match signing device')
   assert.ok(ctx.deposit_addr === addr, 'deposit address does not match signing device')
   assert.ok(id === account_id,         'account id does not match computed id')
-  assert.ok(verify_sig(agent_sig, id, agent_pk), 'server signature is invalid')
+  assert.ok(verify_sig(created_sig, id, agent_pk), 'server signature is invalid')
 }
 
 export function verify_session_token (

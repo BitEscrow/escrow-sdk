@@ -22,8 +22,10 @@ const res = await client.contract.cancel(cid, req)
 // If the request fails, throw an error.
 if (!res.ok) throw new Error(res.error)
 // Unwrap our response payload.
-export const canceled_contract = res.data.contract
+const { contract } = res.data
 
 print_banner('canceled contract')
-console.dir(canceled_contract)
+console.dir(contract)
 console.log('\n')
+
+export const canceled_contract = contract

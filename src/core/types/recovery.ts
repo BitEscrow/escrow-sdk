@@ -1,11 +1,11 @@
 import { ScriptWord } from '@scrow/tapscript'
-import { Network }    from './base.js'
+import { ChainNetwork }    from './base.js'
 
 export interface RecoveryConfig {
   agent_pk    : string
   deposit_pk  : string
   locktime    : number
-  network     : Network
+  network     : ChainNetwork
   return_addr : string
 }
 

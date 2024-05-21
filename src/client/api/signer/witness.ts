@@ -10,9 +10,8 @@ import {
 import {
   ContractData,
   MachineConfig,
-  VMData,
+  MachineData,
   WitnessData,
-  WitnessReceipt,
   WitnessTemplate
 } from '@/core/types/index.js'
 
@@ -28,7 +27,7 @@ export function can_sign_api (esigner : EscrowSigner) {
 
 export function create_witness_api (esigner : EscrowSigner) {
   return (
-    vmdata   : MachineConfig | VMData,
+    vmdata   : MachineConfig | MachineData,
     template : WitnessTemplate
   ) => {
     // esigner.check_issuer(vmdata.server_pk)
@@ -40,7 +39,7 @@ export function create_witness_api (esigner : EscrowSigner) {
 
 export function endorse_witness_api (esigner : EscrowSigner) {
   return (
-    vmdata  : VMData,
+    vmdata  : MachineData,
     witness : WitnessData
   ) => {
     verify_witness_data(vmdata, witness)
@@ -58,21 +57,10 @@ export function list_machines_api (esigner : EscrowSigner) {
   }
 }
 
-export function verify_receipt_api (_esigner : EscrowSigner) {
-  return (
-    _witness : WitnessData,
-    _receipt : WitnessReceipt
-  ) => {
-    console.log('not implemented yet')
-    return null
-  }
-}
-
 export default function (esigner : EscrowSigner) {
   return {
     can_sign : can_sign_api(esigner),
     create   : create_witness_api(esigner),
-    endorse  : endorse_witness_api(esigner),
-    verify   : verify_receipt_api(esigner)
+    endorse  : endorse_witness_api(esigner)
   }
 }

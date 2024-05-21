@@ -3,18 +3,18 @@ import { Bytes }         from '@cmdcode/buff'
 import { AddressConfig } from '@cmdcode/signer'
 
 import {
-  Network,
+  ChainNetwork,
   SignerAPI
 } from '@/core/types/index.js'
 
 export interface SignerConfig {
-  network    : Network
+  network    : ChainNetwork
   server_pk  : string
   server_url : string
 }
 
 export interface SignerOptions extends Partial<Omit<SignerConfig, 'network'>> {
-  network ?: string | Network
+  network ?: string | ChainNetwork
   xpub    ?: string
 }
 

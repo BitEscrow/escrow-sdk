@@ -1,10 +1,11 @@
 import { resolve_json } from '@/client/lib/fetch.js'
-import { Network }      from '@/core/types/index.js'
+import { ChainNetwork } from '@/core/types/index.js'
 import { ChainOracle }  from './oracle.js'
+import { assert }       from '@/core/util/index.js'
 
 import {
   DEFAULT_CONFIG,
-  get_client_config
+  get_server_config
 } from '@/client/config/index.js'
 
 import {
@@ -33,7 +34,7 @@ export class EscrowClient {
 
   constructor (opt : ClientOptions = {}) {
     const options = { ...DEFAULT_CONFIG, ...opt }
-    const client  = get_client_config(opt.network as Network)
+    const client  = get_server_config(opt.network as ChainNetwork)
     const config  = { ...client, ...options }
     this._config  = ClientSchema.config.client.parse(config)
     this._fetcher = get_fetcher(opt.fetcher ?? fetch)
@@ -44,7 +45,7 @@ export class EscrowClient {
     return this._fetcher
   }
 
-  get network ()  : Network {
+  get network ()  : ChainNetwork {
     return this._config.network
   }
 
@@ -67,6 +68,10 @@ export class EscrowClient {
   server   = server_api(this)
   vm       = vmachine_api(this)
   witness  = witness_api(this)
+
+  verify_pk (pubkey : string) {
+    assert.ok(pubkey === this.server_pk, 'pubkey not recognized')
+  }
 
   toJSON () {
     return this._config
