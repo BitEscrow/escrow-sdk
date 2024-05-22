@@ -17,14 +17,13 @@ const [ a_signer, b_signer ] = signers
 
 /**
  * Configure and initialize a machine instance. We'll use this
- * to validate our own statement, and to verify it was executed
- * fairly by the escrow server.
+ * to verify our statements were executed fairly by the server.
  */
 const config = get_machine_config(active_contract)
+// Define our script interpreter.
+const engine = CVM
 // Create the initial state of the machine.
-const vmdata = CVM.init(config)
-// The machine id is derived from the contract.
-const vmid   = vmdata.vmid
+let vmstate  = engine.init(config)
 
 /**
  * Configure a template for our statement. This template is used to check
@@ -42,9 +41,9 @@ const template = {
  */
 let witness : WitnessData
 // Alice signs the initial statement.
-witness = a_signer.witness.create(vmdata, template)
+witness = a_signer.witness.create(vmstate, template)
 // Bob endoreses the statement from Alice.
-witness = b_signer.witness.endorse(vmdata, witness)
+witness = b_signer.witness.endorse(vmstate, witness)
 
 if (DEMO_MODE) {
   print_banner('witness statement')
@@ -54,7 +53,7 @@ if (DEMO_MODE) {
 /**
  * Submit the signed witness statement to the escrow server.
  */
-const res = await client.machine.submit(vmid, witness)
+const res = await client.machine.submit(witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 
@@ -62,17 +61,18 @@ if (!res.ok) throw new Error(res.error)
  * The server will respond with a signed receipt. This receipt 
  * commits to our statement being evaluated by the machine.
  */
-const vm_commit = res.data.commit
+const { commit, vmdata } = res.data
 
 /**
- * We can use the receipt to verify that our witness statement was processed 
- * correctly by the escrow server.
+ * We can use our local copy of the vmstate to verify that our
+ * witness statement was handled correctly by the escrow server.
  */
-client.witness.verify(vm_commit, vmdata, witness)
+vmstate = engine.eval(vmstate, witness)
+client.witness.verify(commit, vmstate, witness)
 
 if (DEMO_MODE) {
   print_banner('witness receipt')
-  console.dir(vm_commit, { depth : null })
+  console.dir(commit, { depth : null })
 }
 
-export { vmdata, witness }
+export { commit, vmdata, witness }

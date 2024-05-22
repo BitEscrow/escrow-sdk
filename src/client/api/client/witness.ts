@@ -60,13 +60,13 @@ function read_witness_api (client : EscrowClient) {
 function verify_commit_api (client : EscrowClient) {
   return (
     commit  : WitnessCommit,
-    vmdata  : MachineData,
+    vmstate : MachineData,
     witness : WitnessData
   ) => {
     // Verify the server pubkey.
     client.verify_pk(commit.agent_pk)
     // Verify the witness statement.
-    verify_witness_commit(commit, vmdata, witness)
+    verify_witness_commit(commit, vmstate, witness)
   }
 }
 

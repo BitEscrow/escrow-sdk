@@ -74,8 +74,7 @@ body     : JSON.stringify(submit_request)
 **Request Body**
 
 ```ts
-export interface VMSubmitRequest {
-  vmid    : string
+interface VMSubmitRequest {
   witness : WitnessData
 }
 ```

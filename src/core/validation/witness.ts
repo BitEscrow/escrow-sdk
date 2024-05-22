@@ -99,18 +99,18 @@ export function verify_witness_sigs (
 
 export function verify_witness_commit (
   commit  : WitnessCommit,
-  vmdata  : MachineData,
+  vmstate : MachineData,
   witness : WitnessData
 ) {
   const { commit_id, commit_sig, agent_pk } = commit
 
   // Don't forget to check that vm matches commit.
-  assert.ok(witness.vmid  === vmdata.vmid,       'provided vmdata and witness vmid does not match')
-  assert.ok(witness.stamp === vmdata.commit_at,  'provided vmdata and witness stamp does not match')
+  assert.ok(witness.vmid  === vmstate.vmid,       'provided vmstate and witness vmid does not match')
+  assert.ok(witness.stamp === vmstate.commit_at,  'provided vmstate and witness stamp does not match')
   assert.ok(witness.vmid  === commit.vmid,       'commit vmid does not match witness')
-  assert.ok(vmdata.head   === commit.vm_head,    'commit vm_head does not match vmdata head')
-  assert.ok(vmdata.output === commit.vm_output,  'commit vm_output does not match vmdata output')
-  assert.ok(vmdata.step   === commit.vm_step,    'commit vm_step does not match vmdata step count')
+  assert.ok(vmstate.head   === commit.vm_head,    'commit vm_head does not match vmstate head')
+  assert.ok(vmstate.output === commit.vm_output,  'commit vm_output does not match vmstate output')
+  assert.ok(vmstate.step   === commit.vm_step,    'commit vm_step does not match vmstate step count')
 
   const int_wid  = get_witness_id(commit)
   const int_rid  = get_commit_id(commit)

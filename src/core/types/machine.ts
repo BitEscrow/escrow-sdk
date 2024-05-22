@@ -38,7 +38,6 @@ export interface MachineConfig {
 }
 
 export interface VMSubmitRequest {
-  vmid    : string
   witness : WitnessData
 }
 

@@ -42,7 +42,7 @@ print_banner('witness statement')
 console.dir(witness, { depth : null })
 
 // Submit the signed statement to the server.
-const res = await client.machine.submit(vmid, witness)
+const res = await client.machine.submit(witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data from the response.

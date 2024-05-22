@@ -61,7 +61,7 @@ export function confirm_deposit (
   assert.ok(!deposit.confirmed, 'deposit is already confirmed')
   assert.ok(txstate.confirmed,  'transaction is not confirmed')
   const status = (!deposit.locked)
-    ? 'confirmed' as DepositStatus
+    ? 'open' as DepositStatus
     : 'locked'    as DepositStatus
   const updated = { ...deposit, ...txstate, status, updated_at: txstate.block_time }
   return sort_record(updated)
@@ -111,7 +111,7 @@ export function release_deposit (
   assert.ok(!deposit.closed, 'deposit is already closed')
   assert.ok(!deposit.spent,  'deposit is already spent')
   const status = (deposit.confirmed)
-    ? 'confirmed'  as DepositStatus
+    ? 'open'  as DepositStatus
     : 'registered' as DepositStatus
   const changes = INIT_LOCK_STATE()
   return sort_record({ ...deposit, ...changes, status, updated_at })

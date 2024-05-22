@@ -3,7 +3,7 @@ import { Buff } from '@cmdcode/buff'
 import {
   WitnessCommitPreImage,
   WitnessDataPreImage
-} from '../../types/index.js'
+} from '@/core/types/index.js'
 
 /**
  * Returns a serialized preimage

@@ -48,7 +48,7 @@ export const GET_CONFIRMED_STATE = () => {
   return {
     ...INIT_SPEND_STATE(),
     ...INIT_LOCK_STATE(),
-    status : 'confirmed' as DepositStatus
+    status : 'open' as DepositStatus
   }
 }
 

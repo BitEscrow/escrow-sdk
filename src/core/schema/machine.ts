@@ -41,7 +41,6 @@ const vm_closed = z.object({
 const close_state = z.discriminatedUnion('closed', [ vm_open, vm_closed ])
 
 const submit_req = z.object({
-  vmid    : hash,
   witness : wit.data
 })
 

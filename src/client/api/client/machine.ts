@@ -33,30 +33,6 @@ function list_machines_api (client : EscrowClient) {
 }
 
 /**
- * Submit a signed statement to the contract.
- */
-function submit_witness_api (client : EscrowClient) {
-  return async (
-    vmid    : string,
-    witness : WitnessData
-  ) : Promise<ApiResponse<VMSubmitResponse>> => {
-    // Validate the request.
-    validate_submit_req({ vmid, witness })
-    // Formulate the request url.
-    const host = client.server_url
-    const url  = `${host}/api/machine/submit`
-    // Formulate the request body.
-    const init = {
-      method  : 'POST',
-      body    : JSON.stringify({ vmid, witness }),
-      headers : { 'content-type': 'application/json' }
-    }
-    // Return the response.
-    return client.fetcher<VMSubmitResponse>({ url, init })
-  }
-}
-
-/**
  * Return a list of committed deposits
  * that are associated with the contract.
  */
@@ -81,6 +57,29 @@ function list_commits_api (client : EscrowClient) {
     const url  = `${host}/api/machine/${vmid}/commits`
     // Return the response.
     return client.fetcher<WitnessListResponse>({ url })
+  }
+}
+
+/**
+ * Submit a signed statement to the contract.
+ */
+function submit_witness_api (client : EscrowClient) {
+  return async (
+    witness : WitnessData
+  ) : Promise<ApiResponse<VMSubmitResponse>> => {
+    // Validate the request.
+    validate_submit_req({ witness })
+    // Formulate the request url.
+    const host = client.server_url
+    const url  = `${host}/api/machine/${witness.vmid}/submit`
+    // Formulate the request body.
+    const init = {
+      method  : 'POST',
+      body    : JSON.stringify({ witness }),
+      headers : { 'content-type': 'application/json' }
+    }
+    // Return the response.
+    return client.fetcher<VMSubmitResponse>({ url, init })
   }
 }
 

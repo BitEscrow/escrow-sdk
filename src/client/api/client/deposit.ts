@@ -1,4 +1,5 @@
-import { assert } from '@/core/util/index.js'
+import { assert }       from '@/core/util/index.js'
+import { EscrowClient } from '@/client/class/client.js'
 
 import {
   validate_close_req,
@@ -16,10 +17,6 @@ import {
   DepositListResponse,
   FundingDataResponse
 } from '@/client/types/index.js'
-
-/* Module Imports */
-
-import { EscrowClient } from '../../class/client.js'
 
 /**
  * Fetch a deposit from the server by Id.
