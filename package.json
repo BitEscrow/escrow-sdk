@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.14.4-dev",
+  "version": "0.14.6-dev",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -98,7 +98,7 @@
     "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.5.2",
+    "@cmdcode/core-cmd": "1.5.3",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
