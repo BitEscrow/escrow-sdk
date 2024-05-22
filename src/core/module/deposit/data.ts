@@ -13,7 +13,7 @@ import {
   RegisterRequest,
   SignerAPI,
   CovenantData,
-  OracleTxStatus
+  TxStatus
 } from '../../types/index.js'
 
 import {
@@ -62,7 +62,7 @@ export function create_deposit (
 
 export function confirm_deposit (
   deposit  : DepositData,
-  txstatus : OracleTxStatus
+  txstatus : TxStatus
 ) : DepositData {
   assert.ok(!deposit.confirmed, 'deposit is already confirmed')
   assert.ok(txstatus.confirmed,  'transaction is not confirmed')
@@ -150,7 +150,7 @@ export function spend_deposit (
 export function settle_deposit (
   deposit  : DepositData,
   signer   : SignerAPI,
-  txstatus : OracleTxStatus
+  txstatus : TxStatus
 ) {
   assert.ok(deposit.confirmed,               'deposit is not confirmed')
   assert.ok(deposit.spent || deposit.closed, 'deposit is not settled')

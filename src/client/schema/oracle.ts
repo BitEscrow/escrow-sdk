@@ -17,18 +17,18 @@ const tx_unconfirmed = z.object({
 
 const tx_status = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])
 
-const spent = z.object({
+const txo_spent = z.object({
   status : tx_status,
   spent  : z.literal(true),
   txid   : hash,
   vin    : num
 })
 
-const unspent = z.object({
+const txo_unspent = z.object({
   spent : z.literal(false)
 })
 
-const outspend = z.discriminatedUnion('spent', [ spent, unspent ])
+const outspend = z.discriminatedUnion('spent', [ txo_spent, txo_unspent ])
 
 const utxo_data = z.object({
   spend  : outspend,

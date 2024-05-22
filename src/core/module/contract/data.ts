@@ -13,7 +13,7 @@ import {
   DepositData,
   SignerAPI,
   MachineData,
-  OracleTxStatus
+  TxStatus
 } from '@/core/types/index.js'
 
 import {
@@ -226,7 +226,7 @@ export function spend_contract (
 export function settle_contract (
   contract : ContractData,
   signer   : SignerAPI,
-  txstatus : OracleTxStatus
+  txstatus : TxStatus
 ) : ContractData {
   const parsed       = TxSchema.oracle_conf.parse(txstatus)
   const settled      = true as const

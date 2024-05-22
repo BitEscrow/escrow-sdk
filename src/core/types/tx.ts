@@ -4,7 +4,7 @@ export type TxSpendState   = TxIsSpent     | TxIsUnspent
 export type TxSettleState  = TxIsSettled   | TxNotSettled
 export type TxConfirmState = TxIsConfirmed | TxIsUnconfirmed
 
-export interface OracleTxStatus {
+export interface TxStatus {
   confirmed     : boolean
   block_hash   ?: string
   block_height ?: number

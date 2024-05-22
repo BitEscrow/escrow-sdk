@@ -1,11 +1,11 @@
 import { parse_addr }     from '@scrow/tapscript/address'
 import { sleep }          from '@/core/util/index.js'
 import { get_fetcher }    from '@/client/lib/fetch.js'
-import { OracleTxStatus } from '@/index.js'
 
 import {
   OracleFeeEstimate,
   OracleTxData,
+  OracleTxStatus,
   OracleUtxo,
   OracleOutSpend,
   OracleUtxoData
@@ -51,7 +51,7 @@ export class ChainOracle {
     // If the response failed, throw.
     if (!res.ok) throw new Error(res.error)
     // Parse the returned data.
-    return ClientSchema.oracle.tx_status.parseAsync(res.data)
+    return ClientSchema.oracle.tx_status.parseAsync(res.data.status)
   }
 
   /**
