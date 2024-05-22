@@ -4,10 +4,10 @@ Reference guide for the virtual machine API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/machine/list](#list-machines-by-pubkey)          | List machines by pubkey.    |
-| [/api/machine/submit](#submit-a-witness-statement)     | Submit a new statement.     |
-| [/api/machine/:vmid](#read-a-machine-by-id)            | Fetch a machine by ID.      |
-| [/api/machine/:vmid/commits](#list-machine-statements) | List statements by machine. |
+| [/api/machine/list](#list-machines-by-pubkey)         | List machines by pubkey.  |
+| [/api/machine/submit](#submit-a-witness-statement)    | Submit a new statement.   |
+| [/api/machine/:vmid](#read-a-machine-by-id)           | Fetch a machine by ID.    |
+| [/api/machine/:vmid/receipts](#list-machine-receipts) | List receipts by machine. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -159,7 +159,7 @@ const { vmdata } = res.data
 
 **Example Response**
 
-- [MachineData](../examples/vmdata.md)
+- [MachineData](../examples/MachineData.md)
 
 **Related Interfaces**
 
@@ -167,15 +167,15 @@ const { vmdata } = res.data
 
 ---
 
-## List Machine Statements
+## List Machine Receipts
 
-Request all witness statements for a virtual machine.
+Request all witness receipts for a virtual machine.
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/machine/:vmid/commits'
+endpoint : '/api/machine/:vmid/receipts'
 ```
 
 **Response Interface**

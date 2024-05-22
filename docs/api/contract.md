@@ -67,7 +67,7 @@ const { contract } = res.data
 
 **Example Response**
 
-- [ContractData](../examples/contractdata.md)
+- [ContractData](../examples/ContractData.md)
 
 **Related Interfaces**
 
@@ -156,7 +156,7 @@ const { contract } = res.data
 
 **Example Response**
 
-- [ContractData](../examples/contractdata.md)
+- [ContractData](../examples/ContractData.md)
 
 **Related Interfaces**
 
@@ -203,7 +203,7 @@ const { contract } = res.data
 
 **Example Response**
 
-- [ContractData](../examples/contractdata.md)
+- [ContractData](../examples/ContractData.md)
 
 **Related Interfaces:**
 

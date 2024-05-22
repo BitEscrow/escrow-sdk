@@ -82,8 +82,7 @@ export function verify_witness_receipt (
   // Don't forget to check that vm matches commit.
   assert.ok(vminput.wid       === receipt.wid,       'receipt wid does not match witness input')
   assert.ok(vmstate.vmid      === receipt.vmid,      'provided vmstate and witness vmid does not match')
-  assert.ok(vmstate.commit_at === receipt.commit_at, 'provided vmstate and witness stamp does not match')
-  assert.ok(vmstate.vmid      === receipt.vmid,      'input vmid does not match witness')
+  assert.ok(vmstate.commit_at === receipt.stamp,     'provided vmstate and witness stamp does not match')
   assert.ok(vmstate.head      === receipt.vm_head,   'input vm_head does not match vmstate head')
   assert.ok(vmstate.output    === receipt.vm_output, 'input vm_output does not match vmstate output')
   assert.ok(vmstate.step      === receipt.vm_step,   'input vm_step does not match vmstate step count')

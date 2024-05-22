@@ -1,6 +1,6 @@
 # WitnessReceipt
 
-```ts
+```json
 {
   "action": "close",
   "agent_pk": "33f9d5a021afdffb864153eefa5d353d53e2d22053dadf8577c0e2b524bac794",

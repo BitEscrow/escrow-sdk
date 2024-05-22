@@ -1,3 +1,7 @@
+---
+sidebar_position: 0
+---
+
 # Introduction
 
 BitEscrow is a secure, private protocol for locking Bitcoin into a smart contract, with non-custodial escrow of funds.
@@ -28,7 +32,7 @@ The three rounds of communication are _negotiation_, _funding_, and _execution_.
 
 ### Negotiation
 
-The first step is to negotiate and agree on a [proposal](data/draft.md#proposaldata) document. This is a human-readable document which contains all of the initial terms of the contract.
+The first step is to negotiate and agree on a [proposal](../data/proposal.md) document. This is a human-readable document which contains all of the initial terms of the contract.
 
 It is written in JSON format, and designed for collaboration (much like a PSBT):
 
@@ -64,7 +68,7 @@ The `engine` field defines the interpreter that will be used to evaluate the sma
 
 You can share this document peer-to-peer, or use a third-party for collaboration. Third-party platforms may assist with negotiation and offer their own services (such as arbitration).
 
-Once the terms have been decided, any party can deliver the final proposal to the escrow server. The server will validate the proposal, then publish an open [contract](wiki/contract.md) for funding.
+Once the terms have been decided, any party can deliver the final proposal to the escrow server. The server will validate the proposal, then publish an open [contract](data/contract.md) for funding.
 
 > Note: The escrow server does not take part in negotiations. While BitEscrow may offer these services, the protocol is designed so that members can negotiate freely, without the escrow server being involved.
 

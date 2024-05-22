@@ -48,13 +48,13 @@ function read_vm_state_api (client : EscrowClient) {
   }
 }
 
-function list_commits_api (client : EscrowClient) {
+function list_receipts_api (client : EscrowClient) {
   return async (vmid : string) : Promise<ApiResponse<WitnessListResponse>> => {
      // Validate the contract id.
     assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/machine/${vmid}/commits`
+    const url  = `${host}/api/machine/${vmid}/receipts`
     // Return the response.
     return client.fetcher.json<WitnessListResponse>(url)
   }
@@ -85,9 +85,9 @@ function submit_witness_api (client : EscrowClient) {
 
 export default function (client : EscrowClient) {
   return {
-    commits : list_commits_api(client),
-    list    : list_machines_api(client),
-    read    : read_vm_state_api(client),
-    submit  : submit_witness_api(client)
+    list     : list_machines_api(client),
+    read     : read_vm_state_api(client),
+    receipts : list_receipts_api(client),
+    submit   : submit_witness_api(client)
   }
 }

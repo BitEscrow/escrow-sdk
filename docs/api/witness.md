@@ -93,7 +93,7 @@ const { receipt } = res.data
 
 **Example Response**
 
-- [WitnessCommit](../examples/witnesscommit.md)
+- [WitnessCommit](../examples/WitnessReceipt.md)
 
 **Related Interfaces:**
 

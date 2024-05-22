@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Development
 
 To get started, make sure you are running `v19+` of node, then install the project dependencies using your node manager of choice:
@@ -20,7 +24,7 @@ This project uses the following scripts:
 
 ### Running the Demo
 
-The main demo is located in the [/demo](demo) directory, and serves as a great resource for how to use the client library.
+The main demo is located in the [/demo](https://github.com/BitEscrow/escrow-core/tree/master/demo) directory, and serves as a great resource for how to use the client library.
 
 You can choose to run the protocol demo on the `mutiny`, `signet`, or `testnet` blockchain:
 
@@ -29,11 +33,11 @@ You can choose to run the protocol demo on the `mutiny`, `signet`, or `testnet` 
 npm run demo mutiny
 ```
 
-No wallet or software required[*]. Simply follow the interactive prompts, and enjoy the protocol in action.
+No wallet or software required. Simply follow the interactive prompts, and enjoy the protocol in action.
 
 > The mutiny chain is the fastest of the three demos, with 30 second blocks.
 
-> [*] Testnet faucet is currently broke. You may need your own testnet coins.
+> Testnet faucet is currently broke. You may need your own testnet coins.
 
 ### Running in Replit
 
@@ -47,7 +51,7 @@ Feel free to fork the replit and try out the developer tools!
 
 ### Using the Client API Demos
 
-There is a suite of client API examples located in the [/demo/api](demo/api) directory.
+There is a suite of client API examples located in the [/demo/api]() directory.
 
 Feel free to use `npm run load` to execute any of the example scripts:
 
@@ -58,26 +62,26 @@ npm run load demo/api/contract/read.ts
 You can also specify a chain to use at the end of the command:
 
 ```bash
-npm run load demo/api/deposit/list.ts mutiny
+npm run load:signet demo/api/deposit/list.ts
 ```
 
 If you run into any errors when using the demos, please consider filing an issue ticket!
 
 ### Using the CVM Evaluation Tool
 
-The CVM [eval](demo/vm/eval.ts) tool allows you to quickly evaluate a set of proposal terms and witness statements using a dummy virtual machine.
+The CVM [eval](https://github.com/BitEscrow/escrow-core/tree/master/demo/vm/eval.ts) tool allows you to quickly evaluate a set of proposal terms and witness statements using a dummy virtual machine.
 
-The tool uses an easy to read [JSON file](demo/vm/vector.json) to load the data. This file can be re-written to demonstrate any contract scenario you wish.
+The tool uses an easy to read [JSON file](https://github.com/BitEscrow/escrow-core/tree/master/demo/vm/vector.json) to load the data. This file can be re-written to demonstrate any contract scenario you wish.
 
 ```
 npm run demo:vm
 ```
 
-The tool and JSON file are located in the [/demo/vm](demo/vm) directory.
+The tool and JSON file are located in the [/demo/vm](https://github.com/BitEscrow/escrow-core/tree/master/demo/vm) directory.
 
 ### Using the Test Suite
 
-The test suite is located in [test/src](test/src), and controlled by the [test/tape.ts](test/tape.ts) file. Feel free to add/remove test packages from the main test method.
+The test suite is located in [test/src](https://github.com/BitEscrow/escrow-core/tree/master/test/src), and controlled by the [test/tape.ts](https://github.com/BitEscrow/escrow-core/tree/master/test/tape.ts) file. Feel free to add/remove test packages from the main test method.
 
 Some tests come with a verbose output, which you can enable with the `VERBOSE=true` flag.
 
