@@ -3,6 +3,8 @@ import { get_machine_id }           from '@/core/module/machine/util.js'
 import { SPEND_TXIN_SIZE }          from '@/core/const.js'
 import { GET_PUBLISH_STATE }        from './state.js'
 
+import TxSchema from '@/core/schema/tx.js'
+
 import {
   ContractCreateConfig,
   ContractData,
@@ -10,7 +12,8 @@ import {
   ContractStatus,
   DepositData,
   SignerAPI,
-  MachineData
+  MachineData,
+  OracleTxStatus
 } from '@/core/types/index.js'
 
 import {
@@ -221,14 +224,18 @@ export function spend_contract (
 }
 
 export function settle_contract (
-  contract    : ContractData,
-  signer      : SignerAPI,
-  settled_at = now()
+  contract : ContractData,
+  signer   : SignerAPI,
+  txstatus : OracleTxStatus
 ) : ContractData {
-  const settled = true as const
-  const status  = 'settled' as ContractStatus
-  const changes = { settled, settled_at }
-  const updated = { ...contract, ...changes, status, updated_at: settled_at }
-  const proof   = notarize_contract(updated, signer, status)
+  const parsed       = TxSchema.oracle_conf.parse(txstatus)
+  const settled      = true as const
+  const settled_at   = parsed.block_time
+  const spent_block  = parsed.block_hash
+  const spent_height = parsed.block_height
+  const changes      = { settled, settled_at, spent_block, spent_height }
+  const status       = 'settled' as ContractStatus
+  const updated      = { ...contract, ...changes, status, updated_at: settled_at }
+  const proof        = notarize_contract(updated, signer, status)
   return sort_record({ ...updated, settled_sig: proof })
 }

@@ -1,6 +1,6 @@
-import { parse_addr }    from '@scrow/tapscript/address'
-import { assert, sleep } from '@/core/util/index.js'
-import { get_fetcher }   from '@/client/lib/fetch.js'
+import { parse_addr }  from '@scrow/tapscript/address'
+import { sleep }       from '@/core/util/index.js'
+import { get_fetcher } from '@/client/lib/fetch.js'
 
 import {
   OracleFeeEstimate,
@@ -164,22 +164,17 @@ export class ChainOracle {
     address  : string,
     interval : number,
     retries  : number,
-    verbose  = false
+    callback : (address : string, tries : number) => Promise<void>
   ) : Promise<OracleUtxoData> {
     let tries = 0,
         utxos : OracleUtxoData[] = []
     for (let i = 0; i < retries; i++) {
       if (utxos.length > 0) {
-        const utxo = utxos.at(-1)
-        assert.exists(utxo)
-        return utxo
+        return utxos[0]
       } else {
         utxos = await this.get_address_utxos(address)
         tries += 1
-        if (verbose) {
-          const msg = `[${tries}/${retries}] checking address in ${interval} seconds...`
-          console.log(msg)
-        }
+        void callback(address, tries)
         await sleep(interval * 1000)
       }
     }

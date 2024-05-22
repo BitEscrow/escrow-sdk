@@ -3,27 +3,34 @@ import base  from './base.js'
 
 const { bool, hash, hex, num, stamp } = base
 
+const oracle_conf = z.object({
+  confirmed    : z.literal(true),
+  block_hash   : hash,
+  block_height : num,
+  block_time   : stamp
+})
+
 const confirm_info = z.object({
   confirmed    : bool,
-  block_hash   : hash.nullable(),
-  block_height : num.nullable(),
-  block_time   : stamp.nullable(),
+  confirmed_at : stamp.nullable(),
+  conf_block   : hash.nullable(),
+  conf_height  : num.nullable(),
   expires_at   : stamp.nullable()
 })
 
 const tx_confirmed = z.object({
   confirmed    : z.literal(true),
-  block_hash   : hash,
-  block_height : num,
-  block_time   : stamp,
+  confirmed_at : stamp,
+  conf_block   : hash,
+  conf_height  : num,
   expires_at   : stamp
 })
 
 const tx_unconfirmed = z.object({
   confirmed    : z.literal(false),
-  block_hash   : z.null(),
-  block_height : z.null(),
-  block_time   : z.null(),
+  confirmed_at : z.null(),
+  conf_block   : z.null(),
+  conf_height  : z.null(),
   expires_at   : z.null()
 })
 
@@ -52,21 +59,27 @@ const tx_unspent = z.object({
 })
 
 const settle_info = z.object({
-  settled     : z.boolean(),
-  settled_at  : stamp.nullable(),
-  settled_sig : hex.nullable()
+  settled      : z.boolean(),
+  settled_at   : stamp.nullable(),
+  settled_sig  : hex.nullable(),
+  spent_block  : hash.nullable(),
+  spent_height : num.nullable()
 })
 
 const tx_settled = z.object({
-  settled     : z.literal(true),
-  settled_at  : stamp,
-  settled_sig : hex
+  settled      : z.literal(true),
+  settled_at   : stamp,
+  settled_sig  : hex,
+  spent_block  : hash.nullable(),
+  spent_height : num.nullable()
 })
 
 const tx_unsettled = z.object({
-  settled     : z.literal(false),
-  settled_at  : z.null(),
-  settled_sig : z.null()
+  settled      : z.literal(false),
+  settled_at   : z.null(),
+  settled_sig  : z.null(),
+  spent_block  : hash.nullable(),
+  spent_height : num.nullable()
 })
 
 const confirm_state = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])
@@ -83,6 +96,7 @@ const txout = z.object({
 export default {
   confirm_info,
   confirm_state,
+  oracle_conf,
   settle_info,
   settle_state,
   spend_info,
