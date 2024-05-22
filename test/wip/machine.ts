@@ -8,7 +8,7 @@ import {
   ContractData,
   PathStatus,
   StateData,
-  WitnessData,
+  WitnessInput,
   WitnessTemplate
 } from '@/core/types/index.js'
 
@@ -116,7 +116,7 @@ export class ContractVM extends EventEmitter <{
     }
   }
 
-  async _submit (witness : WitnessData) {
+  async _submit (witness : WitnessInput) {
     const api = this.client.contract
     const res = await api.submit(this.cid, witness)
     if (!res.ok) throw new Error(res.error)
@@ -173,7 +173,7 @@ export class ContractVM extends EventEmitter <{
     return this.submit(witness)
   }
 
-  async submit (witness : WitnessData) {
+  async submit (witness : WitnessInput) {
     return this._submit(witness)
   }
 

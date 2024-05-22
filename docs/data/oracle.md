@@ -2,9 +2,11 @@
 
 List of data interfaces for the Oracle API.
 
-- [OracleTxData](#oracletxdata)
-- [OracleSpendData](#oraclespenddata)
-- [OracleTxOutput](#txoutput)
+- [OracleTxData](#oracle-tx-data)
+- [OracleTxStatus](#oracle-tx-status)
+- [OracleOutspend](#oracle-outspend)
+- [OracleUtxoData](#oracle-utxo-data)
+- [TxOutput](#tx-output)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -12,7 +14,9 @@ List of data interfaces for the Oracle API.
 
 ---
 
-## OracleTxData
+## Oracle Tx Data
+
+Data interface for a transaction data object.
 
 ```ts
 interface OracleTxData {
@@ -45,7 +49,15 @@ interface OracleTxOut {
   scriptpubkey_address ?: string
   value                 : number
 }
+```
 
+---
+
+## Oracle Tx Status
+
+Data interface for transaction confirmation status.
+
+```ts
 interface OracleTxStatus {
   confirmed    : boolean
   block_hash   : string | null
@@ -54,16 +66,14 @@ interface OracleTxStatus {
 }
 ```
 
-## OracleSpendData
+---
+
+## Oracle Outspend
+
+Data interface for transaction output spend state.
 
 ```ts
-interface OracleSpendData {
-  txspend : TxOutput
-  status  : OracleTxStatus
-  state   : OracleSpendState
-}
-
-interface OracleTxSpendState {
+interface UtxoSpent {
   spent  : boolean
   txid   : string | null
   vin    : number | null
@@ -71,7 +81,24 @@ interface OracleTxSpendState {
 }
 ```
 
-## TxOutput
+---
+
+## Oracle Utxo Data
+
+Data interface for an unspent transaction output.
+
+```ts
+interface OracleUtxoData {
+  status : OracleTxStatus
+  utxo   : TxOutput
+}
+```
+
+---
+
+## Tx Output
+
+Data interface for a transaction ouput.
 
 ```ts
 interface TxOutput {

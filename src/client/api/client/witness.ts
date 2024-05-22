@@ -10,8 +10,8 @@ import {
 
 import {
   MachineData,
-  WitnessData,
-  WitnessCommit
+  WitnessInput,
+  WitnessData
 } from '@/core/types/index.js'
 
 /**
@@ -59,9 +59,9 @@ function read_witness_api (client : EscrowClient) {
  */
 function verify_commit_api (client : EscrowClient) {
   return (
-    commit  : WitnessCommit,
+    commit  : WitnessData,
     vmstate : MachineData,
-    witness : WitnessData
+    witness : WitnessInput
   ) => {
     // Verify the server pubkey.
     client.verify_pk(commit.agent_pk)

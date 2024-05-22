@@ -7,7 +7,7 @@ import { init_tasks, run_schedule } from './schedule.js'
 import {
   MachineConfig,
   MachineData,
-  WitnessData
+  WitnessInput
 } from '@/core/types/index.js'
 
 /* Module Imports */
@@ -41,7 +41,7 @@ const GET_INIT_DATA = () => {
  */
 export function eval_witness (
   data    : MachineData,
-  witness : WitnessData | WitnessData[]
+  witness : WitnessInput | WitnessInput[]
 ) : MachineData {
   // Return early if there is already a result.
   if (data.output !== null) return data

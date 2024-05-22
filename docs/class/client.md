@@ -2,8 +2,8 @@
 
 Reference guide for the `EscrowClient` class API.
 
-- [Configuration](#configuration)
-- [Class Interface](#class-interface)
+- [Client Config](#client-configuration)
+- [Client Interface](#client-interface)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -11,91 +11,88 @@ Reference guide for the `EscrowClient` class API.
 
 ---
 
-## Configuration
+## Client Configuration
 
 Configuration infterface for the EscrowClient.
 
 ```ts
-interface ClientConfig {
+interface ClientOptions {
   hostname ?: string  // The URL to our escrow server.
   oracle   ?: string  // The URL to an electrum-based indexer of your choice.
   network  ?: string  // The network you are using.
 }
 ```
 
-## Class Interface
+## Client Interface
 
 Class interface for the EscrowClient.
 
 ```ts
-class EscrowClient {
-  // Readonly properties
-  readonly _fetcher  : Resolver
-  readonly _host     : string
-  readonly _oracle   : string
-  readonly _network  : ChainNetwork
+export declare class EscrowClient {
 
-  // Constructor
-  constructor(config: ClientConfig)
+    constructor(opt ?: ClientOptions)
 
-  // Getter methods
-  get fetcher() : <T>(config: FetchConfig) => Promise<ApiResponse<T>>
-  get host()    : string
-  get network() : ChainNetwork
+    get network()    : ChainNetwork
+    get oracle()     : ChainOracle
+    get server_pk()  : string
+    get server_url() : string
 
-  // Contract operations
-  contract: {
-    create: (
-      proposal    : ProposalData
-      signatures ?: string[] | undefined
-    ) => Promise<ApiResponse<ContractDataResponse>>
-    funds: (
-      cid : string
-    ) => Promise<ApiResponse<DepositListResponse>>
-    list: (
-      pubkey : string,
-      token  : string
-    ) => Promise<ApiResponse<ContractListResponse>>
-    read: (
-      cid : string
-    ) => Promise<ApiResponse<ContractDataResponse>>
-    submit: (
-      cid     : string,
-      witness : WitnessData
-    ) => Promise<ApiResponse<ContractDataResponse>>
-    witness: (
-      cid : string
-    ) => Promise<ApiResponse<WitnessListResponse>>
-  }
+    account: {
+      commit   : (request : CommitRequest)   => Promise<ApiResponse<FundingDataResponse>>
+      register : (request : RegisterRequest) => Promise<ApiResponse<DepositDataResponse>>
+      request  : (
+        request : AccountRequest, 
+        policy ?: AccountPolicy
+      ) => Promise<ApiResponse<AccountDataResponse>>
+    }
 
-  // Deposit operations
-  deposit: {
-    read      : (dpid: string) => Promise<ApiResponse<DepositDataResponse>>
-    list      : (pubkey: string, token: string) => Promise<ApiResponse<DepositListResponse>>
-    commit    : (dpid: string, covenant: CovenantData) => Promise<ApiResponse<FundingDataResponse>>
-    fund      : (request: RegisterRequest) => Promise<ApiResponse<FundingDataResponse>>
-    register  : (request: RegisterRequest) => Promise<ApiResponse<DepositDataResponse>>
-    request   : (request: AccountRequest) => Promise<ApiResponse<AccountDataResponse>>
-    close     : (dpid: string, req: SpendRequest) => Promise<ApiResponse<DepositDataResponse>>
-  }
+    contract: {
+      cancel : (cid: string, token: string) => Promise<ApiResponse<ContractDataResponse>>
+      create : (
+        request : ContractPublishRequest,
+        engine  : ScriptEngineAPI,
+        policy ?: ProposalPolicy
+      ) => Promise<ApiResponse<ContractDataResponse>>
+      funds  : (cid: string)   => Promise<ApiResponse<FundListResponse>>
+      list   : (token: string) => Promise<ApiResponse<ContractListResponse>>
+      read   : (cid: string)   => Promise<ApiResponse<ContractDataResponse>>
+      verify : (session: ContractSession) => void
+    }
 
-  // Oracle operations
-  oracle: {
-    broadcast_tx    : (txhex: string) => Promise<ApiResponse<string>>
-    fee_estimates   : () => Promise<OracleFeeEstimate>
-    fee_target      : (target: number) => Promise<number>
-    get_txdata      : (txid: string) => Promise<OracleTxData | null>
-    get_utxo        : (query: OracleQuery) => Promise<OracleSpendData | null>
-    get_address_utxos: (address: string) => Promise<OracleSpendData[]>
-  }
+    deposit: {
+      list   : (token: string) => Promise<ApiResponse<DepositListResponse>>
+      read   : (dpid: string)  => Promise<ApiResponse<DepositDataResponse>>
+      lock   : (request: LockRequest)        => Promise<ApiResponse<FundingDataResponse>>
+      cancel : (dpid: string, token: string) => Promise<ApiResponse<DepositDataResponse>>
+      close  : (request: CloseRequest)       => Promise<ApiResponse<DepositDataResponse>>
+    }
 
-  // Witness operations
-  witness: {
-    read: (wid: string) => Promise<ApiResponse<WitnessDataResponse>>
-  }
+    draft: {
+      create: typeof create_session
+      decode: typeof decode_session
+      encode: typeof encode_session
+      publish: typeof publish_session
+    }
 
-  // Serialization methods
-  toJSON()   : { host: string }
-  toString() : string
+    machine: {
+      commits : (vmid: string)  => Promise<ApiResponse<WitnessListResponse>>
+      list    : (token: string) => Promise<ApiResponse<VMListResponse>>
+      read    : (vmid: string)  => Promise<ApiResponse<VMDataResponse>>
+      submit  : (witness: WitnessData) => Promise<ApiResponse<VMSubmitResponse>>
+    }
+
+    server: {
+      keys   : () => Promise<ApiResponse<ServerKeysResponse>>
+      policy : () => Promise<ApiResponse<ServerPolicyResponse>>
+      status : () => Promise<ApiResponse<ServerStatusResponse>>
+    }
+
+    witness: {
+      list   : (token: string) => Promise<ApiResponse<WitnessListResponse>>
+      read   : (wid: string)   => Promise<ApiResponse<WitnessDataResponse>>
+      verify : (commit: WitnessCommit, vmstate: MachineData, witness: WitnessData) => void
+    }
+
+    verify_pk (pubkey: string) : void
 }
 ```

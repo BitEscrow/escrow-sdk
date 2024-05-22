@@ -60,33 +60,35 @@ interface ContractFundingState {
 }
 
 interface ContractActiveState {
-  activated    : boolean         // Whether the contract vm is active. 
-  active_at    : number | null   // UTC timestamp when the contract was activated.
-  active_sig   : string | null   // A confirmation signature from the escrow server.
-  expires_at   : null | number   // UTC deadline for when contract execution must expire.
-  machine_head : string | null   // The final hash of the commit-chain for the machine.
-  machine_vmid : string | null   // The unique id of the machine executing the contract.
+  activated    : boolean        // Whether the contract vm is active. 
+  active_at    : number | null  // UTC timestamp when the contract was activated.
+  active_sig   : string | null  // A confirmation signature from the escrow server.
+  expires_at   : null | number  // UTC deadline for when contract execution must expire.
+  machine_head : string | null  // The final hash of the commit-chain for the machine.
+  machine_vmid : string | null  // The unique id of the machine executing the contract.
 }
 
 interface ContractExecState {
-  closed       : boolean         // Whether the contract vm is running. 
-  closed_at    : number | null   // UTC timestmap when the contract vm finished executing.
-  closed_sig   : string | null   // A confirmation signature from the escrow server.
-  machine_vout : string | null   // The final output of the contract virtual machine.
+  closed       : boolean        // Whether the contract vm is running. 
+  closed_at    : number | null  // UTC timestmap when the contract vm finished executing.
+  closed_sig   : string | null  // A confirmation signature from the escrow server.
+  machine_vout : string | null  // The final output of the contract virtual machine.
 }
 
 interface ContractSpendState {
-  spent       : boolean,          // Whether the contract funds have been spent.
-  spent_at    : number | null     // UTC timestamp when the contract funds were spent.
+  spent       : boolean,        // Whether the contract funds have been spent.
+  spent_at    : number | null   // UTC timestamp when the contract funds were spent.
   spent_sig   : string | null   // A confirmation signature from the escrow server.
-  spent_txhex : string | null     // The body of the spending transaction (in hex).
-  spent_txid  : string | null     // The transaction id for the spending transaction.
+  spent_txhex : string | null   // The body of the spending transaction (in hex).
+  spent_txid  : string | null   // The transaction id for the spending transaction.
 }
 
 interface ContractSettledState {
-  settled     : boolean           // Whether the contract funds have been settled.
-  settled_at  : number | null     // UTC timestamp for when the contract was settled.
-  settled_sig : string | null   // A confirmation signature from the escrow server.
+  settled      : boolean        // Whether the contract funds have been settled.
+  settled_at   : number | null  // UTC timestamp for when the contract was settled.
+  settled_sig  : string | null  // A confirmation signature from the escrow server.
+  spent_block  : string | null  // The hash of the confirming block.
+  spent_height : number | null  // The height of the confirming block.
 }
 ```
 

@@ -12,8 +12,8 @@ import {
   ProgramEntry,
   MachineData,
   ScriptEngineAPI,
-  WitnessData,
-  WitnessCommit
+  WitnessInput,
+  WitnessData
 } from '@/core/types/index.js'
 
 import PropSchema from '@/core/schema/proposal.js'
@@ -34,7 +34,7 @@ export function validate_vm_data (
 
 export function validate_witness_data (
   witness : unknown
-) : asserts witness is WitnessData {
+) : asserts witness is WitnessInput {
   void WitSchema.data.parse(witness)
 }
 
@@ -54,7 +54,7 @@ export function verify_program_entry (
 
 export function verify_witness_data (
   vmdata  : MachineData,
-  witness : WitnessData
+  witness : WitnessInput
 ) {
   // Unpack data objects.
   const { active_at, commit_at, expires_at, output, pathnames } = vmdata
@@ -83,7 +83,7 @@ export function verify_witness_data (
 
 export function verify_witness_sigs (
   program : ProgramData,
-  witness : WitnessData
+  witness : WitnessInput
 ) {
   const { params, prog_id } = program
   const { sigs, wid }       = witness
@@ -98,9 +98,9 @@ export function verify_witness_sigs (
 }
 
 export function verify_witness_commit (
-  commit  : WitnessCommit,
+  commit  : WitnessData,
   vmstate : MachineData,
-  witness : WitnessData
+  witness : WitnessInput
 ) {
   const { commit_id, commit_sig, agent_pk } = commit
 

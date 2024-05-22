@@ -6,7 +6,7 @@ import EndorseMethod       from './methods/endorse.js'
 import {
   Literal,
   ProgramData,
-  WitnessData
+  WitnessInput
 } from '@/core/types/index.js'
 
 import {
@@ -44,7 +44,7 @@ export function init_stores (
 
 export function run_program (
   data    : CVMData,
-  witness : WitnessData
+  witness : WitnessInput
 ) {
   const { programs, state } = data
   const exec = load_program(programs, state.store, witness)
@@ -56,7 +56,7 @@ export function run_program (
 function load_program (
   progs   : ProgramData[],
   stores  : StoreEntry[],
-  witness : WitnessData
+  witness : WitnessInput
 ) : ProgramReturn {
   const { prog_id, action, path } = witness
 

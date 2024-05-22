@@ -14,8 +14,8 @@ import {
   MachineConfig,
   MachineData,
   SignerAPI,
-  WitnessCommit,
   WitnessData,
+  WitnessInput,
   WitnessTemplate
 } from '@/core/types/index.js'
 
@@ -23,7 +23,7 @@ export function create_witness (
   config   : MachineConfig | MachineData,
   pubkeys  : string   | string[],
   template : WitnessTemplate
-) : WitnessData {
+) : WitnessInput {
   const { args = [], action, content = '', method, path, stamp = now() } = template
 
   const keys   = (Array.isArray(pubkeys)) ? pubkeys : [ pubkeys ]
@@ -44,9 +44,9 @@ export function create_witness (
 export function create_commit (
   data    : MachineData,
   signer  : SignerAPI,
-  witness : WitnessData,
+  witness : WitnessInput,
   commit_at = now()
-) : WitnessCommit {
+) : WitnessData {
   const agent_pk   = signer.pubkey
   const vm_closed  = data.closed
   const vm_head    = data.head

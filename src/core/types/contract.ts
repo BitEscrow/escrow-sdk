@@ -1,5 +1,5 @@
 import { FundingData } from './deposit.js'
-import { WitnessData } from './witness.js'
+import { WitnessInput } from './witness.js'
 
 import { ScriptEngineAPI, MachineData } from './machine.js'
 
@@ -144,6 +144,6 @@ export interface ContractSession {
   contract    : ContractData
   engine     ?: ScriptEngineAPI
   funds      ?: FundingData[]
-  statements ?: WitnessData[]
+  statements ?: WitnessInput[]
   vmdata     ?: MachineData
 }

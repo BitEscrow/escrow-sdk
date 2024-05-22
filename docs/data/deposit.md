@@ -5,7 +5,6 @@ List of interfaces for the Deposit API. Click on the links below to navigate:
 - [CovenantData](#covenant-data)
 - [DepositData](#deposit-data)
 - [DepositStatus](#deposit-status)
-- [TxOutput](#tx-output)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -59,9 +58,9 @@ The `DepositData` interface is extended by state interfaces, each one describing
 ```ts
 interface DepositConfirmState {
   confirmed    : boolean        // Whether the deposit transaction is confirmed.
-  block_hash   : string | null  // The hash of the confirming block.
-  block_height : number | null  // The height of the confirming block.
-  block_time   : number | null  // The timestamp of the confirming block.
+  confirmed_at : number | null  // The timestamp of the confirming block.
+  conf_block   : string | null  // The hash of the confirming block.
+  conf_height  : number | null  // The height of the confirming block.
   expires_at   : number | null  // The expiration date of the deposit.
 }
 
@@ -89,12 +88,15 @@ interface DepositSpendState {
 }
 
 interface DepositSettledState {
-  settled     : boolean        // Whether the deposit account has been settled.
-  settled_at  : number | null  // UTC timestamp for when the account was settled.
-  settled_sig : string | null  // A confirmation signature from the escrow server.
+  settled      : boolean        // Whether the deposit account has been settled.
+  settled_at   : number | null  // UTC timestamp for when the account was settled.
+  settled_sig  : string | null  // A confirmation signature from the escrow server.
+  spent_block  : string | null  // The hash of the confirming block.
+  spent_height : number | null  // The height of the confirming block.
 }
 ```
 
+---
 
 ## Deposit Status
 
@@ -110,17 +112,3 @@ type DepositStatus =
   'settled'    |  // Deposit is confirmed closed/spent and settled.
   'error'      |  // Something went wrong. May require manual intervention.
 ```
-
-## Tx Output
-
-Data interface for an unspent transaction output (utxo).
-
-```ts
-interface TxOutput {
-  txid      : string  // The id of the spending transaction
-  vout      : number  // The index of the transaction output.
-  value     : number  // The value of the transaction output.
-  scriptkey : string  // The key or script that is locking the funds.
-}
-```
-

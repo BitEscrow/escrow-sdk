@@ -11,14 +11,14 @@ import {
   ContractData,
   MachineConfig,
   MachineData,
-  WitnessData,
+  WitnessInput,
   WitnessTemplate
 } from '@/core/types/index.js'
 
 export function can_sign_api (esigner : EscrowSigner) {
   return (
     contract : ContractData,
-    witness  : WitnessData
+    witness  : WitnessInput
   ) => {
     const programs = contract.terms.programs
     return can_endorse(programs, esigner._signer, witness)
@@ -40,7 +40,7 @@ export function create_witness_api (esigner : EscrowSigner) {
 export function endorse_witness_api (esigner : EscrowSigner) {
   return (
     vmdata  : MachineData,
-    witness : WitnessData
+    witness : WitnessInput
   ) => {
     verify_witness_data(vmdata, witness)
     return endorse_witness(esigner._signer, witness)
