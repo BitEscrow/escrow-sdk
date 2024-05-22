@@ -70,16 +70,16 @@ const tx_settled = z.object({
   settled      : z.literal(true),
   settled_at   : stamp,
   settled_sig  : hex,
-  spent_block  : hash.nullable(),
-  spent_height : num.nullable()
+  spent_block  : hash,
+  spent_height : num
 })
 
 const tx_unsettled = z.object({
   settled      : z.literal(false),
   settled_at   : z.null(),
   settled_sig  : z.null(),
-  spent_block  : hash.nullable(),
-  spent_height : num.nullable()
+  spent_block  : z.null(),
+  spent_height : z.null()
 })
 
 const confirm_state = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])

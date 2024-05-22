@@ -56,8 +56,8 @@ await sleep(2000)
 // Define our polling interval and retries.
 const [ ival, retries ] = config.poll
 // Poll for utxos from the account address.
-const data = await client.oracle.poll_address(deposit_addr, ival, retries, true)
-const utxo = data.txout
+const data = await client.oracle.poll_address(deposit_addr, ival, retries)
+const utxo = data.utxo
 
 print_banner('address utxo')
 console.log('utxo:', utxo)

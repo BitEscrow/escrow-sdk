@@ -44,7 +44,7 @@ if (DEMO_MODE) {
   await sleep(5000)
 
   // Fetch the settlement tx from the oracle.
-  const txdata = await client.oracle.get_tx_data(txid)
+  const txdata = await client.oracle.get_tx(txid)
   // Print the transaction data to console.
   console.dir(txdata, { depth : null })
 

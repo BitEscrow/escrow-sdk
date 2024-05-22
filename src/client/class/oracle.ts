@@ -1,6 +1,7 @@
-import { parse_addr }  from '@scrow/tapscript/address'
-import { sleep }       from '@/core/util/index.js'
-import { get_fetcher } from '@/client/lib/fetch.js'
+import { parse_addr }     from '@scrow/tapscript/address'
+import { sleep }          from '@/core/util/index.js'
+import { get_fetcher }    from '@/client/lib/fetch.js'
+import { OracleTxStatus } from '@/index.js'
 
 import {
   OracleFeeEstimate,
@@ -35,6 +36,22 @@ export class ChainOracle {
     if (!res.ok) throw new Error(res.error)
     // Parse the returned data.
     return ClientSchema.oracle.txdata.parseAsync(res.data)
+  }
+
+  /**
+   * Fetch transaction status from the oracle.
+   */
+  async get_tx_status (txid : string) : Promise<OracleTxStatus | null> {
+    // Define the url to use for fetching.
+    const url = `${this._host}/tx/${txid}`
+    // Fetch a response from the oracle.
+    const res = await this._fetcher.json<OracleTxData>(url)
+    // If status is 404, return null.
+    if (res.status === 404) return null
+    // If the response failed, throw.
+    if (!res.ok) throw new Error(res.error)
+    // Parse the returned data.
+    return ClientSchema.oracle.tx_status.parseAsync(res.data)
   }
 
   /**
@@ -161,10 +178,10 @@ export class ChainOracle {
   }
 
   async poll_address (
-    address  : string,
-    interval : number,
-    retries  : number,
-    callback : (address : string, tries : number) => Promise<void>
+    address   : string,
+    interval  : number,
+    retries   : number,
+    callback ?: (address : string, tries : number) => Promise<void>
   ) : Promise<OracleUtxoData> {
     let tries = 0,
         utxos : OracleUtxoData[] = []
@@ -174,9 +191,9 @@ export class ChainOracle {
       } else {
         utxos = await this.get_address_utxos(address)
         tries += 1
-        void callback(address, tries)
-        await sleep(interval * 1000)
       }
+      if (callback !== undefined) void callback(address, tries)
+      await sleep(interval * 1000)
     }
     throw new Error('polling timed out')
   }

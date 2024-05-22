@@ -138,7 +138,7 @@ export function verify_utxo_lock (
   current = now()
 ) {
   const limit = current - policy.GRACE_PERIOD
-  if (state.confirmed && state.block_time + locktime <= limit) {
+  if (state.confirmed && state.confirmed_at + locktime <= limit) {
     throw new Error('Deposit lock is expiring within the grace period.')
   }
 }

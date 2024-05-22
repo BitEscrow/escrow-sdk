@@ -76,10 +76,11 @@ const utxo = z.object({
 })
 
 export default {
+  outspend,
   txin,
   txout,
   txdata,
-  outspend,
+  tx_status,
   utxo_data,
   utxo
 }

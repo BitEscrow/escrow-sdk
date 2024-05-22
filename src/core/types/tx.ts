@@ -21,9 +21,9 @@ export interface TxIsConfirmed {
 
 export interface TxIsUnconfirmed {
   confirmed    : false
-  confirmed_at : number
-  conf_block   : string
-  conf_height  : number
+  confirmed_at : null
+  conf_block   : null
+  conf_height  : null
   expires_at   : null
 }
 
