@@ -96,7 +96,7 @@ The funder independently verifies this information, then sends their funds to th
 
 To commit funds to a contract, the funder must produce a signature for each spending requirement in the contract. These signatures are tweaked with the contract terms, then delivered to the escrow agent.
 
-This batch of tweaked signatures forms a [Covenant](data/deposit.md#covenantdata) between the deposit and contract. The escrow server must explicitly agree to this contract (by reciprocating the tweak) in order to co-sign a transaction and spend the funds.
+This batch of tweaked signatures forms a [Covenant](data/deposit.md#covenant-data) between the deposit and contract. The escrow server must explicitly agree to this contract (by reciprocating the tweak) in order to co-sign a transaction and spend the funds.
 
 ```ts
 interface CovenantData {
