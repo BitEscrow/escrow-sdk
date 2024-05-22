@@ -1,10 +1,11 @@
 # Witness API
 
-Reference guide for the BitEscrow Witness API. Click on the links below to navigate:
+Reference guide for the BitEscrow Witness API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/witness/:wid](#read-a-statement-by-id) | Fetch a witness statement from the server by id (wid). |
+| [/api/witness/list](#list-statements-by-pubkey) | List statements by pubkey. |
+| [/api/witness/:wid](#read-a-statement-by-id)    | Fetch a statement by ID.   |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -12,9 +13,53 @@ Reference guide for the BitEscrow Witness API. Click on the links below to navig
 
 ---
 
-## Read a Statement By WID
+## List Statements By Pubkey
 
-Fetch a witness statement from the server by id (wid).
+Request a list of statements that are endorsed by the token's pubkey.
+
+**Request Format**
+
+```ts
+method   : 'GET'
+endpoint : '/api/witness/list'
+headers  : { 'content-type' : 'application/json' }
+```
+
+**Response Interface**
+
+```ts
+interface WitnessListResponse {
+  data : {
+    commits : WitnessCommit[]
+  }
+}
+```
+
+**Example Request**
+
+```ts
+// Generate a request token.
+const req = signer.witness.list()
+// Submit the request and token.
+const res = await client.witness.list(req)
+// Check the response is valid.
+if (!res.ok) throw new Error(res.error)
+// Unpack our data payload.
+const { commits } = res.data
+```
+
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/list.ts).
+
+**Related Interfaces:**
+
+- [WitnessCommit](../data/witness.md#witness-commit)
+
+
+---
+
+## Read a Statement By Id
+
+Fetch a witness statement from the server by its identifier (wid).
 
 **Request Format**
 
@@ -28,7 +73,7 @@ endpoint : '/api/witness/:wid'
 ```ts
 interface WitnessDataResponse {
   data : {
-    witness : WitnessData
+    statement : WitnessCommit
   }
 }
 ```
@@ -36,26 +81,20 @@ interface WitnessDataResponse {
 **Example Request**
 
 ```ts
-import { client }  from '@scrow/demo/01_create_client.js'
-import { witness } from '@scrow/demo/09_settle_contract.js'
-
-// Define the witness id we will use.
-const wid = witness.wid
 // Fetch a contract from the server by cid.
 const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const statement = res.data.witness
+const { commit } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/witness/read.ts) using the shell command:  
-> `yarn load demo/api/witness/read`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/read.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/witness_data.md)
+- [WitnessCommit](../examples/witnesscommit.md)
 
 **Related Interfaces:**
 
-- [WitnessData](../data/witness.md#witnessdata)
+- [WitnessCommit](../data/witness.md#witness-commit)

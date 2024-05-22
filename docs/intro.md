@@ -14,17 +14,13 @@ Key Features:
 
   * __Designed to be robust.__ Deposits can be reused whenever a contract cancels or expires. Refund transactions are secured upfront and broadcast automatically on expiration.
 
----
-
-## Protocol Overview
-
 This SDK implements a trust-less protocol for locking Bitcoin in escrow, without requiring a custodian for the funds. Instead, the funds are deposited into a smart contract on the Bitcoin block-chain, with a chosen escrow agent listed as a co-signer.
 
 The complete protocol involves three rounds of communication, split between three parties:
 
-`Members` : Those participating within the contract.
-`Funders` : Those depositing funds into the contract.
-`Server`  : The server co-signing on deposits (i.e BitEscrow).
+`Members` : Those participating within the contract.  
+`Funders` : Those depositing funds into the contract.  
+`Server`  : The server co-signing on deposits (i.e BitEscrow).  
 
 The three rounds of communication are _negotiation_, _funding_, and _execution_.
 
@@ -39,7 +35,6 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
 ```ts
 {
   title    : 'Basic two-party contract with third-party dispute resolution.',
-  content  : '{}',
   duration : 14400,  // 4 hours.
   engine   : 'cvm',  // Default interpreter, provides basic features.
   network  : 'regtest',
@@ -57,8 +52,7 @@ It is written in JSON format, and designed for collaboration (much like a PSBT):
     ]
   ],
   schedule : [[ 7200, 'close', 'payout|return' ]],
-  value    : 100000,
-  version  : 1
+  value    : 100000
 }
 ```
 
@@ -78,19 +72,21 @@ Once the terms have been decided, any party can deliver the final proposal to th
 
 ### Funding
 
-To deposit funds into a contract, each funder requests a [Deposit Account](data/deposit.md#depositaccount) from the escrow server. This account sets up a 2-of-2 multi-signature address, with a time-locked return path for the funder.
+To deposit funds into a contract, each funder requests a [Deposit Account](data/account.md#account-data) from the escrow server. This account sets up a 2-of-2 multi-signature address, with a time-locked return path for the funder.
 
 ```ts
-interface DepositAccount {
-  acct_id    : string  // Hash identifer for the account record.
-  acct_sig   : string  // Signature for the account record.
-  address    : string  // On-chain address for receiving funds.
-  agent_id   : string  // Identifier of the deposit agent.
-  agent_pk   : string  // Public key of the deposit agent.
-  created_at : number  // Account creation timestamp (in seconds).
-  deposit_pk : string  // Public key of the funder making the deposit.
-  sequence   : number  // Locktime converted into a sequence value.
-  spend_xpub : string  // The extended key used for returning funds.
+interface AccountData {
+  account_hash : string   // A hash digest of the original account request.
+  account_id   : string   // The hash identifier for the data record.
+  agent_pk     : string   // The public key of the escrow server hosting the account.
+  agent_tkn    : string   // Crypto-graphic data to use when creating a covenant.
+  created_at   : number   // The UTC timestamp when the record was created.
+  created_sig  : string   // A signature from the server_pk, signing the account id.
+  deposit_addr : string   // The multi-sig bitcoin address for the deposit account.
+  deposit_pk   : string   // The public key of the user making the deposit.
+  locktime     : number   // The amount of time (in seconds) to lock the deposit.
+  network      : ChainNetwork  // The block-chain network to use for this account.
+  return_addr  : string   // The return address to use when closing the account.
 }
 ```
 
@@ -141,7 +137,7 @@ vm_state: {
 }
 ```
 
-Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witnessdata). These witness statements provide instructions to the virtual machine and execute programs.
+Members of the contract can interact with this machine by submitting a signed statement, called a [witness](data/witness.md#witness-data). These witness statements provide instructions to the virtual machine and execute programs.
 
 Each statement calls upon a `method`, an `action` to perform on success, and a target spending `path` in the contract.
 
@@ -167,27 +163,25 @@ Every statement that updates the machine is recorded into the hash-chain. This c
 When the chain is updated, the new "head" is signed by the escrow agent and returned to provider of the witness statement as a form of receipt. This receipt proves that the escrow agent received the statement, and evaluated it in the virtual machine.
 
 ```ts
-vm_state: {
-  commits: [[
-    // Position of the commit in the chain,
-    step   : 0,
-    // UTC timestamp of the commit.
-    stamp  : 1706511302,
-    // Previous head, before the commit.
-    head   : 'b70704c41e27d5f35a11ae7c6e5976501aa1380195714007197d7f47934dcf69',
-    // The witness id of the statement being committed.
-    wid    : '8859eb66bf8fd0d2868d74fefbbaf5f73408c9072c99b4d8df3348f1479bf5f5',
-    // The action that was performed.
-    action : 'close',
-    // The path that was evaluated.
-    path   : 'tails'
-  ]],
-  // The (now updated) head of the chain.
-  head: '41cf5e1a716067f9255580c96a808d5999c602fb2092b1789fb1ffb574c93597',
+const vmdata = {
+  active_at  : 1716232800,
+  commit_at  : 1716232800,
+  closed     : true,
+  closed_at  : 1716232800,
+  engine     : 'cvm',
+  error      : null,
+  expires_at : 1716247200,
+  head       : '13318f6d2c822ad10a8e78608745ae596e2c0cb4dea3cbe0d21710e0e5a54ef0',
+  output     : 'payout',
+  pathnames  : [ 'payout', 'refund' ],
+  programs   : [ ... ],
+  state      : '...',
+  step       : 1,
+  tasks      : [ [ 7200, 'close|resolve', 'payout|refund' ] ],
+  updated_at : 1716232800,
+  vmid       : '3c9fe23c9cd7ea03c4b007439872d0ca6a8bcf503a23b0394b67d11b4a53ce9e'
 }
 ```
-
-It 
 
 ### Settlement
 

@@ -1,5 +1,5 @@
 import { ProposalData }    from '@scrow/sdk/core'
-import { create_proposal } from '@scrow/sdk/proposal'
+import { create_proposal } from '@scrow/sdk/core/lib'
 import { CoreSigner }      from '../types.js'
 
 const NETWORK = 'regtest'

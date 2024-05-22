@@ -35,7 +35,7 @@ import { assert } from '../util/index.js'
 
 import {
   TxConfirmState,
-  Network,
+  ChainNetwork,
   TxSettleState,
   SignerAPI,
   TxSpendState,
@@ -63,6 +63,7 @@ export function INIT_SPEND_STATE () : TxSpendState {
   return {
     spent       : false as const,
     spent_at    : null,
+    spent_sig   : null,
     spent_txhex : null,
     spent_txid  : null
   }
@@ -73,8 +74,9 @@ export function INIT_SPEND_STATE () : TxSpendState {
  */
 export function INIT_SETTLE_STATE () : TxSettleState {
   return {
-    settled    : false as const,
-    settled_at : null
+    settled     : false as const,
+    settled_at  : null,
+    settled_sig : null
   }
 }
 
@@ -86,7 +88,7 @@ export function create_timelock (
 
 export function get_address (
   tapkey   : Bytes,
-  network ?: Network
+  network ?: ChainNetwork
 ) {
   if (network === 'mutiny') {
     network = 'signet'

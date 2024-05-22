@@ -1,4 +1,4 @@
-import { create_program }           from '@/core/lib/vm.js'
+import { create_program }           from '@/core/lib/program.js'
 import { now }                      from '@/core/util/index.js'
 import { init_vm_state }            from './state.js'
 import { init_stores, run_program } from './program.js'
@@ -6,7 +6,7 @@ import { init_tasks, run_schedule } from './schedule.js'
 
 import {
   MachineConfig,
-  VMData,
+  MachineData,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -40,9 +40,9 @@ const GET_INIT_DATA = () => {
  * Evaluates the witness data against the current virtual machine state.
  */
 export function eval_witness (
-  data    : VMData,
+  data    : MachineData,
   witness : WitnessData | WitnessData[]
-) : VMData {
+) : MachineData {
   // Return early if there is already a result.
   if (data.output !== null) return data
   // Revive the vm state data.
@@ -81,9 +81,9 @@ export function eval_witness (
  * Evaluates the schedule of the virtual machine to process due events.
  */
 export function eval_schedule (
-  data    : VMData,
+  data    : MachineData,
   stop_at : number = now()
-) : VMData {
+) : MachineData {
   // Return early if there is already a result.
   if (data.output !== null) return data
   // Revive the vm state data.
@@ -97,7 +97,7 @@ export function eval_schedule (
 /**
  * Initializes the virtual machine with the given parameters.
  */
-export function init_vm (config : MachineConfig) : VMData {
+export function init_vm (config : MachineConfig) : MachineData {
   const { active_at, expires_at, engine, pathnames, vmid } = config
   const programs = config.programs.map(e => create_program(e))
 

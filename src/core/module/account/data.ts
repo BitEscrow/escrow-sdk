@@ -32,19 +32,19 @@ export function create_account (
   // Get signing agent for account.
   const agent        = util.get_account_agent(request, signer)
   // Generate a session token.
-  const server_tkn   = gen_session_token(agent, created_at).tkn
+  const agent_tkn    = gen_session_token(agent, created_at).tkn
   // Create a context object for the account.
-  const acct_ctx     = util.create_account_ctx(deposit_pk, locktime, network, return_addr, server_tkn)
+  const acct_ctx     = util.create_account_ctx(deposit_pk, locktime, network, return_addr, agent_tkn)
   // Compute the deposit address from the account context.
   const deposit_addr = acct_ctx.deposit_addr
   // Compute the hash for the account request.
   const account_hash = util.get_account_hash(request)
   // Set the server pubkey.
-  const server_pk    = signer.pubkey
+  const agent_pk     = signer.pubkey
   // Compute the id for the account data.
-  const account_id   = util.get_account_id(deposit_addr, account_hash, server_pk, created_at, server_tkn)
+  const account_id   = util.get_account_id(deposit_addr, account_hash, agent_pk, created_at, agent_tkn)
   // Sign the account identifier.
-  const server_sig   = signer.sign(account_id)
+  const created_sig    = signer.sign(account_id)
   // Return the complete account data object.
-  return sort_record({ ...request, account_hash, account_id, created_at, server_sig, deposit_addr, server_pk, server_tkn })
+  return sort_record({ ...request,  account_id, account_hash, created_sig, created_at, deposit_addr, agent_pk, agent_tkn })
 }

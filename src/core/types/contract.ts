@@ -1,4 +1,7 @@
-import { ProofEntry } from './signer.js'
+import { FundingData } from './deposit.js'
+import { WitnessData } from './witness.js'
+
+import { ScriptEngineAPI, MachineData } from './machine.js'
 
 import {
   PaymentEntry,
@@ -12,14 +15,12 @@ import {
 
 export type ContractStatus =
   'published' |  // Contract is published and awaiting funds.
-  'funded'    |  // Contract is funded and awaiting confirmation.
+  'canceled'  |  // Published contract is canceled and funds are released.
   'secured'   |  // Contract funds are confirmed and awaiting activation.
   'active'    |  // Contract is active and CVM is running.
   'closed'    |  // Contract is closed and awaiting settlement.
   'spent'     |  // Contract is settled and awaiting confirmation.
   'settled'   |  // Contract is settled and confirmed on-chain.
-  'canceled'  |  // Published contract is canceled and funds are released.
-  'expired'   |  // Active contract has expired and funds are released.
   'error'        // Something went wrong, may require manual intervention.
 
 export type ContractPublishState = ContractIsPublished | ContractIsCanceled
@@ -36,66 +37,73 @@ export type ContractData =
   TxSpendState         &
   TxSettleState
 
+export type ContractSignatures = 'created_sig' | 'canceled_sig' | 'secured_sig' | 'active_sig' |
+                                 'closed_sig'  | 'spent_sig'    | 'settled_sig'
+
+export type ContractPreImage = Omit<ContractData, ContractSignatures>
+
 export type SpendTemplate = [
   label : string,
   txhex : string
 ]
 
 interface ContractIsPublished {
-  canceled    : false
-  canceled_at : null
+  canceled     : false
+  canceled_at  : null
+  canceled_sig : null
 }
 
 interface ContractIsCanceled {
-  canceled    : true
-  canceled_at : number
+  canceled     : true
+  canceled_at  : number
+  canceled_sig : string
 }
 
 interface ContractIsSecured {
   secured      : true
+  secured_sig  : string
   effective_at : number
-  tx_fees      : number
-  tx_vsize     : number
-  tx_total     : number
 }
 
 interface ContractIsPending {
   secured      : false
+  secured_sig  : null
   effective_at : null
-  tx_fees      : null
-  tx_vsize     : null
-  tx_total     : null
 }
 
 interface ContractIsActive {
-  activated   : true
-  active_at   : number
-  engine_head : string
-  engine_vmid : string
-  expires_at  : number
+  activated    : true
+  active_at    : number
+  active_sig   : string
+  machine_head : string
+  machine_vmid : string
+  expires_at   : number
 }
 
 interface ContractIsInactive {
-  activated   : false
-  active_at   : null
-  engine_head : null
-  engine_vmid : null
-  expires_at  : null
+  activated    : false
+  active_at    : null
+  active_sig   : null
+  machine_head : null
+  machine_vmid : null
+  expires_at   : null
 }
 
 interface ContractIsClosed {
-  closed      : true
-  closed_at   : number
-  engine_vout : string | null
+  closed       : true
+  closed_at    : number
+  closed_sig   : string
+  machine_vout : string | null
 }
 
 interface ContractIsOpen {
-  closed      : false
-  closed_at   : null
-  engine_vout : null
+  closed       : false
+  closed_at    : null
+  closed_sig   : null
+  machine_vout : null
 }
 
-export interface ContractRequest {
+export interface ContractPublishRequest {
   endorsements ?: string[]
   proposal      : ProposalData
 }
@@ -107,8 +115,10 @@ export interface ContractCreateConfig {
 }
 
 export interface ContractBase {
+  agent_pk     : string
   cid          : string
   created_at   : number
+  created_sig  : string
   deadline_at  : number
   endorsements : string[]
   fees         : PaymentEntry[]
@@ -118,13 +128,22 @@ export interface ContractBase {
   moderator    : string | null
   outputs      : SpendTemplate[]
   prop_id      : string
-  server_pk    : string
-  sigs         : ProofEntry<ContractStatus>[]
   status       : ContractStatus
   subtotal     : number
   terms        : ProposalData
   tx_bsize     : number
+  tx_fees      : number
+  tx_vsize     : number
+  tx_total     : number
   vin_count    : number
   vin_txfee    : number
   updated_at   : number
+}
+
+export interface ContractSession {
+  contract    : ContractData
+  engine     ?: ScriptEngineAPI
+  funds      ?: FundingData[]
+  statements ?: WitnessData[]
+  vmdata     ?: MachineData
 }

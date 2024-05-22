@@ -70,7 +70,7 @@ export function settle_covenant (
   deposit   : DepositData,
   output    : string,
   psig      : string,
-  server_sd : SignerAPI
+  agent_dev : SignerAPI
 ) : string {
   //
   assert.exists(deposit.covenant)
@@ -79,7 +79,7 @@ export function settle_covenant (
   //
   const { covenant, utxo } = deposit
   // Get signing agent for account.
-  const agent   = get_account_agent(deposit, server_sd)
+  const agent   = get_account_agent(deposit, agent_dev)
   // Get account context object.
   const ctx     = get_account_ctx(deposit)
   // Compute covenant id

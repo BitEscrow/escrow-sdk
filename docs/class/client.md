@@ -33,7 +33,7 @@ class EscrowClient {
   readonly _fetcher  : Resolver
   readonly _host     : string
   readonly _oracle   : string
-  readonly _network  : Network
+  readonly _network  : ChainNetwork
 
   // Constructor
   constructor(config: ClientConfig)
@@ -41,16 +41,31 @@ class EscrowClient {
   // Getter methods
   get fetcher() : <T>(config: FetchConfig) => Promise<ApiResponse<T>>
   get host()    : string
-  get network() : Network
+  get network() : ChainNetwork
 
   // Contract operations
   contract: {
-    create   : (proposal: ProposalData, signatures?: string[] | undefined) => Promise<ApiResponse<ContractDataResponse>>
-    funds    : (cid: string) => Promise<ApiResponse<DepositListResponse>>
-    list     : (pubkey: string, token: string) => Promise<ApiResponse<ContractListResponse>>
-    read     : (cid: string) => Promise<ApiResponse<ContractDataResponse>>
-    submit   : (cid: string, witness: WitnessData) => Promise<ApiResponse<ContractDataResponse>>
-    witness  : (cid: string) => Promise<ApiResponse<WitnessListResponse>>
+    create: (
+      proposal    : ProposalData
+      signatures ?: string[] | undefined
+    ) => Promise<ApiResponse<ContractDataResponse>>
+    funds: (
+      cid : string
+    ) => Promise<ApiResponse<DepositListResponse>>
+    list: (
+      pubkey : string,
+      token  : string
+    ) => Promise<ApiResponse<ContractListResponse>>
+    read: (
+      cid : string
+    ) => Promise<ApiResponse<ContractDataResponse>>
+    submit: (
+      cid     : string,
+      witness : WitnessData
+    ) => Promise<ApiResponse<ContractDataResponse>>
+    witness: (
+      cid : string
+    ) => Promise<ApiResponse<WitnessListResponse>>
   }
 
   // Deposit operations

@@ -1,18 +1,13 @@
-/* Global Imports */
-
-import { Test }       from 'tape'
-import { CoreClient } from '@cmdcode/core-cmd'
-import { P2TR }       from '@scrow/tapscript/address'
-
-/* Package Imports */
-
-import { endorse_proposal } from '@scrow/sdk/proposal'
-import { assert }           from '@scrow/sdk/util'
-import { get_vm_config }    from '@scrow/sdk/vm'
-import CVM                  from '@scrow/sdk/cvm'
+import { Test }               from 'tape'
+import { CoreClient }         from '@cmdcode/core-cmd'
+import { P2TR }               from '@scrow/tapscript/address'
+import { endorse_proposal }   from '@scrow/sdk/core/lib'
+import { get_machine_config } from '@scrow/sdk/machine'
+import { assert }             from '@scrow/sdk/util'
+import { get_proposal }       from './util.js'
+import CVM                    from '@scrow/sdk/cvm'
 
 import {
-  CoreAssert,
   DepositData,
   PaymentEntry,
   TxOutput
@@ -48,20 +43,19 @@ import {
   verify_proposal_data,
   verify_commit_req,
   verify_deposit_data,
-  verify_witness_receipt,
-  verify_contract_settlement,
+  verify_witness_commit,
   verify_witness_data,
   verify_contract_sigs,
-  verify_deposit_sigs
+  verify_deposit_sigs,
+  verify_contract_settlement,
+  verify_publish_req
 } from '@/core/validation/index.js'
 
 import {
-  create_receipt,
+  create_commit,
   create_witness,
   endorse_witness
 } from '@scrow/sdk/witness'
-
-/* Local Imports */
 
 import {
   fund_address,
@@ -69,8 +63,6 @@ import {
   get_spend_state,
   get_utxo
 } from '../core.js'
-
-import { get_proposal } from './util.js'
 
 import ServerPolicy from '../config/policy.json' assert { type: 'json' }
 
@@ -109,7 +101,7 @@ export default async function (
       // Construct a proposal from the template.
       const proposal = await get_proposal(members)
       // Verify the proposal
-      verify_proposal_data(CVM, server_pol, proposal)
+      verify_proposal_data(CVM, server_pol.proposal, proposal)
       // Have each member endorse the proposal.
       const signatures = members.map(e => endorse_proposal(proposal, e.signer))
 
@@ -125,7 +117,7 @@ export default async function (
       // Client: Create a contract request.
       const pub_req  = create_publish_req(proposal, signatures)
       // Server: Verify contract request.
-      CoreAssert.contract.verify.request(CVM, server_pol, pub_req)
+      verify_publish_req(CVM, server_pol.proposal, pub_req)
       // Server: Create contract data.
       let contract = create_contract(ct_config, pub_req, escrow_dev)
       
@@ -148,7 +140,7 @@ export default async function (
         // Client: Create account request.
         const acct_req = create_account_req(funder.signer.pubkey, LOCKTIME, NETWORK, return_addr)
         // Server: Verify account request.
-        verify_account_req(server_pol, acct_req)
+        verify_account_req(server_pol.account, acct_req)
         // Server: Create account data.
         const account = create_account(acct_req, escrow_dev)
         // Client: Verify account data.
@@ -176,7 +168,7 @@ export default async function (
         // Client: Create the commit request.
         const commit_req = create_commit_req(FEERATE, contract, account, funder.signer, utxo)
         // Server: Verify the registration request.
-        verify_commit_req(contract, server_pol, commit_req, escrow_dev)
+        verify_commit_req(contract, server_pol.account, commit_req, escrow_dev)
         // Server: Create the deposit data.
         const deposit = create_deposit(commit_req, escrow_dev)
         // Client: Verify the deposit data.
@@ -205,7 +197,7 @@ export default async function (
 
       const pending = deposits.map(async deposit => {
         const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
-        return confirm_deposit(deposit, utxo_state, escrow_dev)
+        return confirm_deposit(deposit, utxo_state)
       })
 
       deposits = await Promise.all(pending)
@@ -222,7 +214,7 @@ export default async function (
 
       contract = activate_contract(contract, escrow_dev)
 
-      const vm_config = get_vm_config(contract)
+      const vm_config = get_machine_config(contract)
       let   vm_data   = CVM.init(vm_config)
 
       if (VERBOSE) {
@@ -268,14 +260,14 @@ export default async function (
         throw new Error(vm_data.error)
       }
 
-      // Create a signed receipt for the latest commit.
-      const vm_receipt = create_receipt(vm_data, escrow_dev, witness)
-      // Verify the latest commit matches the receipt.
-      verify_witness_receipt(vm_receipt, vm_data, witness)
+      // Create a signed commit for the latest commit.
+      const vm_commit = create_commit(vm_data, escrow_dev, witness)
+      // Verify the latest commit matches the commit.
+      verify_witness_commit(vm_commit, vm_data, witness)
 
       if (VERBOSE) {
-        console.log(banner('vm receipt'))
-        console.dir(vm_receipt, { depth : null })
+        console.log(banner('vm commit'))
+        console.dir(vm_commit, { depth : null })
       } else {
         t.pass('evaluation ok')
       }
@@ -297,14 +289,14 @@ export default async function (
 
       /* ------------------- [ Settle Contract ] ------------------- */
 
-      const txhex = get_settlement_tx(contract, deposits, escrow_dev)
-      const txid  = await client.publish_tx(txhex, true)
+      const commits = [ witness ]
+      const txhex   = get_settlement_tx(contract, deposits, escrow_dev)
+      const txid    = await client.publish_tx(txhex, true)
 
       contract = spend_contract(contract, txhex, txid, escrow_dev)
-
-      verify_contract_settlement(contract, deposits, proposal, vm_data)
-
       contract = settle_contract(contract, escrow_dev)
+      
+      verify_contract_settlement(contract, CVM, deposits, commits, vm_data)
 
       if (VERBOSE) {
         console.log(banner('settled contract'))

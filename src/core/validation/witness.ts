@@ -1,39 +1,41 @@
-/* Local Imports */
-
-import { verify_sig } from '@cmdcode/crypto-tools/signer'
-
-/* Module Imports */
-
-import { assert, regex }  from '../util/index.js'
+import { verify_sig }    from '@cmdcode/crypto-tools/signer'
+import { assert, regex } from '@/core/util/index.js'
 
 import {
-  get_receipt_id,
+  get_commit_id,
   get_witness_id
-} from '../module/witness/util.js'
+} from '@/core/module/witness/util.js'
 
 import {
   Literal,
   ProgramData,
   ProgramEntry,
-  VMData,
+  MachineData,
   ScriptEngineAPI,
   WitnessData,
-  WitnessReceipt
-} from '../types/index.js'
+  WitnessCommit
+} from '@/core/types/index.js'
 
-import PropSchema from '../schema/proposal.js'
-import WitSchema  from '../schema/witness.js'
+import PropSchema from '@/core/schema/proposal.js'
+import VMSchema   from '@/core/schema/machine.js'
+import WitSchema  from '@/core/schema/witness.js'
 
 export function validate_program_entry (
   program : unknown
 ) : asserts program is ProgramEntry {
-  PropSchema.program.parse(program)
+  void PropSchema.program.parse(program)
+}
+
+export function validate_vm_data (
+  vmdata : MachineData
+) {
+ void VMSchema.data.parse(vmdata)
 }
 
 export function validate_witness_data (
   witness : unknown
 ) : asserts witness is WitnessData {
-  WitSchema.data.parse(witness)
+  void WitSchema.data.parse(witness)
 }
 
 export function verify_program_entry (
@@ -51,7 +53,7 @@ export function verify_program_entry (
 }
 
 export function verify_witness_data (
-  vmdata  : VMData,
+  vmdata  : MachineData,
   witness : WitnessData
 ) {
   // Unpack data objects.
@@ -74,7 +76,7 @@ export function verify_witness_data (
   assert.ok(pathnames.includes(path),  'path does not exist in vm')
   assert.ok(stamp >= active_at,        'stamp exists before active date')
   assert.ok(stamp >= commit_at,        'stamp exists before latest commit')
-  assert.ok(stamp < expires_at,        'stamp exists on or after close date')
+  assert.ok(stamp < expires_at,        'stamp exists on or after expiration date')
   assert.ok(output === null,           'vm has already closed on an output')
   verify_witness_sigs(program, witness)
 }
@@ -95,30 +97,30 @@ export function verify_witness_sigs (
   })
 }
 
-export function verify_witness_receipt (
-  receipt : WitnessReceipt,
-  vmdata  : VMData,
+export function verify_witness_commit (
+  commit  : WitnessCommit,
+  vmstate : MachineData,
   witness : WitnessData
 ) {
-  const { receipt_id, server_pk, server_sig } = receipt
+  const { commit_id, commit_sig, agent_pk } = commit
 
-  // Don't forget to check that vm matches receipt.
-  assert.ok(witness.vmid === vmdata.vmid,        'provided vmdata and witness vmid does not match')
-  assert.ok(witness.stamp === vmdata.commit_at,  'provided vmdata and witness stamp does not match')
-  assert.ok(witness.vmid === receipt.vmid,       'receipt vmid does not match witness')
-  assert.ok(vmdata.head === receipt.vm_hash,     'receipt vm_hash does not match vmdata head')
-  assert.ok(vmdata.output === receipt.vm_output, 'receipt vm_output does not match vmdata output')
-  assert.ok(vmdata.step === receipt.vm_step,     'receipt vm_step does not match vmdata step count')
+  // Don't forget to check that vm matches commit.
+  assert.ok(witness.vmid  === vmstate.vmid,       'provided vmstate and witness vmid does not match')
+  assert.ok(witness.stamp === vmstate.commit_at,  'provided vmstate and witness stamp does not match')
+  assert.ok(witness.vmid  === commit.vmid,       'commit vmid does not match witness')
+  assert.ok(vmstate.head   === commit.vm_head,    'commit vm_head does not match vmstate head')
+  assert.ok(vmstate.output === commit.vm_output,  'commit vm_output does not match vmstate output')
+  assert.ok(vmstate.step   === commit.vm_step,    'commit vm_step does not match vmstate step count')
 
-  const int_wid  = get_witness_id(receipt)
-  const int_rid  = get_receipt_id(receipt)
+  const int_wid  = get_witness_id(commit)
+  const int_rid  = get_commit_id(commit)
 
-  assert.ok(int_wid === witness.wid,             'internal witness id does not match receipt')
-  assert.ok(int_rid === receipt.receipt_id,      'internal receipt id does not match receipt')
+  assert.ok(int_wid === witness.wid,             'internal witness id does not match commit')
+  assert.ok(int_rid === commit.commit_id,        'internal commit id does not match commit')
 
-  const is_valid = verify_sig(server_sig, receipt_id, server_pk)
+  const is_valid = verify_sig(commit_sig, commit_id, agent_pk)
 
-  assert.ok(is_valid, 'receipt signature is invalid')
+  assert.ok(is_valid, 'commit signature is invalid')
 }
 
 export default {
@@ -128,8 +130,8 @@ export default {
   },
   verify : {
     program    : verify_program_entry,
-    witness    : verify_witness_data,
-    receipt    : verify_witness_receipt,
+    data       : verify_witness_data,
+    commit     : verify_witness_commit,
     signatures : verify_witness_sigs
   }
 }

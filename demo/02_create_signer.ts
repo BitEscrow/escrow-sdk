@@ -1,16 +1,18 @@
 import { EscrowSigner } from '@scrow/sdk/client'
-import { config }       from './00_demo_config.js'
+import { print_banner } from '@scrow/test'
+
+import { config } from './00_demo_config.js'
+
+const DEMO_MODE = process.env.VERBOSE === 'true'
 
 /**
- * Utility method for creating a list of
- * signers from a list of strings.
+ * Create a list of signing devices to use.
  */
-function create_signer (alias : string) {
-  // Return an escrow signer.
+export const signers = config.members.map(alias => {
   return EscrowSigner.import(config.client).from_phrase(alias)
-}
+})
 
-/**
- * Define our list of signers.
- */
-export const signers = config.members.map(e => create_signer(e))
+if (DEMO_MODE) {
+  print_banner('signing members')
+  console.log(config.members)
+}

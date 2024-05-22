@@ -1,33 +1,37 @@
-/* Global Imports */
+import { EscrowClient }   from '@/client/class/client.js'
+import { DEFAULT_POLICY } from '@/client/config/index.js'
 
 import {
   validate_account_req,
   validate_register_req,
-  validate_commit_req
+  validate_commit_req,
+  verify_account_req
 } from '@/core/validation/index.js'
 
 import {
-  ApiResponse,
   AccountRequest,
-  AccountDataResponse,
-  DepositDataResponse,
-  FundingDataResponse,
   RegisterRequest,
-  CommitRequest
+  CommitRequest,
+  AccountPolicy
 } from '@/core/types/index.js'
 
-/* Module Imports */
-
-import { EscrowClient } from '../../class/client.js'
+import {
+  ApiResponse,
+  AccountDataResponse,
+  DepositDataResponse,
+  FundingDataResponse
+} from '@/client/types/index.js'
 
 /**
  * Request a deposit account from the provider.
  */
 function request_account_api (client : EscrowClient) {
   return async (
-    request : AccountRequest
+    request : AccountRequest,
+    policy  : AccountPolicy = DEFAULT_POLICY.account
   ) : Promise<ApiResponse<AccountDataResponse>> => {
     validate_account_req(request)
+    verify_account_req(policy, request)
     // Formulate the request.
     const host = client.server_url
     const url  = `${host}/api/account/request`

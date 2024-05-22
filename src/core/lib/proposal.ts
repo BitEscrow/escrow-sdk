@@ -9,10 +9,9 @@ import { TxOutput }    from '@scrow/tapscript'
 /* Module Imports */
 
 import {
-
   get_record_id,
   now,
-  parse_proposal,
+  parser,
   sort_record
 } from '../util/index.js'
 
@@ -44,7 +43,7 @@ const PROPOSAL_DEFAULTS = () => {
 }
 
 export function create_proposal (template : ProposalTemplate) {
-  return parse_proposal({ ...PROPOSAL_DEFAULTS(), ...template })
+  return parser.parse_proposal({ ...PROPOSAL_DEFAULTS(), ...template })
 }
 
 /**

@@ -18,7 +18,7 @@ const res = await client.contract.funds(cid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const funds = res.data.funds
+const { funds } = res.data
 
 print_banner('funds')
 console.dir(funds, { depth : null })

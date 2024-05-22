@@ -19,8 +19,8 @@ const res = await client.deposit.read(dpid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data response
-const deposit = res.data.deposit
+const { deposit } = res.data
 
-print_banner('locked deposit')
+print_banner('deposit data')
 console.dir(deposit, { depth : null })
 console.log('\n')

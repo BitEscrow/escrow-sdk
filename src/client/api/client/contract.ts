@@ -1,26 +1,28 @@
-/* Global Imports */
-
-import { assert, parse_proposal } from '@/core/util/index.js'
-import { create_publish_req }     from '@/core/module/contract/index.js'
+import { assert, parser }     from '@/core/util/index.js'
+import { create_publish_req } from '@/core/module/contract/index.js'
+import { EscrowClient }       from '@/client/class/client.js'
+import { DEFAULT_POLICY }     from '@/client/config/index.js'
 
 import {
+  verify_contract_session,
+  verify_contract_sigs,
   verify_endorsements,
   verify_proposal_data
 } from '@/core/validation/index.js'
 
 import {
-  ApiResponse,
-  ContractDataResponse,
-  ContractListResponse,
-  FundListResponse,
-  ContractRequest,
-  ServerPolicy,
+  ContractPublishRequest,
+  ContractSession,
+  ProposalPolicy,
   ScriptEngineAPI
 } from '@/core/types/index.js'
 
-/* Module Imports */
-
-import { EscrowClient } from '../../class/client.js'
+import {
+  ApiResponse,
+  ContractDataResponse,
+  ContractListResponse,
+  FundListResponse
+} from '@/client/types/index.js'
 
 /**
  * Create a contract from a proposal document.
@@ -29,14 +31,14 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
+    request : ContractPublishRequest,
     engine  : ScriptEngineAPI,
-    policy  : ServerPolicy,
-    request : ContractRequest
+    policy  : ProposalPolicy = DEFAULT_POLICY.proposal
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
     const { endorsements, proposal } = request
     // Parse and validate the proposal.
-    const prop = parse_proposal(proposal)
+    const prop = parser.parse_proposal(proposal)
     // Verify the proposal's terms.
     verify_proposal_data(engine, policy, prop)
     // Verify any signatures.
@@ -80,12 +82,11 @@ function read_contract_api (client : EscrowClient) {
  */
 function list_contract_api (client : EscrowClient) {
   return async (
-    pubkey : string,
-    token  : string
+    token : string
   ) : Promise<ApiResponse<ContractListResponse>> => {
     // Define the request url.
     const host = client.server_url
-    const url  = `${host}/api/contract/list?pk=${pubkey}`
+    const url  = `${host}/api/contract/list`
     // Define the request config.
     const init = {
       method  : 'GET',
@@ -117,9 +118,7 @@ function list_funds_api (client : EscrowClient) {
 /**
  * Cancel a contract that is not active.
  */
-function cancel_contract_api (
-  client : EscrowClient
-) {
+function cancel_contract_api (client : EscrowClient) {
   return async (
     cid   : string,
     token : string
@@ -139,12 +138,21 @@ function cancel_contract_api (
   }
 }
 
+function verify_contract_api (client : EscrowClient) {
+  return (session : ContractSession) => {
+    const pubkey = client.server_pk
+    verify_contract_session(session)
+    verify_contract_sigs(session.contract, pubkey)
+  }
+}
+
 export default function (client : EscrowClient) {
   return {
     cancel : cancel_contract_api(client),
     create : create_contract_api(client),
     funds  : list_funds_api(client),
     list   : list_contract_api(client),
-    read   : read_contract_api(client)
+    read   : read_contract_api(client),
+    verify : verify_contract_api(client)
   }
 }

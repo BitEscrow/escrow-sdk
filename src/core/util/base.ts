@@ -1,4 +1,5 @@
 import { Buff, Bytes } from '@cmdcode/buff'
+import { sha256 }      from '@cmdcode/crypto-tools/hash'
 
 export function get_entry <T = string[]> (
   label   : string,
@@ -69,6 +70,14 @@ export function sort_record <T extends Record<string, any>> (
       sorted[key] = obj[key]
       return sorted
     }, {}) as T
+}
+
+export function get_record_id <T extends object> (obj : T) : Buff {
+  if (Array.isArray(obj) || obj === null || typeof obj !== 'object') {
+    throw new Error('not a valid record')
+  }
+  const sorted = sort_record(obj)
+  return sha256(Buff.json(sorted))
 }
 
 export function stringify (content : any) : string {

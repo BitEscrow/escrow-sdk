@@ -4,9 +4,9 @@ import { verify_psig } from '@cmdcode/musig2'
 
 /* Module Imports */
 
-import { get_account_agent }      from '../module/account/util.js'
-import { parse_session_token }    from '../lib/session.js'
-import { assert, parse_covenant } from '../util/index.js'
+import { get_account_agent }   from '../module/account/util.js'
+import { parse_session_token } from '../lib/session.js'
+import { assert, parser }      from '../util/index.js'
 
 import {
   get_covenant_id,
@@ -32,21 +32,21 @@ import {
 export function validate_covenant_data (
   covenant : unknown
 ) : asserts covenant is CovenantData {
-  parse_covenant(covenant)
+  parser.parse_covenant(covenant)
 }
 
 export function verify_covenant_data (
   contract  : ContractData,
   covenant  : CovenantData,
   request   : RegisterTemplate,
-  server_sd : SignerAPI
+  agent_dev : SignerAPI
 ) {
   // Unpack contract object.
   const { activated, cid, outputs, status } = contract
   // Get the account session agent.
-  const agent   = get_account_agent(request, server_sd)
+  const agent   = get_account_agent(request, agent_dev)
   // Parse the session token from the request.
-  const session = parse_session_token(request.server_tkn)
+  const session = parse_session_token(request.agent_tkn)
   // Make the following assertions.
   assert.ok(!activated,                    'contract is already active')
   assert.ok(status === 'published',        'contract is not in a fundable state')

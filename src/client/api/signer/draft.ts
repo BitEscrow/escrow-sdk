@@ -1,4 +1,4 @@
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner } from '@/client/class/signer.js'
 
 import {
   get_proposal_id,
@@ -8,19 +8,19 @@ import {
 import {
   CredentialConfig,
   DraftSession
-} from '../../types.js'
+} from '@/client/types/index.js'
 
 import {
   claim_membership,
   create_credential
-} from '../../lib/membership.js'
+} from '@/client/lib/membership.js'
 
 import {
   endorse_session,
   join_session,
   leave_session,
   verify_session
-} from '../../lib/session.js'
+} from '@/client/lib/session.js'
 
 export function join_session_api (esigner : EscrowSigner) {
   return (

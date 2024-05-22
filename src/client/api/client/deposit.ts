@@ -1,4 +1,5 @@
-import { assert } from '@/core/util/index.js'
+import { assert }       from '@/core/util/index.js'
+import { EscrowClient } from '@/client/class/client.js'
 
 import {
   validate_close_req,
@@ -6,17 +7,16 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  ApiResponse,
-  DepositDataResponse,
-  DepositListResponse,
-  FundingDataResponse,
   CloseRequest,
   LockRequest
 } from '@/core/types/index.js'
 
-/* Module Imports */
-
-import { EscrowClient } from '../../class/client.js'
+import {
+  ApiResponse,
+  DepositDataResponse,
+  DepositListResponse,
+  FundingDataResponse
+} from '@/client/types/index.js'
 
 /**
  * Fetch a deposit from the server by Id.
@@ -37,11 +37,8 @@ function read_deposit_api (client : EscrowClient) {
 
 function list_deposit_api (client : EscrowClient) {
   return async (
-    pubkey : string,
     token  : string
   ) : Promise<ApiResponse<DepositListResponse>> => {
-    // Validate the pubkey.
-    assert.is_hash(pubkey)
     // Define the request url.
     const host = client.server_url
     const url  = `${host}/api/deposit/list`

@@ -18,4 +18,3 @@ If you have any issues with the demo, please submit an issue ticket and let us k
 # CVM Evaluation Tool
 
 The CVM evaluation tool is located in the `/demo/vm` directory.
-

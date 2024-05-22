@@ -1,13 +1,13 @@
-# Virtual Machine API
+# Machine API
 
-Reference guide for the Virtual Machine API. Click on the links below to navigate:
+Reference guide for the virtual machine API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/vm/list](#list-machines-by-pubkey)        | Fetch a list of machines associated to your public key. |
-| [/api/vm/:vmid](#read-a-machine-by-vmid)        | Fetch the current state of a machine, by vmid. |
-| [/api/vm/:vmid/commits](#read-a-contract-by-id) | Fetch a list of statements commited to a machine, by vmid. |
-| [/api/vm/:vmid/submit](#read-a-contract-by-id)  | Submit a new statement to a machine, by vmid. |
+| [/api/machine/list](#list-machines-by-pubkey)          | List machines by pubkey.    |
+| [/api/machine/submit](#submit-a-witness-statement)     | Submit a new statement.     |
+| [/api/machine/:vmid](#read-a-machine-by-id)            | Fetch a machine by ID.      |
+| [/api/machine/:vmid/commits](#list-machine-statements) | List statements by machine. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -17,33 +17,22 @@ Reference guide for the Virtual Machine API. Click on the links below to navigat
 
 ## List Machines By Pubkey
 
-Create a new contract on the escrow server.
+Request a list of machines that are accessible by the token's pubkey.
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/vm/list'
-headers  : { 'content-type' : 'application/json' }
-body     : JSON.stringify(contract_request)
-```
-
-**Request Body**
-
-```ts
-interface ContractRequest {
-  members     : MemberData[]
-  proposal    : ProposalData
-  signatures ?: string[]
-}
+endpoint : '/api/machine/list'
+headers  : { 'Authorization' : 'Token ' + auth_token }
 ```
 
 **Response Interface**
 
 ```ts
-interface ContractDataResponse {
+interface VMListResponse {
   data : {
-    contract : ContractData
+    machines : MachineData[]
   }
 }
 ```
@@ -51,98 +40,41 @@ interface ContractDataResponse {
 **Example Request**
 
 ```ts
-import { client } from '@scrow/demo/01_create_client.js'
-import { draft }  from '@scrow/demo/04_finish_draft.js'
-
-// Deliver proposal and endorsements to server.
-const res = await client.contract.create(draft)
-// Check if response is valid.
-if (!res.ok) throw new Error(res.error)
-// Unpack our published contract.
-const new_contract = res.data.contract
-```
-
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/create.ts) using the shell command:  
-> `yarn load demo/api/contract/create`
-
-**Example Response**
-
-- [JSON Data](../examples/contract_data.md)
-
-**Related Interfaces**
-
-- [ProposalData](../data/draft.md#proposaldata)
-- [ContractData](../data/contract.md#contractdata)
-
----
-
-## Read a Machine By VMID
-
-Fetch a contract from the server by its contract id (cid).
-
-**Request Format**
-
-```ts
-method   : 'GET'
-endpoint : '/api/contract/:cid'
-```
-
-**Response Interface**
-
-```ts
-interface ContractDataResponse {
-  data : {
-    contract : ContractData
-  }
-}
-```
-
-**Example Request**
-
-```ts
-import { client }       from '@scrow/demo/01_create_client.js'
-import { new_contract } from '@scrow/demo/05_create_contract.js'
-
-// Define the contract id we will use.
-const cid = new_contract.cid
-// Fetch a contract from the server by cid.
-const res = await client.contract.read(cid)
+// Generate a request token.
+const req = signer.machine.list()
+// Deliver the request and token.
+const res = await client.machine.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack the data object.
-const contract = res.data.contract
+// Unpack our data payload.
+const { machines } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/read.ts) using the shell command:  
-> `yarn load demo/api/contract/read`
-
-**Example Response**
-
-- [JSON Data](../examples/contract_data.md)
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/list.ts).
 
 **Related Interfaces**
 
-- [ContractData](../data/contract.md#contractdata)
+- [MachineData](../data/machine.md#machine-data)
 
 ---
 
 ## Submit a Witness Statement
 
-Submit a witness statement to the contract VM.
+Submit a witness statement to a virtual machine.
 
 **Request Format**
 
 ```ts
 method   : 'POST'
-endpoint : '/api/contract/:cid/submit'
+endpoint : '/api/machine/submit'
 headers  : { 'content-type' : 'application/json' }
-body     : JSON.stringify(witness_request)
+body     : JSON.stringify(submit_request)
 ```
 
 **Request Body**
 
 ```ts
-interface WitnessRequest {
+interface VMSubmitRequest {
   witness : WitnessData
 }
 ```
@@ -150,77 +82,64 @@ interface WitnessRequest {
 **Response Interface**
 
 ```ts
-interface ContractDataResponse {
+export interface VMSubmitResponse {
   data : {
-    contract : ContractData
+    commit : WitnessCommit
+    vmdata : MachineData
   }
 }
+
 ```
 
 **Example Request**
 
 ```ts
-import { client }          from '@scrow/demo/01_create_client.js'
-import { signers }         from '@scrow/demo/02_create_signer.js'
-import { active_contract } from '@scrow/demo/08_check_contract.js'
-
-// Unpack our list of signers.
-const [ a_signer, b_signer ] = signers
 // Create a statement template.
 const template = {
   action : 'close',
   method : 'endorse',
-  path   : 'tails'
+  path   : 'payout'
 }
 // Initialize a variable for our witness data.
 let witness : WitnessData
 // Alice signs the initial statement.
-witness = a_signer.witness.sign(active_contract, template)
+witness = a_signer.witness.create(vmstate, template)
 // Bob endoreses the statement from Alice.
-witness = b_signer.witness.endorse(active_contract, witness)
-// Define the contract id we will use.
-const cid = active_contract.cid
+witness = b_signer.witness.endorse(vmstate, witness)
 // Submit the signed statement to the server.
-const res = await client.contract.submit(cid, witness)
+const res = await client.machine.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
-// Unpack the contract from the response.
-const updated_contract = res.data.contract
+// Unpack the data from the response.
+const { commit, vmdata } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/submit.ts) using the shell command:  
-> `yarn load demo/api/contract/submit`
-
-**Example Response**
-
-- [JSON Data](../examples/contract_active.md)
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/submit.ts).
 
 **Related Interfaces:**
 
-- [ContractData](../data/contract.md#contractdata)
-- [WitnessData](../data/witness.md#witnessdata)
+- [MachineData](../data/machine.md#machine-data)
+- [WitnessCommit](../data/witness.md#witness-data)
 
 ---
 
-## Read a Contract VM State
+## Read a Machine By ID
 
-Fetch a contract's machine state via the contract id (cid).
+Fetch machine data from the server by its identifier (vmid).
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/contract/:cid/vmstate'
+endpoint : '/api/machine/:vmid'
 ```
 
 **Response Interface**
 
 ```ts
-interface ContractVMStateResponse {
+export interface VMDataResponse {
   data : {
-    status     : ContractStatus
-    updated_at : number
-    vm_state   : StateData
+    vmdata : MachineData
   }
 }
 ```
@@ -228,42 +147,35 @@ interface ContractVMStateResponse {
 **Example Request**
 
 ```ts
-import { client }          from '@scrow/demo/01_create_client.js'
-import { active_contract } from '@scrow/demo/08_check_contract.js'
-
-// Define the contract id we will use.
-const cid = active_contract.cid
-// Fetch a contract's vm state from the server via cid.
-const res = await client.contract.vmstate(cid)
+// Fetch record from the server via id.
+const res = await client.machine.read(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const vm_state = res.data.vm_state
+const { vmdata } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/vmstate.ts) using the shell command:  
-> `yarn load demo/api/contract/vmstate`
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/read.ts).
 
 **Example Response**
 
-- [JSON Data](../examples/contract_vm.md)
+- [MachineData](../examples/vmdata.md)
 
 **Related Interfaces**
 
-- [ContractStatus](../data/contract.md#contractstatus)
-- [StateData](../data/contract.md#statedata)
+- [MachineData](../data/machine.md#machine-data)
 
 ---
 
-## List Statements in a Contract
+## List Machine Statements
 
-Request all recorded witness statements for a contract.
+Request all witness statements for a virtual machine.
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/contract/:cid/witness'
+endpoint : '/api/machine/:vmid/commits'
 ```
 
 **Response Interface**
@@ -271,7 +183,7 @@ endpoint : '/api/contract/:cid/witness'
 ```ts
 interface WitnessListResponse {
   data : {
-    statements : WitnessData[]
+    commits : WitnessCommit[]
   }
 }
 ```
@@ -279,26 +191,16 @@ interface WitnessListResponse {
 **Example Request**
 
 ```ts
-import { client }           from '@scrow/demo/01_create_client.js'
-import { settled_contract } from '@scrow/demo/09_settle_contract.js'
-
-// Define the contract id we will use.
-const cid = settled_contract.cid
 // Fetch a contract from the server by cid.
-const res = await client.contract.witness(cid)
+const res = await client.machine.commits(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const statements = res.data.statements
+const { commits } = res.data
 ```
 
-> You can run this code in our live [replit instance](https://replit.com/@cscottdev/escrow-core#demo/api/contract/witness.ts) using the shell command:  
-> `yarn load demo/api/contract/witness`
-
-**Example Response**
-
-- [JSON Data](../examples/witness_list.md)
+> See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/commits.ts).
 
 **Related Interfaces:**
 
-- [WitnessData](../data/witness.md#witnessdata)
+- [WitnessCommit](../data/witness.md#witness-commit)

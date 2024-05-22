@@ -1,6 +1,6 @@
 {
   "name": "@scrow/sdk",
-  "version": "0.12.32",
+  "version": "0.14.4-dev",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -30,9 +30,25 @@
       "import": "./dist/client/index.js",
       "types": "./dist/client/index.d.ts"
     },
+    "./client/lib": {
+      "import": "./dist/client/lib/index.js",
+      "types": "./dist/client/lib/index.d.ts"
+    },
+    "./client/schema": {
+      "import": "./dist/client/schema/index.js",
+      "types": "./dist/client/schema/index.d.ts"
+    },
     "./core": {
       "import": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
+    },
+    "./core/lib": {
+      "import": "./dist/core/lib/index.js",
+      "types": "./dist/core/lib/index.d.ts"
+    },
+    "./core/schema": {
+      "import": "./dist/core/schema/index.js",
+      "types": "./dist/core/schema/index.d.ts"
     },
     "./cvm": {
       "import": "./dist/vm/index.js",
@@ -50,25 +66,21 @@
       "import": "./dist/core/module/deposit/index.js",
       "types": "./dist/core/module/deposit/index.d.ts"
     },
-    "./witness": {
-      "import": "./dist/core/module/witness/index.js",
-      "types": "./dist/core/module/witness/index.d.ts"
-    },
-    "./lib": {
-      "import": "./dist/core/lib/index.js",
-      "types": "./dist/core/lib/index.d.ts"
-    },
-    "./schema": {
-      "import": "./dist/core/schema/index.js",
-      "types": "./dist/core/schema/index.d.ts"
+    "./machine": {
+      "import": "./dist/core/module/machine/index.js",
+      "types": "./dist/core/module/machine/index.d.ts"
     },
     "./util": {
       "import": "./dist/core/util/index.js",
       "types": "./dist/core/util/index.d.ts"
     },
-    "./validate": {
+    "./verify": {
       "import": "./dist/core/validation/index.js",
       "types": "./dist/core/validation/index.d.ts"
+    },
+    "./witness": {
+      "import": "./dist/core/module/witness/index.js",
+      "types": "./dist/core/module/witness/index.d.ts"
     }
   },
   "scripts": {
@@ -77,13 +89,11 @@
     "demo:vm": "yarn load demo/vm/eval.ts",
     "lint": "eslint . --ext .ts",
     "load": "tsx --tsconfig ./test/tsconfig.json",
-    "pub:dev": "yarn publish --tag dev",
-    "pub:rel": "yarn publish --tag latest",
+    "load:regtest": "NETWORK=regtest yarn load",
+    "load:mutiny": "NETWORK=mutiny  yarn load",
+    "load:signet": "NETWORK=signet  yarn load",
+    "load:testnet": "NETWORK=testnet yarn load",
     "release": "yarn lint && yarn test && yarn build",
-    "run:regtest": "NETWORK=regtest yarn load",
-    "run:mutiny": "NETWORK=mutiny  yarn load",
-    "run:signet": "NETWORK=signet  yarn load",
-    "run:testnet": "NETWORK=testnet yarn load",
     "scratch": "yarn load test/scratch.ts",
     "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
   },

@@ -5,7 +5,7 @@ import {
   CredentialData,
   DraftSession,
   MemberData
-} from '../types.js'
+} from '@/client/types/index.js'
 
 export function create_credential (
   signer : SignerAPI,

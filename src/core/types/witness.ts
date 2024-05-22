@@ -9,7 +9,7 @@ export interface WitnessTemplate {
   stamp   ?: number
 }
 
-export interface WitnessPreImage {
+export interface WitnessDataPreImage {
   action  : string
   args    : Literal[]
   content : string
@@ -20,21 +20,21 @@ export interface WitnessPreImage {
   vmid    : string
 }
 
-export interface WitnessData extends WitnessPreImage {
+export interface WitnessData extends WitnessDataPreImage {
   sigs : string[]
   wid  : string
 }
 
-export interface ReceiptPreImage extends WitnessData {
-  receipt_at : number
-  server_pk  : string
-  vm_closed  : boolean
-  vm_hash    : string
-  vm_output  : string | null
-  vm_step    : number
+export interface WitnessCommitPreImage extends WitnessData {
+  agent_pk  : string
+  commit_at : number
+  vm_closed : boolean
+  vm_head   : string
+  vm_output : string | null
+  vm_step   : number
 }
 
-export interface WitnessReceipt extends ReceiptPreImage {
-  receipt_id : string
-  server_sig : string
+export interface WitnessCommit extends WitnessCommitPreImage {
+  commit_id  : string
+  commit_sig : string
 }

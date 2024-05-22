@@ -1,7 +1,10 @@
 import { Buff, Bytes } from '@cmdcode/buff'
-import { Network }     from '@/core/types/index.js'
+import { ChainNetwork }     from '@/core/types/index.js'
 
-import { DEFAULT_CONFIG, get_client_config } from '../config.js'
+import {
+  DEFAULT_CONFIG,
+  get_server_config
+} from '@/client/config/index.js'
 
 import {
   Seed,
@@ -14,17 +17,17 @@ import {
   SignerConfig,
   SignerOptions,
   WalletAPI
-} from '../types.js'
+} from '../types/base.js'
 
 import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'
 import deposit_api  from '../api/signer/deposit.js'
 import draft_api    from '../api/signer/draft.js'
-import machine_api  from '../api/signer/vm.js'
+import machine_api  from '../api/signer/machine.js'
 import wallet_api   from '../api/signer/wallet.js'
 import witness_api  from '../api/signer/witness.js'
 
-import ClientSchema  from '../schema.js'
+import ClientSchema  from '../schema/index.js'
 
 export class EscrowSigner {
   static create (
@@ -86,11 +89,11 @@ export class EscrowSigner {
     options : SignerOptions = {}
   ) {
     const opt    = { ...DEFAULT_CONFIG, ...options }
-    const client = get_client_config(opt.network as Network)
+    const client = get_server_config(opt.network as ChainNetwork)
     const config = { ...client, ...opt }
     const xpub   = options.xpub ?? signer.xpub
 
-    this._config = ClientSchema.signer_config.parse(config)
+    this._config = ClientSchema.config.signer.parse(config)
     this._signer = signer
     this._wallet = new Wallet(xpub)
   }
@@ -119,7 +122,7 @@ export class EscrowSigner {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
-  vm       = machine_api(this)
+  machine  = machine_api(this)
   wallet   = wallet_api(this)
   witness  = witness_api(this)
 

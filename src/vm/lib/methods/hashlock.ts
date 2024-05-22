@@ -1,6 +1,6 @@
-import { assert, is_hash }      from '@/core/util/index.js'
+import { assert, check }        from '@/core/util/index.js'
 import { Literal, WitnessData } from '@/core/types/index.js'
-import { VMError }              from '../../util/base.js'
+import { VMError }              from '@/vm/util/base.js'
 import { sha256 }               from '@cmdcode/crypto-tools/hash'
 
 /**
@@ -21,7 +21,7 @@ function exec (
     const { action, args, path, sigs } = witness
     //
     const preimg = args.at(0)
-    if (!is_hash(preimg)) {
+    if (!check.is_hash(preimg)) {
       throw new VMError('invalid pre image provided')
     }
     //
@@ -53,7 +53,7 @@ function verify (params : Literal[]) {
     const thold = Number(threshold)
     const pubs  = pubkeys.map(e => String(e))
 
-    if (!is_hash(hashlock)) {
+    if (!check.is_hash(hashlock)) {
       return 'invalid hashlock'
     } else if (typeof thold !== 'number') {
       return 'invalid threshold value: ' + String(thold)

@@ -2,11 +2,10 @@ import { print_banner }         from '@scrow/test'
 import { get_contract_balance } from '@scrow/sdk/contract'
 import { sleep }                from '@scrow/sdk/util'
 
-import { config }       from './00_demo_config.js'
-import { client }       from './01_create_client.js'
-import { signers }      from './02_create_signer.js'
-import { new_contract } from './05_create_contract.js'
-import { new_account }  from './06_request_account.js'
+import { config }              from './00_demo_config.js'
+import { client }              from './01_create_client.js'
+import { new_contract }        from './05_create_contract.js'
+import { funder, new_account } from './06_request_account.js'
 
 import {
   fund_regtest_address,
@@ -15,46 +14,47 @@ import {
 
 const DEMO_MODE = process.env.VERBOSE === 'true'
 
-/** ========== [ Verify the Account ] ========== **/
-
-// Define our depositor from the signers.
-export const funder = signers[0]
-// Verify the deposit.
-funder.account.verify(new_account)
-
-/** ========== [ Calculate Deposit Amount ] ========== **/
-
-// Unpack account address.
-const { deposit_addr } = new_account
-// Compute a total amount (in sats) with the txfee.
+/**
+ * Check the contract for the total sats balance that needs to be paid.
+ * This balance will be the subtotal of the contract, plus transaction
+ * fees. We also need to include an additional fee to cover our input.
+ */
 const amt_total = get_contract_balance(new_contract) + new_contract.vin_txfee
-// Also compute a total amount in bitcoin.
+// Also convert to a BTC amount (for bitcoin core).
 const btc_total = amt_total / 100_000_000
+// Define the address where we will send the funds.
+const address   = new_account.deposit_addr
+// Define a feerate for the return transaction.
+const ret_rate  = config.feerate
 
-/** ========== [ Print Deposit Info ] ========== **/
-
+/**
+ * Depending on the network, try to fund the deposit address,
+ * automatically. Othewrwise, display a dialog in the console.
+ */
+if (DEMO_MODE) print_banner('depositing funds')
 switch (config.network) {
   case 'mutiny':
-    fund_mutiny_address(deposit_addr, amt_total)
+    fund_mutiny_address(address, amt_total)
     break
   case 'regtest':
-    fund_regtest_address(deposit_addr, amt_total, true)
+    fund_regtest_address(address, amt_total, true)
     break
   default:
-    print_banner('make a deposit')
-    console.log('copy this address :', deposit_addr)
+    console.log('copy this address :', address)
     console.log('send this amount  :', `${amt_total} sats || ${btc_total} btc`)
     console.log('get funds here    :', config.faucet, '\n')   
 }
 
 await sleep(2000)
 
-/** ========== [ Poll Deposit Status ] ========== **/
-
+/**
+ * We are going to poll our block-chain oracle to watch for 
+ * any coins recevied by the deposit address.
+ */
 const [ ival, retries ] = config.poll
 
 let tries  = 1,
-    txdata = await client.oracle.get_latest_utxo(deposit_addr)
+    txdata = await client.oracle.get_latest_utxo(address)
 
 // While there are no utxos (and we still have tries):
 while (txdata === null && tries < retries) {
@@ -63,7 +63,7 @@ while (txdata === null && tries < retries) {
   // Sleep for interval number of secords.
   await sleep(ival * 1000)
   // Check again for utxos at address.
-  txdata = await client.oracle.get_latest_utxo(deposit_addr)
+  txdata = await client.oracle.get_latest_utxo(address)
   // Increment our tries counter
   tries += 1
 }
@@ -75,24 +75,23 @@ if (DEMO_MODE) {
   console.log('\nutxo:', txdata)
 }
 
-/** ========== [ Create Deposit Covenant ] ========== **/
-
-// Define a feerate for the return transaction.
-const feerate = config.feerate
-// Request the funders device to sign a covenant.
-const req     = funder.account.commit(new_account, new_contract, feerate, txdata.txout)
+/**
+ * Request to register a utxo with the escrow server, plus a covenant
+ * that locks the utxo to the specified contract.
+ */
+const req = funder.account.commit(new_account, new_contract, ret_rate, txdata.txout)
 // Deliver our registration request to the server.
-const res     = await client.account.commit(req)
+const res = await client.account.commit(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 
 /**
- * Define our locked deposit.
+ * The server will respond with the deposit account, which will be
+ * registered and locked to the contract. An updated copy of the
+ * contract is also provided in the response.
  */
-export const funded_contract = res.data.contract
-export const locked_deposit  = res.data.deposit
-
-/** ========== [ Export New Data ] ========== **/
+const funded_contract = res.data.contract
+const locked_deposit  = res.data.deposit
 
 if (DEMO_MODE) {
   print_banner('funded contract')
@@ -100,3 +99,5 @@ if (DEMO_MODE) {
   print_banner('locked deposit')
   console.dir(locked_deposit, { depth : null })
 }
+
+export { funded_contract, locked_deposit }

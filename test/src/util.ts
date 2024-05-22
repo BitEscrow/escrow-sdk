@@ -1,8 +1,8 @@
-import { Network } from '@scrow/sdk'
+import { ChainNetwork } from '@scrow/sdk'
 
 import ServerConfigs from './config/servers.json' assert { type : 'json' }
 
-export function get_server_config (network : Network) {
+export function get_server_config (network : ChainNetwork) {
   return ServerConfigs[network as keyof typeof ServerConfigs]
 }
 

@@ -1,10 +1,10 @@
-import { z } from 'zod'
-import base  from '@/core/schema/base.js'
-import vm    from '@/core/schema/vm.js'
+import { z }   from 'zod'
+import base    from '@/core/schema/base.js'
+import machine from '@/core/schema/machine.js'
 
 const { hash, num, regex, str } = base
 
-const data    = vm.data
+const data    = machine.data
 const path    = z.tuple([ str, num ])
 const store   = z.tuple([ hash, str ]).array()
 const status  = z.enum([ 'init', 'open', 'disputed', 'closed' ])
@@ -15,7 +15,7 @@ const int_state = z.object({
   status
 })
 
-const vm_state = vm.shape.extend({
+const vm_state = machine.shape.extend({
   state : int_state
 })
 

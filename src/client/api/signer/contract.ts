@@ -1,6 +1,6 @@
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner } from '@/client/class/signer.js'
 
-export function request_contracts_api (esigner : EscrowSigner) {
+function request_contracts_api (esigner : EscrowSigner) {
   return () => {
     const host = esigner.server_url
     const url  = `${host}/api/contract/list`
@@ -9,7 +9,7 @@ export function request_contracts_api (esigner : EscrowSigner) {
   }
 }
 
-export function cancel_contract_api (esigner : EscrowSigner) {
+function cancel_contract_api (esigner : EscrowSigner) {
   return (cid : string) => {
     const host = esigner.server_url
     const url  = `${host}/api/contract/${cid}/cancel`

@@ -1,4 +1,4 @@
-import { Point } from '@cmdcode/crypto-tools'
+import { Point }   from '@cmdcode/crypto-tools'
 import { Literal } from '../types/index.js'
 
 export function exists <T> (

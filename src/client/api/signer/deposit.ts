@@ -1,5 +1,5 @@
 import { assert }       from '@/core/util/index.js'
-import { EscrowSigner } from '../../class/signer.js'
+import { EscrowSigner } from '@/client/class/signer.js'
 
 import {
   verify_contract_data,
@@ -7,6 +7,7 @@ import {
 } from '@/core/validation/contract.js'
 
 import {
+  validate_deposit_data,
   verify_deposit_data,
   verify_deposit_sigs
 } from '@/core/validation/deposit.js'
@@ -23,7 +24,7 @@ import {
   LockRequest
 } from '@/core/types/index.js'
 
-export function request_deposits_api (esigner : EscrowSigner) {
+function request_deposits_api (esigner : EscrowSigner) {
   return () => {
     const host = esigner.server_url
     const url  = `${host}/api/deposit/list`
@@ -32,7 +33,7 @@ export function request_deposits_api (esigner : EscrowSigner) {
   }
 }
 
-export function lock_funds_api (esigner : EscrowSigner) {
+function lock_funds_api (esigner : EscrowSigner) {
   return (
     contract : ContractData,
     deposit  : DepositData
@@ -46,7 +47,7 @@ export function lock_funds_api (esigner : EscrowSigner) {
   }
 }
 
-export function cancel_deposit_api (esigner : EscrowSigner) {
+function cancel_deposit_api (esigner : EscrowSigner) {
   return (dpid : string) => {
     assert.is_hash(dpid)
     const host = esigner.server_url
@@ -56,7 +57,7 @@ export function cancel_deposit_api (esigner : EscrowSigner) {
   }
 }
 
-export function close_deposit_api (esigner : EscrowSigner) {
+function close_deposit_api (esigner : EscrowSigner) {
   return (
     deposit : DepositData,
     feerate : number
@@ -69,11 +70,20 @@ export function close_deposit_api (esigner : EscrowSigner) {
   }
 }
 
+function verify_deposit_api (esigner : EscrowSigner) {
+  return (deposit : DepositData) => {
+    validate_deposit_data(deposit)
+    verify_deposit_data(deposit, esigner._signer)
+    verify_deposit_sigs(deposit, esigner.server_pk)
+  }
+}
+
 export default function (esigner : EscrowSigner) {
   return {
     cancel : cancel_deposit_api(esigner),
     close  : close_deposit_api(esigner),
     list   : request_deposits_api(esigner),
-    lock   : lock_funds_api(esigner)
+    lock   : lock_funds_api(esigner),
+    verify : verify_deposit_api(esigner)
   }
 }

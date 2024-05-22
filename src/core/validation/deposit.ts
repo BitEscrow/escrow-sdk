@@ -1,43 +1,35 @@
-/* Global Imports */
-
 import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
-
-/* Module Imports */
-
-import { assert, now } from '../util/index.js'
-
-import {
-  get_account_ctx,
-  get_deposit_hash
-} from '../module/account/util.js'
-
-import {
-  get_deposit_id,
-  verify_deposit_sig
-} from '../module/deposit/util.js'
-
-import {
-  CloseRequest,
-  CommitRequest,
-  ContractData,
-  DepositData,
-  DepositStatus,
-  LockRequest,
-  OracleTxRecvStatus,
-  RegisterRequest,
-  ServerPolicy,
-  SignerAPI
-} from '../types/index.js'
-
-import DepositSchema from '../schema/deposit.js'
-
-/* Local Imports */
+import { assert, now }    from '@/core/util/index.js'
 
 import {
   verify_covenant_data,
   verify_return_psig
 } from './covenant.js'
+
+import {
+  get_account_ctx,
+  get_deposit_hash
+} from '@/core/module/account/util.js'
+
+import {
+  get_deposit_id,
+  verify_deposit_sig
+} from '@/core/module/deposit/util.js'
+
+import {
+  AccountPolicy,
+  CloseRequest,
+  CommitRequest,
+  ContractData,
+  DepositData,
+  LockRequest,
+  RegisterRequest,
+  SignerAPI,
+  TxConfirmState
+} from '@/core/types/index.js'
+
+import DepositSchema from '../schema/deposit.js'
 
 export function validate_lock_req (
   request : unknown
@@ -61,18 +53,19 @@ export function verify_lock_req (
   contract  : ContractData,
   deposit   : DepositData,
   request   : LockRequest,
-  server_sd : SignerAPI
+  agent : SignerAPI
 ) {
   assert.ok(request.dpid === deposit.dpid)
-  assert.ok(deposit.covenant === null)
-  const covenant = request.covenant
-  verify_lockable(deposit.status)
-  verify_covenant_data(contract, covenant, deposit, server_sd)
+  assert.ok(deposit.confirmed, 'deposit is not confirmed')
+  assert.ok(!deposit.locked,   'deposit is already locked')
+  assert.ok(!deposit.closed,   'deposit is already closed')
+  assert.ok(!deposit.spent,    'deposit is already spent')
+  verify_covenant_data(contract, request.covenant, deposit, agent)
 }
 
 export function verify_close_req (
   deposit : DepositData,
-  policy  : ServerPolicy,
+  policy  : AccountPolicy,
   request : CloseRequest
 ) {
   const psig = request.return_psig
@@ -103,35 +96,22 @@ export function verify_deposit_sigs (
   deposit : DepositData,
   pubkey  : string
 ) {
-  const labels = deposit.sigs.map(e => e[0])
-
-  assert.ok(labels.includes('registered'),                      'deposit signature missing: registered')
-  assert.ok(!deposit.confirmed || labels.includes('confirmed'), 'deposit signature missing: confirmed')
-  assert.ok(!deposit.locked    || labels.includes('locked'),    'deposit signature missing: locked')
-  assert.ok(!deposit.closed    || labels.includes('closed'),    'deposit signature missing: closed')
-  assert.ok(!deposit.spent     || labels.includes('spent'),     'deposit signature missing: spent')
-  assert.ok(!deposit.settled   || labels.includes('settled'),   'deposit signature missing: settled')
-
-  deposit.sigs.forEach(sig => {
-    verify_deposit_sig(deposit, pubkey, sig)
-  })
+  verify_deposit_sig(deposit, pubkey, 'registered')
+  if (deposit.locked)  verify_deposit_sig(deposit, pubkey, 'locked')
+  if (deposit.closed)  verify_deposit_sig(deposit, pubkey, 'closed')
+  if (deposit.spent)   verify_deposit_sig(deposit, pubkey, 'spent')
+  if (deposit.settled) verify_deposit_sig(deposit, pubkey, 'settled')
 }
 
 export function verify_feerate (
   feerate : number,
-  policy  : ServerPolicy
+  policy  : AccountPolicy
 ) {
   //
-  const { FEERATE_MIN, FEERATE_MAX } = policy.account
+  const { FEERATE_MIN, FEERATE_MAX } = policy
   // Assert that all terms are valid.
   assert.ok(feerate >= FEERATE_MIN, `feerate is below threshold: ${feerate} < ${FEERATE_MIN}`)
   assert.ok(feerate <= FEERATE_MAX, `feerate is above threshold: ${feerate} > ${FEERATE_MAX}`)
-}
-
-export function verify_lockable (status : DepositStatus) {
-  if (status !== 'registered' && status !== 'confirmed') {
-    throw new Error('deposit is not in a lockable state: ' + status)
-  }
 }
 
 export function verify_utxo (
@@ -153,12 +133,12 @@ export function verify_utxo (
 
 export function verify_utxo_lock (
   locktime : number,
-  policy   : ServerPolicy,
-  status   : OracleTxRecvStatus,
+  policy   : AccountPolicy,
+  state    : TxConfirmState,
   current = now()
 ) {
-  const limit = current - policy.account.GRACE_PERIOD
-  if (status.confirmed && status.block_time + locktime <= limit) {
+  const limit = current - policy.GRACE_PERIOD
+  if (state.confirmed && state.block_time + locktime <= limit) {
     throw new Error('Deposit lock is expiring within the grace period.')
   }
 }

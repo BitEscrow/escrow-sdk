@@ -1,6 +1,5 @@
-import { Network }      from './base.js'
+import { ChainNetwork } from './base.js'
 import { CovenantData } from './covenant.js'
-import { ProofEntry }   from './signer.js'
 
 import {
   TxConfirmState,
@@ -12,7 +11,10 @@ import {
 export type LockState     = DepositIsLocked | DepositIsUnlocked
 export type CloseState    = DepositIsClosed | DepositIsOpen
 export type DepositData   = DepositBase & TxConfirmState & LockState & CloseState & TxSettleState & TxSpendState
-export type DepositStatus = 'registered' | 'confirmed' | 'closed' | 'locked' | 'spent' | 'settled' | 'expired' | 'error'
+export type DepositStatus = 'registered' | 'open' | 'closed' | 'locked' | 'spent' | 'settled' | 'error'
+
+export type DepositSignatures = 'created_sig' | 'locked_sig' | 'closed_sig' | 'spent_sig' | 'settled_sig'
+export type DepositPreImage   = Omit<DepositData, DepositSignatures>
 
 export type FundingData = TxConfirmState & TxSettleState & TxSpendState & {
   covenant   : CovenantData | null
@@ -26,27 +28,30 @@ export interface LockRequest {
   covenant : CovenantData
 }
 
-export interface DepositIsLocked {
-  covenant  : CovenantData
-  locked    : true
-  locked_at : number
-}
-
-export interface DepositIsUnlocked {
-  covenant   : null
-  locked     : false
-  locked_at  : null
-}
-
 export interface CloseRequest {
   dpid        : string
   return_rate : number
   return_psig : string
 }
 
+export interface DepositIsLocked {
+  covenant   : CovenantData
+  locked     : true
+  locked_at  : number
+  locked_sig : string
+}
+
+export interface DepositIsUnlocked {
+  covenant   : null
+  locked     : false
+  locked_at  : null
+  locked_sig : null
+}
+
 export interface DepositIsClosed {
   closed       : true
   closed_at    : number
+  closed_sig   : string
   return_txid  : string
   return_txhex : string
 }
@@ -54,6 +59,7 @@ export interface DepositIsClosed {
 export interface DepositIsOpen {
   closed       : false
   closed_at    : null
+  closed_sig   : null
   return_txid  : null
   return_txhex : null
 }
@@ -65,19 +71,19 @@ export interface DepositConfig {
 
 export interface DepositBase {
   account_hash : string
+  agent_pk     : string
+  agent_tkn    : string
   created_at   : number
+  created_sig  : string
   deposit_pk   : string
   deposit_addr : string
   dpid         : string
   locktime     : number
-  network      : Network
+  network      : ChainNetwork
   return_addr  : string
   return_rate  : number
   return_psig  : string
   satpoint     : string
-  server_pk    : string
-  server_tkn   : string
-  sigs         : ProofEntry<DepositStatus>[]
   status       : DepositStatus
   updated_at   : number
   utxo         : TxOutput

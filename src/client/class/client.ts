@@ -1,48 +1,56 @@
-import { resolve_json }                      from '@/core/util/fetch.js'
-import { ApiResponse, Network }              from '@/core/types/index.js'
-import { DEFAULT_CONFIG, get_client_config } from '../config.js'
+import { resolve_json } from '@/client/lib/fetch.js'
+import { ChainNetwork } from '@/core/types/index.js'
+import { ChainOracle }  from './oracle.js'
+import { assert }       from '@/core/util/index.js'
 
 import {
+  DEFAULT_CONFIG,
+  get_server_config
+} from '@/client/config/index.js'
+
+import {
+  ApiResponse,
   ClientConfig,
   ClientOptions,
   FetchConfig
-} from '../types.js'
+} from '@/client/types/index.js'
 
 import account_api   from '../api/client/account.js'
 import contract_api  from '../api/client/contract.js'
 import deposit_api   from '../api/client/deposit.js'
 import draft_api     from '../api/client/draft.js'
-import oracle_api    from '../api/client/oracle.js'
+import machine_api   from '../api/client/machine.js'
 import server_api    from '../api/client/server.js'
-import vmachine_api  from '../api/client/vm.js'
 import witness_api   from '../api/client/witness.js'
 
-import ClientSchema  from '../schema.js'
+import ClientSchema  from '../schema/index.js'
 
 type Resolver = ReturnType<typeof get_fetcher>
 
 export class EscrowClient {
   readonly _config  : ClientConfig
   readonly _fetcher : Resolver
+  readonly _oracle  : ChainOracle
 
   constructor (opt : ClientOptions = {}) {
     const options = { ...DEFAULT_CONFIG, ...opt }
-    const client  = get_client_config(opt.network as Network)
+    const client  = get_server_config(opt.network as ChainNetwork)
     const config  = { ...client, ...options }
-    this._config  = ClientSchema.client_config.parse(config)
+    this._config  = ClientSchema.config.client.parse(config)
     this._fetcher = get_fetcher(opt.fetcher ?? fetch)
+    this._oracle  = new ChainOracle(config.oracle_url)
   }
 
   get fetcher () {
     return this._fetcher
   }
 
-  get network ()  : Network {
+  get network ()  : ChainNetwork {
     return this._config.network
   }
 
-  get oracle_url () : string {
-    return this._config.oracle_url
+  get oracle () : ChainOracle {
+    return this._oracle
   }
 
   get server_pk () : string {
@@ -57,10 +65,13 @@ export class EscrowClient {
   contract = contract_api(this)
   deposit  = deposit_api(this)
   draft    = draft_api(this)
-  oracle   = oracle_api(this)
+  machine  = machine_api(this)
   server   = server_api(this)
-  vm       = vmachine_api(this)
   witness  = witness_api(this)
+
+  verify_pk (pubkey : string) {
+    assert.ok(pubkey === this.server_pk, 'pubkey not recognized')
+  }
 
   toJSON () {
     return this._config

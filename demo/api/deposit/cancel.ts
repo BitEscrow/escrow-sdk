@@ -16,16 +16,16 @@ const dpid = process.argv.slice(2).at(0)
 if (dpid === undefined) throw "must provide a 'dpid' value as an argument"
 
 // Define our funder for the deposit.
-const funder = signers[0]
+const signer = signers[0]
 // Generate a close request from the depositor.
-const req = funder.deposit.cancel(dpid)
+const req = signer.deposit.cancel(dpid)
 // Deliver the request and token.
 const res = await client.deposit.cancel(dpid, req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our response data.
-const closed_deposit = res.data.deposit
+const { deposit } = res.data
 
 print_banner('closed deposit')
-console.dir(closed_deposit, { depth : null })
+console.dir(deposit, { depth : null })
 console.log('\n')

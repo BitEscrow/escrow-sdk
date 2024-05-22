@@ -21,11 +21,11 @@ const account_req = z.object({
 })
 
 const register_req = account_req.extend({
+  agent_tkn   : token,
   covenant    : covenant.optional(),
   network,
   return_psig : hex,
   return_rate : num,
-  server_tkn  : token,
   utxo        : tx.txout
 })
 
@@ -34,15 +34,24 @@ const commit_req = register_req.extend({ covenant })
 const data = z.object({
   account_hash : hash,
   account_id   : hash,
+  agent_pk     : hash,
+  agent_tkn    : token,
   created_at   : stamp,
+  created_sig  : hex,
   deposit_pk   : hash,
   deposit_addr : str,
   locktime     : num,
   network,
-  return_addr  : str,
-  server_pk    : hash,
-  server_sig   : nonce,
-  server_tkn   : token
+  return_addr  : str
 })
 
-export default { data, account_req, commit_req, covenant, register_req, token }
+const policy = z.object({
+  FEERATE_MIN  : num,
+  FEERATE_MAX  : num,
+  GRACE_PERIOD : num,
+  LOCKTIME_MIN : num,
+  LOCKTIME_MAX : num,
+  TOKEN_EXPIRY : num
+})
+
+export default { data, account_req, commit_req, covenant, policy, register_req, token }

@@ -12,7 +12,7 @@ import {
 } from '@/core/lib/proposal.js'
 
 import {
-  ContractRequest,
+  ContractPublishRequest,
   SignerAPI
 } from '@/core/types/index.js'
 
@@ -20,9 +20,9 @@ import {
   DraftSession,
   CredentialData,
   DraftTemplate
-} from '../types.js'
+} from '@/client/types/index.js'
 
-import ClientSchema from '../schema.js'
+import ClientSchema from '@/client/schema/index.js'
 
 import {
   add_member_data,
@@ -62,7 +62,7 @@ export function join_session (
   // Add member to proposal.
   const proposal = add_member_data(cred, policy, session.proposal)
   //
-  return ClientSchema.session.parse({ ...session, members, proposal })
+  return ClientSchema.draft.session.parse({ ...session, members, proposal })
 }
 
 export function leave_session (
@@ -74,11 +74,11 @@ export function leave_session (
   // Add member to proposal.
   const proposal = rem_member_data(cred, session.proposal)
   //
-  return ClientSchema.session.parse({ ...session, members, proposal })
+  return ClientSchema.draft.session.parse({ ...session, members, proposal })
 }
 
 export function reset_session (session : DraftSession) {
-  return ClientSchema.session.parse({ ...session, sigs: [] })
+  return ClientSchema.draft.session.parse({ ...session, sigs: [] })
 }
 
 export function endorse_session (
@@ -87,7 +87,7 @@ export function endorse_session (
 ) : DraftSession {
   const sig  = endorse_proposal(session.proposal, signer)
   const sigs = [ ...session.sigs, sig ]
-  return ClientSchema.session.parse({ ...session, sigs })
+  return ClientSchema.draft.session.parse({ ...session, sigs })
 }
 
 export function tabualte_session (session : DraftSession) {
@@ -145,7 +145,7 @@ export function verify_session (
 
 export function publish_session (
   session : DraftSession
-) : ContractRequest {
+) : ContractPublishRequest {
   const { proposal, sigs: endorsements } = session
   return { endorsements, proposal }
 }
@@ -158,7 +158,7 @@ export function encode_session (session : DraftSession) {
 export function decode_session (session_str : string) : DraftSession {
   const json = Buff.b64url(session_str).str
   const data = JSON.parse(json)
-  return ClientSchema.session.parse(data)
+  return ClientSchema.draft.session.parse(data)
 }
 
 export const DraftUtil = {

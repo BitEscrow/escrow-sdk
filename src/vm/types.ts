@@ -1,6 +1,6 @@
 import {
   Literal,
-  VMData,
+  MachineData,
   WitnessData
 } from '@/core/types/index.js'
 
@@ -50,6 +50,6 @@ export interface CVMState {
   store  : StoreEntry[]    // Data store for each program in the VM.
 }
 
-export interface CVMData extends Omit<VMData, 'state'> {
+export interface CVMData extends Omit<MachineData, 'state'> {
   state : CVMState
 }

@@ -6,9 +6,11 @@ import { config }  from './00_demo_config.js'
 import { signers } from './02_create_signer.js'
 
 /**
- * Define an (optional) moderator for our proposal.
+ * We can specify one of our signers to be a moderator.
+ * 
+ * Moderators have a limited ability to manage or cancel
+ * a contract during the funding stage. 
  */
-
 export const moderator = signers[2]
 
 /**
@@ -22,7 +24,7 @@ export const proposal : ProposalTemplate = {
   moderator  : moderator.pubkey,
   network    : config.network,
   schedule   : [[ 7200, 'close|resolve', 'payout|refund' ]],
-  value      : 10000,
+  value      : 10000
 }
 
 /**

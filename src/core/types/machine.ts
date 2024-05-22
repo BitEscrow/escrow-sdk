@@ -1,18 +1,19 @@
 import { Literal }                     from './base.js'
+import { ProgramData }                 from './program.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
 import { WitnessData }                 from './witness.js'
 
-export type VMRunState = VMOpen | VMClosed
-export type VMData     = VMBase & VMRunState
+export type VMRunState  = VMOpen | VMClosed
+export type MachineData = MachineBase & VMRunState
 
 export interface ScriptEngineAPI {
   actions : string[]
   methods : string[]
   states  : string[]
   label   : string
-  eval    : (data   : VMData, witness  : WitnessData | WitnessData[]) => VMData
-  init    : (config : MachineConfig) => VMData
-  run     : (data   : VMData, stop_at ?: number) => VMData
+  eval    : (data   : MachineData, witness  : WitnessData | WitnessData[]) => MachineData
+  init    : (config : MachineConfig) => MachineData
+  run     : (data   : MachineData, stop_at ?: number) => MachineData
   verify  : (method : string, params   : Literal[]) => string | null
 }
 
@@ -26,22 +27,6 @@ interface VMClosed {
   closed_at : number
 }
 
-export interface ProgramQuery {
-  action   ?: string
-  includes ?: Literal[]
-  method   ?: string
-  params   ?: Literal[]
-  path     ?: string
-}
-
-export interface ProgramData {
-  prog_id : string
-  method  : string
-  actions : string
-  params  : Literal[]
-  paths   : string
-}
-
 export interface MachineConfig {
   active_at  : number
   engine     : string
@@ -52,7 +37,11 @@ export interface MachineConfig {
   vmid       : string
 }
 
-export interface VMBase {
+export interface VMSubmitRequest {
+  witness : WitnessData
+}
+
+export interface MachineBase {
   active_at  : number
   commit_at  : number
   engine     : string

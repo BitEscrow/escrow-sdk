@@ -1,9 +1,12 @@
 import { create_account_req }  from '@/core/module/account/index.js'
 import { verify_account_data } from '@/core/validation/account.js'
 import { assert, parse_err }   from '@/core/util/index.js'
-import { EscrowSigner }        from '../../class/signer.js'
+import { EscrowSigner }        from '@/client/class/signer.js'
 
-import { create_commit_req, create_register_req } from '@/core/module/account/api.js'
+import {
+  create_commit_req,
+  create_register_req
+} from '@/core/module/account/api.js'
 
 import {
   AccountRequest,
@@ -31,7 +34,7 @@ export function verify_account_api (esigner : EscrowSigner) {
       // Unpack terms from the esigner.
       const { server_pk, _signer } = esigner
       // Assert the correct pubkey is used by the server.
-      assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
+      assert.ok(server_pk === account.agent_pk, 'invalid server pubkey')
       // Verify the account data.
       verify_account_data(account, _signer)
       // Return null on success.
@@ -51,7 +54,7 @@ export function register_funds_api (esigner : EscrowSigner) {
   ) : RegisterRequest => {
     const { server_pk, _signer } = esigner
     // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
+    assert.ok(server_pk === account.agent_pk, 'invalid server pubkey')
     verify_account_data(account, _signer)
     return create_register_req(feerate, account, _signer, utxo)
   }
@@ -66,7 +69,7 @@ export function commit_funds_api (esigner : EscrowSigner) {
   ) : CommitRequest => {
     const { server_pk, _signer } = esigner
     // Assert the correct pubkey is used by the server.
-    assert.ok(server_pk === account.server_pk, 'invalid server pubkey')
+    assert.ok(server_pk === account.agent_pk, 'invalid server pubkey')
     verify_account_data(account, _signer)
     return create_commit_req(feerate, contract, account, _signer, utxo)
   }
@@ -74,9 +77,9 @@ export function commit_funds_api (esigner : EscrowSigner) {
 
 export default function (esigner : EscrowSigner) {
   return {
+    commit   : commit_funds_api(esigner),
     request  : request_account_api(esigner),
-    verify   : verify_account_api(esigner),
     register : register_funds_api(esigner),
-    commit   : commit_funds_api(esigner)
+    verify   : verify_account_api(esigner)
   }
 }
