@@ -1,4 +1,4 @@
-# Contract Funds
+# FundingData
 
 ```json
 [

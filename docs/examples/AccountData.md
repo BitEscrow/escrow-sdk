@@ -1,4 +1,4 @@
-# Deposit Account
+# AccountData
 
 ```ts
 {

@@ -31,7 +31,7 @@ function list_witness_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url, init })
+    return client.fetcher.json<WitnessListResponse>(url, init)
   }
 }
 
@@ -49,7 +49,7 @@ function read_witness_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/witness/${wid}`
     // Return a response.
-    return client.fetcher<WitnessDataResponse>({ url })
+    return client.fetcher.json<WitnessDataResponse>(url)
   }
 }
 

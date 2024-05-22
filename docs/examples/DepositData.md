@@ -1,4 +1,4 @@
-# Deposit Data
+# DepositData
 
 ```ts
 {

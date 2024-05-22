@@ -1,8 +1,8 @@
-import { TxOutput } from '@/core/types/tx.js'
+import { TxOutput } from '@/core/types/index.js'
 
-export type OracleFeeEstimate  = Record<string, number>
-export type OracleTxRecvStatus = TxConfirmed | TxUnconfirmed
-export type OracleTxSpendState = TxOutSpent  | TxOutUnspent
+export type OracleFeeEstimate = Record<string, number>
+export type OracleTxConfState = TxConfirmed | TxUnconfirmed
+export type OracleOutSpend    = UtxoSpent   | UtxoUnspent
 
 interface TxConfirmed {
   confirmed    : true
@@ -15,21 +15,15 @@ interface TxUnconfirmed {
   confirmed : false
 }
 
-interface TxOutSpent {
+interface UtxoSpent {
   spent  : true
   txid   : string
   vin    : number
-  status : OracleTxRecvStatus
+  status : OracleTxConfState
 }
 
-interface TxOutUnspent {
+interface UtxoUnspent {
   spent : false
-}
-
-export interface OracleQuery {
-  txid     : string
-  vout    ?: number
-  address ?: string
 }
 
 export interface OracleTxData {
@@ -41,7 +35,7 @@ export interface OracleTxData {
   size     : number
   weight   : number
   fee      : number
-  status   : OracleTxRecvStatus
+  status   : OracleTxConfState
 }
 
 export interface OracleTxIn {
@@ -63,15 +57,14 @@ export interface OracleTxOut {
   value                 : number
 }
 
-export interface OracleTxSpendData {
-  txout  : TxOutput
-  status : OracleTxRecvStatus
-  state  : OracleTxSpendState
-}
-
 export interface OracleUtxo {
   txid   : string
   vout   : number
-  status : OracleTxRecvStatus
+  status : OracleTxConfState
   value  : number
+}
+
+export interface OracleUtxoData {
+  status : OracleTxConfState
+  utxo   : TxOutput
 }

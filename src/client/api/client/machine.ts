@@ -28,7 +28,7 @@ function list_machines_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<VMListResponse>({ url, init })
+    return client.fetcher.json<VMListResponse>(url, init)
   }
 }
 
@@ -44,7 +44,7 @@ function read_vm_state_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/machine/${vmid}`
     // Return the response.
-    return client.fetcher<VMDataResponse>({ url })
+    return client.fetcher.json<VMDataResponse>(url)
   }
 }
 
@@ -56,7 +56,7 @@ function list_commits_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/machine/${vmid}/commits`
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url })
+    return client.fetcher.json<WitnessListResponse>(url)
   }
 }
 
@@ -79,7 +79,7 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<VMSubmitResponse>({ url, init })
+    return client.fetcher.json<VMSubmitResponse>(url, init)
   }
 }
 

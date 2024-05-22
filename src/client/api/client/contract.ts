@@ -55,7 +55,7 @@ function create_contract_api (
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url, init })
+    return client.fetcher.json<ContractDataResponse>(url, init)
   }
 }
 
@@ -72,7 +72,7 @@ function read_contract_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/contract/${cid}`
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url })
+    return client.fetcher.json<ContractDataResponse>(url)
   }
 }
 
@@ -93,7 +93,7 @@ function list_contract_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<ContractListResponse>({ url, init })
+    return client.fetcher.json<ContractListResponse>(url, init)
   }
 }
 
@@ -111,7 +111,7 @@ function list_funds_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/contract/${cid}/funds`
     // Return the response.
-    return client.fetcher<FundListResponse>({ url })
+    return client.fetcher.json<FundListResponse>(url)
   }
 }
 
@@ -134,7 +134,7 @@ function cancel_contract_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<ContractDataResponse>({ url, init })
+    return client.fetcher.json<ContractDataResponse>(url, init)
   }
 }
 

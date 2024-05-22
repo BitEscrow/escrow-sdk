@@ -1,4 +1,4 @@
-# Witness Data
+# WitnessCommit
 
 ```ts
 {

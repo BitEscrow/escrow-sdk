@@ -14,7 +14,7 @@ const mship = cred.extend({
   sig : hex.optional()
 })
 
-const path  = z.tuple([ label, num ])
+const path = z.tuple([ label, num ])
 
 const role = z.object({
   title     : label,

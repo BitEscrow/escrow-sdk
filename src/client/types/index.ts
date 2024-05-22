@@ -1,5 +1,5 @@
 export * from './account.js'
-export * from './base.js'
+export * from './config.js'
 export * from './contract.js'
 export * from './deposit.js'
 export * from './draft.js'

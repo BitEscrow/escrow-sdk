@@ -1,4 +1,4 @@
-# Contract Data
+# ContractData
 
 ```ts
 {

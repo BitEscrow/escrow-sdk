@@ -13,7 +13,7 @@ function server_keys_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/server/keys`
     // Return a response.
-    return client.fetcher<ServerKeysResponse>({ url })
+    return client.fetcher.json<ServerKeysResponse>(url)
   }
 }
 
@@ -23,7 +23,7 @@ function server_policy_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/server/policy`
     // Return a response.
-    return client.fetcher<ServerPolicyResponse>({ url })
+    return client.fetcher.json<ServerPolicyResponse>(url)
   }
 }
 
@@ -33,7 +33,7 @@ function server_status_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/server/status`
     // Return a response.
-    return client.fetcher<ServerStatusResponse>({ url })
+    return client.fetcher.json<ServerStatusResponse>(url)
   }
 }
 

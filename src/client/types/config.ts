@@ -1,4 +1,3 @@
-import { ZodTypeAny }    from 'zod'
 import { Bytes }         from '@cmdcode/buff'
 import { AddressConfig } from '@cmdcode/signer'
 
@@ -25,13 +24,6 @@ export interface ClientConfig extends SignerConfig {
 export interface ClientOptions extends SignerOptions {
   fetcher    ?: typeof fetch
   oracle_url ?: string
-}
-
-export interface FetchConfig {
-  url     : string
-  init   ?: RequestInit | undefined
-  schema ?: ZodTypeAny
-  token  ?: string
 }
 
 export interface ClientSignerAPI extends SignerAPI {
