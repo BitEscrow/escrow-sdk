@@ -30,7 +30,7 @@ headers  : { 'content-type' : 'application/json' }
 ```ts
 interface WitnessListResponse {
   data : {
-    commits : WitnessCommit[]
+    receipts : WitnessReceipt[]
   }
 }
 ```
@@ -45,7 +45,7 @@ const res = await client.witness.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.
-const { commits } = res.data
+const { receipts } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/list.ts).
@@ -73,7 +73,7 @@ endpoint : '/api/witness/:wid'
 ```ts
 interface WitnessDataResponse {
   data : {
-    statement : WitnessCommit
+    receipt : WitnessReceipt
   }
 }
 ```
@@ -86,7 +86,7 @@ const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { commit } = res.data
+const { receipt } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/witness/read.ts).

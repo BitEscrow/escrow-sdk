@@ -20,12 +20,12 @@ export interface WitnessPreImage {
   vmid    : string
 }
 
-export interface WitnessInput extends WitnessPreImage {
+export interface WitnessData extends WitnessPreImage {
   sigs : string[]
   wid  : string
 }
 
-export interface WitnessDataImage extends WitnessInput {
+export interface WitnessReceiptPreImage extends WitnessData {
   agent_pk  : string
   commit_at : number
   vm_closed : boolean
@@ -34,7 +34,7 @@ export interface WitnessDataImage extends WitnessInput {
   vm_step   : number
 }
 
-export interface WitnessData extends WitnessDataImage {
+export interface WitnessReceipt extends WitnessReceiptPreImage {
   commit_id  : string
   commit_sig : string
 }

@@ -16,7 +16,7 @@ const data = z.object({
   wid     : hash
 })
 
-const commit = data.extend({
+const receipt = data.extend({
   agent_pk   : hash,
   commit_at  : stamp,
   commit_id  : hash,
@@ -27,4 +27,4 @@ const commit = data.extend({
   vm_step    : num
 })
 
-export default { data, commit }
+export default { data, receipt }

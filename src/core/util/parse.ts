@@ -4,7 +4,7 @@ import {
   DepositData,
   ProposalData,
   CovenantData,
-  WitnessInput,
+  WitnessData,
   ProgramData,
   FundingData,
   ProposalPolicy,
@@ -73,8 +73,14 @@ export function parse_proposal_policy (
   return CoreSchema.proposal.policy.parse(policy)
 }
 
-export function parse_witness (
+export function parse_witness_data (
   witness : unknown
-) : WitnessInput {
+) : WitnessData {
   return CoreSchema.witness.data.parse(witness)
+}
+
+export function parse_witness_receipt (
+  witness : unknown
+) : WitnessData {
+  return CoreSchema.witness.receipt.parse(witness)
 }

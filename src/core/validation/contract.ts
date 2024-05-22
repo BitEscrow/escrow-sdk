@@ -28,7 +28,7 @@ import {
   ProposalData,
   MachineData,
   ScriptEngineAPI,
-  WitnessInput,
+  WitnessData,
   ProposalPolicy,
   ContractSession
 } from '../types/index.js'
@@ -158,7 +158,7 @@ export function verify_contract_execution (
   contract : ContractData,
   engine   : ScriptEngineAPI,
   vmdata   : MachineData,
-  witness  : WitnessInput[]
+  witness  : WitnessData[]
 ) {
   const config  = get_machine_config(contract)
     let vmstate = engine.init(config)
@@ -216,7 +216,7 @@ export function verify_contract_settlement (
   contract   : ContractData,
   engine     : ScriptEngineAPI,
   funds      : FundingData[],
-  statements : WitnessInput[],
+  statements : WitnessData[],
   vmdata     : MachineData
 ) {
   verify_contract_data(contract)

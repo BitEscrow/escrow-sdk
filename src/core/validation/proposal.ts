@@ -1,7 +1,7 @@
 /* Module Imports */
 import { create_program }             from '@/core/lib/program.js'
 import { assert, now, parser }        from '@/core/util/index.js'
-import { verify_program_entry }       from './witness.js'
+import { verify_program_entry }       from './machine.js'
 import { check_expires, check_regex } from './util.js'
 
 import {

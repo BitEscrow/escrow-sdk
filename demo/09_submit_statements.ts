@@ -61,18 +61,18 @@ if (!res.ok) throw new Error(res.error)
  * The server will respond with a signed receipt. This receipt 
  * commits to our statement being evaluated by the machine.
  */
-const { commit, vmdata } = res.data
+const { receipt, vmdata } = res.data
 
 /**
  * We can use our local copy of the vmstate to verify that our
  * witness statement was handled correctly by the escrow server.
  */
 vmstate = engine.eval(vmstate, witness)
-client.witness.verify(commit, vmstate, witness)
+client.witness.verify(receipt, witness, vmstate)
 
 if (DEMO_MODE) {
   print_banner('witness receipt')
-  console.dir(commit, { depth : null })
+  console.dir(receipt, { depth : null })
 }
 
-export { commit, vmdata, witness }
+export { receipt, vmdata, witness }

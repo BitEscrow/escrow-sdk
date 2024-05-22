@@ -49,6 +49,4 @@ const data = {
   }
 }
 
-const parsed = CoreSchema.deposit.fund.parse(data)
-
-console.log(JSON.stringify([ parsed ], null, 2))
+console.log(JSON.stringify(data, null, 2))

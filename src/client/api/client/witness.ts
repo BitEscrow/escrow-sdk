@@ -1,6 +1,6 @@
-import { assert }                from '@/core/util/index.js'
-import { EscrowClient }          from '@/client/class/client.js'
-import { verify_witness_commit } from '@/core/validation/witness.js'
+import { assert }                 from '@/core/util/index.js'
+import { EscrowClient }           from '@/client/class/client.js'
+import { verify_witness_receipt } from '@/core/validation/witness.js'
 
 import {
   ApiResponse,
@@ -10,8 +10,8 @@ import {
 
 import {
   MachineData,
-  WitnessInput,
-  WitnessData
+  WitnessData,
+  WitnessReceipt
 } from '@/core/types/index.js'
 
 /**
@@ -57,16 +57,16 @@ function read_witness_api (client : EscrowClient) {
  * Verify a statement from the server was correctly
  * committed to the virtual machine.
  */
-function verify_commit_api (client : EscrowClient) {
+function verify_receipt_api (client : EscrowClient) {
   return (
-    commit  : WitnessData,
-    vmstate : MachineData,
-    witness : WitnessInput
+    receipt : WitnessReceipt,
+    vminput : WitnessData,
+    vmstate : MachineData
   ) => {
     // Verify the server pubkey.
-    client.verify_pk(commit.agent_pk)
+    client.verify_pk(receipt.agent_pk)
     // Verify the witness statement.
-    verify_witness_commit(commit, vmstate, witness)
+    verify_witness_receipt(receipt, vminput, vmstate)
   }
 }
 
@@ -74,6 +74,6 @@ export default function (client : EscrowClient) {
   return {
     list   : list_witness_api(client),
     read   : read_witness_api(client),
-    verify : verify_commit_api(client)
+    verify : verify_receipt_api(client)
   }
 }

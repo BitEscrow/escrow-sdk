@@ -1,5 +1,5 @@
 import { assert }              from '@/core/util/index.js'
-import { WitnessInput }         from '@/core/types/index.js'
+import { WitnessData }         from '@/core/types/index.js'
 import { EscrowClient }        from '@/client/class/client.js'
 import { validate_submit_req } from '@/core/validation/machine.js'
 
@@ -65,7 +65,7 @@ function list_commits_api (client : EscrowClient) {
  */
 function submit_witness_api (client : EscrowClient) {
   return async (
-    witness : WitnessInput
+    witness : WitnessData
   ) : Promise<ApiResponse<VMSubmitResponse>> => {
     // Validate the request.
     validate_submit_req({ witness })

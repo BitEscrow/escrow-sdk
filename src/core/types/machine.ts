@@ -1,7 +1,7 @@
 import { Literal }                     from './base.js'
 import { ProgramData }                 from './program.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
-import { WitnessInput }                 from './witness.js'
+import { WitnessData }                 from './witness.js'
 
 export type VMRunState  = VMOpen | VMClosed
 export type MachineData = MachineBase & VMRunState
@@ -11,7 +11,7 @@ export interface ScriptEngineAPI {
   methods : string[]
   states  : string[]
   label   : string
-  eval    : (data   : MachineData, witness  : WitnessInput | WitnessInput[]) => MachineData
+  eval    : (data   : MachineData, witness  : WitnessData | WitnessData[]) => MachineData
   init    : (config : MachineConfig) => MachineData
   run     : (data   : MachineData, stop_at ?: number) => MachineData
   verify  : (method : string, params   : Literal[]) => string | null
@@ -38,7 +38,7 @@ export interface MachineConfig {
 }
 
 export interface VMSubmitRequest {
-  witness : WitnessInput
+  witness : WitnessData
 }
 
 export interface MachineBase {

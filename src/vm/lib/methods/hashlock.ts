@@ -1,5 +1,5 @@
 import { assert, check }        from '@/core/util/index.js'
-import { Literal, WitnessInput } from '@/core/types/index.js'
+import { Literal, WitnessData } from '@/core/types/index.js'
 import { VMError }              from '@/vm/util/base.js'
 import { sha256 }               from '@cmdcode/crypto-tools/hash'
 
@@ -16,7 +16,7 @@ function exec (
   // Normalize threshold.
   const thold = Number(threshold)
   // Return wrapped program.
-  return (witness : WitnessInput) => {
+  return (witness : WitnessData) => {
     // Unpack witness object.
     const { action, args, path, sigs } = witness
     //

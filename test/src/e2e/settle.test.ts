@@ -43,7 +43,7 @@ import {
   verify_proposal_data,
   verify_commit_req,
   verify_deposit_data,
-  verify_witness_commit,
+  verify_witness_receipt,
   verify_witness_data,
   verify_contract_sigs,
   verify_deposit_sigs,
@@ -52,7 +52,7 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  create_commit,
+  create_receipt,
   create_witness,
   endorse_witness
 } from '@scrow/sdk/witness'
@@ -261,13 +261,13 @@ export default async function (
       }
 
       // Create a signed commit for the latest commit.
-      const vm_commit = create_commit(vm_data, escrow_dev, witness)
+      const receipt = create_receipt(vm_data, escrow_dev, witness)
       // Verify the latest commit matches the commit.
-      verify_witness_commit(vm_commit, vm_data, witness)
+      verify_witness_receipt(receipt, witness, vm_data)
 
       if (VERBOSE) {
-        console.log(banner('vm commit'))
-        console.dir(vm_commit, { depth : null })
+        console.log(banner('vm receipt'))
+        console.dir(receipt, { depth : null })
       } else {
         t.pass('evaluation ok')
       }

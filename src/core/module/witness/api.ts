@@ -5,7 +5,7 @@ import { sort_record } from '@/core/util/index.js'
 import {
   ProgramEntry,
   SignerAPI,
-  WitnessInput
+  WitnessData
 } from '@/core/types/index.js'
 
 /**
@@ -15,7 +15,7 @@ import {
 export function can_endorse (
   programs : ProgramEntry[],
   signer   : SignerAPI,
-  witness  : WitnessInput
+  witness  : WitnessData
 ) {
   const { action, method, path } = witness
   const pubkey = signer.pubkey
@@ -30,8 +30,8 @@ export function can_endorse (
  */
 export function endorse_witness (
   signer  : SignerAPI,
-  witness : WitnessInput
-) : WitnessInput {
+  witness : WitnessData
+) : WitnessData {
   const { sigs = [], wid } = witness
   const pub = signer.pubkey
   const sig = signer.sign(wid)

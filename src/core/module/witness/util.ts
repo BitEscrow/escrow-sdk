@@ -1,7 +1,7 @@
 import { Buff } from '@cmdcode/buff'
 
 import {
-  WitnessDataImage,
+  WitnessReceiptPreImage,
   WitnessPreImage
 } from '@/core/types/index.js'
 
@@ -18,7 +18,7 @@ export function get_witness_id (
 }
 
 export function get_commit_id (
-  preimage : WitnessDataImage
+  preimage : WitnessReceiptPreImage
 ) {
   const { commit_at, agent_pk, vm_head, wid } = preimage
   const stamp = Buff.num(commit_at, 4)

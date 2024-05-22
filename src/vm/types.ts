@@ -1,7 +1,7 @@
 import {
   Literal,
   MachineData,
-  WitnessInput
+  WitnessData
 } from '@/core/types/index.js'
 
 export type ProgramExec = (
@@ -10,7 +10,7 @@ export type ProgramExec = (
 ) => ProgramReturn
 
 export type ProgramReturn = (
-  witness : WitnessInput
+  witness : WitnessData
 ) => boolean | Promise<boolean>
 
 export type ProgramVerify = (

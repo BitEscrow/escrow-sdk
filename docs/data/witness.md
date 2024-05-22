@@ -4,7 +4,7 @@ List of data interfaces for the Witness API.
 
 - [WitnessTemplate](#witness-template)
 - [WitnessData](#witness-data)
-- [WitnessCommit](#witness-commit)
+- [WitnessReceipt](#witness-receipt)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -50,12 +50,12 @@ interface WitnessData {
 
 ---
 
-## Witness Commit
+## Witness Receipt
 
 A signed receipt that confirms a statement was evaluated by the machine.
 
 ```ts
-interface WitnessCommit extends WitnessData {
+interface WitnessReceipt extends WitnessData {
   agent_pk   : string        // The public key being used by the escrow server.
   commit_at  : number        // UTC timestamp for when the receipt was created. 
   commit_id  : string        // Hash identifier for the receipt. 

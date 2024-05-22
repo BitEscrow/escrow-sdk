@@ -2,14 +2,14 @@ import MachineSchema from '@/core/schema/machine.js'
 
 import {
   VMSubmitRequest,
-  WitnessInput
+  WitnessData
 } from '@/core/types/index.js'
 
 /**
  * Create a submit request object.
  */
 export function create_submit_req (
-  witness : WitnessInput
+  witness : WitnessData
 ) : VMSubmitRequest {
   // Parse and return a valid submit request object.
   return MachineSchema.submit_req.parse({ witness })

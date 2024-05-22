@@ -19,8 +19,8 @@ const res = await client.witness.list(req)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack our data payload.
-const { commits } = res.data
+const { receipts } = res.data
 
 print_banner('statement list')
-console.dir(commits, { depth : null })
+console.dir(receipts, { depth : null })
 console.log('\n')

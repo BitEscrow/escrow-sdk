@@ -1,4 +1,4 @@
-import { WitnessInput }  from '@/core/types/index.js'
+import { WitnessData }  from '@/core/types/index.js'
 import { ENGINE_LABEL } from '../const.js'
 
 const DEBUG = false
@@ -31,7 +31,7 @@ export function err_handler (
 }
 
 export function get_statements (
-  witness : WitnessInput | WitnessInput[]
+  witness : WitnessData | WitnessData[]
 ) {
  const arr = (Array.isArray(witness)) ? witness : [ witness ]
  return arr.sort((a, b) => a.stamp - b.stamp)

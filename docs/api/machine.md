@@ -84,8 +84,8 @@ interface VMSubmitRequest {
 ```ts
 export interface VMSubmitResponse {
   data : {
-    commit : WitnessCommit
-    vmdata : MachineData
+    receipt : WitnessReceipt
+    vmdata  : MachineData
   }
 }
 
@@ -111,7 +111,7 @@ const res = await client.machine.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data from the response.
-const { commit, vmdata } = res.data
+const { receipt, vmdata } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/submit.ts).
@@ -183,7 +183,7 @@ endpoint : '/api/machine/:vmid/commits'
 ```ts
 interface WitnessListResponse {
   data : {
-    commits : WitnessCommit[]
+    receipts : WitnessCommit[]
   }
 }
 ```
@@ -196,7 +196,7 @@ const res = await client.machine.commits(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { commits } = res.data
+const { receipts } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/commits.ts).

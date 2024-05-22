@@ -1,5 +1,5 @@
 import { assert }               from '@/core/util/index.js'
-import { Literal, WitnessInput } from '@/core/types/index.js'
+import { Literal, WitnessData } from '@/core/types/index.js'
 import { VMError }              from '../../util/base.js'
 
 /**
@@ -14,7 +14,7 @@ function exec (
   // Normalize threshold.
   const thold = Number(threshold)
   // Return wrapped program.
-  return (witness : WitnessInput) => {
+  return (witness : WitnessData) => {
     // Unpack witness object.
     const { action, path, sigs } = witness
     // Iterate through each signature in the witness.
