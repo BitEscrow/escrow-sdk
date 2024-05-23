@@ -1,10 +1,10 @@
 [![Integration Tests](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml/badge.svg?branch=master)](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml)
 
+> If you are looking to use the BitEscrow API, check out our [Developer Documentation](https://bitescrow.dev) resources and [Replit Container](https://replit.com/@cscottdev/escrow-core).
+
 # escrow-core
 
-A secure, private protocol for locking Bitcoin into a smart contract, with non-custodial escrow of funds.
-
-> If you are looking to use the BitEscrow API, check out our [Developer Documentation](https://bitescrow.dev) resources and [Replit Container](https://replit.com/@cscottdev/escrow-core).
+A secure, private protocol for locking Bitcoin to a smart contract, with non-custodial escrow of funds.
 
 Key Features:
 
@@ -17,6 +17,8 @@ Key Features:
   * __Designed for trustless environments.__ Signing keys are separated from address generation, with zero capacity to sweep funds. Keys can be made ephemeral, and recoverable from the user's xpub.
 
   * __Designed to be robust.__ Deposits can be reused whenever a contract cancels or expires. Refund transactions are secured upfront and broadcast automatically on expiration.
+
+  * __Designed to scale.__ Deposits can be locked/released from a contract without being spent. Contracts have the option to settle or expire without an on-chain transaction.
 
 Package Features:
 
