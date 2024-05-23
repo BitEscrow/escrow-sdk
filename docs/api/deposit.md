@@ -95,7 +95,7 @@ const { deposit } = res.data
 
 **Example Response**
 
-- [DepositData](../examples/depositdata.md)
+- [DepositData](../examples/DepositData.md)
 
 **Related Interfaces:**
 
@@ -209,7 +209,7 @@ const { deposit } = res.data
 
 **Example Response**
 
-- [DepositData](../examples/depositdata.md)
+- [DepositData](../examples/DepositData.md)
 
 **Related Interfaces:**
 
@@ -256,7 +256,7 @@ const { deposit } = res.data
 
 **Example Response**
 
-- [DepositData](../examples/deposit-data.md)
+- [DepositData](../examples/DepositData.md)
 
 **Related Interfaces:**
 

@@ -4,10 +4,10 @@ Reference guide for the virtual machine API.
 
 | Endpoint | Description |
 |----------|-------------|
-| [/api/machine/list](#list-machines-by-pubkey)          | List machines by pubkey.    |
-| [/api/machine/submit](#submit-a-witness-statement)     | Submit a new statement.     |
-| [/api/machine/:vmid](#read-a-machine-by-id)            | Fetch a machine by ID.      |
-| [/api/machine/:vmid/commits](#list-machine-statements) | List statements by machine. |
+| [/api/machine/list](#list-machines-by-pubkey)         | List machines by pubkey.  |
+| [/api/machine/submit](#submit-a-witness-statement)    | Submit a new statement.   |
+| [/api/machine/:vmid](#read-a-machine-by-id)           | Fetch a machine by ID.    |
+| [/api/machine/:vmid/receipts](#list-machine-receipts) | List receipts by machine. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -84,8 +84,8 @@ interface VMSubmitRequest {
 ```ts
 export interface VMSubmitResponse {
   data : {
-    commit : WitnessCommit
-    vmdata : MachineData
+    receipt : WitnessReceipt
+    vmdata  : MachineData
   }
 }
 
@@ -111,7 +111,7 @@ const res = await client.machine.submit(vmid, witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data from the response.
-const { commit, vmdata } = res.data
+const { receipt, vmdata } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/submit.ts).
@@ -119,7 +119,7 @@ const { commit, vmdata } = res.data
 **Related Interfaces:**
 
 - [MachineData](../data/machine.md#machine-data)
-- [WitnessCommit](../data/witness.md#witness-data)
+- [WitnessReceipt](../data/witness.md#witness-receipt)
 
 ---
 
@@ -159,7 +159,7 @@ const { vmdata } = res.data
 
 **Example Response**
 
-- [MachineData](../examples/vmdata.md)
+- [MachineData](../examples/MachineData.md)
 
 **Related Interfaces**
 
@@ -167,15 +167,15 @@ const { vmdata } = res.data
 
 ---
 
-## List Machine Statements
+## List Machine Receipts
 
-Request all witness statements for a virtual machine.
+Request all witness receipts for a virtual machine.
 
 **Request Format**
 
 ```ts
 method   : 'GET'
-endpoint : '/api/machine/:vmid/commits'
+endpoint : '/api/machine/:vmid/receipts'
 ```
 
 **Response Interface**
@@ -183,7 +183,7 @@ endpoint : '/api/machine/:vmid/commits'
 ```ts
 interface WitnessListResponse {
   data : {
-    commits : WitnessCommit[]
+    receipts : WitnessCommit[]
   }
 }
 ```
@@ -196,11 +196,11 @@ const res = await client.machine.commits(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { commits } = res.data
+const { receipts } = res.data
 ```
 
 > See the full code example [here](https://github.com/BitEscrow/escrow-core/tree/master/demo/api/machine/commits.ts).
 
 **Related Interfaces:**
 
-- [WitnessCommit](../data/witness.md#witness-commit)
+- [WitnessReceipt](../data/witness.md#witness-receipt)

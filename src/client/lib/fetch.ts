@@ -1,73 +1,76 @@
-import { ApiResponse, OracleTxSpendData } from '@/client/types/index.js'
+import { ApiResponse } from '@/client/types/index.js'
 
-import { TxConfirmState } from '@/core/types/index.js'
+export function get_fetcher (fetcher = fetch) {
+  return {
+    json : async <T> (
+      input : URL | RequestInfo,
+      init ?: RequestInit
+    ) => {
+      return fetch_json<T>(input, init, fetcher)
+    },
+    text : async (
+      input : URL | RequestInfo,
+      init ?: RequestInit
+    ) => {
+      return fetch_text(input, init, fetcher)
+    }
+  }
+}
 
-export async function fetcher <T> (
-  input   : URL | RequestInfo,
-  init   ?: RequestInit,
+export async function fetch_json <T> (
+  input : URL | RequestInfo,
+  init ?: RequestInit,
+  fetcher = fetch
+) {
+    // Fetch response using fetcher.
+    const res = await fetcher(input, init)
+    // Resolve response as json.
+    return resolve_json<T>(res)
+}
+
+export async function fetch_text (
+  input : URL | RequestInfo,
+  init ?: RequestInit,
   fetcher = fetch
 ) {
   // Fetch response using fetcher.
   const res = await fetcher(input, init)
   // Resolve response as json.
-  return resolve_json<T>(res)
+  return resolve_text(res)
 }
 
 /**
- * Helper method for resolving json
- * and other data from HTTP responses.
+ * Helper method for resolving json from HTTP responses.
  */
 export async function resolve_json <T> (
   res : Response
 ) : Promise<ApiResponse<T>> {
   // Unpack response object.
   const { status, statusText } = res
-  // Initialize our data variable.
-  let data : any
   // Try to resolve the data:
-  try {
-    // Resolve the data as json.
-    data = await res.json()
-  } catch {
-    // Else, leave undefined.
-    data = undefined
-  }
-  // If the response is not ok:
   if (!res.ok) {
-    // Find and set error message.
-    const error = (typeof data?.error === 'string')
-      ? data.error
-      : statusText
-    // Return response with error.
-    return { status, ok: false, error }
+    const error = await res.text() ?? statusText
+    return { error, status, ok: false }
+  } else {
+    const data = await res.json() as T
+    return { status, ok: true, data }
   }
-  // If data is undefined:
-  if (data === undefined) {
-    // Return response with error.
-    return {
-      status,
-      ok    : false,
-      error : 'data is undefined'
-    }
-  }
-  // Return response with data.
-  return { status, ok: true, data }
 }
 
-export function get_confirm_state (
-  data     : OracleTxSpendData,
-  locktime : number
-) : TxConfirmState {
-  if (data.status.confirmed) {
-      const expires_at = data.status.block_time + locktime
-      return { ...data.status, expires_at }
+/**
+ * Helper method for resolving text from HTTP responses.
+ */
+export async function resolve_text (
+  res : Response
+) : Promise<ApiResponse<string>> {
+  // Unpack response object.
+  const { status, statusText } = res
+  // Try to resolve the data:
+  if (!res.ok) {
+    const error = await res.text() ?? statusText
+    return { error, status, ok: false }
   } else {
-    return {
-      confirmed    : false as const,
-      block_hash   : null,
-      block_height : null,
-      block_time   : null,
-      expires_at   : null
-    }
+    const data = await res.text()
+    return { status, ok: true, data }
   }
 }

@@ -1,7 +1,7 @@
-import { resolve_json } from '@/client/lib/fetch.js'
+import { get_fetcher }  from '@/client/lib/fetch.js'
 import { ChainNetwork } from '@/core/types/index.js'
-import { ChainOracle }  from './oracle.js'
 import { assert }       from '@/core/util/index.js'
+import { ChainOracle }  from './oracle.js'
 
 import {
   DEFAULT_CONFIG,
@@ -9,10 +9,8 @@ import {
 } from '@/client/config/index.js'
 
 import {
-  ApiResponse,
   ClientConfig,
-  ClientOptions,
-  FetchConfig
+  ClientOptions
 } from '@/client/types/index.js'
 
 import account_api   from '../api/client/account.js'
@@ -79,32 +77,5 @@ export class EscrowClient {
 
   toString () {
     return JSON.stringify(this.toJSON())
-  }
-}
-
-/**
- * Takes a fetch method as input, and wraps it
- * with schema validation and request signing.
- */
-export function get_fetcher (
-  fetcher : typeof fetch
-) {
-  // Return the wrapped fetch method.
-  return async <T> (
-    config : FetchConfig
-  ) : Promise<ApiResponse<T>> => {
-    // Unpack the config.
-    const { init = {}, token, url } = config
-    // Initialize the options object.
-    if (token !== undefined) {
-      init.headers = {
-        ...init.headers,
-        Authorization : 'Bearer ' + token
-      }
-    }
-    // Run the fetcher method.
-    const res = await fetcher(url, init)
-    // Resolve, validate, then return the response.
-    return resolve_json<T>(res)
   }
 }

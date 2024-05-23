@@ -46,10 +46,10 @@ const res = await client.machine.submit(witness)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data from the response.
-const { commit, vmdata } = res.data
+const { receipt, vmdata } = res.data
 
-print_banner('signed statement')
-console.dir(commit, { depth : null })
+print_banner('signed receipt')
+console.dir(receipt, { depth : null })
 console.log('\n')
 
 print_banner('updated machine')

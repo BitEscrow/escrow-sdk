@@ -42,7 +42,7 @@ function request_account_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<AccountDataResponse>({ url, init })
+    return client.fetcher.json<AccountDataResponse>(url, init)
   }
 }
 
@@ -65,7 +65,7 @@ function register_deposit_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<DepositDataResponse>({ url, init })
+    return client.fetcher.json<DepositDataResponse>(url, init)
   }
 }
 
@@ -88,7 +88,7 @@ function commit_funds_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<FundingDataResponse>({ url, init })
+    return client.fetcher.json<FundingDataResponse>(url, init)
   }
 }
 

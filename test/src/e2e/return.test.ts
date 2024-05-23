@@ -27,8 +27,8 @@ import {
 
 import {
   fund_address,
+  get_tx_status,
   get_members,
-  get_spend_state,
   get_utxo
 } from '../core.js'
 
@@ -96,8 +96,8 @@ export default async function (
 
       await client.mine_blocks(1)
 
-      const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
-      deposit = confirm_deposit(deposit, utxo_state)
+      const txstatus = await get_tx_status(client, deposit.utxo.txid)
+      deposit = confirm_deposit(deposit, txstatus)
 
       if (VERBOSE) {
         console.log(banner('deposit'))

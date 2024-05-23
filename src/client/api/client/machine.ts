@@ -28,7 +28,7 @@ function list_machines_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<VMListResponse>({ url, init })
+    return client.fetcher.json<VMListResponse>(url, init)
   }
 }
 
@@ -44,19 +44,19 @@ function read_vm_state_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/machine/${vmid}`
     // Return the response.
-    return client.fetcher<VMDataResponse>({ url })
+    return client.fetcher.json<VMDataResponse>(url)
   }
 }
 
-function list_commits_api (client : EscrowClient) {
+function list_receipts_api (client : EscrowClient) {
   return async (vmid : string) : Promise<ApiResponse<WitnessListResponse>> => {
      // Validate the contract id.
     assert.is_hash(vmid)
     // Formulate the request.
     const host = client.server_url
-    const url  = `${host}/api/machine/${vmid}/commits`
+    const url  = `${host}/api/machine/${vmid}/receipts`
     // Return the response.
-    return client.fetcher<WitnessListResponse>({ url })
+    return client.fetcher.json<WitnessListResponse>(url)
   }
 }
 
@@ -79,15 +79,15 @@ function submit_witness_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Return the response.
-    return client.fetcher<VMSubmitResponse>({ url, init })
+    return client.fetcher.json<VMSubmitResponse>(url, init)
   }
 }
 
 export default function (client : EscrowClient) {
   return {
-    commits : list_commits_api(client),
-    list    : list_machines_api(client),
-    read    : read_vm_state_api(client),
-    submit  : submit_witness_api(client)
+    list     : list_machines_api(client),
+    read     : read_vm_state_api(client),
+    receipts : list_receipts_api(client),
+    submit   : submit_witness_api(client)
   }
 }

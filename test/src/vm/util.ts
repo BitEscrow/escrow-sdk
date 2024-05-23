@@ -14,7 +14,7 @@ import {
   SignerAPI,
   MachineConfig,
   MachineData,
-  WitnessData,
+  WitnessInput,
 } from '@scrow/sdk/core'
 
 import CVM from '@scrow/sdk/cvm'
@@ -64,7 +64,7 @@ export function compile_witness_vectors (
   vmdata    : MachineData,
   witnesses : WitnessVector[]
 ) {
-  const wit_data : WitnessData[] = []
+  const wit_data : WitnessInput[] = []
   // For each witness statement: 
   for (const { signers, ...tmpl } of witnesses) {
     // Resolve signer aliases into their devices:

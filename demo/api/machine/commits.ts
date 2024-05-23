@@ -18,7 +18,7 @@ const res = await client.machine.commits(vmid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { commits } = res.data
+const { receipt: commits } = res.data
 
 print_banner('machine statements')
 console.dir(commits, { depth : null })

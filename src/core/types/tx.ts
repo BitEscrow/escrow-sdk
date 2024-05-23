@@ -4,32 +4,43 @@ export type TxSpendState   = TxIsSpent     | TxIsUnspent
 export type TxSettleState  = TxIsSettled   | TxNotSettled
 export type TxConfirmState = TxIsConfirmed | TxIsUnconfirmed
 
+export interface TxStatus {
+  confirmed     : boolean
+  block_hash   ?: string
+  block_height ?: number
+  block_time   ?: number
+}
+
 export interface TxIsConfirmed {
   confirmed    : true
-  block_hash   : string
-  block_height : number
-  block_time   : number
+  confirmed_at : number
+  conf_block   : string
+  conf_height  : number
   expires_at   : number
 }
 
 export interface TxIsUnconfirmed {
   confirmed    : false
-  block_hash   : null
-  block_height : null
-  block_time   : null
+  confirmed_at : null
+  conf_block   : null
+  conf_height  : null
   expires_at   : null
 }
 
 export interface TxIsSettled {
-  settled     : true
-  settled_at  : number
-  settled_sig : string
+  settled      : true
+  settled_at   : number
+  settled_sig  : string
+  spent_block  : string
+  spent_height : number
 }
 
 export interface TxNotSettled {
-  settled     : false
-  settled_at  : null
-  settled_sig : null
+  settled      : false
+  settled_at   : null
+  settled_sig  : null
+  spent_block  : null
+  spent_height : null
 }
 
 export interface TxIsSpent {

@@ -1,138 +1,106 @@
-import { parse_addr }    from '@scrow/tapscript/address'
-import { assert, sleep } from '@/core/util/index.js'
-import { exists }        from '@/core/util/validate.js'
-import { TxOutput }      from '@/core/types/index.js'
+import { parse_addr }     from '@scrow/tapscript/address'
+import { sleep }          from '@/core/util/index.js'
+import { get_fetcher }    from '@/client/lib/fetch.js'
 
 import {
-  fetcher,
-  get_confirm_state,
-  resolve_json
-} from '@/client/lib/fetch.js'
-
-import {
-  ApiResponse,
   OracleFeeEstimate,
-  OracleQuery,
-  OracleTxSpendData,
-  OracleTxSpendState,
   OracleTxData,
-  OracleUtxo
+  OracleTxStatus,
+  OracleUtxo,
+  OracleOutSpend,
+  OracleUtxoData
 } from '@/client/types/index.js'
 
 import ClientSchema from '@/client/schema/index.js'
 
 export class ChainOracle {
-  readonly _host : string
+  readonly _host    : string
+  readonly _fetcher : ReturnType<typeof get_fetcher>
 
-  constructor (host : string) {
-    this._host = host
+  constructor (host : string, fetcher = fetch) {
+    this._host    = host
+    this._fetcher = get_fetcher(fetcher)
   }
 
   /**
    * Fetch transaction data from the oracle.
    */
-  async get_tx_data (txid : string) : Promise<OracleTxData | null> {
+  async get_tx (txid : string) : Promise<OracleTxData | null> {
     // Define the url to use for fetching.
     const url = `${this._host}/tx/${txid}`
     // Fetch a response from the oracle.
-    const res = await fetch(url)
+    const res = await this._fetcher.json<OracleTxData>(url)
     // If status is 404, return null.
     if (res.status === 404) return null
-    // Resolve the response into json.
-    const json = await resolve_json<OracleTxData>(res)
     // If the response failed, throw.
-    if (!json.ok) throw new Error(json.error)
+    if (!res.ok) throw new Error(res.error)
     // Parse the returned data.
-    const parsed = await ClientSchema.oracle.txdata.spa(json.data)
-    // If data fails validation, throw.
-    if (!parsed.success) throw parsed.error
-    // Return the parsed data.
-    return parsed.data
+    return ClientSchema.oracle.txdata.parseAsync(res.data)
   }
 
   /**
-   * Fetch the spending state of a transaction
-   * output from the oracle.
+   * Fetch transaction status from the oracle.
    */
-  async get_utxo_state (
+  async get_tx_status (txid : string) : Promise<OracleTxStatus | null> {
+    // Define the url to use for fetching.
+    const url = `${this._host}/tx/${txid}`
+    // Fetch a response from the oracle.
+    const res = await this._fetcher.json<OracleTxData>(url)
+    // If status is 404, return null.
+    if (res.status === 404) return null
+    // If the response failed, throw.
+    if (!res.ok) throw new Error(res.error)
+    // Parse the returned data.
+    return ClientSchema.oracle.tx_status.parseAsync(res.data.status)
+  }
+
+  /**
+   * Fetch the spend state of an output from the oracle.
+   */
+  async get_outspend (
     txid : string,
     vout : number
-  ) : Promise<OracleTxSpendState | null> {
+  ) : Promise<OracleOutSpend> {
     // Define the url to use for fetching.
     const url = `${this._host}/tx/${txid}/outspend/${vout}`
     // Fetch a response from the oracle.
-    const res = await fetch(url)
-    // If status is 404, return null.
-    if (res.status === 404) return null
-    // Resolve the response into json.
-    const json = await resolve_json<OracleTxSpendState>(res)
-    // If the response failed, throw.
-    if (!json.ok) throw new Error(json.error)
+    const res = await this._fetcher.json<OracleUtxo>(url)
+    // If failed for another reason, throw error.
+    if (!res.ok) throw new Error(res.error)
     // Parse the returned data.
-    const parsed = await ClientSchema.oracle.txostate.spa(json.data)
-    // If data fails validation, throw.
-    if (!parsed.success) throw parsed.error
-    // Return the parsed data.
-    return parsed.data
+    return ClientSchema.oracle.outspend.parseAsync(res.data)
   }
 
   /**
-   * Fetch the full status and state of a
-   * transaction output from the oracle.
+   * Fetch the transaction output data from the oracle.
    */
-  async get_utxo_data (query : OracleQuery) : Promise<OracleTxSpendData | null> {
-    // Unpack the query object.
-    const { txid, vout, address } = query
+  async get_utxo_data (
+    txid : string,
+    vout : number
+  ) : Promise<OracleUtxoData | null> {
     // Fetch transaction data from the oracle.
-    const tx = await this.get_tx_data(txid)
+    const tx = await this.get_tx(txid)
     // If the transaction is null, return null.
     if (tx === null) return null
-    // Define an index variable.
-    let idx : number
-    // Search the transaction outputs (via address or index).
-    if (!exists(vout)) {
-      if (!exists(address)) {
-        throw new Error('You must specify an address or vout!')
-      }
-      idx = tx.vout.findIndex(e => e.scriptpubkey_address === address)
-    } else {
-      idx = vout
-    }
-    // If the index is -1, return null.
-    if (idx === -1) return null
     // Set the txout based on the resulting index.
-    const txo = tx.vout.at(idx)
+    const txout = tx.vout.at(vout)
     // If txout is undefined, return null.
-    if (txo === undefined) return null
-    // Get the spend state of the txout from the oracle.
-    const state = await this.get_utxo_state(txid, idx)
-    // If the spend state is null, return null.
-    if (state === null) return null
-    // Construct the returned txout.
-    const txout = {
-      txid,
-      vout      : idx,
-      value     : txo.value,
-      scriptkey : txo.scriptpubkey
-    }
-    // Return the txout aling with its state and status.
-    return { txout, status: tx.status, state }
+    if (txout === undefined) return null
+    // Unpack the tx output.
+    const { value, scriptpubkey: scriptkey } = txout
+    // Define the utxo value.
+    const utxo = { txid, vout, value, scriptkey }
+    // Return the utxo data.
+    return { status: tx.status, utxo }
   }
 
-  async get_confirm_state (
-    locktime : number,
-    utxo     : TxOutput
-  ) {
-    const { txid, vout } = utxo
-    const res = await this.get_utxo_data({ txid, vout })
-    return (res === null) ? null : get_confirm_state(res, locktime)
-  }
-
-  async get_address_utxos (addr : string) : Promise<OracleTxSpendData[]> {
+  async get_address_utxos (
+    address : string
+  ) : Promise<OracleUtxoData[]> {
     // Define the url to use for fetching.
-    const url = `${this._host}/address/${addr}/utxo`
+    const url = `${this._host}/address/${address}/utxo`
     // Fetch a response from the oracle.
-    const res = await fetcher<OracleUtxo[]>(url)
+    const res = await this._fetcher.json<OracleUtxo[]>(url)
     // If response failed, throw error.
     if (!res.ok) throw new Error(res.error)
     // Parse the returned data.
@@ -141,22 +109,21 @@ export class ChainOracle {
     if (!parsed.success) throw parsed.error
     // Return the parsed data.
     return parsed.data.map(({ txid, status, value, vout }) => {
-      const scriptkey = parse_addr(addr).hex
-      const state     = { spent: false as const }
-      const txout     = { txid, vout, value, scriptkey }
-      return { state, status, txout }
+      const scriptkey = parse_addr(address).hex
+      const utxo      = { txid, vout, value, scriptkey }
+      return { status, utxo }
     })
   }
 
-  async get_latest_utxo (addr : string) : Promise<OracleTxSpendData | null> {
-    const utxos  = await this.get_address_utxos(addr)
+  async get_first_utxo (address : string) : Promise<OracleUtxoData | null> {
+    const utxos = await this.get_address_utxos(address)
     return utxos.at(0) ?? null
   }
 
   /**
    * Broadcast a transaction through the oracle.
    */
-  async broadcast_tx (txhex : string) : Promise<ApiResponse<string>> {
+  async broadcast_tx (txhex : string) : Promise<string> {
     // Define the url to use for fetching.
     const url = `${this._host}/tx`
     // Configure the request.
@@ -166,13 +133,11 @@ export class ChainOracle {
       method  : 'POST'
     }
     // Fetch a response from the oracle.
-    const res = await fetch(url, req)
-    // Unpack response object.
-    const { status, statusText } = res
-    // Return a data object based on the oracle response.
-    return (res.ok)
-      ? { status, ok: true,  data: await res.text() }
-      : { status, ok: false, error: statusText }
+    const res = await this._fetcher.text(url, req)
+    // If response failed, throw error.
+    if (!res.ok) throw new Error(res.error)
+    // Parse the returned data.
+    return res.data
   }
 
   /**
@@ -182,15 +147,15 @@ export class ChainOracle {
     // Define the url to use for fetching.
     const url = `${this._host}/fee-estimates`
     // Fetch a response from the oracle.
-    const res = await fetch(url)
-    // Resolve the response into json.
-    const json = await resolve_json<OracleFeeEstimate>(res)
+    const res = await this._fetcher.json<OracleFeeEstimate>(url)
     // If the response failed, throw.
-    if (!json.ok) throw new Error(json.error)
+    if (!res.ok) throw new Error(res.error)
     // Return the parsed data with rounded values.
-    const ent = Object.entries(json.data)
-    const rnd = ent.map(([ k, v ]) => [ k, Math.ceil(v) ])
-    return Object.fromEntries(rnd)
+    const entries = Object.entries(res.data)
+    // Round the feerate values.
+    const rounded = entries.map(([ k, v ]) => [ k, Math.ceil(v) ])
+    // Return the feerate values.
+    return Object.fromEntries(rounded)
   }
 
   /**
@@ -213,27 +178,22 @@ export class ChainOracle {
   }
 
   async poll_address (
-    address  : string,
-    interval : number,
-    retries  : number,
-    verbose  = false
-  ) : Promise<OracleTxSpendData> {
+    address   : string,
+    interval  : number,
+    retries   : number,
+    callback ?: (address : string, tries : number) => Promise<void>
+  ) : Promise<OracleUtxoData> {
     let tries = 0,
-        utxos : OracleTxSpendData[] = []
+        utxos : OracleUtxoData[] = []
     for (let i = 0; i < retries; i++) {
       if (utxos.length > 0) {
-        const utxo = utxos.at(-1)
-        assert.exists(utxo)
-        return utxo
+        return utxos[0]
       } else {
         utxos = await this.get_address_utxos(address)
         tries += 1
-        if (verbose) {
-          const msg = `[${tries}/${retries}] checking address in ${interval} seconds...`
-          console.log(msg)
-        }
-        await sleep(interval * 1000)
       }
+      if (callback !== undefined) void callback(address, tries)
+      await sleep(interval * 1000)
     }
     throw new Error('polling timed out')
   }

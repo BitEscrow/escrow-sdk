@@ -1,8 +1,6 @@
-import { Buff }              from '@cmdcode/buff'
-import { Signer, Wallet }    from '@cmdcode/signer'
-import { TxOutput }          from '@/core/types/index.js'
-import { get_confirm_state } from '@/client/lib/fetch.js'
-import { CoreSigner }        from './types.js'
+import { Buff }           from '@cmdcode/buff'
+import { Signer, Wallet } from '@cmdcode/signer'
+import { CoreSigner }     from './types.js'
 
 import {
   CoreClient,
@@ -97,15 +95,12 @@ export async function get_utxo (
   return { txid, vout, value, scriptkey : scriptPubKey.hex }
 }
 
-export async function get_spend_state (
-  client   : CoreClient,
-  locktime : number,
-  utxo     : TxOutput
+export async function get_tx_status (
+  client : CoreClient,
+  txid   : string
 ) {
-  const tx_input = await client.get_txinput(utxo.txid, utxo.vout)
-  if (tx_input === null)          throw new Error('utxo not found')
-  if (!tx_input.status.confirmed) throw new Error('utxo not confirmed')
-  const data = { txout : utxo, status : tx_input.status, state : { spent : false as const }}
-
-  return get_confirm_state(data, locktime)
+  const status = await client.get_tx_status(txid)
+  if (status === null)   throw new Error('utxo not found')
+  if (!status.confirmed) throw new Error('utxo not confirmed')
+  return status
 }

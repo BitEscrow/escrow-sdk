@@ -5,8 +5,8 @@ Reference guide for the Escrow Account API.
 | Endpoint | Description |
 |----------|-------------|
 | [/api/account/request](#request-a-deposit-account) | Request a new deposit account. |
-| [/api/account/register](#register-a-deposit-utxo)  | Register a deposit of funds.   |
-| [/api/account/commit](#commit-a-deposit-utxo)      | Register funds for a contract. |
+| [/api/account/register](#register-a-deposit)       | Register a deposit of funds.   |
+| [/api/account/commit](#commit-a-deposit)           | Register funds for a contract. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -65,7 +65,7 @@ const { account } = res.data
 
 **Example Response**
 
-- [AccountData](../examples/accountdata.md)
+- [AccountData](../examples/AccountData.md)
 
 **Related Interfaces:**
 
@@ -128,12 +128,12 @@ const { deposit } = res.data
 
 **Example Response**
 
-- [DepositData](../examples/depositdata.md)
+- [DepositData](../examples/DepositData.md)
 
 **Related Interfaces:**
 
 - [DepositData](../data/deposit.md#deposit-data)
-- [TxOutput](../data/deposit.md#tx-output)
+- [TxOutput](../data/oracle.md#tx-output)
 
 ---
 
@@ -187,12 +187,12 @@ const { contract, deposit } = res.data
 
 **Example Response**
 
-- [ContractData](../examples/contractdata.md)
-- [DepositData](../examples/depositdata.md)
+- [ContractData](../examples/ContractData.md)
+- [DepositData](../examples/DepositData.md)
 
 **Related Interfaces:**
 
 - [ContractData](../data/contract.md#contract-data)
 - [CovenantData](../data/deposit.md#covenant-data)
 - [DepositData](../data/deposit.md#deposit-data)
-- [TxOutput](../data/deposit.md#tx-output)
+- [TxOutput](../data/oracle.md#tx-output)

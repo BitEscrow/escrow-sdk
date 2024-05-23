@@ -31,7 +31,7 @@ function read_deposit_api (client : EscrowClient) {
     const host = client.server_url
     const url  = `${host}/api/deposit/${dpid}`
     // Return the response.
-    return client.fetcher<DepositDataResponse>({ url })
+    return client.fetcher.json<DepositDataResponse>(url)
   }
 }
 
@@ -48,7 +48,7 @@ function list_deposit_api (client : EscrowClient) {
       headers : { Authorization: 'Bearer ' + token }
     }
     // Return the response.
-    return client.fetcher<DepositListResponse>({ url, init })
+    return client.fetcher.json<DepositListResponse>(url, init)
   }
 }
 
@@ -68,7 +68,7 @@ function lock_deposit_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' }
     }
     // Fetch and return a response.
-    return client.fetcher<FundingDataResponse>({ url, init })
+    return client.fetcher.json<FundingDataResponse>(url, init)
   }
 }
 
@@ -87,7 +87,7 @@ function cancel_deposit_api (client : EscrowClient) {
       method  : 'GET',
       headers : { Authorization: 'Bearer ' + token }
     }
-    return client.fetcher<DepositDataResponse>({ url, init })
+    return client.fetcher.json<DepositDataResponse>(url, init)
   }
 }
 
@@ -106,7 +106,7 @@ function close_deposit_api (client : EscrowClient) {
       headers : { 'content-type': 'application/json' },
       method  : 'POST'
     }
-    return client.fetcher<DepositDataResponse>({ url, init })
+    return client.fetcher.json<DepositDataResponse>(url, init)
   }
 }
 

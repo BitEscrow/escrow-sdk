@@ -14,7 +14,7 @@ import {
   MachineConfig,
   MachineData,
   SignerAPI,
-  WitnessCommit,
+  WitnessReceipt,
   WitnessData,
   WitnessTemplate
 } from '@/core/types/index.js'
@@ -41,12 +41,12 @@ export function create_witness (
   return sort_record({ ...tmpl, sigs: [], wid })
 }
 
-export function create_commit (
+export function create_receipt (
   data    : MachineData,
   signer  : SignerAPI,
   witness : WitnessData,
   commit_at = now()
-) : WitnessCommit {
+) : WitnessReceipt {
   const agent_pk   = signer.pubkey
   const vm_closed  = data.closed
   const vm_head    = data.head

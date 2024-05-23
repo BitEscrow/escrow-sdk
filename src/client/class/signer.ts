@@ -17,7 +17,7 @@ import {
   SignerConfig,
   SignerOptions,
   WalletAPI
-} from '../types/base.js'
+} from '../types/config.js'
 
 import account_api  from '../api/signer/account.js'
 import contract_api from '../api/signer/contract.js'

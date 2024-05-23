@@ -7,30 +7,13 @@ import {
 } from '@/core/module/witness/util.js'
 
 import {
-  Literal,
   ProgramData,
-  ProgramEntry,
   MachineData,
-  ScriptEngineAPI,
   WitnessData,
-  WitnessCommit
+  WitnessReceipt
 } from '@/core/types/index.js'
 
-import PropSchema from '@/core/schema/proposal.js'
-import VMSchema   from '@/core/schema/machine.js'
-import WitSchema  from '@/core/schema/witness.js'
-
-export function validate_program_entry (
-  program : unknown
-) : asserts program is ProgramEntry {
-  void PropSchema.program.parse(program)
-}
-
-export function validate_vm_data (
-  vmdata : MachineData
-) {
- void VMSchema.data.parse(vmdata)
-}
+import WitSchema from '@/core/schema/witness.js'
 
 export function validate_witness_data (
   witness : unknown
@@ -38,18 +21,10 @@ export function validate_witness_data (
   void WitSchema.data.parse(witness)
 }
 
-export function verify_program_entry (
-  machine : ScriptEngineAPI,
-  method  : string,
-  params  : Literal[]
-) {
-  if (!machine.methods.includes(method)) {
-    throw new Error('invalid program method: ' + method)
-  }
-
-  const err = machine.verify(method, params)
-
-  if (err !== null) throw new Error(err)
+export function validate_witness_receipt (
+  witness : unknown
+) : asserts witness is WitnessReceipt {
+  void WitSchema.receipt.parse(witness)
 }
 
 export function verify_witness_data (
@@ -97,41 +72,40 @@ export function verify_witness_sigs (
   })
 }
 
-export function verify_witness_commit (
-  commit  : WitnessCommit,
-  vmstate : MachineData,
-  witness : WitnessData
+export function verify_witness_receipt (
+  receipt : WitnessReceipt,
+  vminput : WitnessData,
+  vmstate : MachineData
 ) {
-  const { commit_id, commit_sig, agent_pk } = commit
+  const { commit_id, commit_sig, agent_pk } = receipt
 
   // Don't forget to check that vm matches commit.
-  assert.ok(witness.vmid  === vmstate.vmid,       'provided vmstate and witness vmid does not match')
-  assert.ok(witness.stamp === vmstate.commit_at,  'provided vmstate and witness stamp does not match')
-  assert.ok(witness.vmid  === commit.vmid,       'commit vmid does not match witness')
-  assert.ok(vmstate.head   === commit.vm_head,    'commit vm_head does not match vmstate head')
-  assert.ok(vmstate.output === commit.vm_output,  'commit vm_output does not match vmstate output')
-  assert.ok(vmstate.step   === commit.vm_step,    'commit vm_step does not match vmstate step count')
+  assert.ok(vminput.wid       === receipt.wid,       'receipt wid does not match witness input')
+  assert.ok(vmstate.vmid      === receipt.vmid,      'provided vmstate and witness vmid does not match')
+  assert.ok(vmstate.commit_at === receipt.stamp,     'provided vmstate and witness stamp does not match')
+  assert.ok(vmstate.head      === receipt.vm_head,   'input vm_head does not match vmstate head')
+  assert.ok(vmstate.output    === receipt.vm_output, 'input vm_output does not match vmstate output')
+  assert.ok(vmstate.step      === receipt.vm_step,   'input vm_step does not match vmstate step count')
 
-  const int_wid  = get_witness_id(commit)
-  const int_rid  = get_commit_id(commit)
+  const int_wid  = get_witness_id(receipt)
+  const int_rid  = get_commit_id(receipt)
 
-  assert.ok(int_wid === witness.wid,             'internal witness id does not match commit')
-  assert.ok(int_rid === commit.commit_id,        'internal commit id does not match commit')
+  assert.ok(int_wid === receipt.wid,       'internal witness id does not match commit')
+  assert.ok(int_rid === receipt.commit_id, 'internal commit id does not match commit')
 
   const is_valid = verify_sig(commit_sig, commit_id, agent_pk)
 
-  assert.ok(is_valid, 'commit signature is invalid')
+  assert.ok(is_valid, 'receipt signature is invalid')
 }
 
 export default {
   validate : {
-    program : validate_program_entry,
-    witness : validate_witness_data
+    data    : validate_witness_data,
+    receipt : validate_witness_receipt
   },
   verify : {
-    program    : verify_program_entry,
     data       : verify_witness_data,
-    commit     : verify_witness_commit,
+    receipt    : verify_witness_receipt,
     signatures : verify_witness_sigs
   }
 }

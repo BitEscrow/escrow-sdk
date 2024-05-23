@@ -1,0 +1,8 @@
+{
+  "label": "Resources",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Documents and resources for using BitEscrow API."
+  }
+}

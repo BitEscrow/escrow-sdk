@@ -4,33 +4,37 @@ import tx    from '@/core/schema/tx.js'
 
 const { bool, hash, hex, num, stamp, str } = base
 
-const confirmed = z.object({
+const tx_confirmed = z.object({
   confirmed    : z.literal(true),
   block_hash   : hash,
   block_height : num,
   block_time   : stamp
 })
 
-const unconfirmed = z.object({
+const tx_unconfirmed = z.object({
   confirmed : z.literal(false)
 })
 
-const status = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
+const tx_status = z.discriminatedUnion('confirmed', [ tx_confirmed, tx_unconfirmed ])
 
-const spent = z.object({
-  status,
-  spent : z.literal(true),
-  txid  : hash,
-  vin   : num
+const txo_spent = z.object({
+  status : tx_status,
+  spent  : z.literal(true),
+  txid   : hash,
+  vin    : num
 })
 
-const unspent = z.object({
+const txo_unspent = z.object({
   spent : z.literal(false)
 })
 
-const state = z.discriminatedUnion('spent', [ spent, unspent ])
+const outspend = z.discriminatedUnion('spent', [ txo_spent, txo_unspent ])
 
-const spend = z.object({ state, status, txout: tx.txout })
+const utxo_data = z.object({
+  spend  : outspend,
+  status : tx_status,
+  utxo   : tx.txout
+})
 
 const txout = z.object({
   scriptpubkey         : hex,
@@ -52,7 +56,7 @@ const txin = z.object({
 })
 
 const txdata = z.object({
-  status,
+  status   : tx_status,
   txid     : hash,
   version  : num,
   locktime : num,
@@ -65,18 +69,18 @@ const txdata = z.object({
 })
 
 const utxo = z.object({
-  txid  : hash,
-  vout  : num,
-  status,
-  value : num
+  txid   : hash,
+  vout   : num,
+  status : tx_status,
+  value  : num
 })
 
 export default {
+  outspend,
   txin,
   txout,
   txdata,
-  txodata  : spend,
-  txostate : state,
-  txstatus : status,
+  tx_status,
+  utxo_data,
   utxo
 }

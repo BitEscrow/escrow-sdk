@@ -54,7 +54,7 @@ await sleep(2000)
 const [ ival, retries ] = config.poll
 
 let tries  = 1,
-    txdata = await client.oracle.get_latest_utxo(address)
+    txdata = await client.oracle.get_first_utxo(address)
 
 // While there are no utxos (and we still have tries):
 while (txdata === null && tries < retries) {
@@ -63,7 +63,7 @@ while (txdata === null && tries < retries) {
   // Sleep for interval number of secords.
   await sleep(ival * 1000)
   // Check again for utxos at address.
-  txdata = await client.oracle.get_latest_utxo(address)
+  txdata = await client.oracle.get_first_utxo(address)
   // Increment our tries counter
   tries += 1
 }
@@ -79,7 +79,7 @@ if (DEMO_MODE) {
  * Request to register a utxo with the escrow server, plus a covenant
  * that locks the utxo to the specified contract.
  */
-const req = funder.account.commit(new_account, new_contract, ret_rate, txdata.txout)
+const req = funder.account.commit(new_account, new_contract, ret_rate, txdata.utxo)
 // Deliver our registration request to the server.
 const res = await client.account.commit(req)
 // Check the response is valid.

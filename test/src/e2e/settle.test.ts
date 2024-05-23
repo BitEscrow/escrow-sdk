@@ -43,7 +43,7 @@ import {
   verify_proposal_data,
   verify_commit_req,
   verify_deposit_data,
-  verify_witness_commit,
+  verify_witness_receipt,
   verify_witness_data,
   verify_contract_sigs,
   verify_deposit_sigs,
@@ -52,15 +52,15 @@ import {
 } from '@/core/validation/index.js'
 
 import {
-  create_commit,
+  create_receipt,
   create_witness,
   endorse_witness
 } from '@scrow/sdk/witness'
 
 import {
   fund_address,
+  get_tx_status,
   get_members,
-  get_spend_state,
   get_utxo
 } from '../core.js'
 
@@ -196,8 +196,8 @@ export default async function (
       /* ------------------- [ Secure Contract ] ------------------- */
 
       const pending = deposits.map(async deposit => {
-        const utxo_state = await get_spend_state(client, deposit.locktime, deposit.utxo)
-        return confirm_deposit(deposit, utxo_state)
+        const status = await get_tx_status(client, deposit.utxo.txid)
+        return confirm_deposit(deposit, status)
       })
 
       deposits = await Promise.all(pending)
@@ -261,13 +261,13 @@ export default async function (
       }
 
       // Create a signed commit for the latest commit.
-      const vm_commit = create_commit(vm_data, escrow_dev, witness)
+      const receipt = create_receipt(vm_data, escrow_dev, witness)
       // Verify the latest commit matches the commit.
-      verify_witness_commit(vm_commit, vm_data, witness)
+      verify_witness_receipt(receipt, witness, vm_data)
 
       if (VERBOSE) {
-        console.log(banner('vm commit'))
-        console.dir(vm_commit, { depth : null })
+        console.log(banner('vm receipt'))
+        console.dir(receipt, { depth : null })
       } else {
         t.pass('evaluation ok')
       }
@@ -287,14 +287,20 @@ export default async function (
         t.pass('execution ok')
       }
 
-      /* ------------------- [ Settle Contract ] ------------------- */
+      /* ------------------- [ Spend Contract ] ------------------- */
 
       const commits = [ witness ]
       const txhex   = get_settlement_tx(contract, deposits, escrow_dev)
       const txid    = await client.publish_tx(txhex, true)
 
       contract = spend_contract(contract, txhex, txid, escrow_dev)
-      contract = settle_contract(contract, escrow_dev)
+
+      /* ------------------- [ Settle Contract ] ------------------- */
+
+      const txstatus = await get_tx_status(client, txid)
+      if (txstatus === null) throw new Error('spent tx not found')
+     
+      contract = settle_contract(contract, escrow_dev, txstatus)
       
       verify_contract_settlement(contract, CVM, deposits, commits, vm_data)
 

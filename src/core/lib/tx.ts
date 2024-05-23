@@ -49,9 +49,9 @@ import {
 export function INIT_CONF_STATE () : TxConfirmState {
   return {
     confirmed    : false as const,
-    block_hash   : null,
-    block_height : null,
-    block_time   : null,
+    confirmed_at : null,
+    conf_block   : null,
+    conf_height  : null,
     expires_at   : null
   }
 }
@@ -74,9 +74,11 @@ export function INIT_SPEND_STATE () : TxSpendState {
  */
 export function INIT_SETTLE_STATE () : TxSettleState {
   return {
-    settled     : false as const,
-    settled_at  : null,
-    settled_sig : null
+    settled      : false as const,
+    settled_at   : null,
+    settled_sig  : null,
+    spent_block  : null,
+    spent_height : null
   }
 }
 

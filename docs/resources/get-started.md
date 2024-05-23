@@ -1,3 +1,8 @@
+---
+sidebar_position: 1
+---
+
+
 # Getting Started
 
 Below is a step-by-step guide on how to use the protocol in an example scenario. This guide includes a live demo that you can run with no special software required.

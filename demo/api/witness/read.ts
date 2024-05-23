@@ -19,8 +19,8 @@ const res = await client.witness.read(wid)
 // Check the response is valid.
 if (!res.ok) throw new Error(res.error)
 // Unpack the data object.
-const { commit } = res.data
+const { receipt } = res.data
 
 print_banner('witness statement')
-console.dir(commit, { depth : null })
+console.dir(receipt, { depth : null })
 console.log('\n')

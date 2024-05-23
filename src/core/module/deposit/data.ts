@@ -1,5 +1,11 @@
-import { assert, now, sort_record }            from '../../util/index.js'
-import { GET_REGISTER_STATE, INIT_LOCK_STATE } from './state.js'
+import { assert, now, sort_record } from '../../util/index.js'
+
+import TxSchema from '@/core/schema/tx.js'
+
+import {
+  GET_REGISTER_STATE,
+  INIT_LOCK_STATE
+} from './state.js'
 
 import {
   DepositData,
@@ -7,7 +13,7 @@ import {
   RegisterRequest,
   SignerAPI,
   CovenantData,
-  TxConfirmState
+  TxStatus
 } from '../../types/index.js'
 
 import {
@@ -55,15 +61,22 @@ export function create_deposit (
 }
 
 export function confirm_deposit (
-  deposit : DepositData,
-  txstate : TxConfirmState
+  deposit  : DepositData,
+  txstatus : TxStatus
 ) : DepositData {
   assert.ok(!deposit.confirmed, 'deposit is already confirmed')
-  assert.ok(txstate.confirmed,  'transaction is not confirmed')
-  const status = (!deposit.locked)
-    ? 'open' as DepositStatus
-    : 'locked'    as DepositStatus
-  const updated = { ...deposit, ...txstate, status, updated_at: txstate.block_time }
+  assert.ok(txstatus.confirmed,  'transaction is not confirmed')
+  const parsed       = TxSchema.oracle_conf.parse(txstatus)
+  const confirmed    = true as const
+  const confirmed_at = parsed.block_time
+  const conf_block   = parsed.block_hash
+  const conf_height  = parsed.block_height
+  const expires_at   = parsed.block_time + deposit.locktime
+  const status       = (!deposit.locked)
+    ? 'open'   as DepositStatus
+    : 'locked' as DepositStatus
+  const changes = { confirmed, confirmed_at, conf_block, conf_height, expires_at }
+  const updated = { ...deposit, ...changes, status, updated_at: confirmed_at }
   return sort_record(updated)
 }
 
@@ -111,7 +124,7 @@ export function release_deposit (
   assert.ok(!deposit.closed, 'deposit is already closed')
   assert.ok(!deposit.spent,  'deposit is already spent')
   const status = (deposit.confirmed)
-    ? 'open'  as DepositStatus
+    ? 'open'       as DepositStatus
     : 'registered' as DepositStatus
   const changes = INIT_LOCK_STATE()
   return sort_record({ ...deposit, ...changes, status, updated_at })
@@ -135,16 +148,20 @@ export function spend_deposit (
 }
 
 export function settle_deposit (
-  deposit : DepositData,
-  signer  : SignerAPI,
-  settled_at = now()
+  deposit  : DepositData,
+  signer   : SignerAPI,
+  txstatus : TxStatus
 ) {
   assert.ok(deposit.confirmed,               'deposit is not confirmed')
   assert.ok(deposit.spent || deposit.closed, 'deposit is not settled')
-  const settled = true as const
-  const status  = 'settled' as DepositStatus
-  const changes = { settled, settled_at }
-  const updated = { ...deposit, ...changes, status, updated_at: settled_at }
-  const proof   = notarize_deposit(updated, signer, status)
+  const parsed       = TxSchema.oracle_conf.parse(txstatus)
+  const settled      = true as const
+  const settled_at   = parsed.block_time
+  const spent_block  = parsed.block_hash
+  const spent_height = parsed.block_height
+  const changes      = { settled, settled_at, spent_block, spent_height }
+  const status       = 'settled' as DepositStatus
+  const updated      = { ...deposit, ...changes, status, updated_at: settled_at }
+  const proof        = notarize_deposit(updated, signer, status)
   return sort_record({ ...updated, settled_sig: proof })
 }
