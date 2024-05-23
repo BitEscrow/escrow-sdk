@@ -5,8 +5,8 @@ Reference guide for the Escrow Account API.
 | Endpoint | Description |
 |----------|-------------|
 | [/api/account/request](#request-a-deposit-account) | Request a new deposit account. |
-| [/api/account/register](#register-a-deposit-utxo)  | Register a deposit of funds.   |
-| [/api/account/commit](#commit-a-deposit-utxo)      | Register funds for a contract. |
+| [/api/account/register](#register-a-deposit)       | Register a deposit of funds.   |
+| [/api/account/commit](#commit-a-deposit)           | Register funds for a contract. |
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  
@@ -133,7 +133,7 @@ const { deposit } = res.data
 **Related Interfaces:**
 
 - [DepositData](../data/deposit.md#deposit-data)
-- [TxOutput](../data/deposit.md#tx-output)
+- [TxOutput](../data/oracle.md#tx-output)
 
 ---
 
@@ -195,4 +195,4 @@ const { contract, deposit } = res.data
 - [ContractData](../data/contract.md#contract-data)
 - [CovenantData](../data/deposit.md#covenant-data)
 - [DepositData](../data/deposit.md#deposit-data)
-- [TxOutput](../data/deposit.md#tx-output)
+- [TxOutput](../data/oracle.md#tx-output)

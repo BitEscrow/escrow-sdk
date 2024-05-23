@@ -51,7 +51,7 @@ Feel free to fork the replit and try out the developer tools!
 
 ### Using the Client API Demos
 
-There is a suite of client API examples located in the [/demo/api]() directory.
+There is a suite of client API examples located in the [/demo/api](https://github.com/BitEscrow/escrow-core/tree/master/demo/api) directory.
 
 Feel free to use `npm run load` to execute any of the example scripts:
 

@@ -2,8 +2,8 @@
 
 Reference guide for the `EscrowSigner` API.
 
-- [Configuration](#configuration)
-- [Class Interface](#class-interface)
+- [Signer Config](#signer-config)
+- [Signer Interface](#signer-interface)
 
 ---
 > Notice any mistakes, or something missing? Please let us know!  

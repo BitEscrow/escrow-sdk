@@ -119,7 +119,7 @@ const { receipt, vmdata } = res.data
 **Related Interfaces:**
 
 - [MachineData](../data/machine.md#machine-data)
-- [WitnessCommit](../data/witness.md#witness-data)
+- [WitnessReceipt](../data/witness.md#witness-receipt)
 
 ---
 
@@ -203,4 +203,4 @@ const { receipts } = res.data
 
 **Related Interfaces:**
 
-- [WitnessCommit](../data/witness.md#witness-commit)
+- [WitnessReceipt](../data/witness.md#witness-receipt)
