@@ -1,8 +1,8 @@
 import { print_banner } from '@scrow/test'
 import { DraftUtil }    from '@scrow/sdk/client'
 
-import { signers }         from './02_create_signer.js'
-import { proposal, roles } from './03_create_proposal.js'
+import { signers }         from '@scrow/demo/02_create_signer.js'
+import { proposal, roles } from '@scrow/demo/03_create_proposal.js'
 
 const DEMO_MODE = process.env.VERBOSE === 'true'
 
@@ -38,8 +38,8 @@ signers.forEach(mbr => {
 })
 
 /**
- * Verify the proposal is complete, all positions are 
- * filled, and endorsements are valid.
+ * Validate the proposal data, and check
+ * each member position is filled properly.
  */
 DraftUtil.verify(draft)
 

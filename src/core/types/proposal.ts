@@ -32,23 +32,23 @@ export interface ProposalTemplate extends Omit<Partial<ProposalData>, 'network'>
 }
 
 export interface ProposalData {
-  content    ?: string
-  created_at  : number
-  deadline    : number
-  duration    : number
-  effective  ?: number
-  engine      : string
-  feerate    ?: number
-  moderator  ?: string
-  network     : ChainNetwork
-  paths       : PathEntry[]
-  payments    : PaymentEntry[]
-  programs    : ProgramEntry[]
-  schedule    : ScheduleEntry[]
-  title       : string
-  txtimeout   : number
-  value       : number
-  version     : number
+  content   ?: string
+  created_at : number
+  deadline   : number
+  duration   : number
+  effective ?: number
+  engine     : string
+  feerate   ?: number
+  moderator ?: string
+  network    : ChainNetwork
+  paths      : PathEntry[]
+  payments   : PaymentEntry[]
+  programs   : ProgramEntry[]
+  schedule   : ScheduleEntry[]
+  title      : string
+  txtimeout  : number
+  value      : number
+  version    : number
 }
 
 export interface ProposalPolicy {

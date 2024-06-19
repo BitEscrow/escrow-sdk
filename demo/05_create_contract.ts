@@ -1,22 +1,36 @@
-import CVM              from '@scrow/sdk/cvm'
-import { print_banner } from '@scrow/test'
+import { print_banner }       from '@scrow/test'
+import { DEFAULT_POLICY }     from '@scrow/sdk/client'
+import { verify_publish_req } from '@scrow/sdk/verify'
+import CVM                    from '@scrow/sdk/cvm'
 
-import { client }       from './01_create_client.js'
-import { publish_req }  from './04_finish_proposal.js'
+import { client }      from './01_create_client.js'
+import { publish_req } from './04_finish_proposal.js'
 
 const DEMO_MODE = process.env.VERBOSE === 'true'
 
 /**
- * We will need to pass in a reference to the scripting engine 
- * defined in the proposal, so that it can verify the terms set
- * for each program.
+ * To verify a proposal for publishing, we need to
+ * pass in a reference to the scripting engine that
+ * will be used, so it can verify the program terms.
  */
 const engine = CVM
 
 /**
+ * We also need a reference to the server's escrow
+ * policy, which may change depending on the server.
+ */
+const policy = DEFAULT_POLICY.proposal
+
+/**
+ * Verify that the publish request is valid, and
+ * fits within the policy of the escrow server.
+ */
+verify_publish_req(engine, policy, publish_req)
+
+/**
  * Request to create a new contract on the escrow server.
  */
-const res = await client.contract.create(publish_req, engine)
+const res = await client.contract.create(publish_req)
 // Check the server response is valid.
 if (!res.ok) throw new Error(res.error)
 

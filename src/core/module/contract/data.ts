@@ -8,7 +8,7 @@ import TxSchema from '@/core/schema/tx.js'
 import {
   ContractCreateConfig,
   ContractData,
-  ContractPublishRequest,
+  PublishRequest,
   ContractStatus,
   DepositData,
   SignerAPI,
@@ -34,7 +34,7 @@ import {
  */
 export function create_contract (
   config  : ContractCreateConfig,
-  request : ContractPublishRequest,
+  request : PublishRequest,
   signer  : SignerAPI
 ) : ContractData {
   // Unpack config object.

@@ -23,7 +23,7 @@ import {
 
 import {
   ContractData,
-  ContractPublishRequest,
+  PublishRequest,
   FundingData,
   ProposalData,
   MachineData,
@@ -38,7 +38,7 @@ import DepositSchema  from '../schema/deposit.js'
 
 export function validate_publish_req (
   request : unknown
-) : asserts request is ContractPublishRequest {
+) : asserts request is PublishRequest {
   void ContractSchema.publish_req.parse(request)
 }
 
@@ -61,13 +61,13 @@ export function validate_contract_session (
 }
 
 export function verify_publish_req (
-  machine : ScriptEngineAPI,
+  engine  : ScriptEngineAPI,
   policy  : ProposalPolicy,
-  request : ContractPublishRequest
+  request : PublishRequest
 ) {
   const { endorsements, proposal } = request
   validate_proposal_data(proposal)
-  verify_proposal_data(machine, policy, proposal)
+  verify_proposal_data(engine, policy, proposal)
   verify_endorsements(proposal, endorsements)
 }
 
