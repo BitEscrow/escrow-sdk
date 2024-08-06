@@ -30,7 +30,6 @@ type PathTotal = [ path: string, total : number ]
 const PROPOSAL_DEFAULTS = () => {
   return {
     created_at : now(),
-    deadline   : CONST.DEADLINE_DEFAULT,
     duration   : CONST.DURATION_DEFAULT,
     engine     : CONST.ENGINE_DEFAULT,
     paths      : [],
@@ -43,7 +42,8 @@ const PROPOSAL_DEFAULTS = () => {
 }
 
 export function create_proposal (template : ProposalTemplate) {
-  return parser.parse_proposal({ ...PROPOSAL_DEFAULTS(), ...template })
+  const deadline = get_proposal_deadline(template)
+  return parser.parse_proposal({ ...PROPOSAL_DEFAULTS(), ...template, deadline })
 }
 
 /**
@@ -138,6 +138,20 @@ export function get_path_total (
     path_totals.push([ label, amt ])
   }
   return path_totals
+}
+
+export function get_proposal_deadline (
+  proposal : ProposalTemplate,
+  current = now()
+) {
+  const { deadline, effective } = proposal
+  if (deadline !== undefined) {
+    return deadline
+  } else if (effective !== undefined) {
+    return effective - current
+  } else {
+    return CONST.DEADLINE_DEFAULT
+  }
 }
 
 export function get_proposal_id (

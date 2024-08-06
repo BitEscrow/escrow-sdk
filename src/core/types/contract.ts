@@ -103,7 +103,7 @@ interface ContractIsOpen {
   machine_vout : null
 }
 
-export interface ContractPublishRequest {
+export interface PublishRequest {
   endorsements ?: string[]
   proposal      : ProposalData
 }

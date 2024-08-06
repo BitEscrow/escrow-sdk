@@ -112,7 +112,7 @@ Defines a set of programs that are available to run within the CVM. Each entry s
 The following entry is an example definition of a program:
 
 ```ts
-[ 'endorse', 'close|resolve', 'payout|return', 2, buyer_pub, seller_pub ]
+[ 'endorse', 'close|resolve', '*', 2, buyer_pub, seller_pub ]
 ```
 
 These terms state that the `endorse` method can be used to `close` or `resolve` the contract, on any (`*`) spending path, using at least `2` signatures, from the `buyer_pubkey` and `seller_pubkey`.

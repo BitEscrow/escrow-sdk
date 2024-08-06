@@ -1,20 +1,15 @@
-import { assert, parser }     from '@/core/util/index.js'
+import { assert }             from '@/core/util/index.js'
 import { create_publish_req } from '@/core/module/contract/index.js'
 import { EscrowClient }       from '@/client/class/client.js'
-import { DEFAULT_POLICY }     from '@/client/config/index.js'
 
 import {
   verify_contract_session,
-  verify_contract_sigs,
-  verify_endorsements,
-  verify_proposal_data
+  verify_contract_sigs
 } from '@/core/validation/index.js'
 
 import {
-  ContractPublishRequest,
-  ContractSession,
-  ProposalPolicy,
-  ScriptEngineAPI
+  PublishRequest,
+  ContractSession
 } from '@/core/types/index.js'
 
 import {
@@ -31,18 +26,10 @@ function create_contract_api (
   client : EscrowClient
 ) {
   return async (
-    request : ContractPublishRequest,
-    engine  : ScriptEngineAPI,
-    policy  : ProposalPolicy = DEFAULT_POLICY.proposal
+    request : PublishRequest
   ) : Promise<ApiResponse<ContractDataResponse>> => {
     // Unpack configurations from client.
     const { endorsements, proposal } = request
-    // Parse and validate the proposal.
-    const prop = parser.parse_proposal(proposal)
-    // Verify the proposal's terms.
-    verify_proposal_data(engine, policy, prop)
-    // Verify any signatures.
-    verify_endorsements(prop, endorsements)
     // Create a contract publish request.
     const req  = create_publish_req(proposal, endorsements)
     // Formulate the request url.

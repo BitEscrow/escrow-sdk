@@ -9,11 +9,12 @@
 import { print_banner }         from '@scrow/test'
 import { get_contract_balance } from '@scrow/sdk/contract'
 import { sleep }                from '@scrow/sdk/util'
-import { config }               from '@scrow/demo/00_demo_config.js'
-import { client }               from '@scrow/demo/01_create_client.js'
-import { signers }              from '@scrow/demo/02_create_signer.js'
-import { new_contract }         from '@scrow/demo/05_create_contract.js'
-import { new_account }          from '@scrow/demo/06_request_account.js'
+
+import { config }       from '@scrow/demo/00_demo_config.js'
+import { client }       from '@scrow/demo/01_create_client.js'
+import { signers }      from '@scrow/demo/02_create_signer.js'
+import { new_contract } from '@scrow/demo/05_create_contract.js'
+import { new_account }  from '@scrow/demo/06_request_account.js'
 
 import {
   fund_mutiny_address,

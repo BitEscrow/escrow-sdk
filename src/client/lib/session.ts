@@ -2,6 +2,7 @@ import { Buff }           from '@cmdcode/buff'
 import { assert }         from '@/core/util/index.js'
 import { has_membership } from './membership.js'
 
+import { verify_endorsements }    from '@/core/validation/contract.js'
 import { validate_proposal_data } from '@/core/validation/proposal.js'
 
 import {
@@ -12,7 +13,7 @@ import {
 } from '@/core/lib/proposal.js'
 
 import {
-  ContractPublishRequest,
+  PublishRequest,
   SignerAPI
 } from '@/core/types/index.js'
 
@@ -145,8 +146,10 @@ export function verify_session (
 
 export function publish_session (
   session : DraftSession
-) : ContractPublishRequest {
+) : PublishRequest {
   const { proposal, sigs: endorsements } = session
+  validate_proposal_data(proposal)
+  verify_endorsements(proposal, endorsements)
   return { endorsements, proposal }
 }
 

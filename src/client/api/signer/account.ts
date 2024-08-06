@@ -16,6 +16,7 @@ import {
   ContractData,
   CommitRequest
 } from '@/core/types/index.js'
+import { get_recovery_config, get_recovery_tx, sign_recovery_tx } from '@/core/lib/recovery.js'
 
 export function request_account_api (esigner : EscrowSigner) {
   return (
@@ -43,6 +44,23 @@ export function verify_account_api (esigner : EscrowSigner) {
       // Return a string on error.
       return parse_err(err)
     }
+  }
+}
+
+export function recover_funds_api (esigner : EscrowSigner) {
+  return (
+    account : AccountData,
+    address : string,
+    feerate : number,
+    utxo    : TxOutput
+  ) : string => {
+    const { server_pk, _signer } = esigner
+    // Assert the correct pubkey is used by the server.
+    assert.ok(server_pk === account.agent_pk, 'invalid server pubkey')
+    verify_account_data(account, _signer)
+    const config = get_recovery_config(account)
+    const templ  = get_recovery_tx(config, feerate, address, utxo)
+    return sign_recovery_tx(config, _signer, templ, utxo)
   }
 }
 
@@ -78,6 +96,7 @@ export function commit_funds_api (esigner : EscrowSigner) {
 export default function (esigner : EscrowSigner) {
   return {
     commit   : commit_funds_api(esigner),
+    recover  : recover_funds_api(esigner),
     request  : request_account_api(esigner),
     register : register_funds_api(esigner),
     verify   : verify_account_api(esigner)
