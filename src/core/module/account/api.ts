@@ -43,7 +43,7 @@ export function create_register_req (
 }
 
 /**
- * Create a registration request object.
+ * Create a commit request object.
  */
 export function create_commit_req (
   feerate  : number,
