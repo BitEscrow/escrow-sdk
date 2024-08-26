@@ -87,7 +87,7 @@
     "build": "./scripts/build.sh",
     "demo": "./demo/run.sh",
     "demo:vm": "yarn load demo/vm/eval.ts",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint src/**/*.ts",
     "load": "tsx --tsconfig ./test/tsconfig.json",
     "load:regtest": "NETWORK=regtest yarn load",
     "load:mutiny": "NETWORK=mutiny  yarn load",
@@ -98,34 +98,30 @@
     "test": "yarn tsc && yarn load test/tape.ts | tap-spec"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.5.3",
-    "@rollup/plugin-commonjs": "^25.0.7",
+    "@cmdcode/core-cmd": "1.6.3",
+    "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^20.11.28",
+    "@types/node": "^22.5.0",
     "@types/tape": "^5.6.4",
-    "@typescript-eslint/eslint-plugin": "^7.3.0",
-    "@typescript-eslint/parser": "^7.3.0",
-    "eslint": "^8.56.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.1.1",
-    "rollup": "^4.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "eslint": "^9.9.1",
+    "rollup": "^4.21.1",
     "tap-spec": "^5.0.0",
-    "tape": "^5.7.5",
-    "tslib": "^2.6.2",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "tape": "^5.8.1",
+    "tslib": "^2.7.0",
+    "tsx": "^4.18.0",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@cmdcode/buff": "2.2.5",
     "@cmdcode/crypto-tools": "2.7.6",
     "@cmdcode/musig2": "2.4.3",
     "@cmdcode/signer": "1.4.7",
-    "@scrow/tapscript": "2.2.2",
-    "zod": "^3.22.4"
+    "@scrow/tapscript": "2.2.4",
+    "zod": "^3.23.8"
   }
 }
