@@ -47,12 +47,17 @@ export function verify_witness_data (
   assert.ok(hash === wid,              'computed hash does not equal witness id')
   assert.ok(method === program.method, 'method does not match program')
   assert.ok(regex(action, actions),    'action not allowed in program')
-  assert.ok(regex(path, paths),        'path not allowed in program')
-  assert.ok(pathnames.includes(path),  'path does not exist in vm')
   assert.ok(stamp >= active_at,        'stamp exists before active date')
   assert.ok(stamp >= commit_at,        'stamp exists before latest commit')
   assert.ok(stamp < expires_at,        'stamp exists on or after expiration date')
   assert.ok(output === null,           'vm has already closed on an output')
+
+  if (path !== null) {
+    assert.exists(paths,                 'paths set to null in program')
+    assert.ok(regex(path, paths),        'path not allowed in program')
+    assert.ok(pathnames.includes(path),  'path does not exist in vm')
+  }
+
   verify_witness_sigs(program, witness)
 }
 

@@ -19,12 +19,21 @@ import {
   WitnessTemplate
 } from '@/core/types/index.js'
 
+const DEFAULT_TEMPLATE = () => {
+  return {
+    args    : [],
+    content : '', 
+    path    : null,
+    stamp   : now()
+  }
+}
+
 export function create_witness (
   config   : MachineConfig | MachineData,
   pubkeys  : string   | string[],
   template : WitnessTemplate
 ) : WitnessData {
-  const { args = [], action, content = '', method, path, stamp = now() } = template
+  const { action, method, path, } = template
 
   const keys   = (Array.isArray(pubkeys)) ? pubkeys : [ pubkeys ]
   const query  = { method, action, path, includes: keys }
@@ -36,7 +45,7 @@ export function create_witness (
 
   const prog_id = pdata.prog_id
   const vmid    = config.vmid
-  const tmpl    = { ...template, args, content, prog_id, stamp, vmid }
+  const tmpl    = { ...DEFAULT_TEMPLATE(), ...template, prog_id, vmid }
   const wid     = get_witness_id(tmpl)
   return sort_record({ ...tmpl, sigs: [], wid })
 }

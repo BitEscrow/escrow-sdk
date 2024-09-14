@@ -1,6 +1,6 @@
 import { ScheduleEntry }   from '@/core/types/index.js'
 import { get_access_list } from '@/util/index.js'
-import { VALID_ACTIONS }   from '../const.js'
+import { PATH_ACTIONS, VALID_ACTIONS }   from '../const.js'
 import { CVMData }         from '../types/index.js'
 import { update_vm_state } from './state.js'
 import { debug }           from '../util/base.js'
@@ -40,19 +40,31 @@ function run_task (
   const PATHS = data.state.paths.map(e => e[0])
   const alist = get_access_list(actions, VALID_ACTIONS).wlist
   const plist = get_access_list(paths, PATHS).wlist
+  const stamp = data.active_at + ts
+  const wid   = data.vmid
   for (const action of alist) {
-    for (const path of plist) {
-      try {
-        debug('[vm] running task:', task)
-        const stamp = data.active_at + ts
-        const input = { action, path, stamp, wid: data.vmid }
+    debug('[vm] running task:', task)
+    
+    try {
+      if (PATH_ACTIONS.includes(action)) {
+        for (const path of plist) {
+          try {
+            const input = { action, path, stamp, wid }
+            update_vm_state(data, input)
+            if (data.output !== null) return
+          } catch (err) {
+            debug('[cvm] task path failed to execute:' + String(err))
+          }
+        }
+      } else {
+        const input = { action, path: null, stamp, wid }
         update_vm_state(data, input)
-        if (data.output !== null) return
-      } catch (err) {
-        debug('[cvm] task failed to execute:' + String(err))
       }
+    } catch (err) {
+      debug('[cvm] task action failed to execute:' + String(err))
     }
   }
+  
 }
 
 /**

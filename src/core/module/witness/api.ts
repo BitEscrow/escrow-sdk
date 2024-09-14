@@ -17,7 +17,8 @@ export function can_endorse (
   signer   : SignerAPI,
   witness  : WitnessData
 ) {
-  const { action, method, path } = witness
+  const { action, method } = witness
+  const path   = witness.path ?? undefined
   const pubkey = signer.pubkey
   const query  = { method, action, path, includes: [ pubkey ] }
   const pdata  = get_program(query, programs)

@@ -5,7 +5,7 @@ export interface WitnessTemplate {
   args    ?: Literal[]
   content ?: string
   method   : string
-  path     : string
+  path    ?: string
   stamp   ?: number
 }
 
@@ -14,7 +14,7 @@ export interface WitnessPreImage {
   args    : Literal[]
   content : string
   method  : string
-  path    : string
+  path    : string | null
   prog_id : string
   stamp   : number
   vmid    : string

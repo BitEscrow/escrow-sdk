@@ -39,7 +39,7 @@ export function get_program (
   }
   // If defined, filter programs by allowed path.
   if (path !== undefined) {
-    progs = progs.filter(e => regex(path, e.paths))
+    progs = progs.filter(e => regex(path, e.paths ?? ''))
   }
   // If defined, filter programs by matching params and index.
   if (Array.isArray(params)) {

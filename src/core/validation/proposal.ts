@@ -94,7 +94,7 @@ function check_programs (
     const prog = create_program(terms)
     const { actions, params, paths, method } = prog
     check_regex(machine.actions, actions)
-    check_regex(path_names, paths)
+    if (paths !== null) check_regex(path_names, paths)
     verify_program_entry(machine, method, params)
   }
 }

@@ -13,5 +13,5 @@ export interface ProgramData {
   method  : string
   actions : string
   params  : Literal[]
-  paths   : string
+  paths   : string | null
 }

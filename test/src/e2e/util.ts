@@ -22,10 +22,10 @@ export async function get_proposal (
     programs : [
       [ 'endorse', 'dispute',       'payout', 1, alice.signer.pubkey ],
       [ 'endorse', 'resolve',       '*',      1, carol.signer.pubkey ],
-      [ 'endorse', 'close|resolve', '*',      2, alice.signer.pubkey, bob.signer.pubkey ]
+      [ 'endorse', 'spend|resolve', '*',      2, alice.signer.pubkey, bob.signer.pubkey ]
     ],
     schedule: [
-      [ 7200, 'close', 'payout|return' ]
+      [ 7200, 'spend', 'payout|return' ]
     ],
     value   : 100000,
     version : 1

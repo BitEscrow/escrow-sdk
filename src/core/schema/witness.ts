@@ -8,7 +8,7 @@ const data = z.object({
   action  : str,
   content : str,
   method  : str,
-  path    : label,
+  path    : label.nullable(),
   prog_id : hash,
   sigs    : hex.array(),
   stamp,

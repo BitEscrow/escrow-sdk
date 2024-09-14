@@ -38,7 +38,7 @@ export default {
     {
       file: 'dist/script.js',
       format: 'iife',
-      name: 'escrow_core',
+      name: 'bitescrow',
       plugins: [terser()],
       sourcemap: true,
       globals : {

@@ -1,6 +1,7 @@
 import { regex }           from '@/util/index.js'
 import { debug }           from '../util/base.js'
 import { update_vm_state } from './state.js'
+import { PATH_ACTIONS }    from '../const.js'
 
 import ClaimMethod   from './methods/claim.js'
 import EndorseMethod from './methods/endorse.js'
@@ -32,7 +33,7 @@ export function check_params (
 ) {
   const mthd = call_method(method)
   if (mthd === null) {
-    return 'method not found'
+    return 'program method not found'
   }
   return mthd.verify(params)
 }
@@ -78,8 +79,23 @@ function load_program (
     throw new Error('program does not have access to action: ' + action)
   }
 
-  if (!regex(path, paths)) {
-    throw new Error('program does not have access to path: ' + path)
+  if (path !== null) {
+    if (path === 'null') {
+      throw new Error('invalid path name')
+    }
+    if (!PATH_ACTIONS.includes(action)) {
+      throw new Error('you cannot specify a path for this action')
+    }
+    if (paths === null) {
+      throw new Error('program does not have access to any paths')
+    }
+    if (!regex(path, paths)) {
+      throw new Error('program does not have access to path: ' + path)
+    }
+  } else {
+    if (PATH_ACTIONS.includes(action)) {
+      throw new Error('you must specify a path for this action')
+    }
   }
 
   const mthd = call_method(method)

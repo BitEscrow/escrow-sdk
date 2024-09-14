@@ -27,7 +27,7 @@ function exec (
         throw new VMError('pubkey not a member of the program')
       }
       // Record the pubkey under path/action label, and return vote count.
-      const count = record_entry(store, `${path}/${action}`, pub)
+      const count = record_entry(store, `${path ?? 'null'}/${action}`, pub)
       // Return the status of the count.
       if (count >= thold) return true
     }

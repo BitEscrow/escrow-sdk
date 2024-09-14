@@ -39,8 +39,8 @@ const LOCKTIME = 172800
 const NETWORK  = 'regtest'
 
 export default async function (
-  client  : CoreClient,
-  tape    : Test
+  client : CoreClient,
+  tape   : Test
 ) {
   tape.test('E2E Recovery Test', async t => {
     try {
