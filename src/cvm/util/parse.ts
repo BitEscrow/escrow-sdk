@@ -1,4 +1,4 @@
-import { VMError }     from '@/cvm/util/index.js'
+import { VMError }     from '@/cvm/util/base.js'
 import { CVMData }     from '@/cvm/types/index.js'
 import { MachineData } from '@/types/index.js'
 import { assert }      from '@/util/index.js'
