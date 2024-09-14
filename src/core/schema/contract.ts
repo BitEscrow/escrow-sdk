@@ -1,5 +1,5 @@
 import { z }    from 'zod'
-import base     from './base.js'
+import base     from '@/schema/base.js'
 import deposit  from './deposit.js'
 import proposal from './proposal.js'
 import vm       from './machine.js'

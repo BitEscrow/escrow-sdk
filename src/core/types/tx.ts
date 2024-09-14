@@ -4,6 +4,8 @@ export type TxSpendState   = TxIsSpent     | TxIsUnspent
 export type TxSettleState  = TxIsSettled   | TxNotSettled
 export type TxConfirmState = TxIsConfirmed | TxIsUnconfirmed
 
+export type ChainNetwork = 'regtest' | 'main' | 'testnet' | 'signet' | 'mutiny'
+
 export interface TxStatus {
   confirmed     : boolean
   block_hash   ?: string

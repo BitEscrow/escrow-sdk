@@ -1,4 +1,4 @@
-import { assert }             from '@/core/util/index.js'
+import { assert }             from '@/util/index.js'
 import { create_publish_req } from '@/core/module/contract/index.js'
 import { EscrowClient }       from '@/client/class/client.js'
 
@@ -7,17 +7,14 @@ import {
   verify_contract_sigs
 } from '@/core/validation/index.js'
 
-import {
-  PublishRequest,
-  ContractSession
-} from '@/core/types/index.js'
-
-import {
+import type {
   ApiResponse,
   ContractDataResponse,
   ContractListResponse,
-  FundListResponse
-} from '@/client/types/index.js'
+  FundListResponse,
+  PublishRequest,
+  ContractSession
+} from '@/types/index.js'
 
 /**
  * Create a contract from a proposal document.

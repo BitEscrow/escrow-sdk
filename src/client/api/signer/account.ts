@@ -1,6 +1,6 @@
 import { create_account_req }  from '@/core/module/account/index.js'
 import { verify_account_data } from '@/core/validation/account.js'
-import { assert, parse_err }   from '@/core/util/index.js'
+import { assert, parse_err }   from '@/util/index.js'
 import { EscrowSigner }        from '@/client/class/signer.js'
 
 import {
@@ -9,14 +9,19 @@ import {
 } from '@/core/module/account/api.js'
 
 import {
+  get_recovery_config,
+  get_recovery_tx,
+  sign_recovery_tx
+} from '@/core/lib/recovery.js'
+
+import type {
   AccountRequest,
   AccountData,
   TxOutput,
   RegisterRequest,
   ContractData,
   CommitRequest
-} from '@/core/types/index.js'
-import { get_recovery_config, get_recovery_tx, sign_recovery_tx } from '@/core/lib/recovery.js'
+} from '@/types/index.js'
 
 export function request_account_api (esigner : EscrowSigner) {
   return (

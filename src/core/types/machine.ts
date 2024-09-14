@@ -1,4 +1,4 @@
-import { Literal }                     from './base.js'
+import { Literal }                     from '@/types/index.js'
 import { ProgramData }                 from './program.js'
 import { ProgramEntry, ScheduleEntry } from './proposal.js'
 import { WitnessData }                 from './witness.js'

@@ -1,19 +1,4 @@
-import { AccountPolicy, ChainNetwork, ProposalPolicy } from '@/core/types/index.js'
-
-export type ApiResponse<T> = DataResponse<T> | ErrorResponse
-
-export interface DataResponse<T> {
-  ok     : true
-  data   : T
-  error ?: string
-  status : number
-}
-
-export interface ErrorResponse {
-  ok     : false
-  error  : string
-  status : number
-}
+import type { AccountPolicy, ChainNetwork, ProposalPolicy } from '@/types/index.js'
 
 export interface ServerConfig {
   oracle_url : string

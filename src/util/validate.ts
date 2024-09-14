@@ -1,5 +1,5 @@
 import { Point }   from '@cmdcode/crypto-tools'
-import { Literal } from '../types/index.js'
+import { Literal } from '@/types/index.js'
 
 export function exists <T> (
   value ?: T | null

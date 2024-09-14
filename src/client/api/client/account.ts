@@ -8,19 +8,16 @@ import {
   verify_account_req
 } from '@/core/validation/index.js'
 
-import {
+import type {
+  ApiResponse,
   AccountRequest,
   RegisterRequest,
   CommitRequest,
-  AccountPolicy
-} from '@/core/types/index.js'
-
-import {
-  ApiResponse,
+  AccountPolicy,
   AccountDataResponse,
   DepositDataResponse,
   FundingDataResponse
-} from '@/client/types/index.js'
+} from '@/types/index.js'
 
 /**
  * Request a deposit account from the provider.

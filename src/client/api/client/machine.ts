@@ -1,4 +1,4 @@
-import { assert }              from '@/core/util/index.js'
+import { assert }              from '@/util/index.js'
 import { WitnessData }         from '@/core/types/index.js'
 import { EscrowClient }        from '@/client/class/client.js'
 import { validate_submit_req } from '@/core/validation/machine.js'
@@ -9,7 +9,7 @@ import {
   VMListResponse,
   VMSubmitResponse,
   WitnessListResponse
-} from '@/client/types/index.js'
+} from '@/types/index.js'
 
 /**
  * Return a list of verified witnesses

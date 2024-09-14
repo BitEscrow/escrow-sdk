@@ -1,4 +1,4 @@
-import { assert }       from '@/core/util/index.js'
+import { assert }       from '@/util/index.js'
 import { EscrowSigner } from '@/client/class/signer.js'
 
 import {
@@ -22,7 +22,7 @@ import {
   ContractData,
   DepositData,
   LockRequest
-} from '@/core/types/index.js'
+} from '@/types/index.js'
 
 function request_deposits_api (esigner : EscrowSigner) {
   return () => {

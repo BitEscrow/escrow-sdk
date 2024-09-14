@@ -1,6 +1,6 @@
-import { get_fetcher }  from '@/client/lib/fetch.js'
+import { get_fetcher }  from '@/util/fetch.js'
 import { ChainNetwork } from '@/core/types/index.js'
-import { assert }       from '@/core/util/index.js'
+import { assert }       from '@/util/index.js'
 import { ChainOracle }  from './oracle.js'
 
 import {

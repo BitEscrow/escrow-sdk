@@ -14,7 +14,7 @@ import {
 
 /* Modules Imports */
 
-import { assert } from '../util/index.js'
+import { assert } from '@/util/index.js'
 
 import {
   AccountTemplate,

@@ -1,5 +1,5 @@
 import { KeyContext }   from '@cmdcode/musig2'
-import { ChainNetwork } from './base.js'
+import { ChainNetwork } from '@/types/index.js'
 import { TxOutput }     from './tx.js'
 
 import {

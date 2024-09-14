@@ -1,13 +1,15 @@
-import {
+
+
+import PropSchema    from '../schema/proposal.js'
+import MachineSchema from '../schema/machine.js'
+
+import type {
   Literal,
   ProgramEntry,
   MachineData,
   ScriptEngineAPI,
   VMSubmitRequest
-} from '../types/index.js'
-
-import PropSchema    from '../schema/proposal.js'
-import MachineSchema from '../schema/machine.js'
+} from '@/types/index.js'
 
 export function validate_program_entry (
   program : unknown

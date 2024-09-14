@@ -1,4 +1,4 @@
-import { assert, now, sort_record } from '../../util/index.js'
+import { assert, now, sort_record } from '@/util/index.js'
 
 import TxSchema from '@/core/schema/tx.js'
 

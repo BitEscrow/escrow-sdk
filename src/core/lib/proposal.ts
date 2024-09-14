@@ -13,7 +13,7 @@ import {
   now,
   parser,
   sort_record
-} from '../util/index.js'
+} from '@/util/index.js'
 
 import {
   PaymentEntry,

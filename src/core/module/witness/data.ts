@@ -8,7 +8,7 @@ import {
 import {
   now,
   sort_record
-} from '@/core/util/index.js'
+} from '@/util/index.js'
 
 import {
   MachineConfig,

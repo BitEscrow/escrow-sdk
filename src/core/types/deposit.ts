@@ -1,4 +1,4 @@
-import { ChainNetwork } from './base.js'
+import { ChainNetwork } from '@/types/index.js'
 import { CovenantData } from './covenant.js'
 
 import {

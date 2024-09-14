@@ -1,18 +1,18 @@
 import { Buff }         from '@cmdcode/buff'
 import { verify_sig }   from '@cmdcode/crypto-tools/signer'
 import { DEPOSIT_KIND } from '@/core/const.js'
-import { get_proof_id } from '@/core/util/notarize.js'
-import * as assert      from '@/core/util/assert.js'
+import { get_proof_id } from '@/util/notarize.js'
+import * as assert      from '@/util/assert.js'
 
 import { get_deposit_proof, get_deposit_state } from './state.js'
 
-import {
+import type {
   DepositData,
   DepositPreImage,
   DepositStatus,
   NoteTemplate,
   SignerAPI
-} from '@/core/types/index.js'
+} from '@/types/index.js'
 
 export function get_deposit_id (
   created_at : number,

@@ -1,7 +1,3 @@
-export type Literal = string | number | boolean | null
-export type Json    = Literal | { [key : string] : Json } | Json[]
-export type ChainNetwork = 'regtest' | 'main' | 'testnet' | 'signet' | 'mutiny'
-
 export interface NoteTemplate {
   content    : string
   created_at : number

@@ -9,14 +9,15 @@ import {
   FundingData,
   ProposalPolicy,
   AccountPolicy
-} from '../types/index.js'
+} from '@/types/index.js'
 
+import BaseSchema from '@/schema/base.js'
 import CoreSchema from '../schema/index.js'
 
 export function parse_network (
   network : unknown
 ) {
-  return CoreSchema.base.network.parse(network)
+  return BaseSchema.network.parse(network)
 }
 
 export function parse_payments (

@@ -1,6 +1,6 @@
 import { ContractData, ContractPreImage, ContractStatus } from '@/core/types/index.js'
 import { INIT_SPEND_STATE, INIT_SETTLE_STATE }            from '@/core/lib/tx.js'
-import { assert, parse_proof, sort_record }               from '@/core/util/index.js'
+import { assert, parse_proof, sort_record }               from '@/util/index.js'
 
 export const INIT_PUBLISH_STATE = () => {
   return {

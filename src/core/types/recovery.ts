@@ -1,5 +1,5 @@
 import { ScriptWord }   from '@scrow/tapscript'
-import { ChainNetwork } from './base.js'
+import { ChainNetwork } from '@/types/index.js'
 
 export interface RecoveryConfig {
   agent_pk    : string

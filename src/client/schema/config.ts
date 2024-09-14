@@ -1,7 +1,7 @@
-import { z }      from 'zod'
-import CoreSchema from '@/core/schema/index.js'
+import { z } from 'zod'
+import base  from '@/schema/base.js'
 
-const { hash, network, str } = CoreSchema.base
+const { hash, network, str } = base
 
 const signer = z.object({
   network,

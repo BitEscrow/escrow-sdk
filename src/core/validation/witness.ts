@@ -1,5 +1,5 @@
 import { verify_sig }    from '@cmdcode/crypto-tools/signer'
-import { assert, regex } from '@/core/util/index.js'
+import { assert, regex } from '@/util/index.js'
 
 import {
   get_commit_id,

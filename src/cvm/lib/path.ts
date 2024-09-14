@@ -1,6 +1,6 @@
 /* Global Imports */
 
-import { regex }        from '@/core/util/index.js'
+import { regex }        from '@/util/index.js'
 import { ProgramEntry } from '@/core/types/index.js'
 
 import {

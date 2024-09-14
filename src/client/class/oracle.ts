@@ -1,6 +1,6 @@
-import { parse_addr }     from '@scrow/tapscript/address'
-import { sleep }          from '@/core/util/index.js'
-import { get_fetcher }    from '@/client/lib/fetch.js'
+import { parse_addr }  from '@scrow/tapscript/address'
+import { sleep }       from '@/util/index.js'
+import { get_fetcher } from '@/util/fetch.js'
 
 import {
   OracleFeeEstimate,

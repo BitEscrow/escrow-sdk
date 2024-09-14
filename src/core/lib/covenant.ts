@@ -12,7 +12,7 @@ import {
 
 /* Local Imports */
 
-import { assert, sort_bytes } from '../util/index.js'
+import { assert, sort_bytes } from '@/util/index.js'
 
 import {
   AccountContext,

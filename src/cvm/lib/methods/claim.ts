@@ -1,7 +1,8 @@
-import { assert, check }        from '@/core/util/index.js'
-import { Literal, WitnessData } from '@/core/types/index.js'
-import { VMError }              from '@/vm/util/base.js'
-import { sha256 }               from '@cmdcode/crypto-tools/hash'
+import { sha256 }        from '@cmdcode/crypto-tools/hash'
+import { VMError }       from '@/cvm/util/base.js'
+import { assert, check } from '@/util/index.js'
+
+import type { Literal, WitnessData } from '@/types/index.js'
 
 /**
  * Main execution logic for the receipt method.

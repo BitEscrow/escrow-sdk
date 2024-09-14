@@ -1,5 +1,5 @@
 import { SignerAPI } from '@/core/types/index.js'
-import { assert }    from '@/core/util/index.js'
+import { assert }    from '@/util/index.js'
 
 import {
   CredentialData,

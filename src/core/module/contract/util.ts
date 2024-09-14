@@ -1,17 +1,32 @@
 import { Buff }                 from '@cmdcode/buff'
 import { decode_tx, encode_tx } from '@scrow/tapscript/tx'
 import { verify_sig }           from '@cmdcode/crypto-tools/signer'
-import { assert }               from '@/core/util/index.js'
-import { get_proof_id }         from '@/core/util/notarize.js'
+import { assert }               from '@/util/index.js'
+import { get_proof_id }         from '@/util/notarize.js'
 
 import { CONTRACT_KIND, SPEND_TXIN_SIZE } from '@/core/const.js'
 
 import {
-  get_contract_proof,
-  get_contract_state
-}   from './state.js'
+  get_covenant_psig,
+  settle_covenant
+} from '@/core/lib/covenant.js'
 
 import {
+  get_path_names,
+  get_path_vouts
+} from '@/core/lib/proposal.js'
+
+import {
+  create_txinput,
+  get_vout_txhex
+} from '@/core/lib/tx.js'
+
+import {
+  get_contract_proof,
+  get_contract_state
+} from './state.js'
+
+import type {
   ContractData,
   ContractPreImage,
   ContractStatus,
@@ -22,22 +37,7 @@ import {
   ProposalData,
   SignerAPI,
   SpendTemplate
-} from '../../types/index.js'
-
-import {
-  get_covenant_psig,
-  settle_covenant
-} from '../../lib/covenant.js'
-
-import {
-  get_path_names,
-  get_path_vouts
-} from '../../lib/proposal.js'
-
-import {
-  create_txinput,
-  get_vout_txhex
-} from '../../lib/tx.js'
+} from '@/types/index.js'
 
 /**
  * Compute the record identifier for a contract.

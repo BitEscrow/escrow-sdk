@@ -1,5 +1,5 @@
 import { decode_tx, encode_tx }     from '@scrow/tapscript/tx'
-import { assert }                   from '@/core/util/index.js'
+import { assert }                   from '@/util/index.js'
 import { get_machine_config }       from '@/core/module/machine/util.js'
 import { create_txinput, get_txid } from '@/core/lib/tx.js'
 

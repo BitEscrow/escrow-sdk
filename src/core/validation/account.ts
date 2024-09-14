@@ -5,7 +5,7 @@ import { parse_addr } from '@scrow/tapscript/address'
 
 /* Module Imports */
 
-import { assert } from '../util/index.js'
+import { assert } from '@/util/index.js'
 
 import {
   get_session_pnonce,

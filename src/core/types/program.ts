@@ -1,4 +1,4 @@
-import { Literal } from './base.js'
+import { Literal } from '@/types/index.js'
 
 export interface ProgramQuery {
   action   ?: string

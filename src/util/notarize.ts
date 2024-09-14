@@ -1,8 +1,9 @@
 import { Buff }         from '@cmdcode/buff'
 import { SignedEvent }  from '@cmdcode/signer'
 import { sha256 }       from '@cmdcode/crypto-tools/hash'
-import { NoteTemplate } from '@/core/types/index.js'
-import * as assert      from '@/core/util/assert.js'
+import { NoteTemplate } from '@/types/index.js'
+
+import * as assert      from '@/util/assert.js'
 
 export function get_proof_id (
   template : NoteTemplate

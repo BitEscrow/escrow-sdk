@@ -1,6 +1,7 @@
-import { assert }               from '@/core/util/index.js'
-import { Literal, WitnessData } from '@/core/types/index.js'
-import { VMError }              from '../../util/base.js'
+import { assert }  from '@/util/index.js'
+import { VMError } from '@/cvm/util/base.js'
+
+import type { Literal, WitnessData } from '@/types/index.js'
 
 /**
  * Main execution logic for the endorse method.

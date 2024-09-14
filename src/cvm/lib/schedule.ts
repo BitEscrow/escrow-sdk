@@ -1,5 +1,5 @@
 import { ScheduleEntry }   from '@/core/types/index.js'
-import { get_access_list } from '@/core/util/index.js'
+import { get_access_list } from '@/util/index.js'
 import { VALID_ACTIONS }   from '../const.js'
 import { CVMData }         from '../types/index.js'
 import { update_vm_state } from './state.js'

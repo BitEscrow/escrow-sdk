@@ -1,5 +1,5 @@
 import { Buff, Bytes }         from '@cmdcode/buff'
-import { assert, sort_record } from '../util/index.js'
+import { assert, sort_record } from '@/util/index.js'
 
 import {
   SessionToken,

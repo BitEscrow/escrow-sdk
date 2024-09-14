@@ -1,6 +1,6 @@
 import { parse_script }   from '@scrow/tapscript/script'
 import { parse_sequence } from '@scrow/tapscript/tx'
-import { assert, now }    from '@/core/util/index.js'
+import { assert, now }    from '@/util/index.js'
 
 import {
   verify_covenant_data,

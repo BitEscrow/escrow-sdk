@@ -1,16 +1,16 @@
 {
-  "name": "@scrow/sdk",
+  "name": "@bitescrow/escrow-sdk",
   "version": "0.15.1",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitescrow/escrow-core.git"
+    "url": "https://github.com/bitescrow/escrow-sdk.git"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org",
-    "access": "public"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "unpkg": "./dist/script.js",
   "files": [
@@ -51,8 +51,8 @@
       "types": "./dist/core/schema/index.d.ts"
     },
     "./cvm": {
-      "import": "./dist/vm/index.js",
-      "types": "./dist/vm/index.d.ts"
+      "import": "./dist/cvm/index.js",
+      "types": "./dist/cvm/index.d.ts"
     },
     "./account": {
       "import": "./dist/core/module/account/index.js",

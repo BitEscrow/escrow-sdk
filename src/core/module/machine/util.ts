@@ -1,5 +1,5 @@
 import { Buff }           from '@cmdcode/buff'
-import { assert }         from '@/core/util/index.js'
+import { assert }         from '@/util/index.js'
 import { get_path_names } from '@/core/lib/proposal.js'
 
 import {

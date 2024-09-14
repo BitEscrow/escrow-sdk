@@ -1,5 +1,5 @@
 import { create_program }           from '@/core/lib/program.js'
-import { now }                      from '@/core/util/index.js'
+import { now }                      from '@/util/index.js'
 import { init_vm_state }            from './state.js'
 import { init_stores, run_program } from './program.js'
 import { init_tasks, run_schedule } from './schedule.js'

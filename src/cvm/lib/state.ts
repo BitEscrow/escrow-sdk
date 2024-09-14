@@ -3,7 +3,7 @@ import { ProgramEntry }    from '@/core/types/index.js'
 import { VMError }         from '../util/base.js'
 import { run_path_action } from './action.js'
 import { PATH_ACTIONS }    from '../const.js'
-import { assert }          from '@/core/util/index.js'
+import { assert }          from '@/util/index.js'
 
 import {
   CVMData,

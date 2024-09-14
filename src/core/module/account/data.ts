@@ -1,4 +1,4 @@
-import { now, sort_record } from '../../util/index.js'
+import { now, sort_record } from '@/util/index.js'
 
 import {
   AccountData,

@@ -1,6 +1,6 @@
 import { Buff }        from '@cmdcode/buff'
 import { get_program } from '@/core/lib/program.js'
-import { sort_record } from '@/core/util/index.js'
+import { sort_record } from '@/util/index.js'
 
 import {
   ProgramEntry,

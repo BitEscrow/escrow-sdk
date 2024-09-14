@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/client/types/index.js'
+import { ApiResponse } from '@/types/index.js'
 
 export function get_fetcher (fetcher = fetch) {
   return {

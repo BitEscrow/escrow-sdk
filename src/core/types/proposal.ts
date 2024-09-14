@@ -1,4 +1,4 @@
-import { Literal, ChainNetwork } from './base.js'
+import { Literal, ChainNetwork } from '@/types/index.js'
 
 export type PaymentEntry = [
   value   : number,

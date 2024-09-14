@@ -13,7 +13,7 @@ import {
   MachineData,
   WitnessData,
   WitnessTemplate
-} from '@/core/types/index.js'
+} from '@/types/index.js'
 
 export function can_sign_api (esigner : EscrowSigner) {
   return (

@@ -4,8 +4,7 @@ import CoreVerify from './validation/index.js'
 
 import * as CONST    from './const.js'
 import * as CoreMod  from './module/index.js'
-import * as CoreUtil from './util/index.js'
 
 export * from './types/index.js'
 
-export { CONST, CoreMod, CoreLib, CoreSchema, CoreUtil, CoreVerify }
+export { CONST, CoreMod, CoreLib, CoreSchema, CoreVerify }

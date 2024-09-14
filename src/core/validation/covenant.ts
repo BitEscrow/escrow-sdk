@@ -6,7 +6,7 @@ import { verify_psig } from '@cmdcode/musig2'
 
 import { get_account_agent }   from '../module/account/util.js'
 import { parse_session_token } from '../lib/session.js'
-import { assert, parser }      from '../util/index.js'
+import { assert, parser }      from '@/util/index.js'
 
 import {
   get_covenant_id,

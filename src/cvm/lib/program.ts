@@ -1,22 +1,19 @@
-import { regex }           from '@/core/util/index.js'
+import { regex }           from '@/util/index.js'
 import { debug }           from '../util/base.js'
 import { update_vm_state } from './state.js'
 
 import ClaimMethod   from './methods/claim.js'
 import EndorseMethod from './methods/endorse.js'
 
-import {
+import type {
   Literal,
   ProgramData,
-  WitnessData
-} from '@/core/types/index.js'
-
-import {
+  WitnessData,
   VMStoreEntry,
   ProgramReturn,
   ProgramMethodAPI,
   CVMData
-} from '../types/index.js'
+} from '@/types/index.js'
 
 export function call_method (method : string) : ProgramMethodAPI | null {
   switch (method) {

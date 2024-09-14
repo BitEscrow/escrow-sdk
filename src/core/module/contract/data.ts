@@ -1,4 +1,4 @@
-import { assert, now, sort_record } from '@/core/util/index.js'
+import { assert, now, sort_record } from '@/util/index.js'
 import { get_machine_id }           from '@/core/module/machine/util.js'
 import { SPEND_TXIN_SIZE }          from '@/core/const.js'
 import { GET_PUBLISH_STATE }        from './state.js'

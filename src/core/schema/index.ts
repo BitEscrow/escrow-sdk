@@ -1,5 +1,4 @@
 import account  from './account.js'
-import base     from './base.js'
 import contract from './contract.js'
 import deposit  from './deposit.js'
 import machine  from './machine.js'
@@ -9,7 +8,6 @@ import witness  from './witness.js'
 
 export default {
   account,
-  base,
   contract,
   deposit,
   machine,

@@ -1,5 +1,5 @@
 import { Buff }           from '@cmdcode/buff'
-import { assert }         from '@/core/util/index.js'
+import { assert }         from '@/util/index.js'
 import { has_membership } from './membership.js'
 
 import { verify_endorsements }    from '@/core/validation/contract.js'
@@ -12,16 +12,13 @@ import {
   get_pay_total
 } from '@/core/lib/proposal.js'
 
-import {
-  PublishRequest,
-  SignerAPI
-} from '@/core/types/index.js'
-
-import {
+import type {
   DraftSession,
   CredentialData,
-  DraftTemplate
-} from '@/client/types/index.js'
+  DraftTemplate,
+  PublishRequest,
+  SignerAPI
+} from '@/types/index.js'
 
 import ClientSchema from '@/client/schema/index.js'
 

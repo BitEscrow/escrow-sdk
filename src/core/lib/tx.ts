@@ -31,7 +31,7 @@ import {
   create_vout
 } from '@scrow/tapscript/tx'
 
-import { assert } from '../util/index.js'
+import { assert } from '@/util/index.js'
 
 import {
   TxConfirmState,

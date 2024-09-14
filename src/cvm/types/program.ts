@@ -1,7 +1,7 @@
 import {
   Literal,
   WitnessData
-} from '@/core/types/index.js'
+} from '@/types/index.js'
 
 import { VMStoreEntry } from './vm.js'
 

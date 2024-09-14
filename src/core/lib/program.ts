@@ -1,5 +1,5 @@
 import { Buff }  from '@cmdcode/buff'
-import { regex } from '@/core/util/index.js'
+import { regex } from '@/util/index.js'
 
 import {
   ProgramQuery,
