@@ -1,6 +1,6 @@
 {
-  "name": "@bitescrow/escrow-sdk",
-  "version": "0.15.2-dev",
+  "name": "@bitescrow/client-sdk",
+  "version": "0.15.4",
   "description": "Development SDK for the BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -71,8 +71,8 @@
       "types": "./dist/core/module/machine/index.d.ts"
     },
     "./util": {
-      "import": "./dist/core/util/index.js",
-      "types": "./dist/core/util/index.d.ts"
+      "import": "./dist/util/index.js",
+      "types": "./dist/util/index.d.ts"
     },
     "./verify": {
       "import": "./dist/core/validation/index.js",
