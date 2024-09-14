@@ -1,14 +1,15 @@
-import { PathState, CVMState } from '../types.js'
-import { VMError }             from '../util/base.js'
+import { VMError } from '../util/base.js'
+
+import { PathStateEnum, CVMState } from '../types/index.js'
 
 export function run_path_action (
   action : string,
-  pstate : PathState,
+  pstate : PathStateEnum,
   state  : CVMState
-) : PathState {
+) : PathStateEnum {
   switch (action) {
-    case 'close':
-      return exec_close(pstate)
+    case 'spend':
+      return exec_spend(pstate)
     case 'dispute':
       return exec_dispute(pstate)
     case 'lock':
@@ -22,41 +23,41 @@ export function run_path_action (
   }
 }
 
-export function exec_dispute (state : PathState) {
-  if (state === PathState.disputed) {
+export function exec_dispute (state : PathStateEnum) {
+  if (state === PathStateEnum.disputed) {
     throw new VMError('path is already in a dispute')
   }
-  return PathState.disputed
+  return PathStateEnum.disputed
 }
 
 export function exec_resolve (state : CVMState) {
   if (state.status !== 'disputed') {
     throw new VMError('path is not in a dispute')
   }
-  return PathState.closed
+  return PathStateEnum.spent
 }
 
-export function exec_lock (state : PathState) {
-  if (state === PathState.locked) {
+export function exec_lock (state : PathStateEnum) {
+  if (state === PathStateEnum.locked) {
     throw new VMError('path is already locked')
-  } else if (state === PathState.disputed) {
+  } else if (state === PathStateEnum.disputed) {
     throw new VMError('path is in a dispute')
   }
-  return PathState.locked
+  return PathStateEnum.locked
 }
 
-export function exec_release (state : PathState) {
-  if (state !== PathState.locked) {
+export function exec_release (state : PathStateEnum) {
+  if (state !== PathStateEnum.locked) {
     throw new VMError('path is not locked')
   }
-  return PathState.open
+  return PathStateEnum.open
 }
 
-function exec_close (state : PathState) {
-  if (state === PathState.locked) {
+function exec_spend (state : PathStateEnum) {
+  if (state === PathStateEnum.locked) {
     throw new VMError('path is locked')
-  } else if (state === PathState.disputed) {
+  } else if (state === PathStateEnum.disputed) {
     throw new VMError('path is in a dispute')
   }
-  return PathState.closed
+  return PathStateEnum.spent
 }

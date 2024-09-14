@@ -13,8 +13,7 @@ import {
   ProgramEntry,
   SignerAPI,
   MachineConfig,
-  MachineData,
-  WitnessInput,
+  MachineData
 } from '@scrow/sdk/core'
 
 import CVM from '@scrow/sdk/cvm'
@@ -57,14 +56,14 @@ export function resolve_aliases (
 }
 
 export function get_config (MachineConfig : unknown) {
-  return CoreSchema.vm.config.parse(MachineConfig)
+  return CoreSchema.machine.config.parse(MachineConfig)
 }
 
 export function compile_witness_vectors (
   vmdata    : MachineData,
   witnesses : WitnessVector[]
 ) {
-  const wit_data : WitnessInput[] = []
+  const wit_data = []
   // For each witness statement: 
   for (const { signers, ...tmpl } of witnesses) {
     // Resolve signer aliases into their devices:

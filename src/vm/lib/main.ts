@@ -21,10 +21,10 @@ import {
 } from '../util/index.js'
 
 import {
-  PathStatus,
+  VMStatus,
   CVMData,
   CVMState
-} from '../types.js'
+} from '../types/index.js'
 
 const GET_INIT_DATA = () => {
   return {
@@ -104,7 +104,7 @@ export function init_vm (config : MachineConfig) : MachineData {
   const int_state : CVMState = {
     paths  : init_vm_state(pathnames, config.programs),
     store  : init_stores(programs.map(e => e.prog_id)),
-    status : 'init' as PathStatus
+    status : 'init' as VMStatus
   }
 
   const data : CVMData = {

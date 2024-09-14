@@ -11,7 +11,7 @@ import {
 export * as VMUtil   from './lib/main.js'
 export * as VMSchema from './schema.js'
 
-export * from './types.js'
+export * from './types/index.js'
 
 export default {
   actions : VALID_ACTIONS,

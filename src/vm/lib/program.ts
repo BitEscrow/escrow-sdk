@@ -1,7 +1,9 @@
 import { regex }           from '@/core/util/index.js'
 import { debug }           from '../util/base.js'
 import { update_vm_state } from './state.js'
-import EndorseMethod       from './methods/endorse.js'
+
+import ClaimMethod   from './methods/claim.js'
+import EndorseMethod from './methods/endorse.js'
 
 import {
   Literal,
@@ -10,14 +12,16 @@ import {
 } from '@/core/types/index.js'
 
 import {
-  StoreEntry,
+  VMStoreEntry,
   ProgramReturn,
-  ProgMethodAPI,
+  ProgramMethodAPI,
   CVMData
-} from '../types.js'
+} from '../types/index.js'
 
-export function call_method (method : string) : ProgMethodAPI | null {
+export function call_method (method : string) : ProgramMethodAPI | null {
   switch (method) {
+    case 'claim':
+      return ClaimMethod
     case 'endorse':
       return EndorseMethod
     default:
@@ -38,7 +42,7 @@ export function check_params (
 
 export function init_stores (
   prog_ids : string[]
-) : StoreEntry[] {
+) : VMStoreEntry[] {
   return prog_ids.map(e => [ e, '[]' ])
 }
 
@@ -55,7 +59,7 @@ export function run_program (
 
 function load_program (
   progs   : ProgramData[],
-  stores  : StoreEntry[],
+  stores  : VMStoreEntry[],
   witness : WitnessData
 ) : ProgramReturn {
   const { prog_id, action, path } = witness

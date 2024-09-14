@@ -43,6 +43,7 @@ function run_test (t : Test, v : VMVector) {
       t.pass(comment)
     } catch (err) {
       const { message } = err as Error
+      console.log(err)
       t.fail(message)
     }
   }

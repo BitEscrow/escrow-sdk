@@ -1,8 +1,8 @@
 import { MachineData }  from '@/core/types/index.js'
 import { assert }  from '@/core/util/index.js'
 import { VMError } from './base.js'
+import { CVMData } from '../types/index.js'
 import schema      from '../schema.js'
-import { CVMData } from '../types.js'
 
 export function serialize_vmstate (vmdata : CVMData) : MachineData {
   try {

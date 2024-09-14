@@ -7,7 +7,7 @@ const { hash, num, regex, str } = base
 const data    = machine.data
 const path    = z.tuple([ str, num ])
 const store   = z.tuple([ hash, str ]).array()
-const status  = z.enum([ 'init', 'open', 'disputed', 'closed' ])
+const status  = z.enum([ 'init', 'open', 'disputed', 'closed', 'spent' ])
 
 const int_state = z.object({
   paths : path.array(),

@@ -5,12 +5,12 @@
   "pathnames" : [ "payout", "return" ],
   "programs"  : [
     [ "endorse", "dispute",       "*", 1, "alice", "bob" ],
-    [ "endorse", "close|resolve", "*", 2, "alice", "bob" ],
+    [ "endorse", "spend|resolve", "*", 2, "alice", "bob" ],
     [ "endorse", "resolve",       "*", 1, "carol"        ]
   ],
   "schedule"  : [
-    [ 7200, "close",   "payout|return" ],
-    [ 7200, "resolve", "return"        ]
+    [ 7100, "resolve", "return"        ],
+    [ 7200, "close",   "payout|return" ]
   ],
   "tests" : [
     {
@@ -20,7 +20,7 @@
       "steps"   : 1,
       "stamp"   : 0,
       "witness" : [
-        { "action": "close", "method": "endorse", "path": "payout", "signers": [ "alice", "bob" ] }
+        { "action": "spend", "method": "endorse", "path": "payout", "signers": [ "alice", "bob" ] }
       ]
     },
     {
@@ -97,14 +97,14 @@
       ]
     },
     {
-      "comment" : "alice and bob try to close the same path after a dispute",
+      "comment" : "alice and bob try to spend the same path after a dispute",
       "error"   : "path is in a dispute",
       "result"  : null,
       "steps"   : 1,
       "stamp"   : 0,
       "witness" : [
         { "action": "dispute", "method": "endorse", "path": "payout", "signers": [ "alice" ] },
-        { "action": "close", "method": "endorse", "path": "payout", "signers": [ "alice", "bob" ] }
+        { "action": "spend",   "method": "endorse", "path": "payout", "signers": [ "alice", "bob" ] }
       ]
     }
   ]
