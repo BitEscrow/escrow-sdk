@@ -13,7 +13,8 @@ import {
   DepositData,
   SignerAPI,
   MachineData,
-  TxStatus
+  TxStatus,
+  ContractIsSettled
 } from '@/core/types/index.js'
 
 import {
@@ -226,16 +227,20 @@ export function spend_contract (
 export function settle_contract (
   contract : ContractData,
   signer   : SignerAPI,
-  txstatus : TxStatus
+  txstatus : TxStatus | null,
+  settled_at = now()
 ) : ContractData {
-  const parsed       = TxSchema.oracle_conf.parse(txstatus)
-  const settled      = true as const
-  const settled_at   = parsed.block_time
-  const spent_block  = parsed.block_hash
-  const spent_height = parsed.block_height
-  const changes      = { settled, settled_at, spent_block, spent_height }
-  const status       = 'settled' as ContractStatus
-  const updated      = { ...contract, ...changes, status, updated_at: settled_at }
-  const proof        = notarize_contract(updated, signer, status)
+  const changes : Omit<ContractIsSettled, 'settled_sig'> = {
+    settled : true as const, settled_at, spent_block : null, spent_height : null
+  }
+  if (txstatus !== null) {
+    const parsed = TxSchema.oracle_conf.parse(txstatus)
+    changes.settled_at   = parsed.block_time
+    changes.spent_block  = parsed.block_hash
+    changes.spent_height = parsed.block_height
+  }
+  const status  = 'settled' as ContractStatus
+  const updated = { ...contract, ...changes, status, updated_at: settled_at }
+  const proof   = notarize_contract(updated, signer, status)
   return sort_record({ ...updated, settled_sig: proof })
 }

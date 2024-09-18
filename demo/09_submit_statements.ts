@@ -30,7 +30,7 @@ let vmstate  = engine.init(config)
  * the contract for a matching program that will allow our statement.
  */
 const template = {
-  action : 'close',
+  action : 'spend',
   method : 'endorse',
   path   : 'payout'
 }

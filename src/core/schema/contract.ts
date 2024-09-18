@@ -104,12 +104,37 @@ const ct_closed = z.object({
   machine_vout : str.nullable()
 })
 
+const settle_info = z.object({
+  settled      : z.boolean(),
+  settled_at   : stamp.nullable(),
+  settled_sig  : hex.nullable(),
+  spent_block  : hash.nullable(),
+  spent_height : num.nullable()
+})
+
+const ct_settled = z.object({
+  settled      : z.literal(true),
+  settled_at   : stamp,
+  settled_sig  : hex,
+  spent_block  : hash.nullable(),
+  spent_height : num.nullable()
+})
+
+const ct_unsettled = z.object({
+  settled      : z.literal(false),
+  settled_at   : z.null(),
+  settled_sig  : z.null(),
+  spent_block  : z.null(),
+  spent_height : z.null()
+})
+
 /* ------------------- [ State Unions ] ------------------- */
 
 const publish_state = z.discriminatedUnion('canceled',  [ ct_published, ct_canceled ])
 const funding_state = z.discriminatedUnion('secured',   [ ct_secured,   ct_pending  ])
 const engine_state  = z.discriminatedUnion('activated', [ ct_active,    ct_inactive ])
 const close_state   = z.discriminatedUnion('closed',    [ ct_open,      ct_closed   ])
+const settle_state  = z.discriminatedUnion('settled',   [ ct_settled,   ct_unsettled ])
 
 /* ------------------- [ Contract Schema ] ------------------- */
 
@@ -145,7 +170,7 @@ const data = base_data
   .and(engine_state)
   .and(close_state)
   .and(tx.spend_state)
-  .and(tx.settle_state)
+  .and(settle_state)
 
 const shape = base_data
   .merge(publish_info)
@@ -153,7 +178,7 @@ const shape = base_data
   .merge(engine_info)
   .merge(close_info)
   .merge(tx.spend_info)
-  .merge(tx.settle_info)
+  .merge(settle_info)
 
 const session = z.object({
   contract   : data,

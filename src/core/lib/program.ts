@@ -38,7 +38,7 @@ export function get_program (
     progs = progs.filter(e => regex(action, e.actions))
   }
   // If defined, filter programs by allowed path.
-  if (path !== undefined) {
+  if (path !== null && path !== undefined) {
     progs = progs.filter(e => regex(path, e.paths ?? ''))
   }
   // If defined, filter programs by matching params and index.

@@ -8,10 +8,7 @@ import {
   ProposalData
 } from './proposal.js'
 
-import {
-  TxSettleState,
-  TxSpendState
-} from './tx.js'
+import { TxSpendState } from './tx.js'
 
 export type ContractStatus =
   'published' |  // Contract is published and awaiting funds.
@@ -27,6 +24,7 @@ export type ContractPublishState = ContractIsPublished | ContractIsCanceled
 export type ContractFundingState = ContractIsSecured   | ContractIsPending
 export type ContractActiveState  = ContractIsActive    | ContractIsInactive
 export type ContractExecState    = ContractIsOpen      | ContractIsClosed
+export type ContractSettleState  = ContractIsSettled   | ContractNotSettled
 
 export type ContractData =
   ContractBase         &
@@ -35,7 +33,7 @@ export type ContractData =
   ContractActiveState  &
   ContractExecState    &
   TxSpendState         &
-  TxSettleState
+  ContractSettleState
 
 export type ContractSignatures = 'created_sig' | 'canceled_sig' | 'secured_sig' | 'active_sig' |
                                  'closed_sig'  | 'spent_sig'    | 'settled_sig'
@@ -101,6 +99,22 @@ interface ContractIsOpen {
   closed_at    : null
   closed_sig   : null
   machine_vout : null
+}
+
+export interface ContractIsSettled {
+  settled      : true
+  settled_at   : number
+  settled_sig  : string
+  spent_block  : string | null
+  spent_height : number | null
+}
+
+export interface ContractNotSettled {
+  settled      : false
+  settled_at   : null
+  settled_sig  : null
+  spent_block  : null
+  spent_height : null
 }
 
 export interface PublishRequest {

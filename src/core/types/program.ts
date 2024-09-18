@@ -5,7 +5,7 @@ export interface ProgramQuery {
   includes ?: Literal[]
   method   ?: string
   params   ?: Literal[]
-  path     ?: string
+  path     ?: string | null
 }
 
 export interface ProgramData {

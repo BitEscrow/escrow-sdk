@@ -29,7 +29,7 @@ const [ a_signer, b_signer ] = signers
 const template = {
   action : 'close',
   method : 'endorse',
-  path   : 'payout'
+  path   : null
 }
 // Initialize a variable for our witness data.
 let witness : WitnessData

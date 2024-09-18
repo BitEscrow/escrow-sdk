@@ -10,7 +10,7 @@
   ],
   "schedule"  : [
     [ 7100, "resolve", "return"        ],
-    [ 7200, "close",   "payout|return" ]
+    [ 7200, "spend",   "payout|return" ]
   ],
   "tests" : [
     {

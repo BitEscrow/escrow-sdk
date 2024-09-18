@@ -5,7 +5,7 @@ export interface WitnessTemplate {
   args    ?: Literal[]
   content ?: string
   method   : string
-  path    ?: string
+  path    ?: string | null
   stamp   ?: number
 }
 
