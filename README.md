@@ -2,11 +2,11 @@
 
 > If you are looking to use the BitEscrow API, check out our [Developer Documentation](https://bitescrow.dev) resources and [Replit Container](https://replit.com/@cscottdev/escrow-core).
 
-# escrow-core
+# escrow-sdk
 
-A secure, private protocol for locking Bitcoin to a smart contract, with non-custodial escrow of funds.
+A software development kit for implementing the BitEscrow protocol: a secure, private protocol for locking Bitcoin to a smart contract, with non-custodial escrow of funds.
 
-Key Features:
+Protocol Features:
 
   * __100% private.__ Users only need a random signing key (hot), and wallet xpub (cold) to participate. All on-chain transactions are script-less key spends. No meta-data is exposed.
 
@@ -20,18 +20,18 @@ Key Features:
 
   * __Designed to scale.__ Deposits can be locked/released from a contract without being spent. Contracts have the option to settle or expire without an on-chain transaction.
 
-Package Features:
+SDK Features:
 
-  * Full suite of methods and tools for every part of the protocol.
-  * A multi-platform client and signing device with minimal dependencies.
-  * Strict type interfaces, plus run-time schema validation (using zod).
+  * Full suite of tools for executing and verifying every part of the protocol.
+  * A multi-platform client and signing device (with minimal dependencies).
+  * Strict type interfaces with run-time schema validation (using zod).
   * E2E demo and test suite for signet, testnet, and mutiny networks.
 
 Roadmap:
 
-  * Direct integration with the Nostr network for message delivery.
-  * Layer-2 deposits with adjustable balance and no timeout.
-  * New `hashlock` and `webhook` programs for the virtual machine.
+  * An adjustable virtual (off-chain) output for the escrow channel.
+  * Deposit / withdraw methods for the escrow channel.
+  * Support for updating contracts that are active.
   * Support for running a federation of escrow servers (via FROST).
 
 ## How It Works
