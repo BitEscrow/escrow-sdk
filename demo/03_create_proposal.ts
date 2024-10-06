@@ -35,7 +35,7 @@ export const roles : RoleTemplate[] = [
     title : 'buyer',
     paths : [[ 'refund', 10000 ],],
     programs : [
-      [ 'endorse', '*', '*', 2 ],
+      [ 'endorse', 'spend|close', '*', 2 ],
       [ 'endorse', 'dispute', 'payout', 1  ]
     ]
   },
@@ -43,7 +43,7 @@ export const roles : RoleTemplate[] = [
     title : 'seller',
     paths : [[ 'payout', 10000 ]],
     programs : [
-      [ 'endorse', '*', '*', 2 ],
+      [ 'endorse', 'spend|close', '*', 2   ],
       [ 'endorse', 'dispute', 'refund', 1  ]
     ]
   },
