@@ -8,6 +8,8 @@ import {
   CoreDaemon
 } from '@cmdcode/core-cmd'
 
+const MIN_BALANCE = 10_000_000
+
 const DEFAULT_CONFIG : Partial<CoreConfig> = {
   corepath : 'test/bin/bitcoind',
   clipath  : 'test/bin/bitcoin-cli',
@@ -58,6 +60,7 @@ export async function get_wallet (
   label  : string
 ) {
   const wdat = await client.load_wallet(label)
+  await wdat.ensure_funds(MIN_BALANCE)
   const xpub = await wdat.xpub
   return new Wallet(xpub)
 }
